@@ -1,0 +1,37 @@
+name: OpenEnergy
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - amply=0.1.6=pyhd8ed1ab_0
+  - bzip2=1.0.8=he774522_0
+  - ca-certificates=2023.11.17=h56e8100_0
+  - colorama=0.4.6=pyhd8ed1ab_0
+  - docutils=0.20.1=py311h1ea47a8_2
+  - glpk=5.0=h8ffe710_0
+  - iniconfig=1.1.1=pyhd3eb1b0_0
+  - libffi=3.4.4=hd77b12b_0
+  - openssl=3.2.0=hcfcfb64_1
+  - packaging=23.1=py311haa95532_0
+  - pip=23.3.1=py311haa95532_0
+  - pluggy=1.0.0=py311haa95532_1
+  - pulp=2.7.0=py311h1ea47a8_1
+  - pyparsing=3.1.1=pyhd8ed1ab_0
+  - pytest=7.4.0=py311haa95532_0
+  - python=3.11.5=he1021f5_0
+  - python_abi=3.11=2_cp311
+  - ruff=0.1.6=py311hc14472d_0
+  - setuptools=68.0.0=py311haa95532_0
+  - sqlite=3.41.2=h2bbff1b_0
+  - tk=8.6.12=h2bbff1b_0
+  - tqdm=4.66.1=pyhd8ed1ab_0
+  - tzdata=2023c=h04d1e81_0
+  - ucrt=10.0.22621.0=h57928b3_0
+  - vc=14.2=h21ff451_1
+  - vc14_runtime=14.36.32532=hdcecf7f_17
+  - vs2015_runtime=14.36.32532=h05e6639_17
+  - wheel=0.41.2=py311haa95532_0
+  - xz=5.4.2=h8cc25b3_0
+  - zlib=1.2.13=h8cc25b3_0
+prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
