@@ -1,43 +1,11 @@
 name: OpenEnergy
 channels:
-  - anaconda
-  - conda-forge
   - defaults
 dependencies:
-  - amply=0.1.6
-  - bzip2=1.0.8
-  - ca-certificates=2023.11.17
-  - colorama=0.4.6
-  - docutils=0.18.1
-  - exceptiongroup=1.0.4
-  - flake8=6.0.0
-  - glpk=5.0
-  - iniconfig=1.1.1
-  - libffi=3.4.4
-  - mccabe=0.7.0
-  - openssl=3.2.0
-  - packaging=23.1
-  - pip=23.3.1
-  - pluggy=1.0.0
-  - pulp=2.7.0
-  - pycodestyle=2.10.0
-  - pyflakes=3.0.1
-  - pyparsing=3.1.1
-  - pytest=7.4.0
-  - python=3.10.13
-  - python_abi=3.10
-  - ruff=0.1.6
-  - setuptools=68.0.0
-  - sqlite=3.41.2
-  - tk=8.6.12
-  - tomli=2.0.1
-  - tqdm=4.66.1
-  - tzdata=2023c
-  - ucrt=10.0.22621.0
-  - vc=14.2
-  - vc14_runtime=14.36.32532
-  - vs2015_runtime=14.36.32532
-  - wheel=0.41.2
-  - xz=5.4.2
-  - zlib=1.2.13
+  - python==3.10.13
+  - pulp
+  - tqdm
+  - ruff
+  - pytest
+  - flake8
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
