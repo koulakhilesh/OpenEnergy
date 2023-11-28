@@ -5,9 +5,6 @@ channels:
   - anaconda
 dependencies:
   - python==3.10.13
-  - pulp
   - tqdm
-  - ruff
   - pytest
-  - flake8
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
