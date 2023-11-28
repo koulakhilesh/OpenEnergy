@@ -1,5 +1,6 @@
 name: OpenEnergy
 channels:
+  - defaults
   - conda-forge
   - anaconda
 dependencies:
