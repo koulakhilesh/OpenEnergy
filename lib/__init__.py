@@ -1,1 +1,1 @@
-from .script import *
+from .script import *  # noqa: F403, F401

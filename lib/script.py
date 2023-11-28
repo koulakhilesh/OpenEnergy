@@ -136,7 +136,6 @@ def main():
     # Run the operation for each day of the year 2023
     start_date = datetime.date(2023, 1, 1)
     end_date = datetime.date(2023, 12, 31)
-    delta = datetime.timedelta(days=1)
 
     total_pnl = 0  # Initialize total P&L
 
