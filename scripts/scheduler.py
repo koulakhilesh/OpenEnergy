@@ -65,7 +65,7 @@ class MarketScheduler:
             )
 
         # Solve model
-        model.solve(pulp.GLPK_CMD(msg=False))
+        model.solve()
 
         # Extract schedule and values
         schedule_data = []
