@@ -1,6 +1,8 @@
 name: OpenEnergy
 channels:
   - defaults
+  - anaconda
+  - conda-forge
 dependencies:
   - python==3.10.13
   - pulp
