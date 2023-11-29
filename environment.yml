@@ -1,10 +1,13 @@
 name: OpenEnergy
 channels:
   - defaults
-  - conda-forge
-  - anaconda
 dependencies:
   - python==3.10.13
+  - pulp
   - tqdm
+  - ruff
   - pytest
+  - flake8
+  - numpy
+  - pandas
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
