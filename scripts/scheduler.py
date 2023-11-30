@@ -1,15 +1,16 @@
 import pulp
 import pandas as pd
+from .battery import Battery
 
 
 class MarketScheduler:
     """Handles scheduling of battery charge/discharge using MILP."""
 
-    def __init__(self, battery, prices):
+    def __init__(self, battery: Battery, prices: list):
         self.battery = battery
         self.prices = prices
 
-    def create_schedule(self):
+    def create_schedule(self) -> pd.DataFrame:
         # MILP model setup
         model = pulp.LpProblem("Battery_Schedule_Optimization", pulp.LpMaximize)
         charge_vars = [

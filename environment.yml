@@ -12,4 +12,5 @@ dependencies:
   - flake8
   - numpy
   - pandas
+  - mypy
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy

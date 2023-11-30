@@ -3,7 +3,7 @@ import random
 
 class Price:
     @staticmethod
-    def load_random_price_data():
+    def load_random_price_data() -> list:
         """
         Generate random price data for simulation, for every 30 minutes.
         """

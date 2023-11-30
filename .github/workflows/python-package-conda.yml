@@ -27,3 +27,6 @@ jobs:
     - name: Running Pytest
       run: | 
         pytest
+    - name: Running mypy
+      run: | 
+         mypy --ignore-missing-imports scripts/
