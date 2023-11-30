@@ -17,8 +17,6 @@ class Battery:
             raise ValueError("Initial SOH must be between 0 and 1")
 
         self.capacity_mwh = capacity_mwh
-
-        self.capacity_mwh = capacity_mwh
         self.charge_efficiency = charge_efficiency
         self.discharge_efficiency = discharge_efficiency
         self.soc = initial_soc  # Initial state of charge as a fraction (0 to 1)
