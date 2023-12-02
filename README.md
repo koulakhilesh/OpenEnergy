@@ -2,7 +2,6 @@
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![GNU License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
@@ -202,8 +201,6 @@ Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/ko
 [contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge
 [forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members
-[stars-shield]: https://img.shields.io/github/stars/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[stars-url]: https://github.comkoulakhilesh/OpenEnergy/stargazers
 [issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge
 [issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues
 [license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge
