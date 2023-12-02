@@ -180,7 +180,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Akhilesh Koul - koulakkhilesh@gmail.com
 
-Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/koulakhilesh/OpenEnerge)
+Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/koulakhilesh/OpenEnergy)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
