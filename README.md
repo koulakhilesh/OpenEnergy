@@ -4,22 +4,21 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![GNU License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-
 
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/koulakhilesh/OpenEnergy">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo_oe.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Best-README-Template</h3>
+  <h3 align="center">OpenEnergy</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    An innovative solution for simulating and analyzing energy markets and renewable energy technologies.
     <br />
     <a href="https://github.com/koulakhilesh/OpenEnergy"><strong>Explore the docs »</strong></a>
     <br />
@@ -33,73 +32,58 @@
 </div>
 
 
-
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#about-the-project">About The Project</a></li>
+    <li><a href="#built-with">Built With</a></li>
+    <!-- <li><a href="#getting-started">Getting Started</a></li> -->
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <!-- <li><a href="#acknowledgments">Acknowledgments</a></li> -->
   </ol>
 </details>
-
 
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+<!-- [![OpenEnergy Screen Shot][product-screenshot]](https://example.com) -->
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+OpenEnergy is a dynamic simulation platform designed for modeling and analyzing energy markets and renewable energy systems. This project aims to bridge the gap between energy engineering and data science, providing a comprehensive tool for understanding and optimizing energy storage and market operations.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+Why OpenEnergy stands out:
+* **Innovative Approach**: Combines advanced algorithms and data analysis to simulate energy market dynamics and battery operations.
+* **User-Centric Design**: Intuitive and easy-to-use, enabling users to focus on analysis and insights rather than complex setup processes.
+* **Adaptable and Scalable**: Whether you are a researcher, industry professional, or enthusiast, OpenEnergy is built to adapt to a wide range of use cases and scales as needed.
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
-
-Use the `BLANK_README.md` to get started.
+As the energy landscape evolves, OpenEnergy will continue to grow, adding new features and capabilities. Your feedback and contributions are welcome to make this tool even more versatile and powerful.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
-### Built With
+## Built With
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+This project is built with a combination of powerful Python libraries, each playing a crucial role in the functionality of OpenEnergy. Here's a list of the major libraries used:
 
-* [Next.js](https://nextjs.org/)
-* [React.js](https://reactjs.org/)
-* [Vue.js](https://vuejs.org/)
-* [Angular](https://angular.io/)
-* [Svelte](https://svelte.dev/)
-* [Laravel](https://laravel.com)
-* [Bootstrap](https://getbootstrap.com)
-* [JQuery](https://jquery.com)
+* [Python](https://www.python.org/) - The core programming language
+* [Pandas](https://pandas.pydata.org/) - Data manipulation and analysis
+* [NumPy](https://numpy.org/) - Support for large, multi-dimensional arrays and matrices
+* [PuLP](https://coin-or.github.io/pulp/) - Linear programming optimization library
+* [tqdm](https://tqdm.github.io/) - Fast, extensible progress bar for loops and CLI
+* [pytest](https://docs.pytest.org/en/stable/) - Framework for testing Python code
+* [os](https://docs.python.org/3/library/os.html) - Miscellaneous operating system interfaces
+
+These tools collectively enable efficient data handling, optimization problem solving, progress tracking, and robust testing, making OpenEnergy a reliable and scalable solution.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-
-<!-- GETTING STARTED -->
+<!-- GETTING STARTED
 ## Getting Started
 
 This is an example of how you may give instructions on setting up your project locally.
@@ -131,55 +115,56 @@ _Below is an example of how you can instruct your audience on installing and set
    const API_KEY = 'ENTER YOUR API';
    ```
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p> -->
 
 
 
-<!-- USAGE EXAMPLES -->
+<!-- USAGE EXAMPLES
 ## Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p> -->
 
 
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
+- [x] Initial development and setup
+- [ ] Basic simulation capabilities for energy markets and battery operations
+- [ ] Advanced modeling for battery degradation and state of health (SOH)
+- [ ] Integration with real-world energy market data sources
+- [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
+- [ ] Development of a graphical user interface (GUI) for easier interaction
+- [ ] Expansion of data visualization features for analysis insights
+- [ ] Support for custom scenario creation and testing
+- [ ] Multi-language documentation and support
 
 See the [open issues](https://github.com/koulakhilesh/OpenEnergy/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
-
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+OpenEnergy thrives on the contributions of energy enthusiasts, developers, and researchers. Your contributions are what drive the growth and effectiveness of this tool, making the open-source community a fertile ground for innovation and collaboration. Every contribution, no matter how small, is valued and appreciated.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+If you have ideas or suggestions that could enhance OpenEnergy:
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. **Fork the Project**: Create a copy of the project under your own account.
+2. **Create your Feature Branch**: `git checkout -b feature/YourFeature`
+3. **Make your Changes**: Implement your changes or improvements in your feature branch.
+4. **Commit your Changes**: `git commit -m 'Add YourFeature'`
+5. **Push to the Branch**: `git push origin feature/YourFeature`
+6. **Open a Pull Request**: Go to the original project and open a pull request with a clear description of your changes.
+
+Feel free to open an issue with the tag "enhancement" to discuss potential features or improvements. And don't forget to give the project a star if you find it useful!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- LICENSE -->
 ## License
@@ -193,29 +178,21 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+Akhilesh Koul - koulakkhilesh@gmail.com
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/koulakhilesh/OpenEnerge)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
 <!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
+<!-- ## Acknowledgments -->
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+<!-- * [Choose an Open Source License](https://choosealicense.com) -->
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+<!-- <p align="right">(<a href="#top">back to top</a>)</p> -->
 
 
 
@@ -226,11 +203,11 @@ Use this space to list resources you find helpful and would like to give credit 
 [forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge
 [forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members
 [stars-shield]: https://img.shields.io/github/stars/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[stars-url]: https://github.com/koulakhilesh/OpenEnergy/stargazers
+[stars-url]: https://github.comkoulakhilesh/OpenEnergy/stargazers
 [issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge
 [issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues
 [license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge
 [license-url]: https://github.com/koulakhilesh/OpenEnergy/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
+[linkedin-url]: https://linkedin.com/in/akhilesh-koul
+<!-- [product-screenshot]: images/screenshot.png -->

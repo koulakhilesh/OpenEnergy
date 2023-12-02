@@ -2,14 +2,10 @@
 
 ## v1.0.0
 
-### Added or Changed
-- Added this changelog :)
-- Fixed typos in both templates
-- Back to top links
-- Added more "Built With" frameworks/libraries
-- Changed table of contents to start collapsed
-- Added checkboxes for major features on roadmap
+### Added
+- Initial release of OpenEnergy.
+- Core functionality for simulating battery operations in energy markets.
+- Integration of Pandas, NumPy, and PuLP for data handling and optimization.
+- Initial README with project overview.
 
-### Removed
-
-- Some packages/libraries from acknowledgements I no longer use
+As OpenEnergy evolves, this changelog will be updated to reflect new features, improvements, bug fixes, and other significant changes.
