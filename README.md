@@ -1,10 +1,10 @@
 <div id="top"></div>
 
-[![Contributors][contributors-shield]][contributors-url]
+<!-- [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Issues][issues-shield]][issues-url]
 [![GNU License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+[![LinkedIn][linkedin-shield]][linkedin-url] -->
 
 
 <!-- PROJECT LOGO -->
@@ -177,9 +177,13 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Akhilesh Koul - koulakkhilesh@gmail.com
+Akhilesh Koul | [koulakhilesh@gmail.com](mailto:koulakhilesh@gmail.com?subject=Hello) | [LinkedIn](https://linkedin.com/in/akhilesh-koul)
+
 
 Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/koulakhilesh/OpenEnergy)
+
+
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -197,14 +201,14 @@ Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/ko
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members
-[issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues
-[license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[license-url]: https://github.com/koulakhilesh/OpenEnergy/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/akhilesh-koul
+<!-- [contributors-shield]: https://img.shields.io/github/contributors/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
+<!-- [contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors -->
+<!-- [forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
+<!-- [forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members -->
+<!-- [issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
+<!-- [issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues -->
+<!-- [license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
+<!-- [license-url]: https://github.com/koulakhilesh/OpenEnergy/blob/master/LICENSE.txt -->
+<!-- [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555 -->
+<!-- [linkedin-url]: https://linkedin.com/in/akhilesh-koul -->
 <!-- [product-screenshot]: images/screenshot.png -->
