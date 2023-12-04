@@ -8,6 +8,8 @@ class Battery:
         max_discharge_rate=None,
         initial_soh: float = 1.0,
         initial_soc: float = 0.0,
+        starting_cycle_count: float = 0.0
+        
     ):
         if capacity_mwh <= 0:
             raise ValueError("Capacity must be greater than 0")
@@ -25,6 +27,9 @@ class Battery:
         self.max_discharge_rate = (
             max_discharge_rate if max_discharge_rate else capacity_mwh
         )
+        self.cycle_count = starting_cycle_count
+        self.last_cycle_soc = initial_soc  # Keep track of SOC at the last cycle
+
 
     def charge(self, mwh: float, duration_hours=0.5):
         charge_amount = min(mwh, self.max_charge_rate * duration_hours)
@@ -33,6 +38,8 @@ class Battery:
         energy_cycled = charge_amount * duration_hours
         dod = self.soc
         self.update_soh(energy_cycled, dod)
+        self.check_and_update_cycles()
+
 
     def discharge(self, mwh: float, duration_hours=0.5):
         discharge_amount = min(mwh, self.max_discharge_rate * duration_hours)
@@ -41,6 +48,16 @@ class Battery:
         energy_cycled = discharge_amount * duration_hours
         dod = self.soc
         self.update_soh(energy_cycled, dod)
+        self.check_and_update_cycles()
+
+    
+    def check_and_update_cycles(self):
+        """
+        Check and update the cycle count based on SOC changes.
+        """
+        if (self.last_cycle_soc <= 0.2 and self.soc >= 0.8) or (self.last_cycle_soc >= 0.8 and self.soc <= 0.2):
+            self.cycle_count += 1
+            self.last_cycle_soc = self.soc    
 
     def get_soc(self) -> float:
         """Return the current state of charge."""
