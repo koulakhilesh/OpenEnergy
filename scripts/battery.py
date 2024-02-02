@@ -45,20 +45,7 @@ class Battery:
             starting_cycle_count (float, optional): The initial cycle count of the battery. Defaults to 0.0.
             temperature_c (float, optional): The temperature of the battery in Celsius. Defaults to 25.
         """
-        # Rest of the code...
-class Battery:
-    def __init__(
-        self,
-        capacity_mwh: float,
-        charge_efficiency: float = 0.9,  # This might now vary with temperature
-        discharge_efficiency: float = 0.9,  # This might now vary with temperature
-        max_charge_rate_mw=None,
-        max_discharge_rate_mw=None,
-        initial_soh: float = 1.0,
-        initial_soc: float = 0.5,
-        starting_cycle_count: float = 0.0,
-        temperature_c: float = 25  # Default temperature in Celsius
-    ):
+        
         if capacity_mwh <= 0:
             raise ValueError("Capacity must be greater than 0")
         if not (0 <= initial_soc <= 1):
