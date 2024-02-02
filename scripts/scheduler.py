@@ -48,11 +48,11 @@ class MarketScheduler:
 
     def solve_model(self, model: pulp.LpProblem) -> None:
         """Solves the LP model."""
-        result_status = model.solve(pulp.PULP_CBC_CMD(msg=False))
+        result_status = model.solve()
         if result_status != pulp.LpStatusOptimal:
             raise ValueError("The optimization problem did not solve to optimality.")
 
-    def extract_schedule(self, vars: dict, num_intervals: int) -> pd.DataFrame:
+    def _extract_schedule(self, vars: dict, num_intervals: int) -> pd.DataFrame:
         """Extracts the charging/discharging schedule from the solved model."""
         schedule_data = [{"Interval": i, "Action": "charge" if vars["charge"][i].varValue > 0 else "discharge" if vars["discharge"][i].varValue > 0 else "idle", "Value": max(vars["charge"][i].varValue, vars["discharge"][i].varValue)} for i in range(num_intervals)]
         return pd.DataFrame(schedule_data)
@@ -68,4 +68,4 @@ class MarketScheduler:
         self.add_constraints(model, vars, num_intervals)
         self.solve_model(model)
         
-        return self.extract_schedule(vars, num_intervals)
+        return self._extract_schedule(vars, num_intervals)

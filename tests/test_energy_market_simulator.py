@@ -1,27 +1,24 @@
 import os
 import pytest
 import sys
-
-sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-
 from datetime import date
 import pandas as pd
 import numpy as np
-from scripts import EnergyMarketSimulator, Battery  # noqa: E402
 
+sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/..")) 
+
+from scripts import EnergyMarketSimulator, Battery  # noqa: E402
 
 @pytest.fixture
 def sample_battery():
     return Battery(capacity_mwh=1, initial_soc=0.5)
 
-
 @pytest.fixture
 def sample_simulator(sample_battery):
-    start_date = date(2023, 1, 1)
-    end_date = date(2023, 1, 2)
+    start_date = date(2022, 1, 1)
+    end_date = date(2022, 1, 5)
     return EnergyMarketSimulator(start_date, end_date, sample_battery)
 
-@pytest.mark.skip
 def test_initialization(sample_battery):
     start_date = date(2023, 1, 1)
     end_date = date(2023, 1, 2)
@@ -29,47 +26,37 @@ def test_initialization(sample_battery):
     assert simulator.start_date == start_date
     assert simulator.end_date == end_date
     assert simulator.battery == sample_battery
+    
 
-@pytest.mark.skip
 def test_calculate_pnl(sample_simulator):
-    actions = ["charge" if i % 2 == 0 else "discharge" for i in range(48)]
-    values = [0.5 if i % 2 == 0 else 0.4 for i in range(48)]
+    schedule_df = pd.DataFrame({"Action": ["charge", "discharge"], "Value": [0.5, 0.3]})
+    actual_prices = [20, 30]
+    pnl = sample_simulator.calculate_pnl(schedule_df, actual_prices)
+    assert np.isclose(pnl, -1.50555)
 
-    mock_schedule_df = pd.DataFrame({"Action": actions, "Value": values})
-    mock_actual_prices = [20 if i % 2 == 0 else 25 for i in range(48)]
+def test_process_daily_schedule(sample_simulator, sample_battery):
+    schedule_df = pd.DataFrame({"Action": ["charge", "discharge"], "Value": [0.5, 0.3]})
+    sample_simulator.process_daily_schedule(schedule_df)
+    assert sample_battery.soc == 0.5 + 0.5*0.9 - 0.3*0.9
 
-    pnl = sample_simulator.calculate_pnl(mock_schedule_df, mock_actual_prices)
-    # Expected P&L calculation
-    expected_pnl = -25.3333
-    assert np.isclose(pnl, expected_pnl)
-
-@pytest.mark.skip
-def test_process_daily_schedule(sample_simulator):
-    actions = ["charge" if i % 2 == 0 else "discharge" for i in range(48)]
-    values = [0.5 if i % 2 == 0 else 0.4 for i in range(48)]
-
-    mock_schedule_df = pd.DataFrame({"Action": actions, "Value": values})
-
+def test_run_daily_operation(sample_simulator):
+    prices = [20, 30]
+    actual_prices = [20, 30]
     initial_soh = sample_simulator.battery.soh
-
-    sample_simulator.process_daily_schedule(mock_schedule_df)
-
-    # Assuming the battery's charge and discharge methods update the SOC appropriately
+    schedule_df, pnl = sample_simulator.run_daily_operation(prices, actual_prices)
+    assert isinstance(schedule_df, pd.DataFrame)
+    assert pnl == 5.4675
     assert sample_simulator.battery.soh != initial_soh
 
-@pytest.mark.skip
-def test_run_daily_operation(sample_simulator):
-    mock_prices = [20] * 48
-    mock_actual_prices = [22] * 48
-    schedule_df, pnl = sample_simulator.run_daily_operation(
-        mock_prices, mock_actual_prices
-    )
-
-    assert isinstance(schedule_df, pd.DataFrame)
-    assert len(schedule_df) == 48
-    assert "Action" in schedule_df.columns and "Value" in schedule_df.columns
-    assert pnl is not None
-
-
+def test_simulate(sample_simulator):
+    results = sample_simulator.simulate()
+    assert len(results) == 5
+    assert isinstance(results[0], tuple)
+    assert isinstance(results[0][0], date)
+    assert isinstance(results[0][1], pd.DataFrame)
+    assert isinstance(results[0][2], float)
+    
+    
+    
 if __name__ == "__main__":
     pytest.main()
