@@ -112,14 +112,12 @@ class EnergyMarketSimulator:
             range((self.end_date - self.start_date).days + 1), desc="Processing Days"
         ):
             current_date = self.start_date + timedelta(days=current_day)
-            prices = (
-                PriceSimulator.load_placeholder_price_data()
-            )  # Placeholder for market prices
-            actual_prices = (
-                PriceSimulator.load_random_price_data()
-            )  # Actual market prices for P&L calculation
+            envelope_prices = PriceSimulator.price_envelope()
+            noisy_prices = PriceSimulator.add_noise_and_spikes(envelope_prices)
 
-            schedule_df, daily_pnl = self.run_daily_operation(prices, actual_prices)
+            schedule_df, daily_pnl = self.run_daily_operation(
+                envelope_prices, noisy_prices
+            )
             total_pnl += daily_pnl
             results.append((current_date, schedule_df, daily_pnl))
 
