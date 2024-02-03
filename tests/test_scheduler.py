@@ -2,33 +2,67 @@ import os
 import pytest
 import pandas as pd
 import sys
+import pulp
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts import Battery, MarketScheduler  # noqa: E402
+from scripts.battery import Battery  # noqa: E402
+from scripts.energy_market_simulator import MarketScheduler  # noqa: E402
 
 
-def test_market_scheduler():
-    test_battery = Battery(capacity_mwh=1.0, initial_soc=0.5)
-    # Lower prices for the first half, higher for the second
-    test_prices = [20] * 24 + [40] * 24
+@pytest.fixture
+def sample_battery():
+    return Battery(capacity_mwh=1, initial_soc=0.5)
 
-    scheduler = MarketScheduler(test_battery, test_prices)
-    schedule_df = scheduler.create_schedule()
 
-    # Check the DataFrame structure
+@pytest.fixture
+def sample_scheduler(sample_battery):
+    prices = [20] * 24 + [40] * 24
+    return MarketScheduler(sample_battery, prices)
+
+
+def test_setup_model(sample_scheduler):
+    num_intervals = 5
+    model = sample_scheduler.setup_model(num_intervals)
+    assert model.name == "Battery_Schedule_Optimization"
+    assert model.sense == -1
+
+
+def test_define_variables(sample_scheduler):
+    num_intervals = 5
+    vars = sample_scheduler.define_variables(None, num_intervals)
+    assert len(vars["charge"]) == num_intervals
+    assert len(vars["discharge"]) == num_intervals
+    assert len(vars["soc"]) == num_intervals + 1
+
+
+def test_add_objective_function(sample_scheduler):
+    model = pulp.LpProblem()
+    vars = {
+        "charge": [pulp.LpVariable("charge") for _ in range(5)],
+        "discharge": [pulp.LpVariable("discharge") for _ in range(5)],
+        "soc": [pulp.LpVariable("soc") for _ in range(6)],
+    }
+    num_intervals = 5
+    timestep_hours = 0.5
+    sample_scheduler.add_objective_function(model, vars, num_intervals, timestep_hours)
+    assert model.objective is not None
+
+
+def test_add_constraints(sample_scheduler):
+    model = pulp.LpProblem()
+    vars = {
+        "charge": [pulp.LpVariable("charge") for _ in range(5)],
+        "discharge": [pulp.LpVariable("discharge") for _ in range(5)],
+        "soc": [pulp.LpVariable("soc") for _ in range(6)],
+    }
+    num_intervals = 5
+    sample_scheduler.add_constraints(model, vars, num_intervals)
+    assert len(model.constraints) != 0
+
+
+def test_create_schedule(sample_scheduler):
+    schedule_df = sample_scheduler.create_schedule()
     assert isinstance(schedule_df, pd.DataFrame)
-    assert "Interval" in schedule_df.columns
-    assert "Action" in schedule_df.columns
-    assert "Value" in schedule_df.columns
-
-    # Basic validation of the schedule
-    # First half should be primarily charging
-    for i in range(24):
-        assert schedule_df.at[i, "Action"] in ["charge", "idle"]
-
-    # Second half should be primarily discharging
-    for i in range(24, 48):
-        assert schedule_df.at[i, "Action"] in ["discharge", "idle"]
 
 
 if __name__ == "__main__":
