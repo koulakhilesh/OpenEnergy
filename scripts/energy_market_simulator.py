@@ -36,8 +36,13 @@ class EnergyMarketSimulator:
         self.start_date = start_date
         self.end_date = end_date
         self.battery = battery
-        
-    def calculate_pnl(self, schedule_df: pd.DataFrame, actual_prices: list, timestep_hours: float = 0.5) -> float:
+
+    def calculate_pnl(
+        self,
+        schedule_df: pd.DataFrame,
+        actual_prices: list,
+        timestep_hours: float = 0.5,
+    ) -> float:
         """
         Calculates the profit and loss (P&L) based on the schedule and actual prices.
 
@@ -53,14 +58,15 @@ class EnergyMarketSimulator:
         for i in range(len(actual_prices)):
             action = schedule_df.at[i, "Action"]
             value = schedule_df.at[i, "Value"]
-            price = actual_prices[i] * timestep_hours  # Adjust for timestep duration if prices are per hour
+            price = (
+                actual_prices[i] * timestep_hours
+            )  # Adjust for timestep duration if prices are per hour
 
             if action == "charge":
                 pnl -= value * price / self.battery.charge_efficiency
             elif action == "discharge":
                 pnl += value * price * self.battery.discharge_efficiency
         return pnl
-    
 
     def process_daily_schedule(self, schedule_df: pd.DataFrame):
         """
@@ -74,7 +80,6 @@ class EnergyMarketSimulator:
                 self.battery.charge(row["Value"])
             elif row["Action"] == "discharge":
                 self.battery.discharge(row["Value"])
-
 
     def run_daily_operation(self, prices: list, actual_prices: list) -> tuple:
         """
@@ -103,10 +108,16 @@ class EnergyMarketSimulator:
         total_pnl = 0
         results = []  # Collect daily operation results for analysis
 
-        for current_day in tqdm(range((self.end_date - self.start_date).days + 1), desc="Processing Days"):
+        for current_day in tqdm(
+            range((self.end_date - self.start_date).days + 1), desc="Processing Days"
+        ):
             current_date = self.start_date + timedelta(days=current_day)
-            prices = PriceSimulator.load_placeholder_price_data()  # Placeholder for market prices
-            actual_prices = PriceSimulator.load_random_price_data()  # Actual market prices for P&L calculation
+            prices = (
+                PriceSimulator.load_placeholder_price_data()
+            )  # Placeholder for market prices
+            actual_prices = (
+                PriceSimulator.load_random_price_data()
+            )  # Actual market prices for P&L calculation
 
             schedule_df, daily_pnl = self.run_daily_operation(prices, actual_prices)
             total_pnl += daily_pnl

@@ -29,7 +29,7 @@ class Battery:
         initial_soh: float = 1.0,
         initial_soc: float = 0.5,
         starting_cycle_count: float = 0.0,
-        temperature_c: float = 25
+        temperature_c: float = 25,
     ):
         """
         Initializes a new instance of the Battery class.
@@ -45,7 +45,7 @@ class Battery:
             starting_cycle_count (float, optional): The initial cycle count of the battery. Defaults to 0.0.
             temperature_c (float, optional): The temperature of the battery in Celsius. Defaults to 25.
         """
-        
+
         if capacity_mwh <= 0:
             raise ValueError("Capacity must be greater than 0")
         if not (0 <= initial_soc <= 1):
@@ -56,8 +56,12 @@ class Battery:
         self.capacity_mwh = capacity_mwh
         self.charge_efficiency = charge_efficiency
         self.discharge_efficiency = discharge_efficiency
-        self.max_charge_rate_mw = max_charge_rate_mw if max_charge_rate_mw else capacity_mwh
-        self.max_discharge_rate_mw = max_discharge_rate_mw if max_discharge_rate_mw else capacity_mwh
+        self.max_charge_rate_mw = (
+            max_charge_rate_mw if max_charge_rate_mw else capacity_mwh
+        )
+        self.max_discharge_rate_mw = (
+            max_discharge_rate_mw if max_discharge_rate_mw else capacity_mwh
+        )
         self.soc = initial_soc
         self.soh = initial_soh
         self.temperature_c = temperature_c
@@ -84,7 +88,9 @@ class Battery:
 
     def discharge(self, energy_mwh: float, duration_hours=0.5):
         self.adjust_efficiency_for_temperature()
-        discharge_energy_mwh = min(energy_mwh, self.max_discharge_rate_mw * duration_hours)
+        discharge_energy_mwh = min(
+            energy_mwh, self.max_discharge_rate_mw * duration_hours
+        )
         actual_discharge_energy_mwh = discharge_energy_mwh * self.discharge_efficiency
         self.soc = max(self.soc - actual_discharge_energy_mwh / self.capacity_mwh, 0.0)
         self.energy_cycled_mwh += discharge_energy_mwh
@@ -109,4 +115,3 @@ class Battery:
         dod_factor = 2 if dod > 0.5 else 1
         degradation_rate = base_degradation * energy_cycled_mwh * dod_factor
         self.soh *= 1 - degradation_rate
-

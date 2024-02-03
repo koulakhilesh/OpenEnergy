@@ -13,4 +13,6 @@ dependencies:
   - numpy
   - pandas
   - mypy
+  - matplotlib
+  - seaborn
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
