@@ -133,7 +133,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 ## Roadmap
 
 - [x] Initial development and setup
-- [ ] Basic simulation capabilities for energy markets and battery operations
+- [x] Basic simulation capabilities for energy markets and battery operations
 - [ ] Advanced modeling for battery degradation and state of health (SOH)
 - [ ] Integration with real-world energy market data sources
 - [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)

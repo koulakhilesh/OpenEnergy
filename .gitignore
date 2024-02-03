@@ -8,3 +8,4 @@ tests/__pycache__
 playground/__pycache__
 scripts/__pycache__
 .mypy_cache
+.vscode
