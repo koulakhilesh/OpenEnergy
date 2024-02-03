@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from tqdm import tqdm
-from .battery import Battery
-from .scheduler import MarketScheduler
-from .prices import PriceSimulator
+from scripts.battery import Battery
+from scripts.scheduler import MarketScheduler
+from scripts.prices import PriceSimulator
 import pandas as pd
 
 

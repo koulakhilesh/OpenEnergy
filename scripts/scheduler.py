@@ -3,6 +3,7 @@ import pulp
 import pandas as pd
 from .battery import Battery
 
+
 class MarketScheduler:
     """Handles scheduling of battery charge/discharge using MILP.
 
@@ -11,7 +12,7 @@ class MarketScheduler:
         prices (List[float]): The list of prices for each interval.
     """
 
-    def __init__(self, battery: Battery, prices: List[float]):
+    def __init__(self, battery:Battery, prices: List[float]):
         self.battery = battery
         self.prices = prices
 

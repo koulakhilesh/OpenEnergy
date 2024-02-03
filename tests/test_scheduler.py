@@ -5,7 +5,8 @@ import sys
 import pulp
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts import Battery, MarketScheduler  # noqa: E402
+from scripts.battery import Battery # noqa: E402
+from scripts.energy_market_simulator import MarketScheduler  # noqa: E402
 
 @pytest.fixture
 def sample_battery():

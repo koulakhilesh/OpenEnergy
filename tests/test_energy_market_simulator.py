@@ -7,7 +7,8 @@ import numpy as np
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/..")) 
 
-from scripts import EnergyMarketSimulator, Battery  # noqa: E402
+from scripts.energy_market_simulator import EnergyMarketSimulator # noqa: E402
+from scripts.battery import Battery  # noqa: E402
 
 @pytest.fixture
 def sample_battery():

@@ -4,7 +4,7 @@ import pytest
 import sys
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts import Battery  # noqa: E402
+from scripts.battery import Battery  # noqa: E402
 
 # Test for initialization
 def test_initialization():
