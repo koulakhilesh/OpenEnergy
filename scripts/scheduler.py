@@ -116,7 +116,9 @@ class MarketScheduler:
             print("Solution is optimal.")
         elif result_status in [pulp.LpStatusNotSolved, pulp.LpStatusUndefined]:
             # Handle sub-optimal or undefined solutions
-            print("Solution is sub-optimal or undefined. Review model constraints and objective.")
+            print(
+                "Solution is sub-optimal or undefined. Review model constraints and objective."
+            )
         elif result_status == pulp.LpStatusInfeasible:
             print("Solution is infeasible. Review model constraints.")
         elif result_status == pulp.LpStatusUnbounded:
