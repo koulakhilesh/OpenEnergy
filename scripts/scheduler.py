@@ -134,7 +134,7 @@ class MarketScheduler:
         """Main method to create a charge/discharge schedule for the battery."""
         num_intervals = len(self.prices)
         timestep_hours = 0.5
-        max_cycles = 10
+        max_cycles = 5
 
         model = self.setup_model(num_intervals)
         vars = self.define_variables(model, num_intervals)

@@ -1,5 +1,6 @@
 import math
 import random
+import datetime
 
 
 class PriceSimulator:
@@ -7,16 +8,21 @@ class PriceSimulator:
     A class for simulating price data with noise and spikes.
 
     Methods:
-    - price_envelope(num_intervals, min_price, max_price, peak_start, peak_end): Generate price data with a smooth envelope curve for peak and off-peak prices.
+    - price_envelope(num_intervals, min_price, max_price, peak_start, peak_end, date): Generate price data with a smooth envelope curve for peak and off-peak prices and adds randomness based on a date seed.
     - add_noise_and_spikes(prices, noise_level, spike_chance, spike_multiplier): Adds random noise and occasional spikes to the prices.
     """
 
     @staticmethod
     def price_envelope(
-        num_intervals=48, min_price=15, max_price=30, peak_start=16, peak_end=32
+        num_intervals=48,
+        min_price=0,
+        max_price=200,
+        peak_start=16,
+        peak_end=32,
+        date=datetime.date.today(),
     ) -> list:
         """
-        Generate price data with a smooth envelope curve for peak and off-peak prices.
+        Generate price data with a smooth envelope curve for peak and off-peak prices, adding randomness based on a date seed.
 
         Parameters:
         - num_intervals (int): The number of price intervals (assuming 30 minutes per interval for a 24-hour day).
@@ -24,23 +30,44 @@ class PriceSimulator:
         - max_price (float): The maximum price during peak hours.
         - peak_start (int): The interval index for the start of peak pricing.
         - peak_end (int): The interval index for the end of peak pricing.
+        - date (datetime.date): The date used as a seed for randomness.
 
         Returns:
-        List[float]: A list of prices with a smooth transition between off-peak and peak hours.
+        List[float]: A list of prices with a smooth transition between off-peak and peak hours, with added randomness.
         """
+        # Use the date as a seed for randomness
+        random.seed(date.toordinal())
+
         prices = []
         for i in range(num_intervals):
             # Calculate the position of the current interval within the cycle
             x = (math.pi * 2) * (i / num_intervals)
-            # Generate a sine wave for smooth transitions
-            sine_value = (
-                math.sin(x - math.pi / 2) + 1
-            ) / 2  # Scale sine wave to [0, 1]
-            price = min_price + (max_price - min_price) * sine_value
 
-            # Keep prices at min_price outside of peak hours
-            if i < peak_start or i >= peak_end:
-                price = min_price
+            # Adjust sine wave to create variations for both peak and off-peak hours
+            if peak_start <= i < peak_end:
+                # More pronounced sine wave for peak hours
+                sine_value = (
+                    math.sin(x - math.pi / 2) + 1
+                ) / 2  # Scale sine wave to [0, 1]
+                price = min_price + (max_price - min_price) * sine_value
+            else:
+                # Subtler sine wave for off-peak hours to introduce variations
+                off_peak_amplitude = (
+                    max_price - min_price
+                ) / 4  # Less variation in off-peak hours
+                sine_value = (
+                    math.sin(x * 2 - math.pi / 2) + 1
+                ) / 2  # Double the frequency for more fluctuations
+                price = min_price + off_peak_amplitude * sine_value
+
+            # Introduce randomness
+            random_adjustment = (
+                random.uniform(-1, 1) * (max_price - min_price) / 20
+            )  # Adjust the scale of randomness
+            price += random_adjustment
+
+            # Ensure price stays within min and max bounds
+            price = max(min_price, min(price, max_price))
 
             prices.append(price)
         return prices
