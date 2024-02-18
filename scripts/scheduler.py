@@ -39,7 +39,16 @@ class MarketScheduler:
             pulp.LpVariable(f"soc_{i}", lowBound=0.05, upBound=0.95)
             for i in range(num_intervals + 1)
         ]
-        return {"charge": charge_vars, "discharge": discharge_vars, "soc": soc_vars}
+        energy_cycled_vars = [
+            pulp.LpVariable(f"cycle_{i}", lowBound=0) for i in range(num_intervals + 1)
+        ]
+
+        return {
+            "charge": charge_vars,
+            "discharge": discharge_vars,
+            "soc": soc_vars,
+            "energy_cycled": energy_cycled_vars,
+        }
 
     def add_objective_function(
         self,
@@ -66,9 +75,17 @@ class MarketScheduler:
             ]
         )
 
-    def add_constraints(self, model: pulp.LpProblem, vars: dict, num_intervals: int):
+    def add_constraints(
+        self,
+        model: pulp.LpProblem,
+        vars: dict,
+        num_intervals: int,
+        max_cycles: float,
+    ):
         """Adds constraints to the model."""
         model += vars["soc"][0] == self.battery.soc
+        model += vars["energy_cycled"][0] == 0
+
         for i in range(num_intervals):
             model += (
                 vars["charge"][i] + vars["discharge"][i] <= self.battery.capacity_mwh
@@ -80,6 +97,16 @@ class MarketScheduler:
                 vars["discharge"][i]
                 * (1 / self.battery.discharge_efficiency / self.battery.capacity_mwh)
             )
+            model += vars["energy_cycled"][i + 1] == vars["energy_cycled"][i] + vars[
+                "charge"
+            ][i] * (self.battery.charge_efficiency) + vars["discharge"][i] * (
+                1 / self.battery.discharge_efficiency
+            )
+
+        model += (
+            vars["energy_cycled"][num_intervals]
+            <= max_cycles * self.battery.capacity_mwh * 2
+        )
 
     def solve_model(self, model: pulp.LpProblem) -> None:
         """Solves the LP model."""
@@ -107,11 +134,12 @@ class MarketScheduler:
         """Main method to create a charge/discharge schedule for the battery."""
         num_intervals = len(self.prices)
         timestep_hours = 0.5
+        max_cycles = 10
 
         model = self.setup_model(num_intervals)
         vars = self.define_variables(model, num_intervals)
         self.add_objective_function(model, vars, num_intervals, timestep_hours)
-        self.add_constraints(model, vars, num_intervals)
+        self.add_constraints(model, vars, num_intervals, max_cycles)
         self.solve_model(model)
 
         return self._extract_schedule(vars, num_intervals)
