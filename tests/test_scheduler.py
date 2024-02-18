@@ -54,9 +54,11 @@ def test_add_constraints(sample_scheduler):
         "charge": [pulp.LpVariable("charge") for _ in range(5)],
         "discharge": [pulp.LpVariable("discharge") for _ in range(5)],
         "soc": [pulp.LpVariable("soc") for _ in range(6)],
+        "energy_cycled": [pulp.LpVariable("energy_cycled") for _ in range(6)],
     }
     num_intervals = 5
-    sample_scheduler.add_constraints(model, vars, num_intervals)
+    max_cycles = 100
+    sample_scheduler.add_constraints(model, vars, num_intervals, max_cycles)
     assert len(model.constraints) != 0
 
 
