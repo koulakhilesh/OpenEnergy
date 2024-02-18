@@ -18,8 +18,8 @@ def sample_battery():
 
 @pytest.fixture
 def sample_simulator(sample_battery):
-    start_date = date(2022, 1, 1)
-    end_date = date(2022, 1, 5)
+    start_date = date(2023, 1, 1)
+    end_date = date(2023, 1, 5)
     return EnergyMarketSimulator(start_date, end_date, sample_battery)
 
 
