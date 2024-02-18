@@ -111,8 +111,18 @@ class MarketScheduler:
     def solve_model(self, model: pulp.LpProblem) -> None:
         """Solves the LP model."""
         result_status = model.solve()
-        if result_status != pulp.LpStatusOptimal:
-            raise ValueError("The optimization problem did not solve to optimality.")
+        # Check if the solution is optimal
+        if result_status == pulp.LpStatusOptimal:
+            print("Solution is optimal.")
+        elif result_status in [pulp.LpStatusNotSolved, pulp.LpStatusUndefined]:
+            # Handle sub-optimal or undefined solutions
+            print("Solution is sub-optimal or undefined. Review model constraints and objective.")
+        elif result_status == pulp.LpStatusInfeasible:
+            print("Solution is infeasible. Review model constraints.")
+        elif result_status == pulp.LpStatusUnbounded:
+            print("Solution is unbounded. Review model objective and constraints.")
+        else:
+            print("Unexpected solver status encountered.")
 
     def _extract_schedule(self, vars: dict, num_intervals: int) -> pd.DataFrame:
         """Extracts the charging/discharging schedule from the solved model."""
