@@ -5,7 +5,6 @@ channels:
   - defaults
 dependencies:
   - python==3.10.13
-  - pulp
   - tqdm
   - ruff
   - pytest
@@ -13,6 +12,9 @@ dependencies:
   - numpy
   - pandas
   - mypy
-  - matplotlib
-  - seaborn
+  - conda-forge::matplotlib
+  - anaconda::seaborn
+  - pyomo
+  - glpk
+  - ipopt
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
