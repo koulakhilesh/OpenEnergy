@@ -177,7 +177,7 @@ class MarketScheduler:
         timestep_hours = 0.5
         max_cycles = 5
 
-        model = self.setup_model(num_intervals)
+        self.setup_model(num_intervals)
         self.define_variables(num_intervals)
         self.add_objective_function(num_intervals, timestep_hours)
         self.add_constraints(num_intervals, max_cycles)

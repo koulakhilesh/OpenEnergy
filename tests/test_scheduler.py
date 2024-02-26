@@ -2,23 +2,11 @@ import os
 import pytest
 import pandas as pd
 import sys
-import pulp
 from scripts.battery import Battery  # noqa: E402
 from scripts.energy_market_simulator import MarketScheduler  # noqa: E402
 import pyomo.environ as pyo
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-
-
-@pytest.fixture
-def sample_battery():
-    return Battery(capacity_mwh=1, initial_soc=0.5)
-
-
-@pytest.fixture
-def sample_scheduler(sample_battery):
-    prices = [20] * 24 + [40] * 24
-    return MarketScheduler(sample_battery, prices)
 
 
 @pytest.fixture
