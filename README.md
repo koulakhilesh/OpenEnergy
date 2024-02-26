@@ -1,10 +1,10 @@
 <div id="top"></div>
 
-<!-- [![Contributors][contributors-shield]][contributors-url]
+[![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Issues][issues-shield]][issues-url]
-[![GNU License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url] -->
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
 
 <!-- PROJECT LOGO -->
@@ -37,7 +37,6 @@
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#built-with">Built With</a></li>
-    <!-- <li><a href="#getting-started">Getting Started</a></li> -->
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -72,60 +71,11 @@ This project is built with a combination of powerful Python libraries, each play
 * [Python](https://www.python.org/) - The core programming language
 * [Pandas](https://pandas.pydata.org/) - Data manipulation and analysis
 * [NumPy](https://numpy.org/) - Support for large, multi-dimensional arrays and matrices
-* [PuLP](https://coin-or.github.io/pulp/) - Linear programming optimization library
-* [tqdm](https://tqdm.github.io/) - Fast, extensible progress bar for loops and CLI
-* [pytest](https://docs.pytest.org/en/stable/) - Framework for testing Python code
-* [os](https://docs.python.org/3/library/os.html) - Miscellaneous operating system interfaces
+* [Pyomo](https://www.pyomo.org/) - Linear programming optimization library
 
 These tools collectively enable efficient data handling, optimization problem solving, progress tracking, and robust testing, making OpenEnergy a reliable and scalable solution.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-<!-- GETTING STARTED
-## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
-
-### Installation
-
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-
-<p align="right">(<a href="#top">back to top</a>)</p> -->
-
-
-
-<!-- USAGE EXAMPLES
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#top">back to top</a>)</p> -->
 
 
 
@@ -134,13 +84,13 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 - [x] Initial development and setup
 - [x] Basic simulation capabilities for energy markets and battery operations
-- [ ] Advanced modeling for battery degradation and state of health (SOH)
-- [ ] Integration with real-world energy market data sources
+- [x] Modeling for battery degradation and state of health (SOH)
 - [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
+- [ ] Support for custom scenario creation and testing
 - [ ] Development of a graphical user interface (GUI) for easier interaction
 - [ ] Expansion of data visualization features for analysis insights
-- [ ] Support for custom scenario creation and testing
-- [ ] Multi-language documentation and support
+- [ ] Integration with real-world energy market data sources
+- [ ] Forecasting capability
 
 See the [open issues](https://github.com/koulakhilesh/OpenEnergy/issues) for a full list of proposed features (and known issues).
 
@@ -192,23 +142,14 @@ Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/ko
 <!-- ACKNOWLEDGMENTS -->
 <!-- ## Acknowledgments -->
 
-<!-- * [Choose an Open Source License](https://choosealicense.com) -->
-
-
-<!-- <p align="right">(<a href="#top">back to top</a>)</p> -->
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-<!-- [contributors-shield]: https://img.shields.io/github/contributors/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
-<!-- [contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors -->
-<!-- [forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
-<!-- [forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members -->
-<!-- [issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
-<!-- [issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues -->
-<!-- [license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge -->
-<!-- [license-url]: https://github.com/koulakhilesh/OpenEnergy/blob/master/LICENSE.txt -->
-<!-- [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555 -->
-<!-- [linkedin-url]: https://linkedin.com/in/akhilesh-koul -->
-<!-- [product-screenshot]: images/screenshot.png -->
+[contributors-shield]: https://img.shields.io/github/contributors/koulakhilesh/OpenEnergy.svg?style=for-the-badge
+[contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge
+[forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members
+[issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge
+[issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues
+[license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge
+[license-url]: https://github.com/koulakhilesh/OpenEnergy/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/akhilesh-koul
+[product-screenshot]: images/screenshot.png
