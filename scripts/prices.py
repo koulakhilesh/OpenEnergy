@@ -1,6 +1,8 @@
 import math
 import random
 import datetime
+import pandas as pd
+import pytz
 
 
 class PriceSimulator:
@@ -103,3 +105,36 @@ class PriceSimulator:
             noisy_prices.append(new_price)
 
         return noisy_prices
+
+
+
+class PriceModel:
+    def __init__(self, csv_file_path="data\\time_series\\time_series_60min_singleindex_filtered.csv"):
+        # Read the CSV data into a DataFrame
+        self.data = pd.read_csv(csv_file_path)
+        # Convert the utc_timestamp column to datetime objects for easier manipulation
+        self.data['utc_timestamp'] = pd.to_datetime(self.data['utc_timestamp'])
+
+    def get_average_price_for_date(self, date_str):
+        # Parse the given date
+        if len(date_str) == 10:  # Only the date part is present
+            date_str += "T00:00:00Z"
+
+        # Parse the given date and make it timezone-aware
+        current_date = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.utc)
+        week_prior = current_date - datetime.timedelta(days=7)
+
+        # Filter the data for the last week
+        last_week_data = self.data[(self.data['utc_timestamp'] >= week_prior) & 
+                                   (self.data['utc_timestamp'] < current_date)]
+
+        # Calculate the average price per hour for the last week
+        average_prices_last_week = last_week_data.groupby(last_week_data['utc_timestamp'].dt.hour)['GB_GBN_price_day_ahead'].mean()
+
+        # Filter the data for the current date
+        current_date_data = self.data[self.data['utc_timestamp'].dt.date == current_date.date()]
+
+        # Get the prices for each hour of the current date
+        prices_current_date = current_date_data.set_index(current_date_data['utc_timestamp'].dt.hour)['GB_GBN_price_day_ahead']
+
+        return list(average_prices_last_week.to_dict().values()), list(prices_current_date.to_dict().values())
