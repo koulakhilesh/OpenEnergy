@@ -30,6 +30,7 @@ class Battery:
         initial_soc: float = 0.5,
         starting_cycle_count: float = 0.0,
         temperature_c: float = 25,
+        duration_hours: float = 1.0,
     ):
         """
         Initializes a new instance of the Battery class.
@@ -68,6 +69,7 @@ class Battery:
         self.cycle_count = starting_cycle_count
         self.last_cycle_soc = initial_soc
         self.energy_cycled_mwh = 0.0
+        self.duration_hours = duration_hours
 
     def adjust_efficiency_for_temperature(self):
         temp_effect = abs(self.temperature_c - 25) * 0.01
@@ -76,9 +78,11 @@ class Battery:
         self.charge_efficiency = max(0.5, min(self.charge_efficiency, 1.0))
         self.discharge_efficiency = max(0.5, min(self.discharge_efficiency, 1.0))
 
-    def charge(self, energy_mwh: float, duration_hours=0.5):
+    def charge(self, energy_mwh: float):
         self.adjust_efficiency_for_temperature()
-        charge_energy_mwh = min(energy_mwh, self.max_charge_rate_mw * duration_hours)
+        charge_energy_mwh = min(
+            energy_mwh, self.max_charge_rate_mw * self.duration_hours
+        )
         actual_charge_energy_mwh = charge_energy_mwh * self.charge_efficiency
         self.soc = min(self.soc + actual_charge_energy_mwh / self.capacity_mwh, 1.0)
         self.energy_cycled_mwh += charge_energy_mwh
@@ -86,10 +90,10 @@ class Battery:
         self.update_soh(charge_energy_mwh, dod)
         self.check_and_update_cycles()
 
-    def discharge(self, energy_mwh: float, duration_hours=0.5):
+    def discharge(self, energy_mwh: float):
         self.adjust_efficiency_for_temperature()
         discharge_energy_mwh = min(
-            energy_mwh, self.max_discharge_rate_mw * duration_hours
+            energy_mwh, self.max_discharge_rate_mw * self.duration_hours
         )
         actual_discharge_energy_mwh = discharge_energy_mwh * self.discharge_efficiency
         self.soc = max(self.soc - actual_discharge_energy_mwh / self.capacity_mwh, 0.0)

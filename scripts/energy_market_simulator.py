@@ -17,7 +17,7 @@ class EnergyMarketSimulator:
 
     Methods:
     - __init__(start_date: date, end_date: date, battery: Battery): Initializes the EnergyMarketSimulator object.
-    - calculate_pnl(schedule_df: pd.DataFrame, actual_prices: list, timestep_hours: float = 0.5) -> float: Calculates the profit and loss (P&L) based on the schedule and actual prices.
+    - calculate_pnl(schedule_df: pd.DataFrame, actual_prices: list, timestep_hours: float ) -> float: Calculates the profit and loss (P&L) based on the schedule and actual prices.
     - process_daily_schedule(schedule_df: pd.DataFrame): Processes the daily schedule by charging or discharging the battery.
     - run_daily_operation(prices: list, actual_prices: list) -> tuple: Runs the daily operation of creating a schedule, processing the schedule, and calculating the P&L.
     - simulate(): Simulates the energy market for the specified period and returns the results.
@@ -41,7 +41,7 @@ class EnergyMarketSimulator:
         self,
         schedule_df: pd.DataFrame,
         actual_prices: list,
-        timestep_hours: float = 0.5,
+        timestep_hours: float = 1.0,
     ) -> float:
         """
         Calculates the profit and loss (P&L) based on the schedule and actual prices.
@@ -49,7 +49,7 @@ class EnergyMarketSimulator:
         Parameters:
         - schedule_df (pd.DataFrame): The schedule dataframe containing the actions and values.
         - actual_prices (list): The list of actual market prices.
-        - timestep_hours (float): The duration of each timestep in hours. Default is 0.5.
+        - timestep_hours (float): The duration of each timestep in hours. Default is 1.0.
 
         Returns:
         - pnl (float): The calculated profit and loss.

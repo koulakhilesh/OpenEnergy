@@ -36,7 +36,7 @@ def test_calculate_pnl(sample_simulator):
     schedule_df = pd.DataFrame({"Action": ["charge", "discharge"], "Value": [0.5, 0.3]})
     actual_prices = [20, 30]
     pnl = sample_simulator.calculate_pnl(schedule_df, actual_prices)
-    assert np.isclose(pnl, -1.50555)
+    assert np.isclose(pnl, -3.011111)
 
 
 def test_process_daily_schedule(sample_simulator, sample_battery):
@@ -51,7 +51,7 @@ def test_run_daily_operation(sample_simulator):
     initial_soh = sample_simulator.battery.soh
     schedule_df, pnl = sample_simulator.run_daily_operation(prices, actual_prices)
     assert isinstance(schedule_df, pd.DataFrame)
-    assert pnl == 5.4675
+    assert pnl == 10.935
     assert sample_simulator.battery.soh != initial_soh
 
 

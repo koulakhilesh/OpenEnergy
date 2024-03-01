@@ -16,7 +16,7 @@ def sample_battery():
 
 @pytest.fixture
 def sample_scheduler(sample_battery):
-    prices = [20] * 24 + [40] * 24
+    prices = [20] * 12 + [40] * 12
     return MarketScheduler(sample_battery, prices)
 
 
@@ -39,7 +39,7 @@ def test_define_variables(sample_scheduler: MarketScheduler):
 
 def test_add_objective_function(sample_scheduler: MarketScheduler):
     num_intervals = 5
-    timestep_hours = 0.5
+    timestep_hours = 1.0
     sample_scheduler.setup_model(num_intervals)
     sample_scheduler.define_variables(num_intervals)
     sample_scheduler.add_objective_function(num_intervals, timestep_hours)

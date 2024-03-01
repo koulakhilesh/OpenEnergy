@@ -174,7 +174,7 @@ class MarketScheduler:
     def create_schedule(self, tee=False):
         """Main method to create a charge/discharge schedule for the battery using PyOMO."""
         num_intervals = len(self.prices)
-        timestep_hours = 0.5
+        timestep_hours = 1.0
         max_cycles = 5
 
         self.setup_model(num_intervals)

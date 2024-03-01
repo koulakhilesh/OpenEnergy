@@ -14,7 +14,7 @@ class PriceSimulator:
 
     @staticmethod
     def price_envelope(
-        num_intervals=48,
+        num_intervals=24,
         min_price=0,
         max_price=200,
         peak_start=16,
@@ -25,7 +25,7 @@ class PriceSimulator:
         Generate price data with a smooth envelope curve for peak and off-peak prices, adding randomness based on a date seed.
 
         Parameters:
-        - num_intervals (int): The number of price intervals (assuming 30 minutes per interval for a 24-hour day).
+        - num_intervals (int): The number of price intervals (assuming 1 price point per hour for a 24-hour day).
         - min_price (float): The minimum price during off-peak hours.
         - max_price (float): The maximum price during peak hours.
         - peak_start (int): The interval index for the start of peak pricing.
