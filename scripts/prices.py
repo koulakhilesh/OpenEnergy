@@ -3,16 +3,85 @@ import random
 import datetime
 import pandas as pd
 import pytz
+import typing as t
+from abc import ABC, abstractmethod
 
 
-class PriceSimulator:
+class IPriceData(ABC):
+    """Interface for retrieving price data."""
+
+    @abstractmethod
+    def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
+        """Get the prices for a given date.
+
+        Args:
+            date (datetime.date): The date for which to retrieve the prices.
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing two lists of floats representing the prices.
+        """
+        pass
+
+
+class IDataProvider:
+    """Interface for data providers."""
+
+    def get_data(self) -> pd.DataFrame:
+        """Get data from the provider."""
+        pass
+
+
+class CSVDataProvider(IDataProvider):
     """
-    A class for simulating price data with noise and spikes.
+    A data provider that reads data from a CSV file.
+
+    Args:
+        csv_file_path (str): The path to the CSV file.
+
+    Returns:
+        pd.DataFrame: The data read from the CSV file.
+    """
+
+    def __init__(self, csv_file_path: str):
+        self.csv_file_path = csv_file_path
+
+    def get_data(self) -> pd.DataFrame:
+        return pd.read_csv(
+            self.csv_file_path,
+            parse_dates=["utc_timestamp"],
+            infer_datetime_format=True,
+        )
+
+
+class PriceSimulator(IPriceData):
+    """
+    A class that simulates price data for a given date.
+
+    Attributes:
+        None
 
     Methods:
-    - price_envelope(num_intervals, min_price, max_price, peak_start, peak_end, date): Generate price data with a smooth envelope curve for peak and off-peak prices and adds randomness based on a date seed.
-    - add_noise_and_spikes(prices, noise_level, spike_chance, spike_multiplier): Adds random noise and occasional spikes to the prices.
+        get_prices: Returns the simulated prices for a given date.
+        price_envelope: Generates the price envelope for a given date.
+        add_noise_and_spikes: Adds noise and spikes to the prices.
+
     """
+
+    def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
+        """
+        Returns the simulated prices for a given date.
+
+        Args:
+            date (datetime.date): The date for which to generate prices.
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing the original prices and the prices with noise and spikes.
+
+        """
+
+        prices = self.price_envelope(date=date)
+        prices_with_noise_and_spikes = self.add_noise_and_spikes(prices)
+        return prices, prices_with_noise_and_spikes
 
     @staticmethod
     def price_envelope(
@@ -22,119 +91,154 @@ class PriceSimulator:
         peak_start=16,
         peak_end=32,
         date=datetime.date.today(),
-    ) -> list:
+    ) -> t.List[float]:
         """
-        Generate price data with a smooth envelope curve for peak and off-peak prices, adding randomness based on a date seed.
+        Generates the price envelope for a given date.
 
-        Parameters:
-        - num_intervals (int): The number of price intervals (assuming 1 price point per hour for a 24-hour day).
-        - min_price (float): The minimum price during off-peak hours.
-        - max_price (float): The maximum price during peak hours.
-        - peak_start (int): The interval index for the start of peak pricing.
-        - peak_end (int): The interval index for the end of peak pricing.
-        - date (datetime.date): The date used as a seed for randomness.
+        Args:
+            num_intervals (int): The number of intervals in a day.
+            min_price (float): The minimum price.
+            max_price (float): The maximum price.
+            peak_start (int): The start hour of the peak period.
+            peak_end (int): The end hour of the peak period.
+            date (datetime.date): The date for which to generate the price envelope.
 
         Returns:
-        List[float]: A list of prices with a smooth transition between off-peak and peak hours, with added randomness.
+            List[float]: The price envelope for the given date.
+
         """
-        # Use the date as a seed for randomness
+
         random.seed(date.toordinal())
 
         prices = []
         for i in range(num_intervals):
-            # Calculate the position of the current interval within the cycle
             x = (math.pi * 2) * (i / num_intervals)
 
-            # Adjust sine wave to create variations for both peak and off-peak hours
             if peak_start <= i < peak_end:
-                # More pronounced sine wave for peak hours
-                sine_value = (
-                    math.sin(x - math.pi / 2) + 1
-                ) / 2  # Scale sine wave to [0, 1]
+                sine_value = (math.sin(x - math.pi / 2) + 1) / 2
                 price = min_price + (max_price - min_price) * sine_value
             else:
-                # Subtler sine wave for off-peak hours to introduce variations
-                off_peak_amplitude = (
-                    max_price - min_price
-                ) / 4  # Less variation in off-peak hours
-                sine_value = (
-                    math.sin(x * 2 - math.pi / 2) + 1
-                ) / 2  # Double the frequency for more fluctuations
+                off_peak_amplitude = (max_price - min_price) / 4
+                sine_value = (math.sin(x * 2 - math.pi / 2) + 1) / 2
                 price = min_price + off_peak_amplitude * sine_value
 
-            # Introduce randomness
-            random_adjustment = (
-                random.uniform(-1, 1) * (max_price - min_price) / 20
-            )  # Adjust the scale of randomness
+            random_adjustment = random.uniform(-1, 1) * (max_price - min_price) / 20
             price += random_adjustment
-
-            # Ensure price stays within min and max bounds
             price = max(min_price, min(price, max_price))
 
             prices.append(price)
+
         return prices
 
     @staticmethod
     def add_noise_and_spikes(
-        prices, noise_level=5, spike_chance=0.05, spike_multiplier=1.5
-    ):
+        prices: t.List[float],
+        noise_level=5,
+        spike_chance=0.05,
+        spike_multiplier=1.5,
+    ) -> t.List[float]:
         """
-        Adds random noise and occasional spikes to the prices.
+        Adds noise and spikes to the prices.
 
-        Parameters:
-        - prices (list): The original list of prices generated by price_envelope.
-        - noise_level (float): The maximum deviation added as noise to each price point.
-        - spike_chance (float): The probability of a price spike occurring at any interval.
-        - spike_multiplier (float): The factor by which prices increase during a spike.
+        Args:
+            prices (List[float]): The original prices.
+            noise_level (float): The level of noise to add.
+            spike_chance (float): The chance of adding a spike to a price.
+            spike_multiplier (float): The multiplier for the spike.
 
         Returns:
-        List[float]: The modified list of prices with added noise and spikes.
+            List[float]: The prices with noise and spikes.
+
         """
+
         noisy_prices = []
         for price in prices:
-            # Add random noise
             noise = random.uniform(-noise_level, noise_level)
             new_price = price + noise
 
-            # Randomly introduce spikes
             if random.random() < spike_chance:
                 new_price *= spike_multiplier
 
-            # Ensure the price does not go negative
             new_price = max(0, new_price)
             noisy_prices.append(new_price)
 
         return noisy_prices
 
 
+class PriceModel(IPriceData):
+    """
+    Represents a model for retrieving and analyzing price data.
 
-class PriceModel:
-    def __init__(self, csv_file_path="data\\time_series\\time_series_60min_singleindex_filtered.csv"):
-        # Read the CSV data into a DataFrame
-        self.data = pd.read_csv(csv_file_path)
-        # Convert the utc_timestamp column to datetime objects for easier manipulation
-        self.data['utc_timestamp'] = pd.to_datetime(self.data['utc_timestamp'])
+    Args:
+        data_provider (IDataProvider): The data provider used to fetch the price data.
 
-    def get_average_price_for_date(self, date_str):
-        # Parse the given date
-        if len(date_str) == 10:  # Only the date part is present
-            date_str += "T00:00:00Z"
+    Attributes:
+        data_provider (IDataProvider): The data provider used to fetch the price data.
+        data (pandas.DataFrame): The fetched price data.
 
-        # Parse the given date and make it timezone-aware
-        current_date = datetime.datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=pytz.utc)
+    """
+
+    def __init__(self, data_provider: IDataProvider):
+        self.data_provider = data_provider
+        self.data = self.data_provider.get_data()
+
+    def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
+        """
+        Retrieves the average prices for the last week and the prices for the specified date.
+
+        Args:
+            date (datetime.date): The date for which to retrieve the prices.
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing the average prices for the last week
+            and the prices for the specified date.
+
+        """
+        current_date = datetime.datetime.combine(date, datetime.time.min).replace(
+            tzinfo=pytz.utc
+        )
         week_prior = current_date - datetime.timedelta(days=7)
 
-        # Filter the data for the last week
-        last_week_data = self.data[(self.data['utc_timestamp'] >= week_prior) & 
-                                   (self.data['utc_timestamp'] < current_date)]
+        last_week_data = self.data[
+            (self.data["utc_timestamp"] >= week_prior)
+            & (self.data["utc_timestamp"] < current_date)
+        ]
 
-        # Calculate the average price per hour for the last week
-        average_prices_last_week = last_week_data.groupby(last_week_data['utc_timestamp'].dt.hour)['GB_GBN_price_day_ahead'].mean()
+        average_prices_last_week = (
+            last_week_data.groupby(last_week_data["utc_timestamp"].dt.hour)[
+                "GB_GBN_price_day_ahead"
+            ]
+            .mean()
+            .tolist()
+        )
 
-        # Filter the data for the current date
-        current_date_data = self.data[self.data['utc_timestamp'].dt.date == current_date.date()]
+        current_date_data = self.data[
+            self.data["utc_timestamp"].dt.date == current_date.date()
+        ]
 
-        # Get the prices for each hour of the current date
-        prices_current_date = current_date_data.set_index(current_date_data['utc_timestamp'].dt.hour)['GB_GBN_price_day_ahead']
+        prices_current_date = current_date_data.set_index(
+            current_date_data["utc_timestamp"].dt.hour
+        )["GB_GBN_price_day_ahead"].tolist()
 
-        return list(average_prices_last_week.to_dict().values()), list(prices_current_date.to_dict().values())
+        return average_prices_last_week, prices_current_date
+
+
+if __name__ == "__main__":
+    data_provider = CSVDataProvider(
+        "data\\time_series\\time_series_60min_singleindex_filtered.csv"
+    )
+    price_model = PriceModel(data_provider)
+    date_provided = datetime.date(2018, 1, 1)
+
+    average_prices, prices_for_day = price_model.get_prices(date_provided)
+    print("Average prices last week per hour:", average_prices)
+    print("Prices for the current date per hour:", prices_for_day)
+
+    price_simulator = PriceSimulator()
+    simulated_prices, simulated_prices_with_noise = price_simulator.get_prices(
+        date_provided
+    )
+    print(f"Simulated Prices on {date_provided}: {simulated_prices}")
+    print(
+        f"Simulated Prices with Noise and Spikes on {date_provided}: {simulated_prices_with_noise}"
+    )
