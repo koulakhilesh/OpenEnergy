@@ -48,7 +48,8 @@ class Battery:
         self.discharge_efficiency = discharge_efficiency
         self.max_charge_rate_mw = kwargs.get('max_charge_rate_mw', capacity_mwh)
         self.max_discharge_rate_mw = kwargs.get('max_discharge_rate_mw', capacity_mwh)
-        self.soc = kwargs.get('initial_soc', 0.5)
+        self.initial_soc = kwargs.get('initial_soc', 0.5)
+        self.soc = self.initial_soc
         self.soh = kwargs.get('initial_soh', 1.0)
         self.temperature_c = kwargs.get('temperature_c', 25)
         self.cycle_count = kwargs.get('starting_cycle_count', 0.0)

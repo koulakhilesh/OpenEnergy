@@ -2,11 +2,13 @@ import os
 import pytest
 import pandas as pd
 import sys
-from scripts.battery import Battery  # noqa: E402
-from scripts.energy_market_simulator import MarketScheduler  # noqa: E402
-import pyomo.environ as pyo
-
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
+import pyomo.environ as pyo
+from scripts.battery import Battery  # noqa: E402
+from scripts.scheduler import MarketScheduler  # noqa: E402
+
+
+
 
 
 @pytest.fixture
