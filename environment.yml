@@ -17,4 +17,5 @@ dependencies:
   - pyomo
   - glpk
   - ipopt
+  - conda-forge::pytz
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy

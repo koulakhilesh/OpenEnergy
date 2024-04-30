@@ -182,7 +182,7 @@ class BatteryOptimizationScheduler:
         self,
         battery: Battery,
         prices: List[float],
-        model_builder: IOptimizationModelBuilder|None = None,
+        model_builder: IOptimizationModelBuilder | None = None,
         solver: IOptimizationSolver | None = None,
     ):
         self.battery = battery
