@@ -26,7 +26,7 @@ class IPriceData(ABC):
 class IDataProvider:
     """Interface for data providers."""
 
-    def get_data(self) -> pd.DataFrame:
+    def get_data(self):
         """Get data from the provider."""
         pass
 
