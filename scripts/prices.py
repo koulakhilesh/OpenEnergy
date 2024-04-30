@@ -53,7 +53,7 @@ class CSVDataProvider(IDataProvider):
         )
 
 
-class PriceSimulator(IPriceData):
+class SimulatedPriceModel(IPriceData):
     """
     A class that simulates price data for a given date.
 
@@ -165,7 +165,7 @@ class PriceSimulator(IPriceData):
         return noisy_prices
 
 
-class PriceModel(IPriceData):
+class HistoricalAveragePriceModel(IPriceData):
     """
     Represents a model for retrieving and analyzing price data.
 
@@ -227,14 +227,14 @@ if __name__ == "__main__":
     data_provider = CSVDataProvider(
         "data\\time_series\\time_series_60min_singleindex_filtered.csv"
     )
-    price_model = PriceModel(data_provider)
+    price_model = HistoricalAveragePriceModel(data_provider)
     date_provided = datetime.date(2018, 1, 1)
 
     average_prices, prices_for_day = price_model.get_prices(date_provided)
     print("Average prices last week per hour:", average_prices)
     print("Prices for the current date per hour:", prices_for_day)
 
-    price_simulator = PriceSimulator()
+    price_simulator = SimulatedPriceModel()
     simulated_prices, simulated_prices_with_noise = price_simulator.get_prices(
         date_provided
     )
