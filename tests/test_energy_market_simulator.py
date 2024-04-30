@@ -33,16 +33,30 @@ def test_initialization(sample_battery):
 
 
 def test_calculate_pnl(sample_simulator):
-    schedule_df = pd.DataFrame({"Action": ["charge", "discharge"], "Value": [0.5, 0.3]})
+    schedule_df = pd.DataFrame(
+        {
+            "Interval": [0, 1],
+            "Charge": [0.0, 0.405],
+            "Discharge": [0.405, 0.0],
+            "SOC": [0.50, 0.50],
+        }
+    )
     actual_prices = [20, 30]
     pnl = sample_simulator.calculate_pnl(schedule_df, actual_prices)
-    assert np.isclose(pnl, -1.50555)
+    assert np.isclose(pnl, -6.209999999999998)
 
 
 def test_process_daily_schedule(sample_simulator, sample_battery):
-    schedule_df = pd.DataFrame({"Action": ["charge", "discharge"], "Value": [0.5, 0.3]})
+    schedule_df = pd.DataFrame(
+        {
+            "Interval": [0, 1],
+            "Charge": [0.0, 0.405],
+            "Discharge": [0.405, 0.0],
+            "SOC": [0.50, 0.50],
+        }
+    )
     sample_simulator.process_daily_schedule(schedule_df)
-    assert sample_battery.soc == 0.5 + 0.5 * 0.9 - 0.3 * 0.9
+    assert sample_battery.soc == 0.5
 
 
 def test_run_daily_operation(sample_simulator):
@@ -51,7 +65,7 @@ def test_run_daily_operation(sample_simulator):
     initial_soh = sample_simulator.battery.soh
     schedule_df, pnl = sample_simulator.run_daily_operation(prices, actual_prices)
     assert isinstance(schedule_df, pd.DataFrame)
-    assert pnl == 5.4675
+    assert pnl == 34.29
     assert sample_simulator.battery.soh != initial_soh
 
 

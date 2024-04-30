@@ -38,6 +38,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        conda install -y python=3.10.13
         conda env update --file environment.yml --name base 
 
     - name: Linting check with Ruff
@@ -50,4 +51,4 @@ jobs:
 
     - name: Running mypy
       run: | 
-        mypy --ignore-missing-imports scripts/
+        mypy scripts/
