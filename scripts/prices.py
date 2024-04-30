@@ -124,7 +124,7 @@ class SimulatedPriceModel(IPriceData):
 
             random_adjustment = random.uniform(-1, 1) * (max_price - min_price) / 20
             price += random_adjustment
-            price = max(min_price, min(price, max_price))
+            price = float(max(min_price, min(price, max_price)))
 
             prices.append(price)
 
@@ -159,7 +159,7 @@ class SimulatedPriceModel(IPriceData):
             if random.random() < spike_chance:
                 new_price *= spike_multiplier
 
-            new_price = max(0, new_price)
+            new_price = float(max(0, new_price))
             noisy_prices.append(new_price)
 
         return noisy_prices

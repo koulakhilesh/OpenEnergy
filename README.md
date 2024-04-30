@@ -85,6 +85,8 @@ These tools collectively enable efficient data handling, optimization problem so
 - [x] Initial development and setup
 - [x] Basic simulation capabilities for energy markets and battery operations
 - [x] Modeling for battery degradation and state of health (SOH)
+- [x] Better Price models
+- [ ] Implementation of the Application Interface
 - [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
 - [ ] Support for custom scenario creation and testing
 - [ ] Development of a graphical user interface (GUI) for easier interaction
@@ -140,7 +142,8 @@ Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/ko
 
 
 <!-- ACKNOWLEDGMENTS -->
-<!-- ## Acknowledgments -->
+## Acknowledgments
+1. I am obliged to [Open Power System Data](https://open-power-system-data.org/data-sources) for providing data sources for price and solar related values.
 
 [contributors-shield]: https://img.shields.io/github/contributors/koulakhilesh/OpenEnergy.svg?style=for-the-badge
 [contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors
