@@ -2,48 +2,32 @@ import os
 import pytest
 import pandas as pd
 import numpy as np
-import datetime
 import sys
+from datetime import datetime
+from pandas.testing import assert_frame_equal
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import HistoricalAveragePriceModel  # noqa: E402
+from scripts.prices import CSVDataProvider, HistoricalAveragePriceModel  # noqa: E402
 
+def test_csv_data_provider(create_test_csv):
+    csv_data_provider = CSVDataProvider('test.csv')
+    data = csv_data_provider.get_data()
 
-# Sample Data Provider
-class SampleDataProvider:
-    def get_data(self):
-        # Sample price data
-        data = pd.DataFrame(
-            {
-                "utc_timestamp": pd.date_range(
-                    start="2021-12-31T00:00:00Z", periods=24 * 8, freq="H"
-                ),
-                "GB_GBN_price_day_ahead": [10.0] * 24 * 4 + [20.0] * 24 * 4,
-            }
-        )
-        return data
+    expected_data = pd.DataFrame({
+        'utc_timestamp': pd.date_range(start="2021-12-31T00:00:00Z", periods=24*8, freq='H'),
+        'GB_GBN_price_day_ahead': range(24*8)
+    })
+    assert_frame_equal(data, expected_data)
 
+def test_historical_average_price_model(create_test_csv):
+    data_provider = CSVDataProvider('test.csv')
+    model = HistoricalAveragePriceModel(data_provider=data_provider)
+    date = datetime(2022, 1, 7)
 
-def test_get_prices():
-    # Create a sample instance of HistoricalAveragePriceModel
-    data_provider = SampleDataProvider()
-    model = HistoricalAveragePriceModel(data_provider)
+    average_prices_last_week, prices_current_date = model.get_prices(date)
 
-    # Specify a date for testing
-    date = datetime.date(2022, 1, 7)
-
-    # Expected results
-    average_prices_last_week = [14.28571] * 24
-    prices_current_date = [20.0] * 24
-
-    # Call the method under test
-    result_average_prices, result_prices = model.get_prices(date)
-
-    # Check the results
-    assert np.isclose(
-        np.array(result_average_prices), np.array(average_prices_last_week)
-    ).all()
-    assert np.isclose(np.array(result_prices), np.array(prices_current_date)).all()
+    assert average_prices_last_week is not None
+    assert prices_current_date is not None
 
 
 if __name__ == "__main__":

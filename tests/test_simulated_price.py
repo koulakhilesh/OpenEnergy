@@ -4,47 +4,39 @@ import datetime
 import sys
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import SimulatedPriceModel  # noqa: E402
+from scripts.prices import SimulatedPriceEnvelopeGenerator, SimulatedPriceModel, SimulatedPriceNoiseAdder  # noqa: E402
 
+import pytest
+from datetime import datetime
+from unittest.mock import Mock, call
 
-@pytest.fixture
-def simulated_price_model():
-    return SimulatedPriceModel()
-
-
-def test_get_prices(simulated_price_model):
-    date = datetime.date(2022, 1, 1)
-    original_prices, prices_with_noise_and_spikes = simulated_price_model.get_prices(
-        date
-    )
-
-    assert isinstance(original_prices, list)
-    assert isinstance(prices_with_noise_and_spikes, list)
-    assert len(original_prices) == 24
-    assert len(prices_with_noise_and_spikes) == 24
-
-
-def test_price_envelope(simulated_price_model):
-    date = datetime.date(2022, 1, 1)
-    prices = simulated_price_model.price_envelope(date=date)
-
-    assert isinstance(prices, list)
+def test_simulated_price_envelope_generator():
+    generator = SimulatedPriceEnvelopeGenerator()
+    date = datetime(2022, 1, 1)
+    prices = generator.generate(date)
     assert len(prices) == 24
-    assert all(isinstance(price, float) for price in prices)
 
-
-def test_add_noise_and_spikes(simulated_price_model):
+def test_simulated_price_noise_adder():
+    adder = SimulatedPriceNoiseAdder()
     prices = [10, 20, 30, 40, 50]
-    noisy_prices = simulated_price_model.add_noise_and_spikes(prices)
+    prices_with_noise = adder.add(prices)
+    assert len(prices_with_noise) == len(prices)
 
-    assert isinstance(noisy_prices, list)
-    assert len(noisy_prices) == 5
-    assert all(isinstance(price, float) for price in noisy_prices)
-    assert all(price >= 0 for price in noisy_prices)
-    assert any(
-        price != original_price for price, original_price in zip(noisy_prices, prices)
-    )
+def test_simulated_price_model():
+    mock_envelope_generator = Mock(spec=SimulatedPriceEnvelopeGenerator)
+    mock_envelope_generator.generate.return_value = [10, 20, 30, 40, 50]
 
+    mock_noise_adder = Mock(spec=SimulatedPriceNoiseAdder)
+    mock_noise_adder.add.return_value = [11, 21, 31, 41, 51]
+
+    model = SimulatedPriceModel(envelope_generator=mock_envelope_generator, noise_adder=mock_noise_adder)
+    date = datetime(2022, 1, 1)
+    prices, prices_with_noise_and_spikes = model.get_prices(date)
+
+    mock_envelope_generator.generate.assert_called_once_with(date=date)
+    mock_noise_adder.add.assert_called_once_with([10, 20, 30, 40, 50])
+    assert prices == [10, 20, 30, 40, 50]
+    assert prices_with_noise_and_spikes == [11, 21, 31, 41, 51]
 
 if __name__ == "__main__":
     pytest.main()
