@@ -19,4 +19,5 @@ dependencies:
   - ipopt
   - conda-forge::pytz
   - pandas-stubs
+  - conda-forge::coverage
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
