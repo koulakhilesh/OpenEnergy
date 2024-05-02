@@ -12,6 +12,7 @@ class IPriceData(ABC):
     def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
         pass
 
+
 class IPriceEnvelopeGenerator(ABC):
     @abstractmethod
     def generate(self, date: datetime.date) -> t.List[float]:
@@ -28,14 +29,17 @@ class IDataProvider:
     def get_data(self):
         pass
 
+
 class SimulatedPriceEnvelopeGenerator(IPriceEnvelopeGenerator):
-    def __init__(self,num_intervals=24,min_price=0,max_price=200,peak_start=16,peak_end=32):
-        self.num_intervals=num_intervals
-        self.min_price=min_price
-        self.max_price=max_price
-        self.peak_start=peak_start
-        self.peak_end=peak_end
-    
+    def __init__(
+        self, num_intervals=24, min_price=0, max_price=200, peak_start=16, peak_end=32
+    ):
+        self.num_intervals = num_intervals
+        self.min_price = min_price
+        self.max_price = max_price
+        self.peak_start = peak_start
+        self.peak_end = peak_end
+
     def generate(self, date: datetime.date) -> t.List[float]:
         random.seed(date.toordinal())
         prices = []
@@ -50,23 +54,23 @@ class SimulatedPriceEnvelopeGenerator(IPriceEnvelopeGenerator):
                 sine_value = (math.sin(x * 2 - math.pi / 2) + 1) / 2
                 price = self.min_price + off_peak_amplitude * sine_value
 
-            random_adjustment = random.uniform(-1, 1) * (self.max_price - self.min_price) / 20
+            random_adjustment = (
+                random.uniform(-1, 1) * (self.max_price - self.min_price) / 20
+            )
             price += random_adjustment
             price = float(max(self.min_price, min(price, self.max_price)))
 
             prices.append(price)
 
         return prices
-        
 
 
 class SimulatedPriceNoiseAdder(IPriceNoiseAdder):
-
     def __init__(self, noise_level=5, spike_chance=0.05, spike_multiplier=1.5):
-        self.noise_level=noise_level
-        self.spike_chance=spike_chance
-        self.spike_multiplier=spike_multiplier
-    
+        self.noise_level = noise_level
+        self.spike_chance = spike_chance
+        self.spike_multiplier = spike_multiplier
+
     def add(self, prices: t.List[float]) -> t.List[float]:
         noisy_prices = []
         for price in prices:
@@ -81,22 +85,21 @@ class SimulatedPriceNoiseAdder(IPriceNoiseAdder):
 
         return noisy_prices
 
+
 class SimulatedPriceModel(IPriceData):
-    
-    def __init__(self, envelope_generator: IPriceEnvelopeGenerator, noise_adder: IPriceNoiseAdder):
+    def __init__(
+        self, envelope_generator: IPriceEnvelopeGenerator, noise_adder: IPriceNoiseAdder
+    ):
         self.envelope_generator = envelope_generator
         self.noise_adder = noise_adder
-
 
     def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
         prices = self.envelope_generator.generate(date=date)
         prices_with_noise_and_spikes = self.noise_adder.add(prices)
         return prices, prices_with_noise_and_spikes
- 
 
 
 class CSVDataProvider(IDataProvider):
-
     def __init__(self, csv_file_path: str):
         self.csv_file_path = csv_file_path
 
@@ -106,6 +109,7 @@ class CSVDataProvider(IDataProvider):
             parse_dates=["utc_timestamp"],
             infer_datetime_format=True,
         )
+
 
 class HistoricalAveragePriceModel(IPriceData):
     DAYS_IN_WEEK = 7
@@ -127,18 +131,24 @@ class HistoricalAveragePriceModel(IPriceData):
         return average_prices_last_week, prices_current_date
 
     def _get_current_date(self, date: datetime.date) -> datetime.datetime:
-        return datetime.datetime.combine(date, datetime.time.min).replace(tzinfo=pytz.utc)
+        return datetime.datetime.combine(date, datetime.time.min).replace(
+            tzinfo=pytz.utc
+        )
 
     def _get_week_prior(self, current_date: datetime.datetime) -> datetime.datetime:
         return current_date - datetime.timedelta(days=self.DAYS_IN_WEEK)
 
-    def _get_last_week_data(self, current_date: datetime.datetime, week_prior: datetime.datetime) -> pd.DataFrame:
+    def _get_last_week_data(
+        self, current_date: datetime.datetime, week_prior: datetime.datetime
+    ) -> pd.DataFrame:
         return self.data[
             (self.data["utc_timestamp"] >= week_prior)
             & (self.data["utc_timestamp"] < current_date)
         ]
 
-    def _get_average_prices_last_week(self, last_week_data: pd.DataFrame) -> t.List[float]:
+    def _get_average_prices_last_week(
+        self, last_week_data: pd.DataFrame
+    ) -> t.List[float]:
         return (
             last_week_data.groupby(last_week_data["utc_timestamp"].dt.hour)[
                 "GB_GBN_price_day_ahead"
@@ -148,11 +158,11 @@ class HistoricalAveragePriceModel(IPriceData):
         )
 
     def _get_current_date_data(self, current_date: datetime.datetime) -> pd.DataFrame:
-        return self.data[
-            self.data["utc_timestamp"].dt.date == current_date.date()
-        ]
+        return self.data[self.data["utc_timestamp"].dt.date == current_date.date()]
 
-    def _get_prices_current_date(self, current_date_data: pd.DataFrame) -> t.List[float]:
-        return current_date_data.set_index(
-            current_date_data["utc_timestamp"].dt.hour
-        )["GB_GBN_price_day_ahead"].tolist()
+    def _get_prices_current_date(
+        self, current_date_data: pd.DataFrame
+    ) -> t.List[float]:
+        return current_date_data.set_index(current_date_data["utc_timestamp"].dt.hour)[
+            "GB_GBN_price_day_ahead"
+        ].tolist()

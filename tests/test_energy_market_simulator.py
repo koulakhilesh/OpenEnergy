@@ -3,7 +3,6 @@ import pytest
 import sys
 from datetime import date
 import pandas as pd
-import numpy as np
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 
@@ -13,22 +12,26 @@ from scripts.prices import IPriceData  # noqa: E402
 from scripts.scheduler import BatteryOptimizationScheduler  # noqa: E402
 
 
-
 @pytest.fixture
 def battery():
-    return Battery(capacity_mwh=100, initial_soc=0.5, charge_efficiency=0.9, discharge_efficiency=0.8)
+    return Battery(
+        capacity_mwh=100,
+        initial_soc=0.5,
+        charge_efficiency=0.9,
+        discharge_efficiency=0.8,
+    )
+
 
 @pytest.fixture
 def schedule_df():
-    data = {
-        'Charge': [10, 0, 0, 20],
-        'Discharge': [0, 15, 0, 0]
-    }
+    data = {"Charge": [10, 0, 0, 20], "Discharge": [0, 15, 0, 0]}
     return pd.DataFrame(data)
+
 
 @pytest.fixture
 def actual_prices():
     return [5, 10, 15, 20]
+
 
 def test_pnl_calculator(battery, schedule_df, actual_prices):
     pnl_calculator = PnLCalculator(battery)
@@ -39,32 +42,35 @@ def test_pnl_calculator(battery, schedule_df, actual_prices):
 
     assert pnl == pytest.approx(expected_pnl)
 
+
 class MockPriceModel(IPriceData):
     def get_prices(self, date):
         return [10, 20, 30, 40], [11, 21, 31, 41]
+
 
 class MockScheduler(BatteryOptimizationScheduler):
     def __init__(self, battery=None, prices=None):
         super().__init__(battery, prices)
 
     def create_schedule(self, prices):
-        data = {
-            'Charge': [10, 0, 0, 20],
-            'Discharge': [0, 15, 0, 0]
-        }
+        data = {"Charge": [10, 0, 0, 20], "Discharge": [0, 15, 0, 0]}
         return pd.DataFrame(data)
+
 
 @pytest.fixture
 def pnl_calculator(battery):
-    return PnLCalculator(battery)    
+    return PnLCalculator(battery)
+
 
 @pytest.fixture
 def price_model():
     return MockPriceModel()
 
+
 @pytest.fixture
 def scheduler():
     return MockScheduler()
+
 
 def test_energy_market_simulator(battery, pnl_calculator, price_model, scheduler):
     simulator = EnergyMarketSimulator(
@@ -73,7 +79,7 @@ def test_energy_market_simulator(battery, pnl_calculator, price_model, scheduler
         battery=battery,
         price_model=price_model,
         pnl_calculator=pnl_calculator,
-        scheduler=scheduler
+        scheduler=scheduler,
     )
 
     results = simulator.simulate()
@@ -87,14 +93,17 @@ def test_energy_market_simulator(battery, pnl_calculator, price_model, scheduler
         expected_pnl = pnl_calculator.calculate(schedule_df, [11, 21, 31, 41])
         assert daily_pnl == pytest.approx(expected_pnl)
 
-def test_energy_market_simulator_single_day(battery, pnl_calculator, price_model, scheduler):
+
+def test_energy_market_simulator_single_day(
+    battery, pnl_calculator, price_model, scheduler
+):
     simulator = EnergyMarketSimulator(
         start_date=date(2022, 1, 1),
         end_date=date(2022, 1, 1),
         battery=battery,
         price_model=price_model,
         pnl_calculator=pnl_calculator,
-        scheduler=scheduler
+        scheduler=scheduler,
     )
 
     results = simulator.simulate()
@@ -106,6 +115,7 @@ def test_energy_market_simulator_single_day(battery, pnl_calculator, price_model
     current_date, schedule_df, daily_pnl = results[0]
     expected_pnl = pnl_calculator.calculate(schedule_df, [11, 21, 31, 41])
     assert daily_pnl == pytest.approx(expected_pnl)
+
 
 # @pytest.fixture
 # def sample_battery():

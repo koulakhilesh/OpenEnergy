@@ -11,13 +11,17 @@ class TemperatureEfficiencyAdjuster(EfficiencyAdjuster):
     def adjust_efficiency(self, temperature_c, charge_efficiency, discharge_efficiency):
         temp_effect = abs(temperature_c - 25) * 0.01
         new_charge_efficiency = max(0.5, min(charge_efficiency - temp_effect, 1.0))
-        new_discharge_efficiency = max(0.5, min(discharge_efficiency - temp_effect, 1.0))
+        new_discharge_efficiency = max(
+            0.5, min(discharge_efficiency - temp_effect, 1.0)
+        )
         return new_charge_efficiency, new_discharge_efficiency
-    
+
+
 class SOHCalculator(ABC):
     @abstractmethod
     def calculate_soh(self, soh, energy_cycled_mwh, dod):
         pass
+
 
 class BasicSOHCalculator(SOHCalculator):
     def calculate_soh(self, soh, energy_cycled_mwh, dod):
@@ -26,9 +30,20 @@ class BasicSOHCalculator(SOHCalculator):
         degradation_rate = base_degradation * energy_cycled_mwh * dod_factor
         return soh * (1 - degradation_rate)
 
+
 class Battery:
-    def __init__(self, capacity_mwh, charge_efficiency=0.9, discharge_efficiency=0.9, efficiency_adjuster=None, soh_calculator=None, **kwargs):
-        self.validate_initial_conditions(capacity_mwh, kwargs.get("initial_soc", 0.5), kwargs.get("initial_soh", 1.0))
+    def __init__(
+        self,
+        capacity_mwh,
+        charge_efficiency=0.9,
+        discharge_efficiency=0.9,
+        efficiency_adjuster=None,
+        soh_calculator=None,
+        **kwargs,
+    ):
+        self.validate_initial_conditions(
+            capacity_mwh, kwargs.get("initial_soc", 0.5), kwargs.get("initial_soh", 1.0)
+        )
         self.capacity_mwh = capacity_mwh
         self.charge_efficiency = charge_efficiency
         self.discharge_efficiency = discharge_efficiency
@@ -41,9 +56,12 @@ class Battery:
         self.cycle_count = kwargs.get("starting_cycle_count", 0.0)
         self.energy_cycled_mwh = kwargs.get("starting_energy_cycled_mwh", 0.0)
         self.duration_hours = kwargs.get("duration_hours", 1.0)
-        self.efficiency_adjuster = efficiency_adjuster if efficiency_adjuster else TemperatureEfficiencyAdjuster()
+        self.efficiency_adjuster = (
+            efficiency_adjuster
+            if efficiency_adjuster
+            else TemperatureEfficiencyAdjuster()
+        )
         self.soh_calculator = soh_calculator if soh_calculator else BasicSOHCalculator()
-
 
     @staticmethod
     def validate_initial_conditions(capacity_mwh, initial_soc, initial_soh):
@@ -55,7 +73,12 @@ class Battery:
             raise ValueError("Initial SOH must be between 0 and 1")
 
     def adjust_efficiency_for_temperature(self):
-        self.charge_efficiency, self.discharge_efficiency = self.efficiency_adjuster.adjust_efficiency(self.temperature_c, self.charge_efficiency, self.discharge_efficiency)
+        (
+            self.charge_efficiency,
+            self.discharge_efficiency,
+        ) = self.efficiency_adjuster.adjust_efficiency(
+            self.temperature_c, self.charge_efficiency, self.discharge_efficiency
+        )
 
     def charge(self, energy_mwh):
         self.adjust_efficiency_for_temperature()
@@ -78,8 +101,6 @@ class Battery:
         self.check_and_update_cycles()
 
     def check_and_update_cycles(self):
-        cycles = (self.energy_cycled_mwh /(2*self.capacity_mwh))
+        cycles = self.energy_cycled_mwh / (2 * self.capacity_mwh)
         self.cycle_count += cycles
         self.last_cycle_soc = self.soc
-
-        
