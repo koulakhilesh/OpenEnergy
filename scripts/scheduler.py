@@ -11,7 +11,7 @@ logging.basicConfig(
 )
 
 
-class IOptimizationModelBuilder(ABC):
+class IModelBuilder(ABC):
     @abstractmethod
     def build_model(
         self,
@@ -24,13 +24,47 @@ class IOptimizationModelBuilder(ABC):
         pass
 
 
-class IOptimizationSolver(ABC):
+class IModelSolver(ABC):
     @abstractmethod
     def solve(self, model: pyo.ConcreteModel, tee: bool):
         pass
 
 
-class PyomoOptimizationModelBuilder(IOptimizationModelBuilder):
+class IModelExtractor(ABC):
+    @abstractmethod
+    def extract_schedule(
+        self, model: pyo.ConcreteModel, num_intervals: int
+    ) -> pd.DataFrame:
+        pass
+
+
+class IModelDefiner(ABC):
+    @abstractmethod
+    def define_time_intervals(self, model, num_intervals):
+        pass
+
+    @abstractmethod
+    def define_variables(self, model):
+        pass
+
+    @abstractmethod
+    def define_objective_function(self, model):
+        pass
+
+    @abstractmethod
+    def define_constraints(self, model, num_intervals, max_cycles):
+        pass
+
+
+class IScheduler(ABC):
+    @abstractmethod
+    def create_schedule(
+        self, prices: List[float], timestep_hours: float, max_cycles: float, tee: bool
+    ) -> pd.DataFrame:
+        pass
+
+
+class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
     def build_model(
         self,
         num_intervals: int,
@@ -43,16 +77,16 @@ class PyomoOptimizationModelBuilder(IOptimizationModelBuilder):
         self.battery = battery
         self.timestep_hours = timestep_hours
         model = pyo.ConcreteModel(name="Battery_Schedule_Optimization")
-        self._define_time_intervals(model, num_intervals)
-        self._define_variables(model)
-        self._define_objective_function(model)
-        self._define_constraints(model, num_intervals, max_cycles)
+        self.define_time_intervals(model, num_intervals)
+        self.define_variables(model)
+        self.define_objective_function(model)
+        self.define_constraints(model, num_intervals, max_cycles)
         return model
 
-    def _define_time_intervals(self, model, num_intervals):
+    def define_time_intervals(self, model, num_intervals):
         model.T = pyo.RangeSet(0, num_intervals - 1)
 
-    def _define_variables(self, model):
+    def define_variables(self, model):
         model.charge_vars = pyo.Var(
             model.T,
             within=pyo.NonNegativeReals,
@@ -88,7 +122,7 @@ class PyomoOptimizationModelBuilder(IOptimizationModelBuilder):
             for t in model.T
         )
 
-    def _define_objective_function(self, model):
+    def define_objective_function(self, model):
         model.objective = pyo.Objective(
             rule=self._objective_rule, sense=pyo.maximize, doc="Objective"
         )
@@ -124,7 +158,7 @@ class PyomoOptimizationModelBuilder(IOptimizationModelBuilder):
                 1 / self.battery.discharge_efficiency
             )
 
-    def _define_constraints(self, model, num_intervals, max_cycles):
+    def define_constraints(self, model, num_intervals, max_cycles):
         model.initial_soc_constraint = pyo.Constraint(
             expr=model.soc_vars[0] == self.battery.initial_soc, doc="Initial SOC"
         )
@@ -144,80 +178,38 @@ class PyomoOptimizationModelBuilder(IOptimizationModelBuilder):
         )
 
 
-class GLPKOptimizationSolver(IOptimizationSolver):
+class GLPKOptimizationSolver(IModelSolver):
     def solve(self, model: pyo.ConcreteModel, tee: bool = False):
         solver = pyo.SolverFactory("glpk")
         result = solver.solve(model, tee=tee)
 
         # Check and log the solver's termination condition and status
-        if (
-            result.solver.status == pyo.SolverStatus.ok
-            and result.solver.termination_condition == pyo.TerminationCondition.optimal
-        ):
-            logging.info("Solution is optimal.")
-        elif result.solver.termination_condition in [
-            pyo.TerminationCondition.infeasible,
-            pyo.TerminationCondition.infeasibleOrUnbounded,
-        ]:
-            logging.warning("Solution is infeasible. Review model constraints.")
-        elif result.solver.termination_condition == pyo.TerminationCondition.unbounded:
-            logging.warning(
-                "Solution is unbounded. Review model objective and constraints."
-            )
-        elif (
-            result.solver.termination_condition
-            == pyo.TerminationCondition.maxIterations
-        ):
-            logging.warning("Maximum iterations reached. Solution may not be optimal.")
-        else:
-            logging.error(
-                f"Unexpected solver status encountered: {result.solver.status}, {result.solver.termination_condition}"
-            )
+        match result.solver.termination_condition:
+            case pyo.TerminationCondition.optimal if result.solver.status == pyo.SolverStatus.ok:
+                logging.info("Solution is optimal.")
+            case (
+                pyo.TerminationCondition.infeasible
+                | pyo.TerminationCondition.infeasibleOrUnbounded
+            ):
+                logging.warning("Solution is infeasible. Review model constraints.")
+            case pyo.TerminationCondition.unbounded:
+                logging.warning(
+                    "Solution is unbounded. Review model objective and constraints."
+                )
+            case pyo.TerminationCondition.maxIterations:
+                logging.warning(
+                    "Maximum iterations reached. Solution may not be optimal."
+                )
+            case _:
+                logging.error(
+                    f"Unexpected solver status encountered: {result.solver.status}, {result.solver.termination_condition}"
+                )
 
         return result
 
 
-class BatteryOptimizationScheduler:
-    def __init__(
-        self,
-        battery: Battery,
-        prices: List[float],
-        model_builder: IOptimizationModelBuilder | None = None,
-        solver: IOptimizationSolver | None = None,
-    ):
-        self.battery = battery
-        self.prices = prices
-        self.model_builder = (
-            model_builder if model_builder else PyomoOptimizationModelBuilder()
-        )
-        self.solver = solver if solver else GLPKOptimizationSolver()
-
-    def create_schedule(self, tee: bool = False) -> pd.DataFrame:
-        num_intervals = len(self.prices)
-        timestep_hours = 1.0  # Assuming 1 hour intervals for simplicity
-        max_cycles = 5  # Example value, adjust as needed
-
-        model = self.model_builder.build_model(
-            num_intervals=num_intervals,
-            prices=self.prices,
-            battery=self.battery,
-            timestep_hours=timestep_hours,
-            max_cycles=max_cycles,
-        )
-        result = self.solver.solve(model, tee)
-
-        if (
-            result.solver.status == pyo.SolverStatus.ok
-            and result.solver.termination_condition == pyo.TerminationCondition.optimal
-        ):
-            return self._extract_schedule(model, num_intervals)
-        else:
-            logging.error(
-                f"Optimization failed with status: {result.solver.status}, condition: {result.solver.termination_condition}"
-            )
-            return pd.DataFrame()
-
-    def _extract_schedule(
+class PyomoModelExtractor(IModelExtractor):
+    def extract_schedule(
         self, model: pyo.ConcreteModel, num_intervals: int
     ) -> pd.DataFrame:
         schedule_data = [
@@ -230,3 +222,45 @@ class BatteryOptimizationScheduler:
             for i in range(num_intervals)
         ]
         return pd.DataFrame(schedule_data)
+
+
+class BatteryOptimizationScheduler(IScheduler):
+    def __init__(
+        self,
+        battery: Battery,
+        model_builder: IModelBuilder,
+        solver: IModelSolver,
+        model_extractor: IModelExtractor,
+    ):
+        self.battery = battery
+        self.model_builder = model_builder
+        self.solver = solver
+        self.model_extractor = model_extractor
+
+    def create_schedule(
+        self,
+        prices: List[float],
+        timestep_hours: float = 1.0,
+        max_cycles: float = 5.0,
+        tee: bool = False,
+    ) -> pd.DataFrame:
+        num_intervals = len(prices)
+
+        model = self.model_builder.build_model(
+            num_intervals=num_intervals,
+            prices=prices,
+            battery=self.battery,
+            timestep_hours=timestep_hours,
+            max_cycles=max_cycles,
+        )
+        result = self.solver.solve(model, tee)
+
+        if (
+            result.solver.status == pyo.SolverStatus.ok
+            and result.solver.termination_condition == pyo.TerminationCondition.optimal
+        ):
+            return self.model_extractor.extract_schedule(model, num_intervals)
+        else:
+            raise Exception(
+                f"Optimization failed with status: {result.solver.status}, condition: {result.solver.termination_condition}"
+            )
