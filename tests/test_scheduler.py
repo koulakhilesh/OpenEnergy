@@ -7,8 +7,8 @@ import pyomo.environ as pyo
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.battery import Battery  # noqa: E402
-from scripts.scheduler import (
+from scripts.assets.battery import Battery  # noqa: E402
+from scripts.optimizer import (
     BatteryOptimizationScheduler,
     GLPKOptimizationSolver,
     PyomoModelExtractor,
