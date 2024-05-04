@@ -6,8 +6,11 @@ from unittest.mock import Mock, patch
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import (SimulatedPriceEnvelopeGenerator,  # noqa: E402
-                            SimulatedPriceModel, SimulatedPriceNoiseAdder)
+from scripts.prices import (
+    SimulatedPriceEnvelopeGenerator,
+    SimulatedPriceModel,
+    SimulatedPriceNoiseAdder,
+)
 
 
 def test_simulated_price_envelope_generator():

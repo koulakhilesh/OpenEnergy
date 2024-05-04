@@ -4,8 +4,7 @@ import sys
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.battery import (BasicSOHCalculator, Battery,  # noqa: E402
-                             TemperatureEfficiencyAdjuster)
+from scripts.battery import BasicSOHCalculator, Battery, TemperatureEfficiencyAdjuster
 
 
 def test_temperature_efficiency_adjuster():

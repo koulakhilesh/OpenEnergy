@@ -8,9 +8,12 @@ import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 from scripts.battery import Battery  # noqa: E402
-from scripts.scheduler import (BatteryOptimizationScheduler,  # noqa: E402
-                               GLPKOptimizationSolver, PyomoModelExtractor,
-                               PyomoOptimizationModelBuilder)
+from scripts.scheduler import (
+    BatteryOptimizationScheduler,
+    GLPKOptimizationSolver,
+    PyomoModelExtractor,
+    PyomoOptimizationModelBuilder,
+)
 
 
 def test_define_time_intervals():

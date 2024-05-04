@@ -2,13 +2,18 @@ import argparse
 from datetime import datetime
 
 from scripts.battery import Battery
-from scripts.energy_market_simulator import (EnergyMarketSimulator,
-                                             PnLCalculator)
-from scripts.prices import (SimulatedPriceEnvelopeGenerator,
-                            SimulatedPriceModel, SimulatedPriceNoiseAdder)
-from scripts.scheduler import (BatteryOptimizationScheduler,
-                               GLPKOptimizationSolver, PyomoModelExtractor,
-                               PyomoOptimizationModelBuilder)
+from scripts.energy_market_simulator import EnergyMarketSimulator, PnLCalculator
+from scripts.prices import (
+    SimulatedPriceEnvelopeGenerator,
+    SimulatedPriceModel,
+    SimulatedPriceNoiseAdder,
+)
+from scripts.scheduler import (
+    BatteryOptimizationScheduler,
+    GLPKOptimizationSolver,
+    PyomoModelExtractor,
+    PyomoOptimizationModelBuilder,
+)
 
 
 def main():
