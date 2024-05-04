@@ -40,7 +40,12 @@ jobs:
       run: |
         conda install -y python=3.10.13
         conda env update --file environment.yml --name base 
-
+    
+    - name: Check import order with isort
+      run: |
+        isort scripts/ --check-only
+        isort app.py --check-only    
+    
     - name: Linting check with Ruff
       run: |
         ruff check scripts/

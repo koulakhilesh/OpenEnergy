@@ -1,12 +1,14 @@
 import os
-import pytest
-import pandas as pd
 import sys
 from datetime import datetime
+
+import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import CSVDataProvider, HistoricalAveragePriceModel  # noqa: E402
+from scripts.prices import (CSVDataProvider,  # noqa: E402
+                            HistoricalAveragePriceModel)
 
 
 def test_csv_data_provider(create_test_csv):

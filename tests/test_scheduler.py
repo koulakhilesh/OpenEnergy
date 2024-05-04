@@ -1,18 +1,16 @@
 import os
-import pytest
-import pandas as pd
 import sys
-import pyomo.environ as pyo
 from unittest import mock
+
+import pandas as pd
+import pyomo.environ as pyo
+import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 from scripts.battery import Battery  # noqa: E402
-from scripts.scheduler import (  # noqa: E402
-    BatteryOptimizationScheduler,
-    PyomoModelExtractor,
-    PyomoOptimizationModelBuilder,
-    GLPKOptimizationSolver,
-)
+from scripts.scheduler import (BatteryOptimizationScheduler,  # noqa: E402
+                               GLPKOptimizationSolver, PyomoModelExtractor,
+                               PyomoOptimizationModelBuilder)
 
 
 def test_define_time_intervals():

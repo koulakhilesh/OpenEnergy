@@ -1,6 +1,7 @@
-import pytest
-import pandas as pd
 import os
+
+import pandas as pd
+import pytest
 
 
 @pytest.fixture(scope="session", autouse=True)
