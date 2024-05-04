@@ -1,16 +1,18 @@
 import os
-import pytest
-import pandas as pd
 import sys
 from datetime import datetime
+
+import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import CSVDataProvider, HistoricalAveragePriceModel  # noqa: E402
+from scripts.prices import CSVDataProvider, HistoricalAveragePriceModel
 
 
 def test_csv_data_provider(create_test_csv):
-    csv_data_provider = CSVDataProvider("test.csv")
+    csv_path = os.path.join("tests", "test.csv")
+    csv_data_provider = CSVDataProvider(csv_path)
     data = csv_data_provider.get_data()
 
     expected_data = pd.DataFrame(
@@ -25,8 +27,9 @@ def test_csv_data_provider(create_test_csv):
 
 
 def test_historical_average_price_model(create_test_csv):
-    data_provider = CSVDataProvider("test.csv")
-    model = HistoricalAveragePriceModel(data_provider=data_provider)
+    csv_path = os.path.join("tests", "test.csv")
+    csv_data_provider = CSVDataProvider(csv_path)
+    model = HistoricalAveragePriceModel(data_provider=csv_data_provider)
     date = datetime(2022, 1, 7)
 
     average_prices_last_week, prices_current_date = model.get_prices(date)

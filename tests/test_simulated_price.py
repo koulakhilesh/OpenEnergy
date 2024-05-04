@@ -1,11 +1,12 @@
 import os
-import pytest
-from datetime import datetime
 import sys
+from datetime import datetime
 from unittest.mock import Mock, patch
 
+import pytest
+
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import (  # noqa: E402
+from scripts.prices import (
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,

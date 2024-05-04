@@ -1,10 +1,11 @@
+import datetime
 import math
 import random
-import datetime
-import pandas as pd
-import pytz
 import typing as t
 from abc import ABC, abstractmethod
+
+import pandas as pd
+import pytz
 
 
 class IPriceData(ABC):

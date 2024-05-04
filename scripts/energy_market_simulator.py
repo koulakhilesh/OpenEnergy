@@ -1,9 +1,11 @@
 from datetime import date, timedelta
-from tqdm import tqdm
-from scripts.battery import Battery
-from scripts.scheduler import BatteryOptimizationScheduler
-from scripts.prices import IPriceData
+
 import pandas as pd
+from tqdm import tqdm
+
+from scripts.battery import Battery
+from scripts.prices import IPriceData
+from scripts.scheduler import BatteryOptimizationScheduler
 
 
 class PnLCalculator:

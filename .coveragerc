@@ -2,3 +2,9 @@
 exclude_lines =
     @abstractmethod
     pass
+    if __name__ == .__main__.:
+
+[run]
+omit = 
+    */playground/*
+    */tests/*

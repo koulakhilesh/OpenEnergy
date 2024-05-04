@@ -1,13 +1,17 @@
 import os
-import pytest
 import sys
 from datetime import date
+
 import pandas as pd
+import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 
 from scripts.battery import Battery  # noqa: E402
-from scripts.energy_market_simulator import EnergyMarketSimulator, PnLCalculator  # noqa: E402
+from scripts.energy_market_simulator import (  # noqa: E402
+    EnergyMarketSimulator,
+    PnLCalculator,
+)
 from scripts.prices import IPriceData  # noqa: E402
 from scripts.scheduler import BatteryOptimizationScheduler  # noqa: E402
 

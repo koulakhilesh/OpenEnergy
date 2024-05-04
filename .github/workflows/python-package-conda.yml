@@ -40,10 +40,11 @@ jobs:
       run: |
         conda install -y python=3.10.13
         conda env update --file environment.yml --name base 
-
+        
     - name: Linting check with Ruff
       run: |
         ruff check scripts/
+        ruff check app.py
 
     - name: Running Pytest
       run: | 
@@ -52,3 +53,4 @@ jobs:
     - name: Running mypy
       run: | 
         mypy scripts/
+        mypy app.py
