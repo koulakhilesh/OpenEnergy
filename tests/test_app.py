@@ -38,5 +38,24 @@ def test_app_custom_dates():
     assert results is not None
 
 
+def test_app_price_model_selection(create_test_csv):
+    # Test with different price models
+    for price_model in ["SimulatedPriceModel", "HistoricalPriceModel"]:
+        args = ["app.py", "--price_model", price_model]
+        with patch.object(sys, "argv", args):
+            results = main()
+        assert results is not None
+
+
+def test_main_exception_handling():
+    # Mock the create_dependencies function to raise an exception
+    with patch("app.create_dependencies", side_effect=Exception("Test exception")):
+        # Call the main function
+        result = main()
+
+        # Check if the main function returned None
+        assert result is None
+
+
 if __name__ == "__main__":
     pytest.main()

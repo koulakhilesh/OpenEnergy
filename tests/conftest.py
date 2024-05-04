@@ -14,8 +14,8 @@ def create_test_csv():
     }
 
     df = pd.DataFrame(data)
-    df.to_csv("test.csv", index=False)
+    df.to_csv("tests/test.csv", index=False)
 
     yield
 
-    os.remove("test.csv")
+    os.remove("tests/test.csv")
