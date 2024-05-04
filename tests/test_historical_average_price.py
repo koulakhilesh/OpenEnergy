@@ -11,7 +11,8 @@ from scripts.prices import CSVDataProvider, HistoricalAveragePriceModel
 
 
 def test_csv_data_provider(create_test_csv):
-    csv_data_provider = CSVDataProvider("test.csv")
+    csv_path = os.path.join("tests", "test.csv")
+    csv_data_provider = CSVDataProvider(csv_path)
     data = csv_data_provider.get_data()
 
     expected_data = pd.DataFrame(
@@ -26,7 +27,8 @@ def test_csv_data_provider(create_test_csv):
 
 
 def test_historical_average_price_model(create_test_csv):
-    csv_data_provider = CSVDataProvider("test.csv")
+    csv_path = os.path.join("tests", "test.csv")
+    csv_data_provider = CSVDataProvider(csv_path)
     model = HistoricalAveragePriceModel(data_provider=csv_data_provider)
     date = datetime(2022, 1, 7)
 

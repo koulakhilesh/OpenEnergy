@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 from datetime import datetime
 
 from scripts.battery import Battery
@@ -74,7 +75,9 @@ def main():
     parser.add_argument(
         "--csv_path",
         type=str,
-        default="data\\time_series\\time_series_60min_singleindex_filtered.csv",
+        default=os.path.join(
+            "data", "time_series", "time_series_60min_singleindex_filtered.csv"
+        ),
     )
     args = parser.parse_args()
 
