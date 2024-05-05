@@ -8,7 +8,6 @@ dependencies:
   - tqdm
   - ruff
   - pytest
-  - flake8
   - numpy
   - pandas
   - mypy
@@ -19,4 +18,6 @@ dependencies:
   - ipopt
   - conda-forge::pytz
   - pandas-stubs
+  - conda-forge::coverage
+  - conda-forge::isort
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
