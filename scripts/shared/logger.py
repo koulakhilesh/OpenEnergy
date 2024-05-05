@@ -11,11 +11,12 @@ class Logger:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level)
 
-        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
+        if not self.logger.handlers:
+            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            handler = logging.StreamHandler()
+            handler.setFormatter(formatter)
 
-        self.logger.addHandler(handler)
+            self.logger.addHandler(handler)
 
     def __call__(self):
         return self.logger

@@ -21,9 +21,12 @@ class CSVDataProvider(IDataProvider):
 class HistoricalAveragePriceModel(IPriceData):
     DAYS_IN_WEEK = 7
 
-    def __init__(self, data_provider: IDataProvider):
+    def __init__(self, data_provider: IDataProvider, interpolate: bool = True):
         self.data_provider = data_provider
+        self.interpolate = interpolate
         self.data = self.data_provider.get_data()
+        if self.interpolate:
+            self.data['GB_GBN_price_day_ahead'].interpolate(method='linear', inplace=True)
 
     def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
         current_date = self._get_current_date(date)

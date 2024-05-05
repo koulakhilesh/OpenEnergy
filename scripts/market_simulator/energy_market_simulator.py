@@ -36,13 +36,14 @@ class EnergyMarketSimulator:
         for _, row in schedule_df.iterrows():
             charge_value = row["Charge"]
             discharge_value = row["Discharge"]
-            if charge_value > 0:
+            if charge_value >= 0:
                 self.battery.charge(charge_value)
             elif discharge_value > 0:
                 self.battery.discharge(discharge_value)
 
     def run_daily_operation(self, prices: list, actual_prices: list) -> tuple:
         schedule_df = self.scheduler.create_schedule(prices)
+        self.logger.debug(f"Schedule for {self.start_date}: {schedule_df}")
         self.process_daily_schedule(schedule_df)
         pnl = self.pnl_calculator.calculate(schedule_df, actual_prices)
         return schedule_df, pnl
@@ -52,7 +53,7 @@ class EnergyMarketSimulator:
         results = []
 
         for current_day in tqdm(
-            range((self.end_date - self.start_date).days + 1), desc="Processing Days"
+            range((self.end_date - self.start_date).days + 1), desc="Processing Days", dynamic_ncols=True
         ):
             current_date = self.start_date + timedelta(days=current_day)
             envelope_prices, noisy_prices = self.price_model.get_prices(
@@ -64,6 +65,5 @@ class EnergyMarketSimulator:
             )
             total_pnl += daily_pnl
             results.append((current_date, schedule_df, daily_pnl))
-        print(total_pnl)
         self.logger.info(f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}")
         return results
