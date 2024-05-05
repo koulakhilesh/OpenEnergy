@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 import pandas as pd
@@ -7,10 +6,6 @@ import pyomo.environ as pyo
 from scripts.assets import Battery
 
 from .interfaces import IModelBuilder, IModelExtractor, IModelSolver, IScheduler
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 
 class PyomoModelExtractor(IModelExtractor):

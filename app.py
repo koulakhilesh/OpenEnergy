@@ -1,5 +1,5 @@
 import argparse
-import logging
+from scripts.shared import Logger
 import os
 from datetime import datetime
 
@@ -17,10 +17,6 @@ from scripts.prices import (
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,
-)
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
@@ -48,7 +44,7 @@ def create_dependencies(args):
         discharge_efficiency=args.discharge_efficiency,
     )
     model_builder = PyomoOptimizationModelBuilder()
-    solver = GLPKOptimizationSolver()
+    solver = GLPKOptimizationSolver(args.log_level)
     model_extractor = PyomoModelExtractor()
     scheduler = BatteryOptimizationScheduler(
         battery=battery,
@@ -79,7 +75,11 @@ def main():
             "data", "time_series", "time_series_60min_singleindex_filtered.csv"
         ),
     )
+    parser.add_argument("--log_level", type=str, default="INFO")
     args = parser.parse_args()
+    log_level = getattr(Logger, args.log_level.upper(), Logger.INFO)
+    logger = Logger(log_level)
+
 
     try:
         (
@@ -99,14 +99,15 @@ def main():
             price_model=price_model,
             pnl_calculator=pnl_calculator,
             scheduler=scheduler,
+            log_level=log_level,
         )
         # Run the simulation
         results = simulator.simulate()
-        logging.info(f"Simulation results with SimulatedPriceModel: \n{results}")
+        logger.debug(f"Simulation results with SimulatedPriceModel: \n{results}")
         return results
 
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return None
 
 

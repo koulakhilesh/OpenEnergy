@@ -1,4 +1,5 @@
-import logging
+
+from scripts.shared import Logger
 from typing import List
 
 import pyomo.environ as pyo
@@ -7,9 +8,7 @@ from scripts.assets import Battery
 
 from .interfaces import IModelBuilder, IModelDefiner, IModelSolver
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+from scripts.shared import Logger
 
 
 class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
@@ -129,30 +128,32 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
 
 
 class GLPKOptimizationSolver(IModelSolver):
+    def __init__(self, log_level: int = Logger.INFO):
+        self.logger = Logger(log_level)
+    
     def solve(self, model: pyo.ConcreteModel, tee: bool = False):
         solver = pyo.SolverFactory("glpk")
-        # TODO check here
         result = solver.solve(model, tee=tee)
 
         # Check and log the solver's termination condition and status
         match result.solver.termination_condition:
             case pyo.TerminationCondition.optimal if result.solver.status == pyo.SolverStatus.ok:
-                logging.info("Solution is optimal.")
+                self.logger.debug("Solution is optimal.")
             case (
                 pyo.TerminationCondition.infeasible
                 | pyo.TerminationCondition.infeasibleOrUnbounded
             ):
-                logging.warning("Solution is infeasible. Review model constraints.")
+                self.logger.warning("Solution is infeasible. Review model constraints.")
             case pyo.TerminationCondition.unbounded:
-                logging.warning(
+                self.logger.warning(
                     "Solution is unbounded. Review model objective and constraints."
                 )
             case pyo.TerminationCondition.maxIterations:
-                logging.warning(
+                self.logger.warning(
                     "Maximum iterations reached. Solution may not be optimal."
                 )
             case _:
-                logging.error(
+                self.logger.error(
                     f"Unexpected solver status encountered: {result.solver.status}, {result.solver.termination_condition}"
                 )
 

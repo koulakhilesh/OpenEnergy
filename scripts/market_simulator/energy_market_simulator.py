@@ -8,6 +8,7 @@ from scripts.optimizer import BatteryOptimizationScheduler
 from scripts.prices import IPriceData
 
 from .pnl_calculator import PnLCalculator
+from scripts.shared import Logger
 
 
 class EnergyMarketSimulator:
@@ -19,7 +20,10 @@ class EnergyMarketSimulator:
         price_model: IPriceData,
         pnl_calculator: PnLCalculator,
         scheduler: BatteryOptimizationScheduler,
-    ):
+        log_level: int = Logger.INFO,
+
+    ):  
+        self.logger = Logger(log_level)
         assert end_date >= start_date, "End date must be after start date."
         self.start_date = start_date
         self.end_date = end_date
@@ -60,6 +64,6 @@ class EnergyMarketSimulator:
             )
             total_pnl += daily_pnl
             results.append((current_date, schedule_df, daily_pnl))
-
-        print(f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}")
+        print(total_pnl)
+        self.logger.info(f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}")
         return results
