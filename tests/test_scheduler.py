@@ -7,13 +7,14 @@ import pyomo.environ as pyo
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.battery import Battery  # noqa: E402
-from scripts.scheduler import (
+from scripts.assets.battery import Battery  # noqa: E402
+from scripts.optimizer import (
     BatteryOptimizationScheduler,
     GLPKOptimizationSolver,
     PyomoModelExtractor,
     PyomoOptimizationModelBuilder,
 )
+from scripts.shared import Logger
 
 
 def test_define_time_intervals():
@@ -207,11 +208,11 @@ def test_solve_logs_correct_message(status, termination_condition, expected_log)
     result.solver.status = status
     result.solver.termination_condition = termination_condition
 
-    with mock.patch("pyomo.environ.SolverFactory") as mock_solver_factory, mock.patch(
-        "logging.info"
-    ) as mock_info, mock.patch("logging.warning") as mock_warning, mock.patch(
-        "logging.error"
-    ) as mock_error:
+    with mock.patch.object(Logger, "debug") as mock_info, mock.patch.object(
+        Logger, "warning"
+    ) as mock_warning, mock.patch.object(Logger, "error") as mock_error, mock.patch(
+        "pyomo.environ.SolverFactory"
+    ) as mock_solver_factory:
         mock_solver_factory.return_value.solve.return_value = result
 
         # Act
@@ -326,6 +327,31 @@ def test_create_schedule_raises_exception_on_failed_optimization():
     with pytest.raises(
         Exception,
         match="Optimization failed with status: warning, condition: infeasible",
+    ):
+        scheduler.create_schedule(prices)
+
+
+def test_create_schedule_raises_exception_on_empty_prices():
+    # Arrange
+    battery = Battery(
+        capacity_mwh=1.0,
+        charge_efficiency=0.9,
+        discharge_efficiency=0.9,
+        initial_soc=0.5,
+    )
+    model_builder = mock.Mock()
+    solver = mock.Mock()
+    model_extractor = mock.Mock()
+    scheduler = BatteryOptimizationScheduler(
+        battery, model_builder, solver, model_extractor
+    )
+
+    prices = []
+
+    # Act and Assert
+    with pytest.raises(
+        Exception,
+        match="Optimization failed with status",
     ):
         scheduler.create_schedule(prices)
 

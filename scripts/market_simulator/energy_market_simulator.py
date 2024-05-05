@@ -3,34 +3,12 @@ from datetime import date, timedelta
 import pandas as pd
 from tqdm import tqdm
 
-from scripts.battery import Battery
+from scripts.assets import Battery
+from scripts.optimizer import BatteryOptimizationScheduler
 from scripts.prices import IPriceData
-from scripts.scheduler import BatteryOptimizationScheduler
+from scripts.shared import Logger
 
-
-class PnLCalculator:
-    def __init__(self, battery: Battery):
-        self.battery = battery
-
-    def calculate(
-        self,
-        schedule_df: pd.DataFrame,
-        actual_prices: list,
-        timestep_hours: float = 1.0,
-    ) -> float:
-        pnl = 0
-        for i in range(len(actual_prices)):
-            charge_value = schedule_df.at[i, "Charge"]
-            discharge_value = schedule_df.at[i, "Discharge"]
-            action = "charge" if charge_value > 0 else "discharge"
-            value = charge_value if charge_value > 0 else discharge_value
-            price = actual_prices[i] * timestep_hours
-
-            if action == "charge":
-                pnl -= value * price / self.battery.charge_efficiency
-            elif action == "discharge":
-                pnl += value * price * self.battery.discharge_efficiency
-        return pnl
+from .pnl_calculator import PnLCalculator
 
 
 class EnergyMarketSimulator:
@@ -42,7 +20,9 @@ class EnergyMarketSimulator:
         price_model: IPriceData,
         pnl_calculator: PnLCalculator,
         scheduler: BatteryOptimizationScheduler,
+        log_level: int = Logger.INFO,
     ):
+        self.logger = Logger(log_level)
         assert end_date >= start_date, "End date must be after start date."
         self.start_date = start_date
         self.end_date = end_date
@@ -59,9 +39,12 @@ class EnergyMarketSimulator:
                 self.battery.charge(charge_value)
             elif discharge_value > 0:
                 self.battery.discharge(discharge_value)
+            elif charge_value == 0.0 and discharge_value == 0.0:
+                self.battery.charge(charge_value)
 
     def run_daily_operation(self, prices: list, actual_prices: list) -> tuple:
         schedule_df = self.scheduler.create_schedule(prices)
+        self.logger.debug(f"Schedule for {self.start_date}: {schedule_df}")
         self.process_daily_schedule(schedule_df)
         pnl = self.pnl_calculator.calculate(schedule_df, actual_prices)
         return schedule_df, pnl
@@ -71,7 +54,9 @@ class EnergyMarketSimulator:
         results = []
 
         for current_day in tqdm(
-            range((self.end_date - self.start_date).days + 1), desc="Processing Days"
+            range((self.end_date - self.start_date).days + 1),
+            desc="Processing Days",
+            dynamic_ncols=True,
         ):
             current_date = self.start_date + timedelta(days=current_day)
             envelope_prices, noisy_prices = self.price_model.get_prices(
@@ -83,6 +68,7 @@ class EnergyMarketSimulator:
             )
             total_pnl += daily_pnl
             results.append((current_date, schedule_df, daily_pnl))
-
-        print(f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}")
+        self.logger.info(
+            f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}"
+        )
         return results

@@ -7,13 +7,10 @@ import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 
-from scripts.battery import Battery  # noqa: E402
-from scripts.energy_market_simulator import (  # noqa: E402
-    EnergyMarketSimulator,
-    PnLCalculator,
-)
-from scripts.prices import IPriceData  # noqa: E402
-from scripts.scheduler import BatteryOptimizationScheduler  # noqa: E402
+from scripts.assets.battery import Battery
+from scripts.market_simulator import EnergyMarketSimulator, PnLCalculator
+from scripts.optimizer.scheduler import BatteryOptimizationScheduler
+from scripts.prices.interfaces import IPriceData
 
 
 @pytest.fixture
@@ -63,7 +60,7 @@ class MockScheduler(BatteryOptimizationScheduler):
         super().__init__(battery, model_builder, solver, model_extractor)
 
     def create_schedule(self, prices):
-        data = {"Charge": [10, 0, 0, 20], "Discharge": [0, 15, 0, 0]}
+        data = {"Charge": [10, 0, 0, 0], "Discharge": [0, 15, 5, 0]}
         return pd.DataFrame(data)
 
 
