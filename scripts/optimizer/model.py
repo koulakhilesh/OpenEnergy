@@ -1,21 +1,18 @@
-
-from scripts.shared import Logger
-from typing import List
+import typing as t
 
 import pyomo.environ as pyo
 
 from scripts.assets import Battery
+from scripts.shared import Logger
 
 from .interfaces import IModelBuilder, IModelDefiner, IModelSolver
-
-from scripts.shared import Logger
 
 
 class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
     def build_model(
         self,
         num_intervals: int,
-        prices: List[float],
+        prices: t.List[float],
         battery: Battery,
         timestep_hours: float,
         max_cycles: float,
@@ -130,7 +127,7 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
 class GLPKOptimizationSolver(IModelSolver):
     def __init__(self, log_level: int = Logger.INFO):
         self.logger = Logger(log_level)
-    
+
     def solve(self, model: pyo.ConcreteModel, tee: bool = False):
         solver = pyo.SolverFactory("glpk")
         result = solver.solve(model, tee=tee)

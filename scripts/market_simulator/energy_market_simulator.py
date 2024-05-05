@@ -6,9 +6,9 @@ from tqdm import tqdm
 from scripts.assets import Battery
 from scripts.optimizer import BatteryOptimizationScheduler
 from scripts.prices import IPriceData
+from scripts.shared import Logger
 
 from .pnl_calculator import PnLCalculator
-from scripts.shared import Logger
 
 
 class EnergyMarketSimulator:
@@ -21,8 +21,7 @@ class EnergyMarketSimulator:
         pnl_calculator: PnLCalculator,
         scheduler: BatteryOptimizationScheduler,
         log_level: int = Logger.INFO,
-
-    ):  
+    ):
         self.logger = Logger(log_level)
         assert end_date >= start_date, "End date must be after start date."
         self.start_date = start_date
@@ -53,7 +52,9 @@ class EnergyMarketSimulator:
         results = []
 
         for current_day in tqdm(
-            range((self.end_date - self.start_date).days + 1), desc="Processing Days", dynamic_ncols=True
+            range((self.end_date - self.start_date).days + 1),
+            desc="Processing Days",
+            dynamic_ncols=True,
         ):
             current_date = self.start_date + timedelta(days=current_day)
             envelope_prices, noisy_prices = self.price_model.get_prices(
@@ -65,5 +66,7 @@ class EnergyMarketSimulator:
             )
             total_pnl += daily_pnl
             results.append((current_date, schedule_df, daily_pnl))
-        self.logger.info(f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}")
+        self.logger.info(
+            f"Total P&L from {self.start_date} to {self.end_date}: {total_pnl}"
+        )
         return results

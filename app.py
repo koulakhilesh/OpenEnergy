@@ -1,5 +1,4 @@
 import argparse
-from scripts.shared import Logger
 import os
 from datetime import datetime
 
@@ -18,6 +17,7 @@ from scripts.prices import (
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,
 )
+from scripts.shared import Logger
 
 
 def create_dependencies(args):
@@ -79,7 +79,6 @@ def main():
     args = parser.parse_args()
     log_level = getattr(Logger, args.log_level.upper(), Logger.INFO)
     logger = Logger(log_level)
-
 
     try:
         (

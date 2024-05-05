@@ -1,5 +1,5 @@
+import typing as t
 from abc import ABC, abstractmethod
-from typing import List
 
 import pandas as pd
 import pyomo.environ as pyo
@@ -12,7 +12,7 @@ class IModelBuilder(ABC):
     def build_model(
         self,
         num_intervals: int,
-        prices: List[float],
+        prices: t.List[float],
         battery: Battery,
         timestep_hours: float,
         max_cycles: float,
@@ -57,6 +57,6 @@ class IModelDefiner(ABC):
 class IScheduler(ABC):
     @abstractmethod
     def create_schedule(
-        self, prices: List[float], timestep_hours: float, max_cycles: float, tee: bool
+        self, prices: t.List[float], timestep_hours: float, max_cycles: float, tee: bool
     ) -> pd.DataFrame:
         pass

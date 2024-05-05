@@ -1,4 +1,4 @@
-from typing import List
+import typing as t
 
 import pandas as pd
 import pyomo.environ as pyo
@@ -39,7 +39,7 @@ class BatteryOptimizationScheduler(IScheduler):
 
     def create_schedule(
         self,
-        prices: List[float],
+        prices: t.List[float],
         timestep_hours: float = 1.0,
         max_cycles: float = 5.0,
         tee: bool = False,
