@@ -1,5 +1,6 @@
 import logging
 
+
 class Logger:
     DEBUG = logging.DEBUG
     INFO = logging.INFO
