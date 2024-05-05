@@ -35,10 +35,12 @@ class EnergyMarketSimulator:
         for _, row in schedule_df.iterrows():
             charge_value = row["Charge"]
             discharge_value = row["Discharge"]
-            if charge_value >= 0:
+            if charge_value > 0:
                 self.battery.charge(charge_value)
             elif discharge_value > 0:
                 self.battery.discharge(discharge_value)
+            elif charge_value == 0.0 and discharge_value == 0.0:
+                self.battery.charge(charge_value)
 
     def run_daily_operation(self, prices: list, actual_prices: list) -> tuple:
         schedule_df = self.scheduler.create_schedule(prices)

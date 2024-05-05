@@ -19,9 +19,6 @@ class Logger:
 
             self.logger.addHandler(handler)
 
-    def __call__(self):
-        return self.logger
-
     def debug(self, msg):
         self.logger.debug(msg)
 

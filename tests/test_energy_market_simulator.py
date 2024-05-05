@@ -60,7 +60,7 @@ class MockScheduler(BatteryOptimizationScheduler):
         super().__init__(battery, model_builder, solver, model_extractor)
 
     def create_schedule(self, prices):
-        data = {"Charge": [10, 0, 0, 20], "Discharge": [0, 15, 0, 0]}
+        data = {"Charge": [10, 0, 0, 0], "Discharge": [0, 15, 5, 0]}
         return pd.DataFrame(data)
 
 
