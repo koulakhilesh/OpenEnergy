@@ -7,7 +7,6 @@ class PnLCalculator:
     def __init__(self, battery: Battery):
         self.battery = battery
 
-
     def calculate(
         self,
         schedule_df: pd.DataFrame,
