@@ -7,6 +7,7 @@ class PnLCalculator:
     def __init__(self, battery: Battery):
         self.battery = battery
 
+
     def calculate(
         self,
         schedule_df: pd.DataFrame,
@@ -17,12 +18,12 @@ class PnLCalculator:
         for i in range(len(actual_prices)):
             charge_value = schedule_df.at[i, "Charge"]
             discharge_value = schedule_df.at[i, "Discharge"]
-            action = "charge" if charge_value > 0 else "discharge"
-            value = charge_value if charge_value > 0 else discharge_value
             price = actual_prices[i] * timestep_hours
 
-            if action == "charge":
-                pnl -= value * price / self.battery.charge_efficiency
-            elif action == "discharge":
-                pnl += value * price * self.battery.discharge_efficiency
+            if charge_value > 0:
+                pnl -= charge_value * price / self.battery.charge_efficiency
+            elif discharge_value > 0:
+                pnl += discharge_value * price * self.battery.discharge_efficiency
+            else:
+                continue  # Skip this iteration if both charge_value and discharge_value are zero
         return pnl
