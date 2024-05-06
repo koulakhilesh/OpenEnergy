@@ -59,7 +59,7 @@ def create_dependencies(args):
     return start_date, end_date, battery, price_model, pnl_calculator, scheduler
 
 
-def main():
+def main(args=None):
     # Parse command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--battery_capacity", type=float, default=1.0)
@@ -76,7 +76,12 @@ def main():
         ),
     )
     parser.add_argument("--log_level", type=str, default="INFO")
-    args = parser.parse_args()
+
+    if args is None:
+        args = parser.parse_args()
+    else:
+        args = parser.parse_args(args)
+
     log_level = getattr(Logger, args.log_level.upper(), Logger.INFO)
     logger = Logger(log_level)
 
