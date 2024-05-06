@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulation Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 600px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+            flex: 1 0 30%;
+        }
+        .input-group label {
+            margin-bottom: 5px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            flex-basis: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Energy Market Simulator</h1>
+    </div>    
+    <form id="simulationForm" action="/simulate" method="get">
+        <div class="input-group">
+            <label for="battery_capacity">Battery Capacity</label>
+            <input type="number" id="battery_capacity" name="battery_capacity" value="1.0" step="0.1">
+        </div>
+        <div class="input-group">
+            <label for="charge_efficiency">Charge Efficiency</label>
+            <input type="number" id="charge_efficiency" name="charge_efficiency" value="0.9" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="discharge_efficiency">Discharge Efficiency</label>
+            <input type="number" id="discharge_efficiency" name="discharge_efficiency" value="0.9" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="start_date">Start Date</label>
+            <input type="date" id="start_date" name="start_date" value="2015-02-01">
+        </div>
+        <div class="input-group">
+            <label for="end_date">End Date</label>
+            <input type="date" id="end_date" name="end_date" value="2015-02-02">
+        </div>
+        <div class="input-group">
+            <label for="price_model">Price Model</label>
+            <select id="price_model" name="price_model">
+                <option value="SimulatedPriceModel">SimulatedPriceModel</option>
+                <option value="HistoricalPriceModel">HistoricalPriceModel</option>
+            </select>
+        </div>
+        <button type="simulate">Simulate</button>
+    </form>
+</body>
+</html>

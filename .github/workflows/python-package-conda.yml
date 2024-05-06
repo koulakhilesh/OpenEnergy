@@ -1,4 +1,4 @@
-name: Test, Lint, and Deploy
+name: Python Package using Conda
 
 on: [push]
 
@@ -52,16 +52,3 @@ jobs:
       - name: Running mypy
         run: |
           mypy scripts/ app.py main.py
-
-  deploy:
-    needs: build-linux
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install Vercel CLI
-        run: npm i -g vercel
-
-      - name: Deploy to Vercel
-        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --prod

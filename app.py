@@ -1,18 +1,23 @@
 import os
 
 from flasgger import Swagger
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 
-from main import create_app
+from main import run_simulation
 
 app = Flask(__name__)
 swagger = Swagger(app)
 
 
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
 @app.route("/simulate", methods=["GET"])
 def simulate():
     """
-    This is the API documentation for the simulate endpoint.
+    This is the API documentation for the simulate endpoint as /apidocs/
     ---
     parameters:
       - name: battery_capacity
@@ -92,7 +97,7 @@ def simulate():
         request.args.get("log_level", default="INFO", type=str),
     ]
 
-    result = create_app(args)
+    result = run_simulation(args)
     if result is None:
         return jsonify({"error": "An error occurred during the simulation."}), 500
     else:
