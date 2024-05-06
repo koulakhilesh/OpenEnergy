@@ -8,9 +8,8 @@ The optimization problem is formulated as a linear programming problem. The obje
 
 The mathematical formulation of the objective function is:
 
-```latex
-\max \sum_{t \in T} \left( \frac{{\text{{discharge\_vars}}[t] \times \text{{prices}}[t] \times \text{{discharge\_efficiency}}}}{{\text{{timestep\_hours}}}} - \frac{{\text{{charge\_vars}}[t] \times \text{{prices}}[t]}}{{\text{{charge\_efficiency}} \times \text{{timestep\_hours}}}} \right)
-```
+$$\max \sum_{t \in T} \left( \frac{{\text{{discharge\_vars}}[t] \times \text{{prices}}[t] \times \text{{discharge\_efficiency}}}}{{\text{{timestep\_hours}}}} - \frac{{\text{{charge\_vars}}[t] \times \text{{prices}}[t]}}{{\text{{charge\_efficiency}} \times \text{{timestep\_hours}}}} \right)
+$$
 
 where:
 - `T` is the set of time intervals.
@@ -25,21 +24,18 @@ The model also includes several constraints:
 
 1. The sum of the charge and discharge variables at each time interval must not exceed the battery capacity:
 
-```latex
-\text{{charge\_vars}}[t] + \text{{discharge\_vars}}[t] \leq \text{{battery\_capacity}}
-```
+$$\text{{charge\_vars}}[t] + \text{{discharge\_vars}}[t] \leq \text{{battery\_capacity}}
+$$
 
 2. The state of charge (SOC) at each time interval is updated based on the charge and discharge variables:
 
-```latex
-\text{{soc\_vars}}[t] = \text{{soc\_vars}}[t - 1] + \frac{{\text{{charge\_vars}}[t - 1] \times \text{{charge\_efficiency}}}}{{\text{{battery\_capacity}}}} - \frac{{\text{{discharge\_vars}}[t - 1]}}{{\text{{discharge\_efficiency}} \times \text{{battery\_capacity}}}}
-```
+$$\text{{soc\_vars}}[t] = \text{{soc\_vars}}[t - 1] + \frac{{\text{{charge\_vars}}[t - 1] \times \text{{charge\_efficiency}}}}{{\text{{battery\_capacity}}}} - \frac{{\text{{discharge\_vars}}[t - 1]}}{{\text{{discharge\_efficiency}} \times \text{{battery\_capacity}}}}
+$$
 
 3. The total energy cycled through the battery must not exceed a given maximum:
 
-```latex
-\text{{energy\_cycled\_vars}}[\text{{num\_intervals}} - 1] \leq \text{{max\_cycles}} \times \text{{battery\_capacity}} \times 2
-```
+$$\text{{energy\_cycled\_vars}}[\text{{num\_intervals}} - 1] \leq \text{{max\_cycles}} \times \text{{battery\_capacity}} \times 2
+$$
 
 ## Classes
 

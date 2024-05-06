@@ -14,9 +14,8 @@ The code defines two main classes:
 
 The P&L is calculated as follows:
 
-```latex
-\text{{pnl}} = \sum_{i=0}^{n} \left( \text{{value}} \times \text{{price}} \times \text{{efficiency}} \right)
-```
+$$\text{{pnl}} = \sum_{i=0}^{n} \left( \text{{value}} \times \text{{price}} \times \text{{efficiency}} \right)
+$$
 
 where:
 - `n` is the number of time intervals.
