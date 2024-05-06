@@ -32,16 +32,17 @@ class TemperatureEfficiencyAdjuster(EfficiencyAdjuster):
 
 The temperature effect is calculated as:
 
-```latex
+$$
 \text{{temp\_effect}} = | \text{{temperature\_c}} - 25 | * 0.01
-```
+$$
 
 The new charge and discharge efficiencies are calculated as:
 
-```latex
+$$
 \text{{new\_charge\_efficiency}} = \max(0.5, \min(\text{{charge\_efficiency}} - \text{{temp\_effect}}, 1.0))
+\\
 \text{{new\_discharge\_efficiency}} = \max(0.5, \min(\text{{discharge\_efficiency}} - \text{{temp\_effect}}, 1.0))
-```
+$$
 
 ### SOHCalculator
 
@@ -69,15 +70,15 @@ class BasicSOHCalculator(SOHCalculator):
 
 The degradation rate is calculated as:
 
-```latex
+$$
 \text{{degradation\_rate}} = \text{{base\_degradation}} * \text{{energy\_cycled\_mwh}} * \text{{dod\_factor}}
-```
+$$
 
 The new SOH is calculated as:
 
-```latex
+$$
 \text{{new\_soh}} = \text{{soh}} * (1 - \text{{degradation\_rate}})
-```
+$$
 
 ### Battery
 
@@ -99,21 +100,21 @@ class Battery:
 
 The `charge` and `discharge` methods adjust the battery's state of charge (SOC) based on the energy input/output and the charge/discharge efficiency. The SOC is calculated as:
 
-```latex
+$$
 \text{{new\_soc}} = \min(\text{{soc}} + \frac{{\text{{actual\_energy\_mwh}}}}{{\text{{capacity\_mwh}}}}, 1.0) \quad \text{{for charging}}
+\\
 \text{{new\_soc}} = \max(\text{{soc}} - \frac{{\text{{actual\_energy\_mwh}}}}{{\text{{capacity\_mwh}}}}, 0.0) \quad \text{{for discharging}}
-```
+$$
 
 The `update_soh_and_cycles` method updates the energy cycled and the SOH, and checks and updates the cycles. The DOD is calculated as:
 
-```latex
+$$
 \text{{dod}} = 1.0 - \text{{soc}}
-```
+$$
 
 The cycles are calculated as:
 
-```latex
-\text{{cycles}} = \frac{{\text{{energy\_cycled\_mwh}}}}{{2 * \text{{capacity\_mwh}}}}
-```
+$$\text{{cycles}} = \frac{{\text{{energy\_cycled\_mwh}}}}{{2 * \text{{capacity\_mwh}}}}
+$$
 
 The `check_and_update_cycles` method updates the cycle count and the last cycle SOC.

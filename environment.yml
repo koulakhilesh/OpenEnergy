@@ -20,4 +20,6 @@ dependencies:
   - pandas-stubs
   - conda-forge::coverage
   - conda-forge::isort
+  - anaconda::flask
+  - flasgger
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy

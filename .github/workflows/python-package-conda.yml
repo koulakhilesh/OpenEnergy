@@ -45,6 +45,7 @@ jobs:
       run: |
         ruff check scripts/
         ruff check app.py
+        ruff check server.py
 
     - name: Running Pytest
       run: | 
