@@ -1,7 +1,5 @@
 name: OpenEnergy
 channels:
-  - conda-forge
-  - anaconda
   - defaults
 dependencies:
   - python==3.10.13
@@ -20,4 +18,6 @@ dependencies:
   - pandas-stubs
   - conda-forge::coverage
   - conda-forge::isort
+  - anaconda::flask
+  - flasgger
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
