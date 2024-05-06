@@ -1,60 +1,70 @@
 import os
 import sys
-from unittest.mock import patch
 
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from app import main  # noqa: E402
+
+from app import app
 
 
-def test_app_default_args():
-    # Test with default arguments
-    results = main()
-    assert results is not None
+@pytest.fixture
+def client():
+    app.config["TESTING"] = True
+    with app.test_client() as client:
+        yield client
 
 
-def test_app_custom_battery_params():
-    # Test with different battery parameters
-    args = [
-        "app.py",
-        "--battery_capacity",
-        "2.0",
-        "--charge_efficiency",
-        "0.8",
-        "--discharge_efficiency",
-        "0.8",
-    ]
-    with patch.object(sys, "argv", args):
-        results = main()
-    assert results is not None
-
-
-def test_app_custom_dates():
-    # Test with different start and end dates
-    args = ["app.py", "--start_date", "2021-01-01", "--end_date", "2021-01-02"]
-    with patch.object(sys, "argv", args):
-        results = main()
-    assert results is not None
-
-
-def test_app_price_model_selection(create_test_csv):
-    # Test with different price models
-    for price_model in ["SimulatedPriceModel", "HistoricalPriceModel"]:
-        args = ["app.py", "--price_model", price_model]
-        with patch.object(sys, "argv", args):
-            results = main()
-        assert results is not None
-
-
-def test_main_exception_handling():
-    # Mock the create_dependencies function to raise an exception
-    with patch("app.create_dependencies", side_effect=Exception("Test exception")):
-        # Call the main function
-        result = main()
-
-        # Check if the main function returned None
-        assert result is None
+@pytest.mark.parametrize(
+    "query_params, expected_status",
+    [
+        # Test the endpoint with valid arguments
+        (
+            {
+                "battery_capacity": 10.0,
+                "charge_efficiency": 0.9,
+                "discharge_efficiency": 0.9,
+                "start_date": "2015-02-01",
+                "end_date": "2015-02-02",
+                "price_model": "SimulatedPriceModel",
+                "csv_path": "data/time_series/time_series_60min_singleindex_filtered.csv",
+                "log_level": "INFO",
+            },
+            200,
+        ),
+        # Test the endpoint with missing arguments
+        (
+            {
+                "charge_efficiency": 0.9,
+                "discharge_efficiency": 0.9,
+                "start_date": "2015-02-01",
+                "end_date": "2015-02-02",
+                "price_model": "SimulatedPriceModel",
+                "csv_path": "data/time_series/time_series_60min_singleindex_filtered.csv",
+                "log_level": "INFO",
+            },
+            200,
+        ),
+        # Test the endpoint when the simulation fails
+        (
+            {
+                "battery_capacity": 1.0,
+                "charge_efficiency": 0.9,
+                "discharge_efficiency": 0.9,
+                "start_date": "invalid_date",
+                "end_date": "2015-02-02",
+                "price_model": "SimulatedPriceModel",
+                "csv_path": "data/time_series/time_series_60min_singleindex_filtered.csv",
+                "log_level": "INFO",
+            },
+            500,
+        ),
+    ],
+)
+def test_simulate_endpoint(client, query_params, expected_status):
+    # Test the endpoint with the provided query parameters
+    response = client.get("/simulate", query_string=query_params)
+    assert response.status_code == expected_status
 
 
 if __name__ == "__main__":
