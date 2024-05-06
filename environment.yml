@@ -1,5 +1,7 @@
 name: OpenEnergy
 channels:
+  - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - python==3.10.13
