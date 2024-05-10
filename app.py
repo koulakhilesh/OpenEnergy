@@ -1,17 +1,13 @@
 import os
 
 from flasgger import Swagger
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
 
 from main import run_simulation
 
 app = Flask(__name__)
 swagger = Swagger(app)
 
-
-@app.route("/")
-def home():
-    return render_template("index.html")
 
 
 @app.route("/simulate", methods=["GET"])
