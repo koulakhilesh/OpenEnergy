@@ -91,13 +91,14 @@ These tools collectively enable efficient data handling, optimization problem so
 - [x] Basic simulation capabilities for energy markets and battery operations
 - [x] Modeling for battery degradation and state of health (SOH)
 - [x] Better Price models
+- [ ] Forecasting capability
 - [ ] Implementation of the Application Interface
-- [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
-- [ ] Support for custom scenario creation and testing
 - [ ] Development of a graphical user interface (GUI) for easier interaction
+- [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
+- [ ] Enable Stochastic Programming for Optimizer
 - [ ] Expansion of data visualization features for analysis insights
 - [ ] Integration with real-world energy market data sources
-- [ ] Forecasting capability
+
 
 See the [open issues](https://github.com/koulakhilesh/OpenEnergy/issues) for a full list of proposed features (and known issues).
 
