@@ -9,7 +9,6 @@ app = Flask(__name__)
 swagger = Swagger(app)
 
 
-
 @app.route("/simulate", methods=["GET"])
 def simulate():
     """
