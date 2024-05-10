@@ -9,15 +9,18 @@ dependencies:
   - numpy
   - pandas
   - mypy
-  - conda-forge::matplotlib
+  - matplotlib==3.8.4
   - anaconda::seaborn
   - pyomo
   - glpk
   - ipopt
-  - conda-forge::pytz
+  - pytz==2024.1
   - pandas-stubs
   - conda-forge::coverage
   - conda-forge::isort
-  - anaconda::flask
+  - flask==2.2.5
   - conda-forge::flasgger
+  - ipywidgets==8.1.2
+  - requests==2.31.0
+  - conda-forge::chardet
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
