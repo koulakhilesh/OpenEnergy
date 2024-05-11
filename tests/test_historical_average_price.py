@@ -18,7 +18,7 @@ def test_csv_data_provider(create_test_csv):
     expected_data = pd.DataFrame(
         {
             "utc_timestamp": pd.date_range(
-                start="2021-12-31T00:00:00Z", periods=24 * 8, freq="H"
+                start="2021-12-31T00:00:00Z", periods=24 * 8, freq="h"
             ),
             "GB_GBN_price_day_ahead": range(24 * 8),
         }
