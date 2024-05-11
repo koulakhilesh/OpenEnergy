@@ -23,4 +23,6 @@ dependencies:
   - ipywidgets==8.1.2
   - requests==2.31.0
   - conda-forge::chardet
+  - plotly::plotly
+  - anaconda::nbformat
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
