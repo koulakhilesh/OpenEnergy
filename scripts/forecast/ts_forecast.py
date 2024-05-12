@@ -7,6 +7,7 @@ import pickle
 
 from sklearn.base import clone
 
+
 class TimeSeriesForecaster:
     def __init__(self, model=LinearRegression(), history_length=7*24, forecast_length=24):
         self.history_length = history_length
