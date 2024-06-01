@@ -12,9 +12,6 @@ from tqdm.auto import tqdm
 from abc import ABC, abstractmethod
 
 class IForecaster(ABC):
-    @abstractmethod
-    def preprocess_data(self, df):
-        pass
 
     @abstractmethod
     def train(self, df):
@@ -51,16 +48,21 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
 
         return self
 
-class FeatureEngineer:
+
+class IFeatureEngineer(ABC):
+    @abstractmethod
     def transform(self, df):
+        pass
+class FeatureEngineer(IFeatureEngineer):
+    def transform(self, df, column_name='value'):
         df = df.copy()
         df['hour'] = df.index.hour
         df['day_of_week'] = df.index.dayofweek
-        df['rolling_mean'] = df['value'].rolling(window=24).mean()
-        df['rolling_min'] = df['value'].rolling(window=24).min()
-        df['rolling_max'] = df['value'].rolling(window=24).max()
-        df['rolling_std'] = df['value'].rolling(window=24).std()
-        df['diff_from_mean'] = df['value'] - df['rolling_mean']
+        df['rolling_mean'] = df[column_name].rolling(window=24).mean()
+        df['rolling_min'] = df[column_name].rolling(window=24).min()
+        df['rolling_max'] = df[column_name].rolling(window=24).max()
+        df['rolling_std'] = df[column_name].rolling(window=24).std()
+        df['diff_from_mean'] = df[column_name] - df['rolling_mean']
         return df.dropna()
 
 class TimeSeriesForecaster(IForecaster):
@@ -71,24 +73,24 @@ class TimeSeriesForecaster(IForecaster):
         self.feature_engineer = feature_engineer
         self.validation_mse = None
 
-    def preprocess_data(self, df):
+    def preprocess_data(self, df, column_name):
         assert len(df) >= self.history_length + self.forecast_length, "Input data must be at least history_length + forecast_length"
-        df = self.feature_engineer.transform(df)
+        df = self.feature_engineer.transform(df,column_name=column_name)
         X = np.array([df[i:i+self.history_length].values.ravel() for i in range(len(df)-self.history_length-self.forecast_length+1)])
-        y = np.array([df[i+self.history_length:i+self.history_length+self.forecast_length]['value'] for i in range(len(df)-self.history_length-self.forecast_length+1)])
+        y = np.array([df[i+self.history_length:i+self.history_length+self.forecast_length][column_name] for i in range(len(df)-self.history_length-self.forecast_length+1)])
         return X, y
 
-    def train(self, df):
-        X, y = self.preprocess_data(df)
+    def train(self, df, column_name):
+        X, y = self.preprocess_data(df, column_name)
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
         self.model.fit(X_train, y_train)
         y_pred = self.model.predict(X_val)
         self.validation_mse = mean_squared_error(y_val, y_pred)
         print('Validation MSE:', self.validation_mse)
 
-    def forecast(self, df):
+    def forecast(self, df, column_name):
         assert len(df) >= self.history_length, "Input data must be at least history_length"
-        df = self.feature_engineer.transform(df)
+        df = self.feature_engineer.transform(df,column_name)
         X = df[-self.history_length:].values.ravel().reshape(1, -1)
         return self.model.predict(X)[0]
 
