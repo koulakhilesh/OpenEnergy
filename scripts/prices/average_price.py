@@ -11,7 +11,9 @@ class CSVDataProvider(IDataProvider):
     def __init__(self, csv_file_path: str):
         self.csv_file_path = csv_file_path
 
-    def get_data(self, column_names:list, timestamp_column="utc_timestamp") -> pd.DataFrame:
+    def get_data(
+        self, column_names: list, timestamp_column="utc_timestamp"
+    ) -> pd.DataFrame:
         df = pd.read_csv(
             self.csv_file_path,
             parse_dates=[timestamp_column],
@@ -20,9 +22,6 @@ class CSVDataProvider(IDataProvider):
         df.index.name = None
         return df[column_names]
 
-
-
-  
 
 class HistoricalAveragePriceModel(IPriceData):
     DAYS_IN_WEEK = 7
