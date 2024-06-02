@@ -2,9 +2,7 @@ import os
 import sys
 from datetime import datetime
 
-
 import pytest
-
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 from scripts.prices import HistoricalAveragePriceModel

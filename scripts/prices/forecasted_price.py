@@ -16,6 +16,8 @@ from .interfaces import IPriceData
 
 class ForecastPriceModel(IPriceData, IForecaster):
     DAYS_IN_WEEK_PLUS_1 = 8
+    PRICE_COLUMN = "GB_GBN_price_day_ahead"
+    TIMESTAMP_COLUMN = "utc_timestamp"
 
     def __init__(
         self,
@@ -33,13 +35,11 @@ class ForecastPriceModel(IPriceData, IForecaster):
         )
         self.forecaster = TimeSeriesForecaster(model, data_preprocessor)
         self.data = self.data_provider.get_data(
-            column_names=["GB_GBN_price_day_ahead"], timestamp_column="utc_timestamp"
+            column_names=[self.PRICE_COLUMN], timestamp_column=self.TIMESTAMP_COLUMN
         )
         self.helper = PriceDataHelper()
         if self.interpolate:
-            self.data["GB_GBN_price_day_ahead"].interpolate(
-                method="linear", inplace=True
-            )
+            self.data[self.PRICE_COLUMN].interpolate(method="linear", inplace=True)
 
     def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
         current_date = self.helper.get_current_date(date)
@@ -54,46 +54,16 @@ class ForecastPriceModel(IPriceData, IForecaster):
 
         current_date_data = self.helper.get_current_date_data(current_date, self.data)
         prices_current_date = self.helper.get_prices_current_date(
-            current_date_data, "GB_GBN_price_day_ahead"
+            current_date_data, self.PRICE_COLUMN
         )
 
         return forecasted_prices, prices_current_date
 
-    # def _get_current_date(self, date: datetime.date) -> datetime.datetime:
-    #     return datetime.datetime.combine(date, datetime.time.min).replace(
-    #         tzinfo=pytz.utc
-    #     )
+    def train(self, df):
+        self.forecaster.train(df, column_name=self.PRICE_COLUMN)
 
-    # def _get_week_prior(self, current_date: datetime.datetime) -> datetime.datetime:
-    #     return current_date - datetime.timedelta(days=self.DAYS_IN_WEEK_PLUS_1)
-
-    # def _get_last_week_data(self, current_date, week_prior):
-    #     return self.data[
-    #         (self.data.index >= week_prior) & (self.data.index < current_date)
-    #     ]
-
-    # def _get_current_date_data(self, current_date):
-
-    #     assert isinstance(self.data.index, pd.DatetimeIndex)
-
-    #     current_date_data=self.data[
-    #         (self.data.index.year == current_date.year)
-    #         & (self.data.index.month == current_date.month)
-    #         & (self.data.index.day == current_date.day)
-    #     ]
-    #     assert isinstance(current_date_data, pd.DataFrame)
-    #     return current_date_data
-
-    # def _get_prices_current_date(self, current_date_data):
-    #     prices_current_date = current_date_data["GB_GBN_price_day_ahead"].values
-    #     assert isinstance(prices_current_date, list)
-    #     return prices_current_date
-
-    def train(self, df, column_name="GB_GBN_price_day_ahead"):
-        self.forecaster.train(df, column_name=column_name)
-
-    def forecast(self, df, column_name="GB_GBN_price_day_ahead"):
-        return self.forecaster.forecast(df, column_name=column_name)
+    def forecast(self, df):
+        return self.forecaster.forecast(df, column_name=self.PRICE_COLUMN)
 
     def evaluate(self, y_true, y_pred):
         return self.forecaster.evaluate(y_true, y_pred)
