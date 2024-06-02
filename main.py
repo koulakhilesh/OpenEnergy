@@ -14,13 +14,12 @@ from scripts.optimizer import (
     PyomoOptimizationModelBuilder,
 )
 from scripts.prices import (
-    CSVDataProvider,
     HistoricalAveragePriceModel,
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,
 )
-from scripts.shared import Logger
+from scripts.shared import CSVDataProvider, Logger
 
 
 def create_dependencies(args):

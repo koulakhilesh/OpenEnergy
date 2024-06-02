@@ -1,5 +1,7 @@
 name: OpenEnergy
 channels:
+  - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - python==3.10.13
@@ -25,4 +27,5 @@ dependencies:
   - conda-forge::chardet
   - plotly::plotly
   - anaconda::nbformat
+  - conda-forge::xgboost
 prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
