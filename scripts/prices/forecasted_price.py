@@ -72,5 +72,5 @@ class ForecastPriceModel(IPriceData, IForecaster):
         self.forecaster.save_model(file_path)
 
     @staticmethod
-    def load_model(file_path):
-        return ForecastPriceModel.load_model(file_path)
+    def load_model(file_path) -> IModel:
+        return TimeSeriesForecaster.load_model(file_path)
