@@ -173,7 +173,7 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
             pickle.dump(self.model, f)
 
     @staticmethod
-    def load_model(file_path: str) -> "TimeSeriesForecaster":
+    def load_model(file_path: str) -> IModel:
         try:
             with open(file_path, "rb") as f:
                 return pickle.load(f)
