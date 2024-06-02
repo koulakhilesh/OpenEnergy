@@ -2,7 +2,6 @@ import pickle
 from abc import ABC, abstractmethod
 
 import numpy as np
-import pandas as pd
 from sklearn.base import clone
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -171,12 +170,13 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
 
     def save_model(self, file_path):
         with open(file_path, "wb") as f:
-            pickle.dump(self, f)
+            pickle.dump(self.model, f)
 
     @staticmethod
     def load_model(file_path: str) -> "TimeSeriesForecaster":
         try:
             with open(file_path, "rb") as f:
                 return pickle.load(f)
-        except (FileNotFoundError, pickle.UnpicklingError):
+        except (FileNotFoundError, pickle.UnpicklingError) as e:
             print(f"Failed to load model from {file_path}")
+            raise e
