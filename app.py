@@ -37,13 +37,13 @@ def simulate():
         in: query
         type: string
         required: false
-        default: '2015-02-01'
+        default: '2019-01-01'
         description: The start date of the simulation in the format 'YYYY-MM-DD'.
       - name: end_date
         in: query
         type: string
         required: false
-        default: '2015-02-02'
+        default: '2019-02-01'
         description: The end date of the simulation in the format 'YYYY-MM-DD'.
       - name: price_model
         in: query
@@ -57,6 +57,12 @@ def simulate():
         required: false
         default: 'data/time_series/time_series_60min_singleindex_filtered.csv'
         description: The path to the CSV file with the time series data.
+      - name: price_forecast_model
+        in: query
+        type: string
+        required: false
+        default: 'models/prices/price_forecast_model.pkl'
+        description: The price forecast model to use for the simulation.
       - name: log_level
         in: query
         type: string
@@ -75,9 +81,9 @@ def simulate():
         "--discharge_efficiency",
         str(request.args.get("discharge_efficiency", default=0.9, type=float)),
         "--start_date",
-        request.args.get("start_date", default="2015-02-01", type=str),
+        request.args.get("start_date", default="2019-01-01", type=str),
         "--end_date",
-        request.args.get("end_date", default="2015-02-02", type=str),
+        request.args.get("end_date", default="2019-01-02", type=str),
         "--price_model",
         request.args.get("price_model", default="SimulatedPriceModel", type=str),
         "--csv_path",
@@ -86,6 +92,12 @@ def simulate():
             default=os.path.join(
                 "data", "time_series", "time_series_60min_singleindex_filtered.csv"
             ),
+            type=str,
+        ),
+        "--price_forecast_model",
+        request.args.get(
+            "price_forecast_model",
+            default=os.path.join("models", "prices", "price_forecast_model.pkl"),
             type=str,
         ),
         "--log_level",
