@@ -10,6 +10,14 @@ from .interfaces import IPriceData
 
 
 class HistoricalAveragePriceModel(IPriceData):
+    """
+    Represents a model for calculating historical average prices.
+
+    Args:
+        data_provider (IDataProvider): The data provider used to retrieve price data.
+        interpolate (bool, optional): Whether to interpolate missing values in the data. Defaults to True.
+    """
+
     DAYS_IN_WEEK = 7
     PRICE_COLUMN = "GB_GBN_price_day_ahead"
     TIMESTAMP_COLUMN = "utc_timestamp"
@@ -25,6 +33,16 @@ class HistoricalAveragePriceModel(IPriceData):
             self.data[self.PRICE_COLUMN].interpolate(method="linear", inplace=True)
 
     def get_prices(self, date: datetime.date) -> t.Tuple[t.List[float], t.List[float]]:
+        """
+        Get the average prices for the last week and the prices for the current date.
+
+        Args:
+            date (datetime.date): The current date.
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing the average prices for the last week
+            and the prices for the current date.
+        """
         current_date = self.helper.get_current_date(date)
         week_prior = self.helper.get_week_prior(current_date, self.DAYS_IN_WEEK)
 
@@ -43,6 +61,15 @@ class HistoricalAveragePriceModel(IPriceData):
     def get_average_prices_last_week(
         self, last_week_data: pd.DataFrame
     ) -> t.List[float]:
+        """
+        Calculate the average prices for the last week.
+
+        Args:
+            last_week_data (pd.DataFrame): The price data for the last week.
+
+        Returns:
+            List[float]: A list of average prices for each hour of the day.
+        """
         assert isinstance(last_week_data.index, pd.DatetimeIndex)
 
         return (

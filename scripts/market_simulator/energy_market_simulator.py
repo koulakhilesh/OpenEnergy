@@ -12,6 +12,30 @@ from .pnl_calculator import PnLCalculator
 
 
 class EnergyMarketSimulator:
+    """
+    A class representing an energy market simulator.
+
+    Attributes:
+        start_date (date): The start date of the simulation.
+        end_date (date): The end date of the simulation.
+        battery (Battery): The battery used in the simulation.
+        price_model (IPriceData): The price model used in the simulation.
+        pnl_calculator (PnLCalculator): The P&L calculator used in the simulation.
+        scheduler (BatteryOptimizationScheduler): The battery optimization scheduler used in the simulation.
+        log_level (int, optional): The log level for logging messages. Defaults to Logger.INFO.
+
+    Methods:
+        process_daily_schedule(schedule_df: pd.DataFrame) -> None:
+            Process the daily schedule by charging or discharging the battery based on the schedule.
+
+        run_daily_operation(prices: list, actual_prices: list) -> tuple:
+            Run the daily operation by creating a schedule, processing the schedule, and calculating the P&L.
+
+        simulate() -> list:
+            Simulate the energy market by running daily operations and returning the results.
+
+    """
+
     def __init__(
         self,
         start_date: date,
@@ -31,7 +55,16 @@ class EnergyMarketSimulator:
         self.pnl_calculator = pnl_calculator
         self.scheduler = scheduler
 
-    def process_daily_schedule(self, schedule_df: pd.DataFrame):
+    def process_daily_schedule(self, schedule_df: pd.DataFrame) -> None:
+        """
+        Process the daily schedule by charging or discharging the battery based on the schedule.
+
+        Args:
+            schedule_df (pd.DataFrame): The schedule for the day.
+
+        Returns:
+            None
+        """
         for _, row in schedule_df.iterrows():
             charge_value = row["Charge"]
             discharge_value = row["Discharge"]
@@ -43,6 +76,16 @@ class EnergyMarketSimulator:
                 self.battery.charge(charge_value)
 
     def run_daily_operation(self, prices: list, actual_prices: list) -> tuple:
+        """
+        Run the daily operation by creating a schedule, processing the schedule, and calculating the P&L.
+
+        Args:
+            prices (list): The envelope prices for the day.
+            actual_prices (list): The noisy prices for the day.
+
+        Returns:
+            tuple: A tuple containing the schedule DataFrame and the daily P&L.
+        """
         schedule_df = self.scheduler.create_schedule(prices)
         self.logger.debug(f"Schedule for {self.start_date}: {schedule_df}")
         self.process_daily_schedule(schedule_df)
@@ -50,6 +93,12 @@ class EnergyMarketSimulator:
         return schedule_df, pnl
 
     def simulate(self) -> list:
+        """
+        Simulate the energy market by running daily operations and returning the results.
+
+        Returns:
+            list: A list of tuples containing the date, schedule DataFrame, and daily P&L for each day of the simulation.
+        """
         total_pnl = 0
         results = []
 
