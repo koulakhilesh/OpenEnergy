@@ -6,6 +6,7 @@ from datetime import date, datetime
 import pandas as pd
 
 from scripts.assets import Battery
+from scripts.forecast import FeatureEngineer
 from scripts.market_simulator import EnergyMarketSimulator, PnLCalculator
 from scripts.optimizer import (
     BatteryOptimizationScheduler,
@@ -14,6 +15,7 @@ from scripts.optimizer import (
     PyomoOptimizationModelBuilder,
 )
 from scripts.prices import (
+    ForecastPriceModel,
     HistoricalAveragePriceModel,
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
@@ -22,40 +24,55 @@ from scripts.prices import (
 from scripts.shared import CSVDataProvider, Logger
 
 
-def create_dependencies(args):
-    # Create dependencies for SimulatedPriceModel
+def create_price_model(args):
     if args.price_model == "SimulatedPriceModel":
         envelope_generator = SimulatedPriceEnvelopeGenerator()
         noise_adder = SimulatedPriceNoiseAdder()
-        price_model = SimulatedPriceModel(
+        return SimulatedPriceModel(
             envelope_generator=envelope_generator, noise_adder=noise_adder
         )
 
     elif args.price_model == "HistoricalPriceModel":
         data_provider = CSVDataProvider(args.csv_path)
-        price_model = HistoricalAveragePriceModel(data_provider=data_provider)
+        return HistoricalAveragePriceModel(data_provider=data_provider)
 
-    # Convert dates from strings to date objects
-    start_date = datetime.strptime(args.start_date, "%Y-%m-%d").date()
-    end_date = datetime.strptime(args.end_date, "%Y-%m-%d").date()
+    elif args.price_model == "ForecastedPriceModel":
+        data_provider = CSVDataProvider(args.csv_path)
+        feature_engineer = FeatureEngineer()
+        pretrained_model = ForecastPriceModel.load_model(args.price_forecast_model)
+        return ForecastPriceModel(
+            data_provider=data_provider,
+            feature_engineer=feature_engineer,
+            model=pretrained_model,
+        )
 
-    # Create dependencies for BatteryOptimizationScheduler
-    battery = Battery(
+
+def create_battery(args):
+    return Battery(
         capacity_mwh=args.battery_capacity,
         charge_efficiency=args.charge_efficiency,
         discharge_efficiency=args.discharge_efficiency,
     )
+
+
+def create_scheduler(battery, args):
     model_builder = PyomoOptimizationModelBuilder()
     solver = GLPKOptimizationSolver(args.log_level)
     model_extractor = PyomoModelExtractor()
-    scheduler = BatteryOptimizationScheduler(
+    return BatteryOptimizationScheduler(
         battery=battery,
         model_builder=model_builder,
         solver=solver,
         model_extractor=model_extractor,
     )
 
-    # Create dependencies for EnergyMarketSimulator
+
+def create_dependencies(args):
+    price_model = create_price_model(args)
+    start_date = datetime.strptime(args.start_date, "%Y-%m-%d").date()
+    end_date = datetime.strptime(args.end_date, "%Y-%m-%d").date()
+    battery = create_battery(args)
+    scheduler = create_scheduler(battery, args)
     pnl_calculator = PnLCalculator(battery=battery)
 
     return start_date, end_date, battery, price_model, pnl_calculator, scheduler
@@ -76,6 +93,11 @@ def run_simulation(args=None) -> t.Optional[t.List[t.Tuple[date, pd.DataFrame, f
         default=os.path.join(
             "data", "time_series", "time_series_60min_singleindex_filtered.csv"
         ),
+    )
+    parser.add_argument(
+        "--price_forecast_model",
+        type=str,
+        default=os.path.join("models", "prices", "price_forecast_model.pkl"),
     )
     parser.add_argument("--log_level", type=str, default="INFO")
 
