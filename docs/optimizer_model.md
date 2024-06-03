@@ -26,9 +26,7 @@ This method defines the rule for the objective function. The objective is to max
 
 The objective function is defined as follows:
 
-$$
-\text{{objective}} = \sum_{t \in T} \left( \text{{discharge\_vars}}[t] \times \text{{prices}}[t] \times \text{{discharge\_efficiency}} / \text{{timestep\_hours}} \right) - \left( \text{{charge\_vars}}[t] \times \text{{prices}}[t] / (\text{{charge\_efficiency}} \times \text{{timestep\_hours}}) \right)
-$$
+$$\text{{objective}} = \sum_{t \in T} \left( \text{{discharge\_vars}}[t] \times \text{{prices}}[t] \times \text{{discharge\_efficiency}} / \text{{timestep\_hours}} \right) - \left( \text{{charge\_vars}}[t] \times \text{{prices}}[t] / (\text{{charge\_efficiency}} \times \text{{timestep\_hours}}) \right)$$
 
 #### Method: define_objective_function
 
@@ -40,9 +38,7 @@ This method defines the rule for the charging and discharging constraint. The su
 
 The charging and discharging constraint is defined as follows:
 
-$$
-\text{{charge\_vars}}[t] + \text{{discharge\_vars}}[t] \leq \text{{capacity\_mwh}}
-$$
+$$\text{{charge\_vars}}[t] + \text{{discharge\_vars}}[t] \leq \text{{capacity\_mwh}}$$
 
 #### Method: _soc_update_rule
 
@@ -50,9 +46,7 @@ This method defines the rule for the SOC update constraint. The SOC for each tim
 
 The SOC update constraint is defined as follows:
 
-$$
-\text{{soc\_vars}}[t] = \text{{soc\_vars}}[t - 1] + \left( \text{{charge\_vars}}[t - 1] \times \text{{charge\_efficiency}} / \text{{capacity\_mwh}} \right) - \left( \text{{discharge\_vars}}[t - 1] / (\text{{discharge\_efficiency}} \times \text{{capacity\_mwh}}) \right)
-$$
+$$\text{{soc\_vars}}[t] = \text{{soc\_vars}}[t - 1] + \left( \text{{charge\_vars}}[t - 1] \times \text{{charge\_efficiency}} / \text{{capacity\_mwh}} \right) - \left( \text{{discharge\_vars}}[t - 1] / (\text{{discharge\_efficiency}} \times \text{{capacity\_mwh}}) \right)$$
 
 #### Method: _energy_cycled_update_rule
 
@@ -60,9 +54,7 @@ This method defines the rule for the energy cycled update constraint. The energy
 
 The energy cycled update constraint is defined as follows:
 
-$$
-\text{{energy\_cycled\_vars}}[t] = \text{{energy\_cycled\_vars}}[t - 1] + \text{{charge\_vars}}[t - 1] \times \text{{charge\_efficiency}} + \text{{discharge\_vars}}[t - 1] / \text{{discharge\_efficiency}}
-$$
+$$\text{{energy\_cycled\_vars}}[t] = \text{{energy\_cycled\_vars}}[t - 1] + \text{{charge\_vars}}[t - 1] \times \text{{charge\_efficiency}} + \text{{discharge\_vars}}[t - 1] / \text{{discharge\_efficiency}}$$
 
 #### Method: define_constraints
 
@@ -70,9 +62,7 @@ This method defines the constraints for the model. It defines the initial SOC co
 
 The maximum cycles constraint is defined as follows:
 
-$$
-\text{{energy\_cycled\_vars}}[\text{{num\_intervals}} - 1] \leq \text{{max\_cycles}} \times \text{{capacity\_mwh}} \times 2
-$$
+$$\text{{energy\_cycled\_vars}}[\text{{num\_intervals}} - 1] \leq \text{{max\_cycles}} \times \text{{capacity\_mwh}} \times 2$$
 
 ### 2. GLPKOptimizationSolver
 
