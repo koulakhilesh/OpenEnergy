@@ -1,6 +1,9 @@
 import argparse
 import os
-from datetime import datetime
+import typing as t
+from datetime import date, datetime
+
+import pandas as pd
 
 from scripts.assets import Battery
 from scripts.market_simulator import EnergyMarketSimulator, PnLCalculator
@@ -11,13 +14,12 @@ from scripts.optimizer import (
     PyomoOptimizationModelBuilder,
 )
 from scripts.prices import (
-    CSVDataProvider,
     HistoricalAveragePriceModel,
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,
 )
-from scripts.shared import Logger
+from scripts.shared import CSVDataProvider, Logger
 
 
 def create_dependencies(args):
@@ -59,7 +61,7 @@ def create_dependencies(args):
     return start_date, end_date, battery, price_model, pnl_calculator, scheduler
 
 
-def create_app(args=None):
+def run_simulation(args=None) -> t.Optional[t.List[t.Tuple[date, pd.DataFrame, float]]]:
     # Parse command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--battery_capacity", type=float, default=1.0)
@@ -116,4 +118,4 @@ def create_app(args=None):
 
 
 if __name__ == "__main__":
-    create_app()
+    run_simulation()

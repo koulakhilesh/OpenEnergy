@@ -9,6 +9,8 @@ from .interfaces import IModelBuilder, IModelDefiner, IModelSolver
 
 
 class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
+    """A class that builds a Pyomo optimization model for battery scheduling."""
+
     def build_model(
         self,
         num_intervals: int,
@@ -17,6 +19,19 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
         timestep_hours: float,
         max_cycles: float,
     ) -> pyo.ConcreteModel:
+        """
+        Build the Pyomo optimization model.
+
+        Args:
+            num_intervals (int): The number of time intervals.
+            prices (List[float]): The list of electricity prices for each time interval.
+            battery (Battery): The battery object.
+            timestep_hours (float): The duration of each time interval in hours.
+            max_cycles (float): The maximum number of cycles allowed for the battery.
+
+        Returns:
+            pyo.ConcreteModel: The Pyomo optimization model.
+        """
         self.prices = prices
         self.battery = battery
         self.timestep_hours = timestep_hours
@@ -28,9 +43,22 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
         return model
 
     def define_time_intervals(self, model: pyo.ConcreteModel, num_intervals: int):
+        """
+        Define the time intervals for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+            num_intervals (int): The number of time intervals.
+        """
         model.T = pyo.RangeSet(0, num_intervals - 1)
 
     def define_variables(self, model: pyo.ConcreteModel):
+        """
+        Define the variables for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+        """
         model.charge_vars = pyo.Var(
             model.T,
             within=pyo.NonNegativeReals,
@@ -51,6 +79,15 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
         )
 
     def _objective_rule(self, model: pyo.ConcreteModel):
+        """
+        Define the objective function rule for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+
+        Returns:
+            Expression: The expression representing the objective function.
+        """
         return sum(
             (
                 model.discharge_vars[t]
@@ -67,16 +104,42 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
         )
 
     def define_objective_function(self, model: pyo.ConcreteModel):
+        """
+        Define the objective function for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+        """
         model.objective = pyo.Objective(
             rule=self._objective_rule, sense=pyo.maximize, doc="Objective"
         )
 
     def _charging_discharging_rule(self, model: pyo.ConcreteModel, t: int):
+        """
+        Define the charging and discharging constraint rule for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+            t (int): The time interval.
+
+        Returns:
+            Constraint: The constraint representing the charging and discharging rule.
+        """
         return (
             model.charge_vars[t] + model.discharge_vars[t] <= self.battery.capacity_mwh
         )
 
     def _soc_update_rule(self, model: pyo.ConcreteModel, t: int):
+        """
+        Define the state of charge (SOC) update constraint rule for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+            t (int): The time interval.
+
+        Returns:
+            Constraint: The constraint representing the SOC update rule.
+        """
         if t == 0:
             return pyo.Constraint.Skip
         else:
@@ -91,6 +154,16 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
             )
 
     def _energy_cycled_update_rule(self, model: pyo.ConcreteModel, t: int):
+        """
+        Define the energy cycled update constraint rule for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+            t (int): The time interval.
+
+        Returns:
+            Constraint: The constraint representing the energy cycled update rule.
+        """
         if t == 0:
             return pyo.Constraint.Skip
         else:
@@ -105,6 +178,14 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
     def define_constraints(
         self, model: pyo.ConcreteModel, num_intervals: int, max_cycles: float
     ):
+        """
+        Define the constraints for the optimization model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo optimization model.
+            num_intervals (int): The number of time intervals.
+            max_cycles (float): The maximum number of cycles allowed for the battery.
+        """
         model.initial_soc_constraint = pyo.Constraint(
             expr=model.soc_vars[0] == self.battery.initial_soc, doc="Initial SOC"
         )
@@ -125,10 +206,32 @@ class PyomoOptimizationModelBuilder(IModelBuilder, IModelDefiner):
 
 
 class GLPKOptimizationSolver(IModelSolver):
+    """
+    A solver implementation using the GLPK solver.
+
+    Args:
+        log_level (int): The log level for the solver's logger. Defaults to Logger.INFO.
+
+    Attributes:
+        logger (Logger): The logger instance for logging solver information.
+
+    """
+
     def __init__(self, log_level: int = Logger.INFO):
         self.logger = Logger(log_level)
 
     def solve(self, model: pyo.ConcreteModel, tee: bool = False):
+        """
+        Solves the optimization model using the GLPK solver.
+
+        Args:
+            model (pyo.ConcreteModel): The optimization model to be solved.
+            tee (bool): Whether to display solver output. Defaults to False.
+
+        Returns:
+            The result of the optimization solver.
+
+        """
         solver = pyo.SolverFactory("glpk")
         result = solver.solve(model, tee=tee)
 

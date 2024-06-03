@@ -9,9 +9,32 @@ from .interfaces import IModelBuilder, IModelExtractor, IModelSolver, IScheduler
 
 
 class PyomoModelExtractor(IModelExtractor):
+    """
+    A class that extracts schedule data from a Pyomo model.
+
+    Attributes:
+        None
+
+    Methods:
+        extract_schedule(model: pyo.ConcreteModel, num_intervals: int) -> pd.DataFrame:
+            Extracts schedule data from the given Pyomo model.
+
+    """
+
     def extract_schedule(
         self, model: pyo.ConcreteModel, num_intervals: int
     ) -> pd.DataFrame:
+        """
+        Extracts schedule data from the given Pyomo model.
+
+        Args:
+            model (pyo.ConcreteModel): The Pyomo model from which to extract the schedule data.
+            num_intervals (int): The number of intervals for which to extract the schedule data.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the extracted schedule data.
+
+        """
         schedule_data = [
             {
                 "Interval": i,
@@ -25,6 +48,20 @@ class PyomoModelExtractor(IModelExtractor):
 
 
 class BatteryOptimizationScheduler(IScheduler):
+    """
+    A class that represents a battery optimization scheduler.
+
+    Attributes:
+        battery (Battery): The battery object to be optimized.
+        model_builder (IModelBuilder): The model builder object used to build the optimization model.
+        solver (IModelSolver): The model solver object used to solve the optimization model.
+        model_extractor (IModelExtractor): The model extractor object used to extract the optimized schedule.
+
+    Methods:
+        create_schedule(prices, timestep_hours, max_cycles, tee): Creates an optimized schedule based on the given prices.
+
+    """
+
     def __init__(
         self,
         battery: Battery,
@@ -44,6 +81,22 @@ class BatteryOptimizationScheduler(IScheduler):
         max_cycles: float = 5.0,
         tee: bool = False,
     ) -> pd.DataFrame:
+        """
+        Creates an optimized schedule based on the given prices.
+
+        Args:
+            prices (List[float]): A list of prices for each time interval.
+            timestep_hours (float, optional): The duration of each time interval in hours. Defaults to 1.0.
+            max_cycles (float, optional): The maximum number of charge-discharge cycles allowed for the battery. Defaults to 5.0.
+            tee (bool, optional): Flag indicating whether to print solver output. Defaults to False.
+
+        Returns:
+            pd.DataFrame: A DataFrame representing the optimized schedule.
+
+        Raises:
+            Exception: If the optimization fails with a non-optimal status or condition.
+
+        """
         num_intervals = len(prices)
 
         model = self.model_builder.build_model(
