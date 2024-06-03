@@ -91,11 +91,11 @@ These tools collectively enable efficient data handling, optimization problem so
 - [x] Basic simulation capabilities for energy markets and battery operations
 - [x] Modeling for battery degradation and state of health (SOH)
 - [x] Better Price models
-- [ ] Forecasting capability
-- [ ] Implementation of the Application Interface
-- [ ] Development of a graphical user interface (GUI) for easier interaction
+- [x] Forecasting capability
+- [/] Implementation of the Application Interface
 - [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
 - [ ] Enable Stochastic Programming for Optimizer
+- [ ] Development of a graphical user interface (GUI) for easier interaction
 - [ ] Expansion of data visualization features for analysis insights
 - [ ] Integration with real-world energy market data sources
 
