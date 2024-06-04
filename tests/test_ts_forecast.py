@@ -153,14 +153,17 @@ def test_xgb_model_fit_predict_consistency():
     )
 
     # Fit the XGBModel
-    model = XGBModel()
+    params = {"n_estimators": 10, "max_depth": 3, "random_state": 42}
+    model = XGBModel(params)
     model.fit(X_train, y_train)
 
     # Predict using the XGBModel
     y_pred_fit = model.predict(X_val)
 
     # Fit and predict using the original MultiOutputRegressor
-    original_regressor = MultiOutputRegressor(XGBRegressor(random_state=42))
+    original_regressor = MultiOutputRegressor(
+        XGBRegressor(random_state=42, n_estimators=10, max_depth=3)
+    )
     original_regressor.fit(X_train, y_train)
     y_pred_original = original_regressor.predict(X_val)
 

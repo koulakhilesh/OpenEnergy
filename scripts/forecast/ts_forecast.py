@@ -181,8 +181,15 @@ class XGBModel(IModel):
 
     """
 
-    def __init__(self):
-        self.model = ProgressMultiOutputRegressor(XGBRegressor(random_state=42))
+    def __init__(self, params=None):
+        if params is None:
+            params = {
+                "random_state": 42,
+                "n_estimators": 100,
+                "max_depth": 5,
+                "learning_rate": 0.1,
+            }
+        self.model = ProgressMultiOutputRegressor(XGBRegressor(**params))
 
     def fit(self, X, y):
         """
