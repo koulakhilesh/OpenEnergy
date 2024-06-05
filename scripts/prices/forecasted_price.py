@@ -47,6 +47,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
         history_length=7 * 24,
         forecast_length=24,
         interpolate: bool = True,
+        prior_days: int = DAYS_IN_WEEK_PLUS_1,
     ):
         self.data_provider = data_provider
         self.interpolate = interpolate
@@ -58,6 +59,8 @@ class ForecastPriceModel(IPriceData, IForecaster):
             column_names=[self.PRICE_COLUMN], timestamp_column=self.TIMESTAMP_COLUMN
         )
         self.helper = PriceDataHelper()
+        self._prior_days = prior_days
+
         if self.interpolate:
             self.data[self.PRICE_COLUMN].interpolate(method="linear", inplace=True)
 
@@ -72,14 +75,11 @@ class ForecastPriceModel(IPriceData, IForecaster):
             Tuple[List[float], List[float]]: A tuple containing the forecasted prices and actual prices.
         """
         current_date = self.helper.get_current_date(date)
-        week_prior = self.helper.get_week_prior(current_date, self.DAYS_IN_WEEK_PLUS_1)
+        prior_date = self.helper.get_prior_date(current_date, self._prior_days)
 
-        last_week_data = self.helper.get_last_week_data(
-            current_date, week_prior, self.data
-        )
+        prior_data = self.helper.get_prior_data(current_date, prior_date, self.data)
 
-        # Forecast prices for the current date using last week's data
-        forecasted_prices = self.forecast(last_week_data)
+        forecasted_prices = self.forecast(prior_data)
 
         current_date_data = self.helper.get_current_date_data(current_date, self.data)
         prices_current_date = self.helper.get_prices_current_date(
@@ -107,7 +107,11 @@ class ForecastPriceModel(IPriceData, IForecaster):
         Returns:
             pandas.DataFrame: The forecasted prices.
         """
-        return self.forecaster.forecast(df, column_name=self.PRICE_COLUMN)
+        return (
+            self.forecaster.forecast(df, column_name=self.PRICE_COLUMN)
+            .flatten()
+            .tolist()
+        )
 
     def evaluate(self, y_true, y_pred):
         """

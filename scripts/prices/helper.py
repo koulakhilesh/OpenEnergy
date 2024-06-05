@@ -23,37 +23,18 @@ class PriceDataHelper(IPriceDataHelper):
             tzinfo=pytz.utc
         )
 
-    def get_week_prior(
+    def get_prior_date(
         self, current_date: datetime.datetime, delta_days: int
     ) -> datetime.datetime:
-        """Get the date that is a certain number of days prior to the current date.
-
-        Args:
-            current_date (datetime.datetime): The current date.
-            delta_days (int): The number of days to go back.
-
-        Returns:
-            datetime.datetime: The date that is `delta_days` prior to the current date.
-        """
         return current_date - datetime.timedelta(days=delta_days)
 
-    def get_last_week_data(
+    def get_prior_data(
         self,
         current_date: datetime.datetime,
-        week_prior: datetime.datetime,
+        prior_date: datetime.datetime,
         data: pd.DataFrame,
     ) -> pd.DataFrame:
-        """Get the data for the last week.
-
-        Args:
-            current_date (datetime.datetime): The current date.
-            week_prior (datetime.datetime): The date that is a week prior to the current date.
-            data (pd.DataFrame): The data containing price information.
-
-        Returns:
-            pd.DataFrame: The data for the last week.
-        """
-        return data[(data.index >= week_prior) & (data.index < current_date)]
+        return data[(data.index >= prior_date) & (data.index < current_date)]
 
     def get_current_date_data(
         self, current_date: datetime.datetime, data: pd.DataFrame

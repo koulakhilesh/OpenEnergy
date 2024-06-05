@@ -264,20 +264,28 @@ class DataPreprocessor:
         assert (
             len(df) >= self.history_length + self.forecast_length
         ), "Input data must be at least history_length + forecast_length"
-        df = self.feature_engineer.transform(df, column_name=column_name)
         X = np.array(
             [
-                df[i : i + self.history_length].values.ravel()
+                df[column_name][i : i + self.history_length].values.ravel()
                 for i in range(len(df) - self.history_length - self.forecast_length + 1)
             ]
         )
+
+        # Feature engineer the dataframe
+        df_engineered = self.feature_engineer.transform(df, column_name=column_name)
+
+        # Drop column_name from df_engineered
+        df_engineered = df_engineered.drop(columns=[column_name])[: len(X)]
+
+        # Add the feature engineered columns to X
+        X = np.concatenate((X, df_engineered.values), axis=1)
         y = np.array(
             [
-                df[
+                df[column_name][
                     i + self.history_length : i
                     + self.history_length
                     + self.forecast_length
-                ][column_name]
+                ]
                 for i in range(len(df) - self.history_length - self.forecast_length + 1)
             ]
         )
@@ -344,9 +352,29 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         assert (
             len(df) >= self.data_preprocessor.history_length
         ), "Input data must be at least history_length"
-        df = self.data_preprocessor.feature_engineer.transform(df, column_name)
-        X = df[-self.data_preprocessor.history_length :].values.ravel().reshape(1, -1)
-        return self.model.predict(X)[0]
+
+        # Create X using only df[column_name]
+        X = np.array(
+            [
+                df[column_name][
+                    i : i + self.data_preprocessor.history_length
+                ].values.ravel()
+                for i in range(len(df) - self.data_preprocessor.history_length + 1)
+            ]
+        )
+
+        # Feature engineer the dataframe
+        df_engineered = self.data_preprocessor.feature_engineer.transform(
+            df, column_name=column_name
+        )
+
+        # Drop column_name from df_engineered
+        df_engineered = df_engineered.drop(columns=[column_name])[: len(X)]
+
+        # Add the feature engineered columns to X
+        X = np.concatenate((X, df_engineered.values), axis=1)
+
+        return self.model.predict(X)
 
     def evaluate(self, y_true, y_pred):
         """

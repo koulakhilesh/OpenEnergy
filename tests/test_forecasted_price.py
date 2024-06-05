@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.forecast.ts_forecast import IFeatureEngineer, IModel
+from scripts.forecast.ts_forecast import FeatureEngineer, IModel, XGBModel
 from scripts.prices.forecasted_price import ForecastPriceModel
 from scripts.shared.interfaces import IDataProvider
 
@@ -18,9 +18,9 @@ class MockDataProvider(IDataProvider):
         df = pd.DataFrame(
             {
                 "utc_timestamp": pd.date_range(
-                    "2022-01-01", periods=300, freq="h", tz="UTC"
+                    "2022-01-01", periods=96, freq="h", tz="UTC"
                 ),
-                "GB_GBN_price_day_ahead": np.arange(300),
+                "GB_GBN_price_day_ahead": np.arange(96),
             }
         )
         df.set_index("utc_timestamp", inplace=True)
@@ -28,37 +28,29 @@ class MockDataProvider(IDataProvider):
         return df
 
 
-class MockFeatureEngineer(IFeatureEngineer):
-    def transform(self, df, column_name):
-        return df
-
-
-class MockModel(IModel):
-    def fit(self, X, y):
-        pass
-
-    def predict(self, X):
-        return np.zeros((X.shape[0], 24))
-
-
 def test_get_prices():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = MockFeatureEngineer()
-    model = MockModel()
+    feature_engineer = FeatureEngineer()
+    model = XGBModel()
 
     # Create a ForecastPriceModel instance
     forecast_model = ForecastPriceModel(
         data_provider=data_provider,
         feature_engineer=feature_engineer,
         model=model,
-        history_length=7 * 24,
+        history_length=24,
         forecast_length=24,
         interpolate=True,
+        prior_days=1,
     )
+    # train the model
+    full_data = data_provider.get_data("GB_GBN_price_day_ahead", "utc_timestamp")
+    train_data = full_data.loc[full_data.index.day < 4]
+    forecast_model.train(train_data)
 
     # Get prices for a specific date
-    date = datetime.date(2022, 1, 10)
+    date = datetime.date(2022, 1, 4)
     forecasted_prices, prices_current_date = forecast_model.get_prices(date)
 
     # Check the shape of the forecasted prices and prices for the current date
@@ -69,31 +61,26 @@ def test_get_prices():
 def test_train():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = MockFeatureEngineer()
-    model = MockModel()
+    feature_engineer = FeatureEngineer()
+    model = XGBModel()
 
     # Create a ForecastPriceModel instance
     forecast_model = ForecastPriceModel(
         data_provider=data_provider,
         feature_engineer=feature_engineer,
         model=model,
-        history_length=7 * 24,
+        history_length=24,
         forecast_length=24,
         interpolate=True,
+        prior_days=1,
     )
 
-    # Create a sample DataFrame for training
-    df = pd.DataFrame(
-        {
-            "utc_timestamp": pd.date_range(
-                "2022-01-01", periods=300, freq="h", tz="UTC"
-            ),
-            "GB_GBN_price_day_ahead": np.arange(300),
-        }
-    )
+    # train the model
+    full_data = data_provider.get_data("GB_GBN_price_day_ahead", "utc_timestamp")
+    train_data = full_data.loc[full_data.index.day < 4]
 
     # Train the model
-    forecast_model.train(df)
+    forecast_model.train(train_data)
 
     # Check if the model has been trained
     assert forecast_model.forecaster.validation_mse is not None
@@ -102,31 +89,30 @@ def test_train():
 def test_forecast():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = MockFeatureEngineer()
-    model = MockModel()
+    feature_engineer = FeatureEngineer()
+    model = XGBModel()
 
     # Create a ForecastPriceModel instance
     forecast_model = ForecastPriceModel(
         data_provider=data_provider,
         feature_engineer=feature_engineer,
         model=model,
-        history_length=7 * 24,
+        history_length=24,
         forecast_length=24,
         interpolate=True,
+        prior_days=1,
     )
 
-    # Create a sample DataFrame for forecasting
-    df = pd.DataFrame(
-        {
-            "utc_timestamp": pd.date_range(
-                "2022-01-01", periods=300, freq="h", tz="UTC"
-            ),
-            "GB_GBN_price_day_ahead": np.arange(300),
-        }
-    )
+    # train the model
+    full_data = data_provider.get_data("GB_GBN_price_day_ahead", "utc_timestamp")
+    train_data = full_data.loc[full_data.index.day < 4]
+    forecast_model.train(train_data)
+
+    # test_data
+    test_df = full_data.loc[full_data.index.day == 4]
 
     # Forecast prices
-    forecasted_prices = forecast_model.forecast(df)
+    forecasted_prices = forecast_model.forecast(test_df)
 
     # Check the shape of the forecasted prices
     assert len(forecasted_prices) == 24
@@ -135,16 +121,16 @@ def test_forecast():
 def test_evaluate():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = MockFeatureEngineer()
-    model = MockModel()
+    feature_engineer = FeatureEngineer()
+    model = XGBModel()
 
     # Create a ForecastPriceModel instance
     forecast_model = ForecastPriceModel(
         data_provider=data_provider,
         feature_engineer=feature_engineer,
         model=model,
-        history_length=7 * 24,
-        forecast_length=24,
+        history_length=3,
+        forecast_length=3,
         interpolate=True,
     )
 
@@ -162,16 +148,16 @@ def test_evaluate():
 def test_save_model(tmp_path):
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = MockFeatureEngineer()
-    model = MockModel()
+    feature_engineer = FeatureEngineer()
+    model = XGBModel()
 
     # Create a ForecastPriceModel instance
     forecast_model = ForecastPriceModel(
         data_provider=data_provider,
         feature_engineer=feature_engineer,
         model=model,
-        history_length=7 * 24,
-        forecast_length=24,
+        history_length=3,
+        forecast_length=3,
         interpolate=True,
     )
 
@@ -186,16 +172,16 @@ def test_save_model(tmp_path):
 def test_load_model(tmp_path):
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = MockFeatureEngineer()
-    model = MockModel()
+    feature_engineer = FeatureEngineer()
+    model = XGBModel()
 
     # Create a ForecastPriceModel instance
     forecast_model = ForecastPriceModel(
         data_provider=data_provider,
         feature_engineer=feature_engineer,
         model=model,
-        history_length=7 * 24,
-        forecast_length=24,
+        history_length=3,
+        forecast_length=3,
         interpolate=True,
     )
 

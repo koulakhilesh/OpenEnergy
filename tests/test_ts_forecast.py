@@ -15,7 +15,6 @@ sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 from scripts.forecast import (
     DataPreprocessor,
     FeatureEngineer,
-    IFeatureEngineer,
     IModel,
     ProgressMultiOutputRegressor,
     TimeSeriesForecaster,
@@ -215,150 +214,32 @@ def test_preprocess_data():
     X, y = data_preprocessor.preprocess_data(df, column_name="value")
 
     # Check the shape of X and y
-    assert X.shape == (4, 24)
-    assert y.shape == (4, 2)
+    assert X.shape == (6, 10)
+    assert y.shape == (6, 2)
 
     # Check the values of X and y
     expected_X = np.array(
         [
-            [
-                3.0,
-                2.0,
-                5.0,
-                2.0,
-                1.0,
-                3.0,
-                1.0,
-                1.0,
-                4.0,
-                3.0,
-                5.0,
-                3.0,
-                2.0,
-                4.0,
-                1.0,
-                1.0,
-                5.0,
-                4.0,
-                5.0,
-                4.0,
-                3.0,
-                5.0,
-                1.0,
-                1.0,
-            ],
-            [
-                4.0,
-                3.0,
-                5.0,
-                3.0,
-                2.0,
-                4.0,
-                1.0,
-                1.0,
-                5.0,
-                4.0,
-                5.0,
-                4.0,
-                3.0,
-                5.0,
-                1.0,
-                1.0,
-                6.0,
-                5.0,
-                5.0,
-                5.0,
-                4.0,
-                6.0,
-                1.0,
-                1.0,
-            ],
-            [
-                5.0,
-                4.0,
-                5.0,
-                4.0,
-                3.0,
-                5.0,
-                1.0,
-                1.0,
-                6.0,
-                5.0,
-                5.0,
-                5.0,
-                4.0,
-                6.0,
-                1.0,
-                1.0,
-                7.0,
-                6.0,
-                5.0,
-                6.0,
-                5.0,
-                7.0,
-                1.0,
-                1.0,
-            ],
-            [
-                6.0,
-                5.0,
-                5.0,
-                5.0,
-                4.0,
-                6.0,
-                1.0,
-                1.0,
-                7.0,
-                6.0,
-                5.0,
-                6.0,
-                5.0,
-                7.0,
-                1.0,
-                1.0,
-                8.0,
-                7.0,
-                5.0,
-                7.0,
-                6.0,
-                8.0,
-                1.0,
-                1.0,
-            ],
+            [1.0, 2.0, 3.0, 2.0, 5.0, 2.0, 1.0, 3.0, 1.0, 1.0],
+            [2.0, 3.0, 4.0, 3.0, 5.0, 3.0, 2.0, 4.0, 1.0, 1.0],
+            [3.0, 4.0, 5.0, 4.0, 5.0, 4.0, 3.0, 5.0, 1.0, 1.0],
+            [4.0, 5.0, 6.0, 5.0, 5.0, 5.0, 4.0, 6.0, 1.0, 1.0],
+            [5.0, 6.0, 7.0, 6.0, 5.0, 6.0, 5.0, 7.0, 1.0, 1.0],
+            [6.0, 7.0, 8.0, 7.0, 5.0, 7.0, 6.0, 8.0, 1.0, 1.0],
         ]
     )
 
-    expected_y = np.array([[6, 7], [7, 8], [8, 9], [9, 10]])
+    expected_y = np.array([[4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10]])
     np.testing.assert_array_equal(X, expected_X)
     np.testing.assert_array_equal(y, expected_y)
-
-
-class MockModel(IModel):
-    def fit(self, X, y):
-        pass
-
-    def predict(self, X):
-        return np.zeros((X.shape[0], 2))
-
-
-class MockFeatureEngineer(IFeatureEngineer):
-    def transform(self, df, column_name):
-        return df
-
-
-class MockDataPreprocessor(DataPreprocessor):
-    def preprocess_data(self, df, column_name):
-        X = np.zeros((len(df), 1))
-        y = np.zeros((len(df), 2))
-        return X, y
 
 
 def test_train():
     # Create a sample DataFrame
     df = pd.DataFrame(
         {
-            "timestamp": pd.date_range("2022-01-01", periods=100, freq="h"),
-            "value": np.arange(100),
+            "timestamp": pd.date_range("2022-01-01", periods=10, freq="h"),
+            "value": np.arange(10),
         }
     )
 
@@ -366,8 +247,11 @@ def test_train():
     df.index.name = None
 
     # Create a mock model and data preprocessor
-    model = MockModel()
-    data_preprocessor = MockDataPreprocessor(MockFeatureEngineer())
+    model = XGBModel()
+    feature_engineer = FeatureEngineer(window_size=3)
+    data_preprocessor = DataPreprocessor(
+        feature_engineer=feature_engineer, history_length=3, forecast_length=2
+    )
 
     # Create a TimeSeriesForecaster instance
     forecaster = TimeSeriesForecaster(model, data_preprocessor)
@@ -381,27 +265,41 @@ def test_train():
 
 def test_forecast():
     # Create a sample DataFrame
-    df = pd.DataFrame(
+    train_df = pd.DataFrame(
         {
-            "timestamp": pd.date_range("2022-01-01", periods=200, freq="h"),
-            "value": np.arange(200),
+            "timestamp": pd.date_range("2022-01-01", periods=10, freq="h"),
+            "value": np.arange(10),
         }
     )
-    df.set_index("timestamp", inplace=True)
-    df.index.name = None
+    train_df.set_index("timestamp", inplace=True)
+    train_df.index.name = None
+
+    test_df = pd.DataFrame(
+        {
+            "timestamp": pd.date_range("2022-01-14", periods=3, freq="h"),
+            "value": np.arange(3),
+        }
+    )
+    test_df.set_index("timestamp", inplace=True)
+    test_df.index.name = None
 
     # Create a mock model and data preprocessor
-    model = MockModel()
-    data_preprocessor = MockDataPreprocessor(MockFeatureEngineer())
+    model = XGBModel()
+
+    feature_engineer = FeatureEngineer(window_size=3)
+    data_preprocessor = DataPreprocessor(
+        feature_engineer=feature_engineer, history_length=3, forecast_length=2
+    )
 
     # Create a TimeSeriesForecaster instance
     forecaster = TimeSeriesForecaster(model, data_preprocessor)
+    forecaster.train(train_df, column_name="value")
 
     # Forecast using the forecaster
-    forecast = forecaster.forecast(df, column_name="value")
+    forecast = forecaster.forecast(test_df, column_name="value")
 
     # Check the shape of the forecast
-    assert forecast.shape == (2,)
+    assert forecast.shape == (1, 2)
 
 
 def test_evaluate():
@@ -410,8 +308,8 @@ def test_evaluate():
     y_pred = np.array([[0, 0], [0, 0], [0, 0]])
 
     # Create a mock model and data preprocessor
-    model = MockModel()
-    data_preprocessor = MockDataPreprocessor(MockFeatureEngineer())
+    model = XGBModel()
+    data_preprocessor = DataPreprocessor(FeatureEngineer())
 
     # Create a TimeSeriesForecaster instance
     forecaster = TimeSeriesForecaster(model, data_preprocessor)
@@ -425,8 +323,8 @@ def test_evaluate():
 
 def test_save_model(tmp_path):
     # Create a mock model and data preprocessor
-    model = MockModel()
-    data_preprocessor = MockDataPreprocessor(MockFeatureEngineer())
+    model = XGBModel()
+    data_preprocessor = DataPreprocessor(FeatureEngineer())
 
     # Create a TimeSeriesForecaster instance
     forecaster = TimeSeriesForecaster(model, data_preprocessor)
@@ -441,8 +339,8 @@ def test_save_model(tmp_path):
 
 def test_load_model(tmp_path):
     # Create a mock model and data preprocessor
-    model = MockModel()
-    data_preprocessor = MockDataPreprocessor(MockFeatureEngineer())
+    model = XGBModel()
+    data_preprocessor = DataPreprocessor(FeatureEngineer())
 
     # Create a TimeSeriesForecaster instance
     forecaster = TimeSeriesForecaster(model, data_preprocessor)

@@ -77,37 +77,18 @@ class IPriceDataHelper(ABC):
         pass
 
     @abstractmethod
-    def get_week_prior(
+    def get_prior_date(
         self, current_date: datetime.datetime, delta_days: int
     ) -> datetime.datetime:
-        """Get the date and time of the week prior to the given date.
-
-        Args:
-            current_date (datetime.datetime): The current date and time.
-            delta_days (int): The number of days to go back.
-
-        Returns:
-            datetime.datetime: The date and time of the week prior.
-        """
         pass
 
     @abstractmethod
-    def get_last_week_data(
+    def get_prior_data(
         self,
         current_date: datetime.datetime,
-        week_prior: datetime.datetime,
+        prior_date: datetime.datetime,
         data: pd.DataFrame,
     ) -> pd.DataFrame:
-        """Get the data for the last week.
-
-        Args:
-            current_date (datetime.datetime): The current date and time.
-            week_prior (datetime.datetime): The date and time of the week prior.
-            data (pd.DataFrame): The data to filter.
-
-        Returns:
-            pd.DataFrame: The filtered data for the last week.
-        """
         pass
 
     @abstractmethod
