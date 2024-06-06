@@ -148,6 +148,13 @@ class FeatureEngineer(IFeatureEngineer):
         """
         df["hour"] = df.index.hour
         df["day_of_week"] = df.index.dayofweek
+        df["month"] = df.index.month
+        df["hour_sin"] = np.sin(2 * np.pi * df["hour"]/23.0)
+        df["hour_cos"] = np.cos(2 * np.pi * df["hour"]/23.0)
+        df["day_of_week_sin"] = np.sin(2 * np.pi * df["day_of_week"]/6.0)
+        df["day_of_week_cos"] = np.cos(2 * np.pi * df["day_of_week"]/6.0)
+        df["month_sin"] = np.sin(2 * np.pi * df["month"]/11.0)
+        df["month_cos"] = np.cos(2 * np.pi * df["month"]/11.0)
         return df
 
     def add_rolling_features(self, df, column_name):
@@ -167,6 +174,13 @@ class FeatureEngineer(IFeatureEngineer):
         df["rolling_max"] = df[column_name].rolling(window=self.window_size).max()
         df["rolling_std"] = df[column_name].rolling(window=self.window_size).std()
         df["diff_from_mean"] = df[column_name] - df["rolling_mean"]
+        df["ewm"] = df[column_name].ewm(span=self.window_size).mean()
+        df["rolling_skew"] = df[column_name].rolling(window=self.window_size).skew()
+        df["rolling_kurt"] = df[column_name].rolling(window=self.window_size).kurt()
+        df["rolling_median"] = df[column_name].rolling(window=self.window_size).median()
+        df["rolling_quantile_25"] = df[column_name].rolling(window=self.window_size).quantile(0.25)
+        df["rolling_quantile_75"] = df[column_name].rolling(window=self.window_size).quantile(0.75)
+
         return df
 
 
