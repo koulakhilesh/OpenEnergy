@@ -22,7 +22,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
     and evaluating prices.
 
     Attributes:
-        DAYS_IN_WEEK_PLUS_1 (int): The number of days in a week plus one.
+        DAYS_IN_WEEK (int): The number of days in a week e.
         PRICE_COLUMN (str): The name of the column containing the price data.
         TIMESTAMP_COLUMN (str): The name of the column containing the timestamps.
 
@@ -35,7 +35,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
         interpolate (bool, optional): Whether to interpolate missing values in the price data. Defaults to True.
     """
 
-    DAYS_IN_WEEK_PLUS_1 = 8
+    DAYS_IN_WEEK = 7
     PRICE_COLUMN = "GB_GBN_price_day_ahead"
     TIMESTAMP_COLUMN = "utc_timestamp"
 
@@ -47,7 +47,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
         history_length=7 * 24,
         forecast_length=24,
         interpolate: bool = True,
-        prior_days: int = DAYS_IN_WEEK_PLUS_1,
+        prior_days: int = DAYS_IN_WEEK,
     ):
         self.data_provider = data_provider
         self.interpolate = interpolate
@@ -78,7 +78,6 @@ class ForecastPriceModel(IPriceData, IForecaster):
         prior_date = self.helper.get_prior_date(current_date, self._prior_days)
 
         prior_data = self.helper.get_prior_data(current_date, prior_date, self.data)
-
         forecasted_prices = self.forecast(prior_data)
 
         current_date_data = self.helper.get_current_date_data(current_date, self.data)

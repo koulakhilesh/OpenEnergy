@@ -67,7 +67,7 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
         Returns self.
     """
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, eval_set=None, early_stopping_rounds=None, sample_weight=None):
         super(MultiOutputRegressor, self)._validate_data(
             X, y, multi_output=True, accept_sparse="csc", dtype="numeric"
         )
@@ -77,7 +77,19 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
         self.estimators_ = []
         for i in tqdm(range(y.shape[1])):
             e = clone(self.estimator)
-            e = e.fit(X, y[:, i], sample_weight)
+            single_eval_set = (
+                [(eval_set[0][0], eval_set[0][1][:, i])]
+                if eval_set is not None
+                else None
+            )
+            e = e.fit(
+                X,
+                y[:, i],
+                eval_set=single_eval_set,
+                early_stopping_rounds=early_stopping_rounds,
+                sample_weight=sample_weight,
+                verbose=100,
+            )
             self.estimators_.append(e)
 
         return self
@@ -188,10 +200,12 @@ class XGBModel(IModel):
                 "n_estimators": 100,
                 "max_depth": 5,
                 "learning_rate": 0.1,
+                "objective": "reg:squarederror",
             }
+
         self.model = ProgressMultiOutputRegressor(XGBRegressor(**params))
 
-    def fit(self, X, y):
+    def fit(self, X, y, eval_set=None, early_stopping_rounds=None):
         """
         Fits the XGBoost model to the given training data.
 
@@ -200,7 +214,9 @@ class XGBModel(IModel):
             y: The target values for training.
 
         """
-        self.model.fit(X, y)
+        self.model.fit(
+            X, y, eval_set=eval_set, early_stopping_rounds=early_stopping_rounds
+        )
 
     def predict(self, X):
         """
@@ -332,7 +348,8 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         X_train, X_val, y_train, y_val = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
-        self.model.fit(X_train, y_train)
+        eval_set = [(X_val, y_val)]
+        self.model.fit(X_train, y_train, eval_set=eval_set, early_stopping_rounds=100)
         y_pred = self.model.predict(X_val)
         self.validation_mse = mean_squared_error(y_val, y_pred)
         print("Validation MSE:", self.validation_mse)
