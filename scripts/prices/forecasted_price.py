@@ -8,7 +8,7 @@ from scripts.forecast.ts_forecast import (
     IModel,
     TimeSeriesForecaster,
 )
-from scripts.prices.helper import PriceDataHelper
+from scripts.prices.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData

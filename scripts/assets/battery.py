@@ -21,6 +21,17 @@ class TemperatureEfficiencyAdjuster(IEfficiencyAdjuster):
         charge_efficiency: float,
         discharge_efficiency: float,
     ):
+        """
+        Adjusts the charge and discharge efficiency of the battery based on the temperature.
+
+        Args:
+            temperature_c (float): The temperature in degrees Celsius.
+            charge_efficiency (float): The current charge efficiency of the battery.
+            discharge_efficiency (float): The current discharge efficiency of the battery.
+
+        Returns:
+            Tuple[float, float]: A tuple containing the adjusted charge efficiency and discharge efficiency.
+        """
         temp_effect = abs(temperature_c - 25) * 0.01
         new_charge_efficiency = max(0.5, min(charge_efficiency - temp_effect, 1.0))
         new_discharge_efficiency = max(

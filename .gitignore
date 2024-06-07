@@ -19,3 +19,4 @@ notebooks/.pytest_cache
 # Miscellaneous
 playground
 .coverage
+_posts

@@ -3,7 +3,7 @@ import typing as t
 
 import pandas as pd
 
-from scripts.prices.helper import PriceDataHelper
+from scripts.prices.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData

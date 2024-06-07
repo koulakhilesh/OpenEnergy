@@ -9,33 +9,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from tqdm.auto import tqdm
 from xgboost import XGBRegressor
 
-
-class IForecaster(ABC):
-    @abstractmethod
-    def train(self, df):
-        pass
-
-    @abstractmethod
-    def forecast(self, df):
-        pass
-
-
-class IEvaluator(ABC):
-    @abstractmethod
-    def evaluate(self, y_true, y_pred):
-        pass
-
-
-class ISaver(ABC):
-    @abstractmethod
-    def save_model(self, file_path):
-        pass
-
-
-class ILoader(ABC):
-    @abstractmethod
-    def load_model(self, file_path):
-        pass
+from .interfaces import IEvaluator, IForecaster, ILoader, IModel, ISaver
 
 
 class ProgressMultiOutputRegressor(MultiOutputRegressor):
@@ -149,12 +123,12 @@ class FeatureEngineer(IFeatureEngineer):
         df["hour"] = df.index.hour
         df["day_of_week"] = df.index.dayofweek
         df["month"] = df.index.month
-        df["hour_sin"] = np.sin(2 * np.pi * df["hour"]/23.0)
-        df["hour_cos"] = np.cos(2 * np.pi * df["hour"]/23.0)
-        df["day_of_week_sin"] = np.sin(2 * np.pi * df["day_of_week"]/6.0)
-        df["day_of_week_cos"] = np.cos(2 * np.pi * df["day_of_week"]/6.0)
-        df["month_sin"] = np.sin(2 * np.pi * df["month"]/11.0)
-        df["month_cos"] = np.cos(2 * np.pi * df["month"]/11.0)
+        df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 23.0)
+        df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 23.0)
+        df["day_of_week_sin"] = np.sin(2 * np.pi * df["day_of_week"] / 6.0)
+        df["day_of_week_cos"] = np.cos(2 * np.pi * df["day_of_week"] / 6.0)
+        df["month_sin"] = np.sin(2 * np.pi * df["month"] / 11.0)
+        df["month_cos"] = np.cos(2 * np.pi * df["month"] / 11.0)
         return df
 
     def add_rolling_features(self, df, column_name):
@@ -178,20 +152,14 @@ class FeatureEngineer(IFeatureEngineer):
         df["rolling_skew"] = df[column_name].rolling(window=self.window_size).skew()
         df["rolling_kurt"] = df[column_name].rolling(window=self.window_size).kurt()
         df["rolling_median"] = df[column_name].rolling(window=self.window_size).median()
-        df["rolling_quantile_25"] = df[column_name].rolling(window=self.window_size).quantile(0.25)
-        df["rolling_quantile_75"] = df[column_name].rolling(window=self.window_size).quantile(0.75)
+        df["rolling_quantile_25"] = (
+            df[column_name].rolling(window=self.window_size).quantile(0.25)
+        )
+        df["rolling_quantile_75"] = (
+            df[column_name].rolling(window=self.window_size).quantile(0.75)
+        )
 
         return df
-
-
-class IModel(ABC):
-    @abstractmethod
-    def fit(self, X, y):
-        pass
-
-    @abstractmethod
-    def predict(self, X):
-        pass
 
 
 class XGBModel(IModel):
