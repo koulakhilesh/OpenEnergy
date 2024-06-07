@@ -20,3 +20,4 @@ notebooks/.pytest_cache
 playground
 .coverage
 _posts
+models/prices
