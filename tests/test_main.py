@@ -58,4 +58,4 @@ def test_main_exception_handling():
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

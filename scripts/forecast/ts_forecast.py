@@ -126,12 +126,6 @@ class FeatureEngineer(IFeatureEngineer):
         df["day_of_month"] = df.index.day
         df["week_of_year"] = df.index.isocalendar().week
         df["is_weekend"] = df.index.dayofweek > 4
-        df["hour_sin"] = np.sin(2 * np.pi * df["hour"] / 23.0)
-        df["hour_cos"] = np.cos(2 * np.pi * df["hour"] / 23.0)
-        df["day_of_week_sin"] = np.sin(2 * np.pi * df["day_of_week"] / 6.0)
-        df["day_of_week_cos"] = np.cos(2 * np.pi * df["day_of_week"] / 6.0)
-        df["month_sin"] = np.sin(2 * np.pi * df["month"] / 11.0)
-        df["month_cos"] = np.cos(2 * np.pi * df["month"] / 11.0)
         return df
 
     def add_rolling_features(self, df, column_name):
@@ -147,23 +141,15 @@ class FeatureEngineer(IFeatureEngineer):
 
         """
         df["rolling_mean"] = df[column_name].rolling(window=self.window_size).mean()
-        df["rolling_var"] = df[column_name].rolling(window=self.window_size).var()
-        df["rolling_sum"] = df[column_name].rolling(window=self.window_size).sum()
-        df["rolling_range"] = df[column_name].rolling(window=self.window_size).max() - df[column_name].rolling(window=self.window_size).min()
-        df["percent_change"] = df[column_name].pct_change() * 100
         df["rolling_min"] = df[column_name].rolling(window=self.window_size).min()
         df["rolling_max"] = df[column_name].rolling(window=self.window_size).max()
         df["rolling_std"] = df[column_name].rolling(window=self.window_size).std()
         df["diff_from_mean"] = df[column_name] - df["rolling_mean"]
-        df["ewm"] = df[column_name].ewm(span=self.window_size).mean()
-        df["ewm_std"] = df[column_name].ewm(span=self.window_size).std()
         df["rolling_skew"] = df[column_name].rolling(window=self.window_size).skew()
         df["rolling_kurt"] = df[column_name].rolling(window=self.window_size).kurt()
         df["rolling_median"] = df[column_name].rolling(window=self.window_size).median()
         df["rolling_quantile_25"] = df[column_name].rolling(window=self.window_size).quantile(0.25)
         df["rolling_quantile_75"] = df[column_name].rolling(window=self.window_size).quantile(0.75)
-        df["extreme_high"] = (df[column_name] > df["rolling_quantile_75"]).astype(int)
-        df["extreme_low"] = (df[column_name] < df["rolling_quantile_25"]).astype(int)
 
         return df
 

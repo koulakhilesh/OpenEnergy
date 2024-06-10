@@ -23,4 +23,4 @@ def test_historical_average_price_model(create_test_csv):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

@@ -357,4 +357,4 @@ def test_create_schedule_raises_exception_on_empty_prices():
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

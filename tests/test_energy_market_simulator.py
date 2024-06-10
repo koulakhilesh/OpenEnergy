@@ -125,4 +125,4 @@ def test_energy_market_simulator_single_day(
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])
