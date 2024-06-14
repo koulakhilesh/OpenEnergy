@@ -75,6 +75,7 @@ class IFeatureEngineer(ABC):
         pass
 
 
+# TODO: Add lad and lead values as features
 class FeatureEngineer(IFeatureEngineer):
     """
     A class for feature engineering on time series data.
@@ -125,7 +126,7 @@ class FeatureEngineer(IFeatureEngineer):
         df["month"] = df.index.month
         df["day_of_month"] = df.index.day
         df["week_of_year"] = df.index.isocalendar().week
-        df["is_weekend"] = df.index.dayofweek > 4
+        df["is_weekend"] = (df.index.dayofweek > 4).astype(int)
         return df
 
     def add_rolling_features(self, df, column_name):
@@ -144,13 +145,14 @@ class FeatureEngineer(IFeatureEngineer):
         df["rolling_min"] = df[column_name].rolling(window=self.window_size).min()
         df["rolling_max"] = df[column_name].rolling(window=self.window_size).max()
         df["rolling_std"] = df[column_name].rolling(window=self.window_size).std()
-        df["diff_from_mean"] = df[column_name] - df["rolling_mean"]
         df["rolling_skew"] = df[column_name].rolling(window=self.window_size).skew()
-        df["rolling_kurt"] = df[column_name].rolling(window=self.window_size).kurt()
         df["rolling_median"] = df[column_name].rolling(window=self.window_size).median()
-        df["rolling_quantile_25"] = df[column_name].rolling(window=self.window_size).quantile(0.25)
-        df["rolling_quantile_75"] = df[column_name].rolling(window=self.window_size).quantile(0.75)
-
+        df["rolling_quantile_25"] = (
+            df[column_name].rolling(window=self.window_size).quantile(0.25)
+        )
+        df["rolling_quantile_75"] = (
+            df[column_name].rolling(window=self.window_size).quantile(0.75)
+        )
         return df
 
 
@@ -254,6 +256,8 @@ class DataPreprocessor:
         assert (
             len(df) >= self.history_length + self.forecast_length
         ), "Input data must be at least history_length + forecast_length"
+
+        # TODO: Add lad and lead values as features
         X = np.array(
             [
                 df[column_name][i : i + self.history_length].values.ravel()
@@ -262,13 +266,13 @@ class DataPreprocessor:
         )
 
         # Feature engineer the dataframe
-        df_engineered = self.feature_engineer.transform(df, column_name=column_name)
-
-        # Drop column_name from df_engineered
-        df_engineered = df_engineered.drop(columns=[column_name])[: len(X)]
+        df_engineered = self.feature_engineer.transform(
+            df, column_name=column_name
+        ).drop(columns=[column_name])[: -self.forecast_length]
 
         # Add the feature engineered columns to X
         X = np.concatenate((X, df_engineered.values), axis=1)
+
         y = np.array(
             [
                 df[column_name][

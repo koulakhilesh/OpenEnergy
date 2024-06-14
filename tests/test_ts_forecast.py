@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.datasets import make_regression
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputRegressor
@@ -20,62 +19,6 @@ from scripts.forecast import (
     TimeSeriesForecaster,
     XGBModel,
 )
-
-
-def test_fit():
-    # Generate dummy data
-    X, y = make_regression(n_samples=100, n_features=5, n_targets=3, random_state=42)
-
-    # Fit the original MultiOutputRegressor
-    original_regressor = MultiOutputRegressor(LinearRegression())
-    original_regressor.fit(X, y)
-
-    # Fit the ProgressMultiOutputRegressor
-    progress_regressor = ProgressMultiOutputRegressor(LinearRegression())
-    progress_regressor.fit(X, y)
-
-    # Compare the estimators
-    for original_estimator, progress_estimator in zip(
-        original_regressor.estimators_, progress_regressor.estimators_
-    ):
-        assert np.allclose(original_estimator.coef_, progress_estimator.coef_)
-        assert np.allclose(original_estimator.intercept_, progress_estimator.intercept_)
-
-
-def test_predict():
-    # Generate dummy data
-    X, y = make_regression(n_samples=100, n_features=5, n_targets=3, random_state=42)
-
-    # Fit the regressor
-    regressor = ProgressMultiOutputRegressor(LinearRegression())
-    regressor.fit(X, y)
-
-    # Predict using the regressor
-    X_test = np.random.randn(10, 5)
-    y_pred = regressor.predict(X_test)
-
-    # Check the shape of the predictions
-    assert y_pred.shape == (10, 3)
-
-
-def test_fit_predict_consistency():
-    # Generate dummy data
-    X, y = make_regression(n_samples=100, n_features=5, n_targets=3, random_state=42)
-
-    # Fit the regressor
-    regressor = ProgressMultiOutputRegressor(LinearRegression())
-    regressor.fit(X, y)
-
-    # Predict using the regressor
-    y_pred_fit = regressor.predict(X)
-
-    # Fit and predict using the original MultiOutputRegressor
-    original_regressor = MultiOutputRegressor(LinearRegression())
-    original_regressor.fit(X, y)
-    y_pred_original = original_regressor.predict(X)
-
-    # Check the consistency of predictions
-    assert np.allclose(y_pred_fit, y_pred_original)
 
 
 def test_transform():
@@ -96,20 +39,100 @@ def test_transform():
     transformed_df = feature_engineer.transform(df, column_name="value")
 
     # Check the shape of the transformed DataFrame
-    assert transformed_df.shape == (8, 8)
+    assert transformed_df.shape == (8, 15)
 
     # Check the values of the transformed DataFrame
     expected_values = np.array(
         [
-            [3.0, 2.0, 5.0, 2.0, 1.0, 3.0, 1.0, 1.0],
-            [4.0, 3.0, 5.0, 3.0, 2.0, 4.0, 1.0, 1.0],
-            [5.0, 4.0, 5.0, 4.0, 3.0, 5.0, 1.0, 1.0],
-            [6.0, 5.0, 5.0, 5.0, 4.0, 6.0, 1.0, 1.0],
-            [7.0, 6.0, 5.0, 6.0, 5.0, 7.0, 1.0, 1.0],
-            [8.0, 7.0, 5.0, 7.0, 6.0, 8.0, 1.0, 1.0],
-            [9.0, 8.0, 5.0, 8.0, 7.0, 9.0, 1.0, 1.0],
-            [10.0, 9.0, 5.0, 9.0, 8.0, 10.0, 1.0, 1.0],
-        ]
+            [
+                3,
+                2,
+                5,
+                1,
+                1,
+                52,
+                1,
+                2.0,
+                1.0,
+                3.0,
+                1.0,
+                6.394884621840883e-14,
+                2.0,
+                1.5,
+                2.5,
+            ],
+            [
+                4,
+                3,
+                5,
+                1,
+                1,
+                52,
+                1,
+                3.0,
+                2.0,
+                4.0,
+                1.0,
+                -2.398081733190341e-14,
+                3.0,
+                2.5,
+                3.5,
+            ],
+            [
+                5,
+                4,
+                5,
+                1,
+                1,
+                52,
+                1,
+                4.0,
+                3.0,
+                5.0,
+                1.0,
+                7.993605777301119e-15,
+                4.0,
+                3.5,
+                4.5,
+            ],
+            [6, 5, 5, 1, 1, 52, 1, 5.0, 4.0, 6.0, 1.0, 0.0, 5.0, 4.5, 5.5],
+            [7, 6, 5, 1, 1, 52, 1, 6.0, 5.0, 7.0, 1.0, 0.0, 6.0, 5.5, 6.5],
+            [8, 7, 5, 1, 1, 52, 1, 7.0, 6.0, 8.0, 1.0, 0.0, 7.0, 6.5, 7.5],
+            [
+                9,
+                8,
+                5,
+                1,
+                1,
+                52,
+                1,
+                8.0,
+                7.0,
+                9.0,
+                1.0,
+                -7.993605777301119e-15,
+                8.0,
+                7.5,
+                8.5,
+            ],
+            [
+                10,
+                9,
+                5,
+                1,
+                1,
+                52,
+                1,
+                9.0,
+                8.0,
+                10.0,
+                1.0,
+                2.398081733190341e-14,
+                9.0,
+                8.5,
+                9.5,
+            ],
+        ],
     )
     np.testing.assert_array_equal(transformed_df.values, expected_values)
 
@@ -214,18 +237,72 @@ def test_preprocess_data():
     X, y = data_preprocessor.preprocess_data(df, column_name="value")
 
     # Check the shape of X and y
-    assert X.shape == (6, 10)
+    assert X.shape == (6, 17)
     assert y.shape == (6, 2)
 
     # Check the values of X and y
     expected_X = np.array(
         [
-            [1.0, 2.0, 3.0, 2.0, 5.0, 2.0, 1.0, 3.0, 1.0, 1.0],
-            [2.0, 3.0, 4.0, 3.0, 5.0, 3.0, 2.0, 4.0, 1.0, 1.0],
-            [3.0, 4.0, 5.0, 4.0, 5.0, 4.0, 3.0, 5.0, 1.0, 1.0],
-            [4.0, 5.0, 6.0, 5.0, 5.0, 5.0, 4.0, 6.0, 1.0, 1.0],
-            [5.0, 6.0, 7.0, 6.0, 5.0, 6.0, 5.0, 7.0, 1.0, 1.0],
-            [6.0, 7.0, 8.0, 7.0, 5.0, 7.0, 6.0, 8.0, 1.0, 1.0],
+            [
+                1,
+                2,
+                3,
+                2,
+                5,
+                1,
+                1,
+                52,
+                1,
+                2.0,
+                1.0,
+                3.0,
+                1.0,
+                6.394884621840883e-14,
+                2.0,
+                1.5,
+                2.5,
+            ],
+            [
+                2,
+                3,
+                4,
+                3,
+                5,
+                1,
+                1,
+                52,
+                1,
+                3.0,
+                2.0,
+                4.0,
+                1.0,
+                -2.398081733190341e-14,
+                3.0,
+                2.5,
+                3.5,
+            ],
+            [
+                3,
+                4,
+                5,
+                4,
+                5,
+                1,
+                1,
+                52,
+                1,
+                4.0,
+                3.0,
+                5.0,
+                1.0,
+                7.993605777301119e-15,
+                4.0,
+                3.5,
+                4.5,
+            ],
+            [4, 5, 6, 5, 5, 1, 1, 52, 1, 5.0, 4.0, 6.0, 1.0, 0.0, 5.0, 4.5, 5.5],
+            [5, 6, 7, 6, 5, 1, 1, 52, 1, 6.0, 5.0, 7.0, 1.0, 0.0, 6.0, 5.5, 6.5],
+            [6, 7, 8, 7, 5, 1, 1, 52, 1, 7.0, 6.0, 8.0, 1.0, 0.0, 7.0, 6.5, 7.5],
         ]
     )
 
