@@ -9,33 +9,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from tqdm.auto import tqdm
 from xgboost import XGBRegressor
 
-
-class IForecaster(ABC):
-    @abstractmethod
-    def train(self, df):
-        pass
-
-    @abstractmethod
-    def forecast(self, df):
-        pass
-
-
-class IEvaluator(ABC):
-    @abstractmethod
-    def evaluate(self, y_true, y_pred):
-        pass
-
-
-class ISaver(ABC):
-    @abstractmethod
-    def save_model(self, file_path):
-        pass
-
-
-class ILoader(ABC):
-    @abstractmethod
-    def load_model(self, file_path):
-        pass
+from .interfaces import IEvaluator, IForecaster, ILoader, IModel, ISaver
 
 
 class ProgressMultiOutputRegressor(MultiOutputRegressor):
@@ -67,7 +41,7 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
         Returns self.
     """
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, eval_set=None, early_stopping_rounds=None, sample_weight=None):
         super(MultiOutputRegressor, self)._validate_data(
             X, y, multi_output=True, accept_sparse="csc", dtype="numeric"
         )
@@ -77,7 +51,19 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
         self.estimators_ = []
         for i in tqdm(range(y.shape[1])):
             e = clone(self.estimator)
-            e = e.fit(X, y[:, i], sample_weight)
+            single_eval_set = (
+                [(eval_set[0][0], eval_set[0][1][:, i])]
+                if eval_set is not None
+                else None
+            )
+            e = e.fit(
+                X,
+                y[:, i],
+                eval_set=single_eval_set,
+                early_stopping_rounds=early_stopping_rounds,
+                sample_weight=sample_weight,
+                verbose=100,
+            )
             self.estimators_.append(e)
 
         return self
@@ -89,6 +75,7 @@ class IFeatureEngineer(ABC):
         pass
 
 
+# TODO: Add lad and lead values as features
 class FeatureEngineer(IFeatureEngineer):
     """
     A class for feature engineering on time series data.
@@ -136,6 +123,10 @@ class FeatureEngineer(IFeatureEngineer):
         """
         df["hour"] = df.index.hour
         df["day_of_week"] = df.index.dayofweek
+        df["month"] = df.index.month
+        df["day_of_month"] = df.index.day
+        df["week_of_year"] = df.index.isocalendar().week
+        df["is_weekend"] = (df.index.dayofweek > 4).astype(int)
         return df
 
     def add_rolling_features(self, df, column_name):
@@ -154,18 +145,15 @@ class FeatureEngineer(IFeatureEngineer):
         df["rolling_min"] = df[column_name].rolling(window=self.window_size).min()
         df["rolling_max"] = df[column_name].rolling(window=self.window_size).max()
         df["rolling_std"] = df[column_name].rolling(window=self.window_size).std()
-        df["diff_from_mean"] = df[column_name] - df["rolling_mean"]
+        df["rolling_skew"] = df[column_name].rolling(window=self.window_size).skew()
+        df["rolling_median"] = df[column_name].rolling(window=self.window_size).median()
+        df["rolling_quantile_25"] = (
+            df[column_name].rolling(window=self.window_size).quantile(0.25)
+        )
+        df["rolling_quantile_75"] = (
+            df[column_name].rolling(window=self.window_size).quantile(0.75)
+        )
         return df
-
-
-class IModel(ABC):
-    @abstractmethod
-    def fit(self, X, y):
-        pass
-
-    @abstractmethod
-    def predict(self, X):
-        pass
 
 
 class XGBModel(IModel):
@@ -181,10 +169,19 @@ class XGBModel(IModel):
 
     """
 
-    def __init__(self):
-        self.model = ProgressMultiOutputRegressor(XGBRegressor(random_state=42))
+    def __init__(self, params=None):
+        if params is None:
+            params = {
+                "random_state": 42,
+                "n_estimators": 100,
+                "max_depth": 5,
+                "learning_rate": 0.1,
+                "objective": "reg:squarederror",
+            }
 
-    def fit(self, X, y):
+        self.model = ProgressMultiOutputRegressor(XGBRegressor(**params))
+
+    def fit(self, X, y, eval_set=None, early_stopping_rounds=None):
         """
         Fits the XGBoost model to the given training data.
 
@@ -193,7 +190,9 @@ class XGBModel(IModel):
             y: The target values for training.
 
         """
-        self.model.fit(X, y)
+        self.model.fit(
+            X, y, eval_set=eval_set, early_stopping_rounds=early_stopping_rounds
+        )
 
     def predict(self, X):
         """
@@ -257,20 +256,30 @@ class DataPreprocessor:
         assert (
             len(df) >= self.history_length + self.forecast_length
         ), "Input data must be at least history_length + forecast_length"
-        df = self.feature_engineer.transform(df, column_name=column_name)
+
+        # TODO: Add lad and lead values as features
         X = np.array(
             [
-                df[i : i + self.history_length].values.ravel()
+                df[column_name][i : i + self.history_length].values.ravel()
                 for i in range(len(df) - self.history_length - self.forecast_length + 1)
             ]
         )
+
+        # Feature engineer the dataframe
+        df_engineered = self.feature_engineer.transform(
+            df, column_name=column_name
+        ).drop(columns=[column_name])[: -self.forecast_length]
+
+        # Add the feature engineered columns to X
+        X = np.concatenate((X, df_engineered.values), axis=1)
+
         y = np.array(
             [
-                df[
+                df[column_name][
                     i + self.history_length : i
                     + self.history_length
                     + self.forecast_length
-                ][column_name]
+                ]
                 for i in range(len(df) - self.history_length - self.forecast_length + 1)
             ]
         )
@@ -317,7 +326,8 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         X_train, X_val, y_train, y_val = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
-        self.model.fit(X_train, y_train)
+        eval_set = [(X_val, y_val)]
+        self.model.fit(X_train, y_train, eval_set=eval_set, early_stopping_rounds=100)
         y_pred = self.model.predict(X_val)
         self.validation_mse = mean_squared_error(y_val, y_pred)
         print("Validation MSE:", self.validation_mse)
@@ -337,9 +347,29 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         assert (
             len(df) >= self.data_preprocessor.history_length
         ), "Input data must be at least history_length"
-        df = self.data_preprocessor.feature_engineer.transform(df, column_name)
-        X = df[-self.data_preprocessor.history_length :].values.ravel().reshape(1, -1)
-        return self.model.predict(X)[0]
+
+        # Create X using only df[column_name]
+        X = np.array(
+            [
+                df[column_name][
+                    i : i + self.data_preprocessor.history_length
+                ].values.ravel()
+                for i in range(len(df) - self.data_preprocessor.history_length + 1)
+            ]
+        )
+
+        # Feature engineer the dataframe
+        df_engineered = self.data_preprocessor.feature_engineer.transform(
+            df, column_name=column_name
+        )
+
+        # Drop column_name from df_engineered
+        df_engineered = df_engineered.drop(columns=[column_name])[: len(X)]
+
+        # Add the feature engineered columns to X
+        X = np.concatenate((X, df_engineered.values), axis=1)
+
+        return self.model.predict(X)
 
     def evaluate(self, y_true, y_pred):
         """

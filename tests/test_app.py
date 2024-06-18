@@ -68,4 +68,4 @@ def test_simulate_endpoint(client, query_params, expected_status):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

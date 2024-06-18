@@ -39,4 +39,4 @@ def test_logger(logger):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])
