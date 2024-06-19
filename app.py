@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from flasgger import Swagger
 from flask import Flask, jsonify, request
 
@@ -75,11 +76,11 @@ def simulate():
     """
     args = [
         "--battery_capacity",
-        str(request.args.get("battery_capacity", default=1.0, type=float)),
+        str(request.args.get("battery_capacity", default=1.0, type=np.float64)),
         "--charge_efficiency",
-        str(request.args.get("charge_efficiency", default=0.9, type=float)),
+        str(request.args.get("charge_efficiency", default=0.9, type=np.float64)),
         "--discharge_efficiency",
-        str(request.args.get("discharge_efficiency", default=0.9, type=float)),
+        str(request.args.get("discharge_efficiency", default=0.9, type=np.float64)),
         "--start_date",
         request.args.get("start_date", default="2019-01-01", type=str),
         "--end_date",

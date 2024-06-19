@@ -38,6 +38,7 @@ def test_app_custom_dates():
     assert results is not None
 
 
+# TODO Add test for ForecastedPriceModel
 def test_app_price_model_selection(create_test_csv):
     # Test with different price models
     for price_model in ["SimulatedPriceModel", "HistoricalPriceModel"]:
@@ -58,4 +59,4 @@ def test_main_exception_handling():
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

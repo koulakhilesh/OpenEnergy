@@ -17,10 +17,10 @@ jobs:
       - name: Fetch tags
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
-      # Set the latest version as an environment variable
-      - name: Get the latest tag
+      # Set the version from __version__.py as an environment variable      - name: Get the latest tag
+      - name: Get version from __version__.py
         id: get_version
-        run: echo "VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_ENV
+        run: echo "VERSION=$(python -c 'from __version__ import __version__; print(__version__)')" >> $GITHUB_ENV
 
       # Optionally, print the version for verification
       - name: Print version

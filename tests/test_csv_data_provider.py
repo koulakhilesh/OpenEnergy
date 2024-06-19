@@ -33,4 +33,4 @@ def test_csv_data_provider(create_test_csv):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

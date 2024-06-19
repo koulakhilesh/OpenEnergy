@@ -1,5 +1,8 @@
 import datetime
 import typing as t
+import warnings
+
+import pandas as pd
 
 from scripts.forecast.ts_forecast import (
     DataPreprocessor,
@@ -8,10 +11,12 @@ from scripts.forecast.ts_forecast import (
     IModel,
     TimeSeriesForecaster,
 )
-from scripts.prices.helper import PriceDataHelper
+from scripts.prices.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData
+
+warnings.simplefilter(action="ignore", category=pd.errors.SettingWithCopyWarning)
 
 
 class ForecastPriceModel(IPriceData, IForecaster):
@@ -22,7 +27,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
     and evaluating prices.
 
     Attributes:
-        DAYS_IN_WEEK_PLUS_1 (int): The number of days in a week plus one.
+        DAYS_IN_WEEK (int): The number of days in a week e.
         PRICE_COLUMN (str): The name of the column containing the price data.
         TIMESTAMP_COLUMN (str): The name of the column containing the timestamps.
 
@@ -35,7 +40,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
         interpolate (bool, optional): Whether to interpolate missing values in the price data. Defaults to True.
     """
 
-    DAYS_IN_WEEK_PLUS_1 = 8
+    DAYS_IN_WEEK = 7
     PRICE_COLUMN = "GB_GBN_price_day_ahead"
     TIMESTAMP_COLUMN = "utc_timestamp"
 
@@ -47,6 +52,7 @@ class ForecastPriceModel(IPriceData, IForecaster):
         history_length=7 * 24,
         forecast_length=24,
         interpolate: bool = True,
+        prior_days: int = DAYS_IN_WEEK,
     ):
         self.data_provider = data_provider
         self.interpolate = interpolate
@@ -58,6 +64,8 @@ class ForecastPriceModel(IPriceData, IForecaster):
             column_names=[self.PRICE_COLUMN], timestamp_column=self.TIMESTAMP_COLUMN
         )
         self.helper = PriceDataHelper()
+        self._prior_days = prior_days
+
         if self.interpolate:
             self.data[self.PRICE_COLUMN].interpolate(method="linear", inplace=True)
 
@@ -72,14 +80,10 @@ class ForecastPriceModel(IPriceData, IForecaster):
             Tuple[List[float], List[float]]: A tuple containing the forecasted prices and actual prices.
         """
         current_date = self.helper.get_current_date(date)
-        week_prior = self.helper.get_week_prior(current_date, self.DAYS_IN_WEEK_PLUS_1)
+        prior_date = self.helper.get_prior_date(current_date, self._prior_days)
 
-        last_week_data = self.helper.get_last_week_data(
-            current_date, week_prior, self.data
-        )
-
-        # Forecast prices for the current date using last week's data
-        forecasted_prices = self.forecast(last_week_data)
+        prior_data = self.helper.get_prior_data(current_date, prior_date, self.data)
+        forecasted_prices = self.forecast(prior_data)
 
         current_date_data = self.helper.get_current_date_data(current_date, self.data)
         prices_current_date = self.helper.get_prices_current_date(
@@ -95,19 +99,22 @@ class ForecastPriceModel(IPriceData, IForecaster):
         Args:
             df (pandas.DataFrame): The training data.
         """
-        self.forecaster.train(df, column_name=self.PRICE_COLUMN)
+        self.forecaster.train(df, column_name=self.PRICE_COLUMN, include_lead=True)
 
     def forecast(self, df):
         """
-        Forecast prices using the trained model.
+        Forecast the prices.
 
         Args:
-            df (pandas.DataFrame): The data to forecast.
-
-        Returns:
-            pandas.DataFrame: The forecasted prices.
+            df (pandas.DataFrame): The data to use for forecasting.
         """
-        return self.forecaster.forecast(df, column_name=self.PRICE_COLUMN)
+        return (
+            self.forecaster.forecast(
+                df, column_name=self.PRICE_COLUMN, include_lead=False
+            )
+            .flatten()
+            .tolist()
+        )
 
     def evaluate(self, y_true, y_pred):
         """

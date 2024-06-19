@@ -92,7 +92,7 @@ These tools collectively enable efficient data handling, optimization problem so
 - [x] Modeling for battery degradation and state of health (SOH)
 - [x] Better Price models
 - [x] Forecasting capability
-- [/] Implementation of the Application Interface
+- [x] Basic Implementation of the Application Interface
 - [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
 - [ ] Enable Stochastic Programming for Optimizer
 - [ ] Development of a graphical user interface (GUI) for easier interaction

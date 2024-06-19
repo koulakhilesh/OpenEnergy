@@ -64,4 +64,4 @@ def test_add_increases_price_when_random_less_than_spike_chance():
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])

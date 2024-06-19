@@ -1,31 +1,23 @@
-name: OpenEnergy
+name: openenergy
 channels:
-  - conda-forge
-  - anaconda
   - defaults
+  - conda-forge
 dependencies:
-  - python==3.10.13
-  - tqdm
-  - ruff
+  - python==3.10.14
   - pytest
-  - numpy
   - pandas
-  - mypy
-  - matplotlib==3.8.4
-  - anaconda::seaborn
+  - scikit-learn
   - pyomo
   - glpk
   - ipopt
-  - pytz==2024.1
-  - pandas-stubs
-  - conda-forge::coverage
-  - conda-forge::isort
-  - flask==2.2.5
-  - conda-forge::flasgger
-  - ipywidgets==8.1.2
-  - requests==2.31.0
-  - conda-forge::chardet
-  - plotly::plotly
-  - anaconda::nbformat
-  - conda-forge::xgboost
-prefix: C:\Users\koula\miniconda3\envs\OpenEnergy
+  - xgboost
+  - tqdm
+  - flasgger
+  - isort
+  - ruff
+  - mypy
+  - coverage
+  - ipykernel
+  - matplotlib
+  - seaborn
+prefix: C:\Users\koula\miniconda3\envs\openenergy

@@ -134,4 +134,4 @@ def test_battery_check_and_update_cycles_with_high_energy_cycled():
 
 
 if __name__ == "__main__":
-    pytest.main()
+    pytest.main([__file__])
