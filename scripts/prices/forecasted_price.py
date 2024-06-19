@@ -1,5 +1,8 @@
 import datetime
 import typing as t
+import warnings
+
+import pandas as pd
 
 from scripts.forecast.ts_forecast import (
     DataPreprocessor,
@@ -12,6 +15,8 @@ from scripts.prices.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData
+
+warnings.simplefilter(action="ignore", category=pd.errors.SettingWithCopyWarning)
 
 
 class ForecastPriceModel(IPriceData, IForecaster):
@@ -94,20 +99,19 @@ class ForecastPriceModel(IPriceData, IForecaster):
         Args:
             df (pandas.DataFrame): The training data.
         """
-        self.forecaster.train(df, column_name=self.PRICE_COLUMN)
+        self.forecaster.train(df, column_name=self.PRICE_COLUMN, include_lead=True)
 
     def forecast(self, df):
         """
-        Forecast prices using the trained model.
+        Forecast the prices.
 
         Args:
-            df (pandas.DataFrame): The data to forecast.
-
-        Returns:
-            pandas.DataFrame: The forecasted prices.
+            df (pandas.DataFrame): The data to use for forecasting.
         """
         return (
-            self.forecaster.forecast(df, column_name=self.PRICE_COLUMN)
+            self.forecaster.forecast(
+                df, column_name=self.PRICE_COLUMN, include_lead=False
+            )
             .flatten()
             .tolist()
         )

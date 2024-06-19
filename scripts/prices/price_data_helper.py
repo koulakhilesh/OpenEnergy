@@ -2,7 +2,7 @@ import datetime
 import typing as t
 
 import pandas as pd
-import pytz
+import pytz  # type: ignore
 
 from .interfaces import IPriceDataHelper
 

@@ -15,7 +15,6 @@ from scripts.forecast import (
     DataPreprocessor,
     FeatureEngineer,
     IModel,
-    ProgressMultiOutputRegressor,
     TimeSeriesForecaster,
     XGBModel,
 )
@@ -33,13 +32,17 @@ def test_transform():
     df.index.name = None
 
     # Create a FeatureEngineer instance
-    feature_engineer = FeatureEngineer(window_size=3)
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=2)
 
     # Apply the transform method
-    transformed_df = feature_engineer.transform(df, column_name="value")
+    transformed_df, X_columns, Y_columns = feature_engineer.transform(
+        df, column_name="value", include_lead=True
+    )
 
     # Check the shape of the transformed DataFrame
-    assert transformed_df.shape == (8, 15)
+    assert transformed_df.shape == (6, 19)
+    assert len(X_columns) == 17
+    assert len(Y_columns) == 2
 
     # Check the values of the transformed DataFrame
     expected_values = np.array(
@@ -60,6 +63,10 @@ def test_transform():
                 2.0,
                 1.5,
                 2.5,
+                2.0,
+                1.0,
+                4.0,
+                5.0,
             ],
             [
                 4,
@@ -77,6 +84,10 @@ def test_transform():
                 3.0,
                 2.5,
                 3.5,
+                3.0,
+                2.0,
+                5.0,
+                6.0,
             ],
             [
                 5,
@@ -94,45 +105,75 @@ def test_transform():
                 4.0,
                 3.5,
                 4.5,
-            ],
-            [6, 5, 5, 1, 1, 52, 1, 5.0, 4.0, 6.0, 1.0, 0.0, 5.0, 4.5, 5.5],
-            [7, 6, 5, 1, 1, 52, 1, 6.0, 5.0, 7.0, 1.0, 0.0, 6.0, 5.5, 6.5],
-            [8, 7, 5, 1, 1, 52, 1, 7.0, 6.0, 8.0, 1.0, 0.0, 7.0, 6.5, 7.5],
-            [
-                9,
-                8,
-                5,
-                1,
-                1,
-                52,
-                1,
-                8.0,
+                4.0,
+                3.0,
+                6.0,
                 7.0,
-                9.0,
-                1.0,
-                -7.993605777301119e-15,
-                8.0,
-                7.5,
-                8.5,
             ],
             [
-                10,
-                9,
+                6,
+                5,
                 5,
                 1,
                 1,
                 52,
                 1,
-                9.0,
-                8.0,
-                10.0,
+                5.0,
+                4.0,
+                6.0,
                 1.0,
-                2.398081733190341e-14,
-                9.0,
-                8.5,
-                9.5,
+                0.0,
+                5.0,
+                4.5,
+                5.5,
+                5.0,
+                4.0,
+                7.0,
+                8.0,
             ],
-        ],
+            [
+                7,
+                6,
+                5,
+                1,
+                1,
+                52,
+                1,
+                6.0,
+                5.0,
+                7.0,
+                1.0,
+                0.0,
+                6.0,
+                5.5,
+                6.5,
+                6.0,
+                5.0,
+                8.0,
+                9.0,
+            ],
+            [
+                8,
+                7,
+                5,
+                1,
+                1,
+                52,
+                1,
+                7.0,
+                6.0,
+                8.0,
+                1.0,
+                0.0,
+                7.0,
+                6.5,
+                7.5,
+                7.0,
+                6.0,
+                9.0,
+                10.0,
+            ],
+        ]
     )
     np.testing.assert_array_equal(transformed_df.values, expected_values)
 
@@ -228,7 +269,7 @@ def test_preprocess_data():
     df.index.name = None
 
     # Create a DataPreprocessor instance
-    feature_engineer = FeatureEngineer(window_size=3)
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=2)
     data_preprocessor = DataPreprocessor(
         feature_engineer=feature_engineer, history_length=3, forecast_length=2
     )
@@ -244,8 +285,6 @@ def test_preprocess_data():
     expected_X = np.array(
         [
             [
-                1,
-                2,
                 3,
                 2,
                 5,
@@ -261,10 +300,10 @@ def test_preprocess_data():
                 2.0,
                 1.5,
                 2.5,
+                2.0,
+                1.0,
             ],
             [
-                2,
-                3,
                 4,
                 3,
                 5,
@@ -280,10 +319,10 @@ def test_preprocess_data():
                 3.0,
                 2.5,
                 3.5,
+                3.0,
+                2.0,
             ],
             [
-                3,
-                4,
                 5,
                 4,
                 5,
@@ -299,14 +338,18 @@ def test_preprocess_data():
                 4.0,
                 3.5,
                 4.5,
+                4.0,
+                3.0,
             ],
-            [4, 5, 6, 5, 5, 1, 1, 52, 1, 5.0, 4.0, 6.0, 1.0, 0.0, 5.0, 4.5, 5.5],
-            [5, 6, 7, 6, 5, 1, 1, 52, 1, 6.0, 5.0, 7.0, 1.0, 0.0, 6.0, 5.5, 6.5],
-            [6, 7, 8, 7, 5, 1, 1, 52, 1, 7.0, 6.0, 8.0, 1.0, 0.0, 7.0, 6.5, 7.5],
+            [6, 5, 5, 1, 1, 52, 1, 5.0, 4.0, 6.0, 1.0, 0.0, 5.0, 4.5, 5.5, 5.0, 4.0],
+            [7, 6, 5, 1, 1, 52, 1, 6.0, 5.0, 7.0, 1.0, 0.0, 6.0, 5.5, 6.5, 6.0, 5.0],
+            [8, 7, 5, 1, 1, 52, 1, 7.0, 6.0, 8.0, 1.0, 0.0, 7.0, 6.5, 7.5, 7.0, 6.0],
         ]
     )
 
-    expected_y = np.array([[4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10]])
+    expected_y = np.array(
+        [[4.0, 5.0], [5.0, 6.0], [6.0, 7.0], [7.0, 8.0], [8.0, 9.0], [9.0, 10.0]]
+    )
     np.testing.assert_array_equal(X, expected_X)
     np.testing.assert_array_equal(y, expected_y)
 
@@ -325,7 +368,7 @@ def test_train():
 
     # Create a mock model and data preprocessor
     model = XGBModel()
-    feature_engineer = FeatureEngineer(window_size=3)
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=2)
     data_preprocessor = DataPreprocessor(
         feature_engineer=feature_engineer, history_length=3, forecast_length=2
     )
@@ -363,7 +406,7 @@ def test_forecast():
     # Create a mock model and data preprocessor
     model = XGBModel()
 
-    feature_engineer = FeatureEngineer(window_size=3)
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=2)
     data_preprocessor = DataPreprocessor(
         feature_engineer=feature_engineer, history_length=3, forecast_length=2
     )
