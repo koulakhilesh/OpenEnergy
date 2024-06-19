@@ -10,7 +10,7 @@ def create_test_csv(request):
 
     data = {
         "utc_timestamp": pd.date_range(
-            start="2021-12-31T00:00:00Z", periods=24 * 8, freq="H"
+            start="2021-12-31T00:00:00Z", periods=24 * 8, freq="h"
         ),
         column_name: [float(i) for i in range(24 * 8)],
     }

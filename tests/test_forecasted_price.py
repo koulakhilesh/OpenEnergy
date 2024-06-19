@@ -31,7 +31,7 @@ class MockDataProvider(IDataProvider):
 def test_get_prices():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = FeatureEngineer()
+    feature_engineer = FeatureEngineer(window_size=24, lag=24, lead=24)
     model = XGBModel()
 
     # Create a ForecastPriceModel instance
@@ -61,7 +61,7 @@ def test_get_prices():
 def test_train():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = FeatureEngineer()
+    feature_engineer = FeatureEngineer(window_size=24, lag=24, lead=24)
     model = XGBModel()
 
     # Create a ForecastPriceModel instance
@@ -89,7 +89,7 @@ def test_train():
 def test_forecast():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = FeatureEngineer()
+    feature_engineer = FeatureEngineer(window_size=24, lag=24, lead=24)
     model = XGBModel()
 
     # Create a ForecastPriceModel instance
@@ -121,7 +121,7 @@ def test_forecast():
 def test_evaluate():
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = FeatureEngineer()
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=3)
     model = XGBModel()
 
     # Create a ForecastPriceModel instance
@@ -148,7 +148,7 @@ def test_evaluate():
 def test_save_model(tmp_path):
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = FeatureEngineer()
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=3)
     model = XGBModel()
 
     # Create a ForecastPriceModel instance
@@ -172,7 +172,7 @@ def test_save_model(tmp_path):
 def test_load_model(tmp_path):
     # Create a mock data provider, feature engineer, and model
     data_provider = MockDataProvider()
-    feature_engineer = FeatureEngineer()
+    feature_engineer = FeatureEngineer(window_size=3, lag=3, lead=3)
     model = XGBModel()
 
     # Create a ForecastPriceModel instance

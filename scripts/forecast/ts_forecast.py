@@ -1,7 +1,6 @@
 import pickle
 from abc import ABC, abstractmethod
 
-import numpy as np
 from sklearn.base import clone
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -71,54 +70,65 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
 
 class IFeatureEngineer(ABC):
     @abstractmethod
-    def transform(self, df):
+    def transform(self, df, column_name, include_lead):
         pass
 
 
 # TODO: Add lad and lead values as features
 class FeatureEngineer(IFeatureEngineer):
     """
-    A class for feature engineering on time series data.
+    FeatureEngineer is a class that performs feature engineering on time series data.
 
-    Parameters:
-    - window_size (int): The size of the rolling window for calculating rolling features. Default is 24.
-
-    Methods:
-    - transform(df, column_name="value"): Transforms the input DataFrame by adding time features and rolling features.
-    - add_time_features(df): Adds time-related features to the DataFrame.
-    - add_rolling_features(df, column_name): Adds rolling features to the DataFrame.
-
+    Attributes:
+        window_size (int): The size of the rolling window for calculating rolling features.
+        lag (int): The lag value for creating lag features.
+        lead (int): The lead value for creating lead features.
     """
 
-    def __init__(self, window_size=24):
+    def __init__(self, window_size=24, lag=7 * 24, lead=24):
         self.window_size = window_size
+        self.lag = lag
+        self.lead = lead
 
-    def transform(self, df, column_name="value"):
+    def transform(self, df, column_name="value", include_lead=True):
         """
-        Transforms the input DataFrame by adding time features and rolling features.
+        Transforms the input DataFrame by adding time, rolling, lag, and lead features.
 
-        Parameters:
-        - df (pandas.DataFrame): The input DataFrame.
-        - column_name (str): The name of the column to calculate rolling features on. Default is "value".
+        Args:
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column to calculate features on.
+            include_lead (bool): Whether to include lead features.
 
         Returns:
-        - transformed_df (pandas.DataFrame): The transformed DataFrame with added features.
+            df (pandas.DataFrame): The transformed DataFrame.
+            X_columns (list): The list of column names for the input features.
+            y_columns (list): The list of column names for the target values.
 
         """
         df = df.copy()
-        df = self.add_time_features(df)
-        df = self.add_rolling_features(df, column_name)
-        return df.dropna()
+        X_columns = [column_name]
+        y_columns = []
+        df, columns = self.add_time_features(df)
+        X_columns.extend(columns)
+        df, columns = self.add_rolling_features(df, column_name)
+        X_columns.extend(columns)
+        df, columns = self.add_lag_features(df, column_name, self.lag)
+        X_columns.extend(columns)
+        if include_lead:
+            df, columns = self.add_lead_features(df, column_name, self.lead)
+            y_columns.extend(columns)
+        return df.dropna(), X_columns, y_columns
 
     def add_time_features(self, df):
         """
-        Adds time-related features to the DataFrame.
+        Adds time features to the DataFrame.
 
         Parameters:
         - df (pandas.DataFrame): The input DataFrame.
 
         Returns:
         - df (pandas.DataFrame): The DataFrame with added time features.
+        - columns (list): The list of column names for the time features.
 
         """
         df["hour"] = df.index.hour
@@ -127,7 +137,15 @@ class FeatureEngineer(IFeatureEngineer):
         df["day_of_month"] = df.index.day
         df["week_of_year"] = df.index.isocalendar().week
         df["is_weekend"] = (df.index.dayofweek > 4).astype(int)
-        return df
+        columns = [
+            "hour",
+            "day_of_week",
+            "month",
+            "day_of_month",
+            "week_of_year",
+            "is_weekend",
+        ]
+        return df, columns
 
     def add_rolling_features(self, df, column_name):
         """
@@ -139,8 +157,9 @@ class FeatureEngineer(IFeatureEngineer):
 
         Returns:
         - df (pandas.DataFrame): The DataFrame with added rolling features.
-
+        - columns (list): The list of column names for the rolling features.
         """
+
         df["rolling_mean"] = df[column_name].rolling(window=self.window_size).mean()
         df["rolling_min"] = df[column_name].rolling(window=self.window_size).min()
         df["rolling_max"] = df[column_name].rolling(window=self.window_size).max()
@@ -153,7 +172,57 @@ class FeatureEngineer(IFeatureEngineer):
         df["rolling_quantile_75"] = (
             df[column_name].rolling(window=self.window_size).quantile(0.75)
         )
-        return df
+        columns = [
+            "rolling_mean",
+            "rolling_min",
+            "rolling_max",
+            "rolling_std",
+            "rolling_skew",
+            "rolling_median",
+            "rolling_quantile_25",
+            "rolling_quantile_75",
+        ]
+        return df, columns
+
+    def add_lag_features(self, df, column_name, lag):
+        """
+        Adds lag features to the DataFrame.
+
+        Parameters:
+        - df (pandas.DataFrame): The input DataFrame.
+        - column_name (str): The name of the column to create lag features for.
+        - lag (int): The number of lag values to add.
+
+        Returns:
+        - df (pandas.DataFrame): The DataFrame with added lag features.
+        - columns (list): The list of column names for the lag features.
+
+        """
+        for i in range(1, lag):
+            df[f"{column_name}_lag_{i}"] = df[column_name].shift(i)
+
+        columns = [f"{column_name}_lag_{i}" for i in range(1, lag)]
+        return df, columns
+
+    def add_lead_features(self, df, column_name, lead):
+        """
+        Adds lead features to the DataFrame.
+
+        Parameters:
+        - df (pandas.DataFrame): The input DataFrame.
+        - column_name (str): The name of the column to create lead features for.
+        - lead (int): The number of lead values to add.
+
+        Returns:
+        - df (pandas.DataFrame): The DataFrame with added lead features.
+        - columns (list): The list of column names for the lead features.
+
+        """
+        for i in range(1, lead + 1):
+            df[f"{column_name}_lead_{i}"] = df[column_name].shift(-i)
+
+        columns = [f"{column_name}_lead_{i}" for i in range(1, lead + 1)]
+        return df, columns
 
 
 class XGBModel(IModel):
@@ -188,8 +257,10 @@ class XGBModel(IModel):
         Args:
             X: The input features for training.
             y: The target values for training.
-
+            eval_set: The evaluation set for early stopping.
+            early_stopping_rounds: The number of early stopping rounds.
         """
+
         self.model.fit(
             X, y, eval_set=eval_set, early_stopping_rounds=early_stopping_rounds
         )
@@ -209,24 +280,6 @@ class XGBModel(IModel):
 
 
 class DataPreprocessor:
-    """
-    A class that preprocesses data for time series forecasting.
-
-    Args:
-        feature_engineer (IFeatureEngineer): An instance of the feature engineer class.
-        history_length (int): The length of the historical data used for forecasting. Default is 7 * 24.
-        forecast_length (int): The length of the forecasted data. Default is 24.
-
-    Attributes:
-        history_length (int): The length of the historical data used for forecasting.
-        forecast_length (int): The length of the forecasted data.
-        feature_engineer (IFeatureEngineer): An instance of the feature engineer class.
-
-    Methods:
-        preprocess_data(df, column_name): Preprocesses the input data for time series forecasting.
-
-    """
-
     def __init__(
         self,
         feature_engineer: IFeatureEngineer,
@@ -237,52 +290,31 @@ class DataPreprocessor:
         self.forecast_length = forecast_length
         self.feature_engineer = feature_engineer
 
-    def preprocess_data(self, df, column_name):
+    def preprocess_data(self, df, column_name, include_lead=True):
         """
-        Preprocesses the input data for time series forecasting.
+        Preprocesses the input data by performing feature engineering.
 
         Args:
-            df (pandas.DataFrame): The input data as a pandas DataFrame.
-            column_name (str): The name of the column to be forecasted.
+            df (pandas.DataFrame): The input DataFrame.
+            column_name (str): The name of the column to forecast.
+            include_lead (bool): Whether to include lead features.
 
         Returns:
-            X (numpy.ndarray): The input features for forecasting.
-            y (numpy.ndarray): The target values for forecasting.
-
-        Raises:
-            AssertionError: If the input data length is less than history_length + forecast_length.
-
+            X (array-like): The input features.
+            y (array-like): The target values.
         """
+
         assert (
             len(df) >= self.history_length + self.forecast_length
         ), "Input data must be at least history_length + forecast_length"
 
-        # TODO: Add lad and lead values as features
-        X = np.array(
-            [
-                df[column_name][i : i + self.history_length].values.ravel()
-                for i in range(len(df) - self.history_length - self.forecast_length + 1)
-            ]
+        df_engineered, X_columns, y_columns = self.feature_engineer.transform(
+            df, column_name=column_name, include_lead=include_lead
         )
 
-        # Feature engineer the dataframe
-        df_engineered = self.feature_engineer.transform(
-            df, column_name=column_name
-        ).drop(columns=[column_name])[: -self.forecast_length]
+        X = df_engineered[X_columns].values
+        y = df_engineered[y_columns].values
 
-        # Add the feature engineered columns to X
-        X = np.concatenate((X, df_engineered.values), axis=1)
-
-        y = np.array(
-            [
-                df[column_name][
-                    i + self.history_length : i
-                    + self.history_length
-                    + self.forecast_length
-                ]
-                for i in range(len(df) - self.history_length - self.forecast_length + 1)
-            ]
-        )
         return X, y
 
 
@@ -313,16 +345,18 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         self.data_preprocessor = data_preprocessor
         self.validation_mse = None
 
-    def train(self, df, column_name):
+    def train(self, df, column_name, include_lead=True):
         """
         Trains the model using the input DataFrame and target column.
 
         Args:
             df (pandas.DataFrame): The input DataFrame.
-            column_name (str): The name of the target column.
-
+            column_name (str): The name of the column to forecast.
+            include_lead (bool): Whether to include lead features.
         """
-        X, y = self.data_preprocessor.preprocess_data(df, column_name)
+        X, y = self.data_preprocessor.preprocess_data(
+            df, column_name, include_lead=include_lead
+        )
         X_train, X_val, y_train, y_val = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
@@ -332,42 +366,28 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         self.validation_mse = mean_squared_error(y_val, y_pred)
         print("Validation MSE:", self.validation_mse)
 
-    def forecast(self, df, column_name):
+    def forecast(self, df, column_name, include_lead=False):
         """
         Performs forecasting on the input DataFrame and target column.
 
         Args:
             df (pandas.DataFrame): The input DataFrame.
-            column_name (str): The name of the target column.
+            column_name (str): The name of the column to forecast.
+            include_lead (bool): Whether to include lead features.
 
         Returns:
-            float: The forecasted value.
-
+            array-like: The forecasted values.
         """
         assert (
             len(df) >= self.data_preprocessor.history_length
         ), "Input data must be at least history_length"
 
-        # Create X using only df[column_name]
-        X = np.array(
-            [
-                df[column_name][
-                    i : i + self.data_preprocessor.history_length
-                ].values.ravel()
-                for i in range(len(df) - self.data_preprocessor.history_length + 1)
-            ]
-        )
-
         # Feature engineer the dataframe
-        df_engineered = self.data_preprocessor.feature_engineer.transform(
-            df, column_name=column_name
+        df_engineered, X_columns, _ = self.data_preprocessor.feature_engineer.transform(
+            df, column_name=column_name, include_lead=include_lead
         )
 
-        # Drop column_name from df_engineered
-        df_engineered = df_engineered.drop(columns=[column_name])[: len(X)]
-
-        # Add the feature engineered columns to X
-        X = np.concatenate((X, df_engineered.values), axis=1)
+        X = df_engineered[X_columns].values
 
         return self.model.predict(X)
 
