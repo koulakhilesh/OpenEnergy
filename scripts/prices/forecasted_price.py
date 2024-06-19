@@ -1,5 +1,8 @@
 import datetime
 import typing as t
+import warnings
+
+import pandas as pd
 
 from scripts.forecast.ts_forecast import (
     DataPreprocessor,
@@ -12,6 +15,8 @@ from scripts.prices.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData
+
+warnings.simplefilter(action="ignore", category=pd.errors.SettingWithCopyWarning)
 
 
 class ForecastPriceModel(IPriceData, IForecaster):

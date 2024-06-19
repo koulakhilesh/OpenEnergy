@@ -1,6 +1,8 @@
 import pickle
+import warnings
 from abc import ABC, abstractmethod
 
+import pandas as pd
 from sklearn.base import clone
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -9,6 +11,8 @@ from tqdm.auto import tqdm
 from xgboost import XGBRegressor
 
 from .interfaces import IEvaluator, IForecaster, ILoader, IModel, ISaver
+
+warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 
 class ProgressMultiOutputRegressor(MultiOutputRegressor):
