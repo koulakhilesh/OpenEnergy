@@ -1,5 +1,7 @@
 name: new-openenergy
 channels:
+  - conda-forge
+  - anaconda
   - defaults
 dependencies:
   - _py-xgboost-mutex=2.0
