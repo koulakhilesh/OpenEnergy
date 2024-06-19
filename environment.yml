@@ -1,4 +1,4 @@
-name: openenergy
+name: new-openenergy
 channels:
   - conda-forge
   - defaults
@@ -166,4 +166,4 @@ dependencies:
   - zipp=3.19.2
   - zlib=1.2.13
   - zstd=1.5.5
-prefix: C:\Users\koula\miniconda3\envs\openenergy
+prefix: C:\Users\koula\miniconda3\envs\new-openenergy

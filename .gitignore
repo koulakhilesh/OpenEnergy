@@ -21,3 +21,4 @@ playground
 .coverage
 _posts
 models/prices
+data/time_series
