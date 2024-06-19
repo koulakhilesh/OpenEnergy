@@ -3,6 +3,7 @@ import os
 import typing as t
 from datetime import date, datetime
 
+import numpy as np
 import pandas as pd
 
 from scripts.assets import Battery
@@ -78,12 +79,14 @@ def create_dependencies(args):
     return start_date, end_date, battery, price_model, pnl_calculator, scheduler
 
 
-def run_simulation(args=None) -> t.Optional[t.List[t.Tuple[date, pd.DataFrame, float]]]:
+def run_simulation(
+    args=None,
+) -> t.Optional[t.List[t.Tuple[date, pd.DataFrame, np.float64]]]:
     # Parse command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--battery_capacity", type=float, default=1.0)
-    parser.add_argument("--charge_efficiency", type=float, default=0.9)
-    parser.add_argument("--discharge_efficiency", type=float, default=0.9)
+    parser.add_argument("--battery_capacity", type=np.float64, default=1.0)
+    parser.add_argument("--charge_efficiency", type=np.float64, default=0.9)
+    parser.add_argument("--discharge_efficiency", type=np.float64, default=0.9)
     parser.add_argument("--start_date", type=str, default="2015-02-01")
     parser.add_argument("--end_date", type=str, default="2015-02-02")
     parser.add_argument("--price_model", type=str, default="SimulatedPriceModel")
