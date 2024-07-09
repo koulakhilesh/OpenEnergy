@@ -1,11 +1,10 @@
 import warnings
-from abc import ABC, abstractmethod
 
 import pandas as pd
 
-warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
-
 from .interfaces import IFeatureEngineer
+
+warnings.simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 
 class FeatureEngineer(IFeatureEngineer):
@@ -156,8 +155,6 @@ class FeatureEngineer(IFeatureEngineer):
 
         columns = [f"{column_name}_lead_{i}" for i in range(1, lead + 1)]
         return df, columns
-
-
 
 
 class DataPreprocessor:

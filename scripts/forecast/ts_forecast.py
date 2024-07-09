@@ -1,6 +1,5 @@
 import pickle
 import warnings
-from abc import ABC, abstractmethod
 
 import pandas as pd
 from sklearn.base import clone
@@ -125,7 +124,6 @@ class XGBModel(IModel):
 
         """
         return self.model.predict(X)
-
 
 
 class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):

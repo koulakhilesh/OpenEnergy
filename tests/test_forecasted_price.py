@@ -8,7 +8,7 @@ import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 from scripts.forecast.ts_forecast import FeatureEngineer, IModel, XGBModel
-from scripts.prices.forecasted_price import ForecastPriceModel
+from scripts.prices.forecasted_price_model import ForecastPriceModel
 from scripts.shared.interfaces import IDataProvider
 
 

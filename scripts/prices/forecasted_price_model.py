@@ -4,7 +4,7 @@ import warnings
 
 import pandas as pd
 
-from scripts.forecast.ts_forecast import (
+from scripts.forecast import (
     DataPreprocessor,
     IFeatureEngineer,
     IForecaster,
