@@ -11,7 +11,7 @@ from scripts.forecast import (
     IModel,
     TimeSeriesForecaster,
 )
-from scripts.prices.price_data_helper import PriceDataHelper
+from scripts.price_models.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData

@@ -11,7 +11,7 @@ from scripts.forecast import (
     IModel,
     TimeSeriesForecaster,
 )
-from scripts.pv.pv_data_helper import PVDataHelper
+from scripts.pv_models.pv_data_helper import PVDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPVData
