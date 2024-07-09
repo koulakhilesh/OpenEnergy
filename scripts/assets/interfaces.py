@@ -122,16 +122,20 @@ class IBatterySystem(ABC):
         """Checks and updates the cycle count of the battery based on the energy cycled."""
         pass
 
+
 class IPVSystem:
     """
     Interface for a Photovoltaic (PV) System.
     """
+
+    @abstractmethod
     def calculate_generation(self, irradiance_w_per_m2: float, hours: float) -> float:
         """
         Calculates the electricity generation based on solar irradiance and efficiency.
         """
         pass
 
+    @abstractmethod
     def assess_degradation(self, years: float) -> float:
         """
         Assesses the degradation of the PV system's efficiency over time.

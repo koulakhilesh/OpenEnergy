@@ -3,7 +3,7 @@ import typing as t
 
 import pandas as pd
 
-from scripts.pv_models.pv_data_helper import PVDataHelper
+from scripts.pv_generation_models.pv_data_helper import PVDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPVData

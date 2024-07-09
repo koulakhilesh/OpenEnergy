@@ -1,4 +1,4 @@
-from .interfaces import IEfficiencyAdjuster, ISOHCalculator, IBatterySystem
+from .interfaces import IBatterySystem, IEfficiencyAdjuster, ISOHCalculator
 
 
 class TemperatureEfficiencyAdjuster(IEfficiencyAdjuster):
@@ -71,8 +71,6 @@ class BasicSOHCalculator(ISOHCalculator):
         dod_factor = 2 if dod > 0.5 else 1
         degradation_rate = base_degradation * energy_cycled_mwh * dod_factor
         return soh * (1 - degradation_rate)
-
-
 
 
 class Battery(IBatterySystem):
