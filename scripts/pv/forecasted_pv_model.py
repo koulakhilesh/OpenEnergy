@@ -90,7 +90,7 @@ class ForecastPVGenerationModel(IPVData, IForecaster):
         forecasted_generations = self.forecast(prior_data)
 
         current_date_data = self.helper.get_current_date_data(current_date, self.data)
-        generations_current_date = self.helper.get_generations_current_date(
+        generations_current_date = self.helper.get_generation_current_date(
             current_date_data, self.GENERATION_COLUMN
         )
 
