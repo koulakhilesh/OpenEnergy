@@ -5,7 +5,7 @@ from datetime import datetime
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.prices import HistoricalAveragePriceModel
+from scripts.price_models import HistoricalAveragePriceModel
 from scripts.shared import CSVDataProvider
 
 

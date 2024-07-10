@@ -2,23 +2,23 @@
 **/*.ipynb_checkpoints
 
 # Python cache and related directories
-**/__pycache__
+.mypy_cache
 .pytest_cache
 .ruff_cache
-.mypy_cache
+**/__pycache__
 
 # Specific directories' cache
-tests/__pycache__
+notebooks/.pytest_cache
 playground/__pycache__
 scripts/__pycache__
-notebooks/.pytest_cache
+tests/__pycache__
 
 # Development tools configurations
 .vscode
 
 # Miscellaneous
-playground
-.coverage
+_linkedin
 _posts
+.coverage
 models/prices
-
+playground
