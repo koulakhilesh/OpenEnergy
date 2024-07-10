@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from scripts.assets import Battery
 from scripts.optimizer import BatteryOptimizationScheduler
-from scripts.price_models import IPriceData
+from scripts.prices import IPriceData
 from scripts.shared import Logger
 
 from .pnl_calculator import PnLCalculator
