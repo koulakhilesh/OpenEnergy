@@ -10,7 +10,7 @@ sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 from scripts.assets.battery import Battery
 from scripts.market_simulator import EnergyMarketSimulator, PnLCalculator
 from scripts.optimizer.scheduler import BatteryOptimizationScheduler
-from scripts.price_models.interfaces import IPriceData
+from scripts.prices.interfaces import IPriceData
 
 
 @pytest.fixture

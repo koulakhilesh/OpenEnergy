@@ -1,4 +1,4 @@
-from .interfaces import IBatterySystem, IEfficiencyAdjuster, ISOHCalculator
+from .interfaces import IEfficiencyAdjuster, ISOHCalculator
 
 
 class TemperatureEfficiencyAdjuster(IEfficiencyAdjuster):
@@ -73,7 +73,7 @@ class BasicSOHCalculator(ISOHCalculator):
         return soh * (1 - degradation_rate)
 
 
-class Battery(IBatterySystem):
+class Battery:
     """
     Represents a battery object with various properties and methods for charging and discharging.
 

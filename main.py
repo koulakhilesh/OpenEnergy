@@ -15,7 +15,7 @@ from scripts.optimizer import (
     PyomoModelExtractor,
     PyomoOptimizationModelBuilder,
 )
-from scripts.price_models import (
+from scripts.prices import (
     ForecastPriceModel,
     HistoricalAveragePriceModel,
     SimulatedPriceEnvelopeGenerator,

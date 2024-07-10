@@ -4,14 +4,14 @@ import warnings
 
 import pandas as pd
 
-from scripts.forecast import (
+from scripts.forecast.ts_forecast import (
     DataPreprocessor,
     IFeatureEngineer,
     IForecaster,
     IModel,
     TimeSeriesForecaster,
 )
-from scripts.price_models.price_data_helper import PriceDataHelper
+from scripts.prices.price_data_helper import PriceDataHelper
 from scripts.shared.interfaces import IDataProvider
 
 from .interfaces import IPriceData
