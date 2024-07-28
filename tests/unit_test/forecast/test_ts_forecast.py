@@ -10,7 +10,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.multioutput import MultiOutputRegressor
 from xgboost import XGBRegressor
 
-sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 from scripts.forecast import (
     DataPreprocessor,
     FeatureEngineer,
