@@ -6,7 +6,7 @@ class PVSystem(IPVSystem):
         self,
         capacity_mw: float,
         initial_efficiency: float = 1.0,
-        degradation_rate_per_year: float = 0.0001,
+        degradation_rate_per_year: float = 0.01,
         duration_hours: float = 1.0,
     ):
         assert capacity_mw > 0, "Capacity must be positive"

@@ -16,12 +16,7 @@ def pv_system():
 
 @pytest.mark.parametrize(
     "years, expected_efficiency",
-    [
-        (0, 1.0),
-        (1, 0.9999),
-        (2, 0.99980001),
-        (5, 0.9995000625001563),
-    ],
+    [(0, 1.0), (1, 0.99), (2, 0.9801), (5, 0.95099005), (10, 0.90438208)],
 )
 def test_calculate_current_efficiency(pv_system, years, expected_efficiency):
     assert pv_system.calculate_current_efficiency(years) == pytest.approx(
@@ -33,9 +28,9 @@ def test_calculate_current_efficiency(pv_system, years, expected_efficiency):
     "normalized_irradiance, years, expected_generation",
     [
         (1.0, 0, 10.0),
-        (0.5, 1, 4.9995),
-        (0.8, 2, 7.9984001),
-        (0.3, 5, 2.9985003),
+        (0.5, 1, 4.95),
+        (0.8, 2, 7.8408),
+        (0.3, 5, 2.852970),
     ],
 )
 def test_calculate_generation(
