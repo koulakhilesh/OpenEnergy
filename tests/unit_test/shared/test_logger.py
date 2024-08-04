@@ -5,7 +5,9 @@ from io import StringIO
 
 import pytest
 
-sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 from scripts.shared import Logger
 
 

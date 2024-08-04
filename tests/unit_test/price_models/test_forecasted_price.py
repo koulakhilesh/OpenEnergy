@@ -6,7 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 from scripts.forecast.ts_feature_engineering import FeatureEngineer
 from scripts.forecast.ts_forecast import IModel, XGBModel
 from scripts.price_models.forecasted_price_model import ForecastPriceModel

@@ -6,7 +6,9 @@ import pandas as pd
 import pyomo.environ as pyo
 import pytest
 
-sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+)
 from scripts.assets.battery import Battery  # noqa: E402
 from scripts.optimizer import (
     BatteryOptimizationScheduler,
