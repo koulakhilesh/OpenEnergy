@@ -15,6 +15,7 @@ tests/__pycache__
 
 # Development tools configurations
 .vscode
+openenergy_env
 
 # Miscellaneous
 _linkedin

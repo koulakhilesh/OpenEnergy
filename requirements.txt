@@ -1,0 +1,14 @@
+pytest
+pandas
+scikit-learn
+pyomo
+xgboost
+tqdm
+flasgger
+isort
+ruff
+mypy
+coverage
+ipykernel
+matplotlib
+seaborn

@@ -42,6 +42,7 @@
   <ol>
     <li><a href="#about-the-project">About The Project</a></li>
     <li><a href="#built-with">Built With</a></li>
+    <li><a href="#setting-up-the-virtual-environment">Setting up the Virtual Environment</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -82,6 +83,57 @@ These tools collectively enable efficient data handling, optimization problem so
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+
+## Setting up the Virtual Environment
+
+Ensure you have Python 3.10 installed on your system. You can check your Python version with:
+
+```bash
+python3 --version
+```
+
+To set up the virtual environment and install the dependencies, run the following commands:
+
+```bash
+chmod +x setup_env.sh
+./setup_env.sh
+```
+
+To activate the virtual environment, run:
+
+```bash
+source openenergy_env/bin/activate
+```
+
+### Platform-specific Instructions
+
+#### macOS
+
+To install `glpk`, run:
+
+```bash
+brew install glpk
+```
+
+For `ipopt`, follow the instructions from the [Ipopt documentation](https://coin-or.github.io/Ipopt/INSTALL.html).
+
+#### Windows
+
+To install `glpk`, run:
+
+```bash
+choco install glpk
+```
+
+For `ipopt`, follow the instructions from the [Ipopt documentation](https://coin-or.github.io/Ipopt/INSTALL.html).
+
+To deactivate the virtual environment, run:
+
+```bash
+deactivate
+```
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 <!-- ROADMAP -->
