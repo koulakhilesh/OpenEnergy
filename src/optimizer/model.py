@@ -2,8 +2,8 @@ import typing as t
 
 import pyomo.environ as pyo
 
-from scripts.assets import Battery
-from scripts.shared import Logger
+from src.assets import Battery
+from src.shared import Logger
 
 from .interfaces import IModelBuilder, IModelDefiner, IModelSolver
 

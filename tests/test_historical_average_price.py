@@ -5,8 +5,8 @@ from datetime import datetime
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.price_models import HistoricalAveragePriceModel
-from scripts.shared import CSVDataProvider
+from src.price_models import HistoricalAveragePriceModel
+from src.shared import CSVDataProvider
 
 
 @pytest.mark.parametrize("create_test_csv", ["GB_GBN_price_day_ahead"], indirect=True)

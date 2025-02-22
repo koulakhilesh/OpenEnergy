@@ -7,10 +7,10 @@ import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
 
-from scripts.assets.battery import Battery
-from scripts.market_simulator import EnergyMarketSimulator, PnLCalculator
-from scripts.optimizer.scheduler import BatteryOptimizationScheduler
-from scripts.price_models.interfaces import IPriceData
+from src.assets.battery import Battery
+from src.market_simulator import EnergyMarketSimulator, PnLCalculator
+from src.optimizer.scheduler import BatteryOptimizationScheduler
+from src.price_models.interfaces import IPriceData
 
 
 @pytest.fixture

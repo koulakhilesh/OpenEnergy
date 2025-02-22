@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.price_models import (
+from src.price_models import (
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,

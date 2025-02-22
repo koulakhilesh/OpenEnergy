@@ -6,7 +6,7 @@ import pytest
 from pandas.testing import assert_frame_equal
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.shared import CSVDataProvider
+from src.shared import CSVDataProvider
 
 
 @pytest.mark.parametrize("create_test_csv", ["GB_GBN_price_day_ahead"], indirect=True)

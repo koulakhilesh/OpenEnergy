@@ -11,7 +11,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from xgboost import XGBRegressor
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.forecast import (
+from src.forecast import (
     DataPreprocessor,
     FeatureEngineer,
     IModel,

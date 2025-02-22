@@ -3,10 +3,10 @@ from datetime import date, timedelta
 import pandas as pd
 from tqdm import tqdm
 
-from scripts.assets import Battery
-from scripts.optimizer import BatteryOptimizationScheduler
-from scripts.price_models import IPriceData
-from scripts.shared import Logger
+from src.assets import Battery
+from src.optimizer import BatteryOptimizationScheduler
+from src.price_models import IPriceData
+from src.shared import Logger
 
 from .pnl_calculator import PnLCalculator
 

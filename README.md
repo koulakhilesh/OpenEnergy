@@ -89,7 +89,7 @@ These tools collectively enable efficient data handling, optimization problem so
 Ensure you have Python 3.10 installed on your system. You can check your Python version with:
 
 ```bash
-python3 --version
+python --version
 ```
 
 To set up the virtual environment and install the dependencies, run the following commands:
@@ -103,29 +103,9 @@ To activate the virtual environment, run:
 
 ```bash
 source openenergy_env/bin/activate
+source openenergy_env/Scripts/activate
 ```
 
-### Platform-specific Instructions
-
-#### macOS
-
-To install `glpk`, run:
-
-```bash
-brew install glpk
-```
-
-For `ipopt`, follow the instructions from the [Ipopt documentation](https://coin-or.github.io/Ipopt/INSTALL.html).
-
-#### Windows
-
-To install `glpk`, run:
-
-```bash
-choco install glpk
-```
-
-For `ipopt`, follow the instructions from the [Ipopt documentation](https://coin-or.github.io/Ipopt/INSTALL.html).
 
 To deactivate the virtual environment, run:
 

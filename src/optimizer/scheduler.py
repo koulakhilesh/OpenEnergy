@@ -3,7 +3,7 @@ import typing as t
 import pandas as pd
 import pyomo.environ as pyo
 
-from scripts.assets import Battery
+from src.assets import Battery
 
 from .interfaces import IModelBuilder, IModelExtractor, IModelSolver, IScheduler
 

@@ -6,23 +6,23 @@ from datetime import date, datetime
 import numpy as np
 import pandas as pd
 
-from scripts.assets import Battery
-from scripts.forecast import FeatureEngineer
-from scripts.market_simulator import EnergyMarketSimulator, PnLCalculator
-from scripts.optimizer import (
+from src.assets import Battery
+from src.forecast import FeatureEngineer
+from src.market_simulator import EnergyMarketSimulator, PnLCalculator
+from src.optimizer import (
     BatteryOptimizationScheduler,
     GLPKOptimizationSolver,
     PyomoModelExtractor,
     PyomoOptimizationModelBuilder,
 )
-from scripts.price_models import (
+from src.price_models import (
     ForecastPriceModel,
     HistoricalAveragePriceModel,
     SimulatedPriceEnvelopeGenerator,
     SimulatedPriceModel,
     SimulatedPriceNoiseAdder,
 )
-from scripts.shared import CSVDataProvider, Logger
+from src.shared import CSVDataProvider, Logger
 
 
 def create_price_model(args):

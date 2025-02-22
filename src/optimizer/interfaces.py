@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 import pyomo.environ as pyo
 
-from scripts.assets import Battery
+from src.assets import Battery
 
 
 class IModelBuilder(ABC):

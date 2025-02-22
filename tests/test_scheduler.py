@@ -7,14 +7,14 @@ import pyomo.environ as pyo
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.assets.battery import Battery  # noqa: E402
-from scripts.optimizer import (
+from src.assets.battery import Battery  # noqa: E402
+from src.optimizer import (
     BatteryOptimizationScheduler,
     GLPKOptimizationSolver,
     PyomoModelExtractor,
     PyomoOptimizationModelBuilder,
 )
-from scripts.shared import Logger
+from src.shared import Logger
 
 
 def test_define_time_intervals():

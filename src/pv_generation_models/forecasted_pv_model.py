@@ -4,15 +4,15 @@ import warnings
 
 import pandas as pd
 
-from scripts.forecast import (
+from src.forecast import (
     DataPreprocessor,
     IFeatureEngineer,
     IForecaster,
     IModel,
     TimeSeriesForecaster,
 )
-from scripts.pv_generation_models.pv_data_helper import PVDataHelper
-from scripts.shared.interfaces import IDataProvider
+from src.pv_generation_models.pv_data_helper import PVDataHelper
+from src.shared.interfaces import IDataProvider
 
 from .interfaces import IPVData
 

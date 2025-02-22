@@ -4,7 +4,7 @@ import sys
 import pytest
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__) + "/.."))
-from scripts.assets.battery import (
+from src.assets.battery import (
     BasicSOHCalculator,
     Battery,
     TemperatureEfficiencyAdjuster,

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from scripts.assets import Battery
+from src.assets import Battery
 
 
 class PnLCalculator:
