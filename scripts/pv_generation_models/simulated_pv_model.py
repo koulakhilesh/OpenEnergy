@@ -139,6 +139,22 @@ class SimulatedPVGenerationModel(IPVData):
         self.envelope_generator = envelope_generator
         self.noise_adder = noise_adder
 
+    def get_generation(
+        self, date: datetime.date
+    ) -> t.Tuple[t.List[float], t.List[float]]:
+        """
+        Get the PV generation data for a specific date (interface compliance).
+
+        Args:
+            date (datetime.date): The date for which to retrieve the PV generation data.
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing two lists of floats.
+                The first list represents the generated power in kW for each hour of the day,
+                and the second list represents the estimated potential generation in kW.
+        """
+        return self.get_generations(date)
+
     def get_generations(
         self, date: datetime.date
     ) -> t.Tuple[t.List[float], t.List[float]]:

@@ -37,6 +37,28 @@
 
 
 <!-- TABLE OF CONTENTS -->
+## Installation
+
+
+You can install OpenEnergy and its dependencies in a Python virtual environment using pip and requirements.txt:
+
+```bash
+# 1. Create and activate a virtual environment (recommended)
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Install OpenEnergy as a package (editable mode recommended for development)
+pip install -e .
+```
+
+This will install all required dependencies and OpenEnergy so you can import its modules in your Python scripts or notebooks.
+
+To add or update dependencies, edit the `requirements.txt` file.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -69,6 +91,7 @@ As the energy landscape evolves, OpenEnergy will continue to grow, adding new fe
 
 
 
+
 ## Built With
 
 This project is built with a combination of powerful Python libraries, each playing a crucial role in the functionality of OpenEnergy. Here's a list of the major libraries used:
@@ -93,7 +116,7 @@ These tools collectively enable efficient data handling, optimization problem so
 - [x] Better Price models
 - [x] Forecasting capability
 - [x] Basic Implementation of the Application Interface
-- [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
+- [x] Implementation of additional renewable energy simulation components (e.g., solar, wind)
 - [ ] Enable Stochastic Programming for Optimizer
 - [ ] Development of a graphical user interface (GUI) for easier interaction
 - [ ] Expansion of data visualization features for analysis insights
