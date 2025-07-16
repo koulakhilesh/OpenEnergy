@@ -10,7 +10,7 @@ from main import run_simulation  # noqa: E402
 
 def test_app_default_args():
     # Test with default arguments
-    results = run_simulation()
+    results = run_simulation(args=[])
     assert results is not None
 
 
@@ -52,7 +52,7 @@ def test_main_exception_handling():
     # Mock the create_dependencies function to raise an exception
     with patch("main.create_dependencies", side_effect=Exception("Test exception")):
         # Call the main function
-        result = run_simulation()
+        result = run_simulation(args=[])
 
         # Check if the main function returned None
         assert result is None

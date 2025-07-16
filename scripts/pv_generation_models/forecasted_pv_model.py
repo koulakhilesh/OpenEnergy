@@ -69,7 +69,24 @@ class ForecastPVGenerationModel(IPVData, IForecaster):
         self._prior_days = prior_days
 
         if self.interpolate:
-            self.data[self.GENERATION_COLUMN].interpolate(method="linear", inplace=True)
+            self.data = self.data.copy()
+            self.data[self.GENERATION_COLUMN] = self.data[self.GENERATION_COLUMN].interpolate(method="linear")
+
+    def get_generation(
+        self, date: datetime.date
+    ) -> t.Tuple[t.List[float], t.List[float]]:
+        """
+        Get the forecasted PV generation and actual generation for a given date.
+        
+        This method satisfies the IPVData interface requirement.
+
+        Args:
+            date (datetime.date): The date for which to get the generation.
+
+        Returns:
+            Tuple[List[float], List[float]]: A tuple containing the forecasted PV generation and actual generation.
+        """
+        return self.get_generations(date)
 
     def get_generations(
         self, date: datetime.date

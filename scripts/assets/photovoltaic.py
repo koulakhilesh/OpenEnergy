@@ -11,9 +11,9 @@ class PVSystem(IPVSystem):
     ):
         assert capacity_mw > 0, "Capacity must be positive"
         assert 0 < initial_efficiency <= 1, "Initial efficiency must be between 0 and 1"
-        assert (
-            0 <= degradation_rate_per_year < 1
-        ), "Degradation rate must be between 0 and 1"
+        assert 0 <= degradation_rate_per_year < 1, (
+            "Degradation rate must be between 0 and 1"
+        )
         assert duration_hours >= 0, "Duration hours must be positive"
 
         self.capacity_mw = capacity_mw

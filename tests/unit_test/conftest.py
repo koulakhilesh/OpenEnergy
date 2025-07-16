@@ -16,7 +16,7 @@ def create_test_csv(request):
     }
 
     df = pd.DataFrame(data)
-    csv_path = os.path.join("tests", "test.csv")
+    csv_path = os.path.join(os.path.dirname(__file__), "test.csv")
     df.to_csv(csv_path, index=False)
 
     yield
