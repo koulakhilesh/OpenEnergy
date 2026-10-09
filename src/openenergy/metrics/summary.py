@@ -40,6 +40,7 @@ class Summary:
     premium: float | None = None
     available_mwh: float | None = None
     curtailed_mwh: float | None = None
+    emissions_t: float | None = None
 
     @property
     def total(self) -> float:
@@ -86,6 +87,7 @@ def summarise(result: BacktestResult, benchmark: BacktestResult | None = None) -
         premium=float(daily["premium"].sum()) if site else None,
         available_mwh=float(daily["available_mwh"].sum()) if site else None,
         curtailed_mwh=float(daily["curtailed_mwh"].sum()) if site else None,
+        emissions_t=float(daily["emissions_t"].sum()) if "emissions_t" in daily else None,
     )
 
 

@@ -225,6 +225,8 @@ def _format_run(run: ScenarioRun) -> str:
         f"forecast MAE / RMSE   {s.forecast_mae:,.2f} / {s.forecast_rmse:,.2f} {money}/MWh",
         f"capture ratio         {_percent(s.capture_ratio)}",
     ]
+    if s.emissions_t is not None:
+        lines.append(f"net emissions         {s.emissions_t:,.1f} tCO2 (average intensity)")
     if run.plant_capture is not None:
         p = run.plant_capture
         lines.append(

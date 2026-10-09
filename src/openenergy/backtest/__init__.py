@@ -3,6 +3,7 @@
 from openenergy.backtest.engine import (
     BacktestConfig,
     BacktestResult,
+    Carbon,
     PlantResult,
     Site,
     run_backtest,
@@ -12,6 +13,7 @@ from openenergy.backtest.engine import (
 __all__ = [
     "BacktestConfig",
     "BacktestResult",
+    "Carbon",
     "PlantResult",
     "Site",
     "run_backtest",
