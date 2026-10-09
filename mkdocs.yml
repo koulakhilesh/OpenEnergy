@@ -1,0 +1,64 @@
+site_name: OpenEnergy
+site_description: Backtest battery storage against real power-market prices.
+site_url: https://koulakhilesh.github.io/OpenEnergy/
+repo_url: https://github.com/koulakhilesh/OpenEnergy
+repo_name: koulakhilesh/OpenEnergy
+edit_uri: edit/master/docs/
+copyright: MIT licence. Market data from Open Power System Data (CC BY 4.0).
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      toggle: {icon: material/weather-night, name: Dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      toggle: {icon: material/weather-sunny, name: Light mode}
+
+nav:
+  - Home: index.md
+  - Concepts: concepts.md
+  - Guides:
+      - Scenarios: guides/scenarios.md
+      - Command line: guides/cli.md
+      - Research with the Python API: guides/research.md
+  - Data: data.md
+  - API reference: api.md
+  - Design (v2.0): design/v2.0.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.arithmatex: {generic: true}
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: false
+            show_root_heading: true
+            members_order: source
+            separate_signature: true

@@ -1,164 +1,98 @@
-<div id="top"></div>
-
-
-[![Python Package using Conda](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/python-package-conda.yml/badge.svg?branch=master)](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/python-package-conda.yml)
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
-
-
-<!-- PROJECT LOGO -->
-<br />
 <div align="center">
-  <a href="https://github.com/koulakhilesh/OpenEnergy">
-    <img src="images/logo_oe.png" alt="Logo" width="80" height="80">
-  </a>
+  <img src="docs/assets/logo.png" alt="OpenEnergy logo" width="80" height="80">
 
-  <h3 align="center">OpenEnergy</h3>
+  <h3>OpenEnergy</h3>
 
-  <p align="center">
-    An innovative solution for simulating and analyzing energy markets and renewable energy technologies.
-    <br />
-    <a href="https://github.com/koulakhilesh/OpenEnergy"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/koulakhilesh/OpenEnergy">View Demo</a>
+  <p>Backtest battery storage against real power-market prices.</p>
+
+  <p>
+    <a href="https://koulakhilesh.github.io/OpenEnergy/"><strong>Documentation</strong></a>
     ·
-    <a href="https://github.com/koulakhilesh/OpenEnergy/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/koulakhilesh/OpenEnergy/issues">Request Feature</a>
+    <a href="https://github.com/koulakhilesh/OpenEnergy/issues">Issues</a>
   </p>
+
+  [![CI](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/ci.yml)
+  [![Docs](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/docs.yml/badge.svg?branch=master)](https://koulakhilesh.github.io/OpenEnergy/)
 </div>
 
+## What it does
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li><a href="#about-the-project">About The Project</a></li>
-    <li><a href="#built-with">Built With</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <!-- <li><a href="#acknowledgments">Acknowledgments</a></li> -->
-  </ol>
-</details>
+Describe a battery and a forecasting approach in a short YAML file. OpenEnergy plans each
+day on the forecast, settles the plan at the prices that actually cleared, and reports
+what the battery earned, how hard it worked, and how close it came to perfect foresight.
 
+- **Battery physics**: power and energy ratings, charge/discharge efficiencies, SOC
+  window, cycle and calendar ageing.
+- **Dispatch**: a daily mixed-integer optimisation solved with HiGHS.
+- **Backtesting without lookahead**: forecasts see only data available at the decision
+  time; plans settle at actual prices.
+- **Forecasters**: perfect foresight, last week's prices, noisy foresight and a
+  gradient-boosting model.
+- **Data**: hourly GB day-ahead prices for 2015–2020 from Open Power System Data are
+  bundled.
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+## Quick start
 
-<!-- [![OpenEnergy Screen Shot][product-screenshot]](https://example.com) -->
+Requires Python 3.14 and [uv](https://docs.astral.sh/uv/).
 
-OpenEnergy is a dynamic simulation platform designed for modeling and analyzing energy markets and renewable energy systems. This project aims to bridge the gap between energy engineering and data science, providing a comprehensive tool for understanding and optimizing energy storage and market operations.
+```bash
+git clone https://github.com/koulakhilesh/OpenEnergy.git
+cd OpenEnergy
+uv sync --extra forecast
+uv run openenergy compare examples/*.yaml
+```
 
-Why OpenEnergy stands out:
-* **Innovative Approach**: Combines advanced algorithms and data analysis to simulate energy market dynamics and battery operations.
-* **User-Centric Design**: Intuitive and easy-to-use, enabling users to focus on analysis and insights rather than complex setup processes.
-* **Adaptable and Scalable**: Whether you are a researcher, industry professional, or enthusiast, OpenEnergy is built to adapt to a wide range of use cases and scales as needed.
+```text
+scenario         forecast             days       revenue   per MW-yr   capture   cycles
+gb-2019-perfect  perfect_foresight     363        19,075      19,180    100.0%      464
+gb-2019-ml       gradient_boosting     363        14,086      14,164     73.8%      400
+gb-2019-naive    naive_last_week       363        13,918      13,995     73.0%      465
+```
 
-As the energy landscape evolves, OpenEnergy will continue to grow, adding new features and capabilities. Your feedback and contributions are welcome to make this tool even more versatile and powerful.
+A 1 MW / 2 MWh battery trading GB day-ahead prices in 2019 would have earned about £14k
+per MW-year planning on last week's prices: 73% of what perfect foresight allows.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+Run one scenario and write its results to `outputs/<name>/`:
 
+```bash
+uv run openenergy run examples/gb-2019-naive.yaml
+```
 
+See the [documentation](https://koulakhilesh.github.io/OpenEnergy/) for the equations,
+every scenario setting and the Python API.
 
-## Built With
+## Development
 
-This project is built with a combination of powerful Python libraries, each playing a crucial role in the functionality of OpenEnergy. Here's a list of the major libraries used:
+```bash
+uv sync --all-extras --group docs
+uv run ruff check && uv run ruff format --check && uv run mypy && uv run pytest
+uv run mkdocs serve
+```
 
-* [Python](https://www.python.org/) - The core programming language
-* [Pandas](https://pandas.pydata.org/) - Data manipulation and analysis
-* [NumPy](https://numpy.org/) - Support for large, multi-dimensional arrays and matrices
-* [Pyomo](https://www.pyomo.org/) - Linear programming optimization library
-
-These tools collectively enable efficient data handling, optimization problem solving, progress tracking, and robust testing, making OpenEnergy a reliable and scalable solution.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
 ## Roadmap
 
-- [x] Initial development and setup
-- [x] Basic simulation capabilities for energy markets and battery operations
-- [x] Modeling for battery degradation and state of health (SOH)
-- [x] Better Price models
-- [x] Forecasting capability
-- [x] Basic Implementation of the Application Interface
-- [ ] Implementation of additional renewable energy simulation components (e.g., solar, wind)
-- [ ] Enable Stochastic Programming for Optimizer
-- [ ] Development of a graphical user interface (GUI) for easier interaction
-- [ ] Expansion of data visualization features for analysis insights
-- [ ] Integration with real-world energy market data sources
+| Release | Scope |
+|---------|-------|
+| v2.0 | Battery arbitrage backtesting |
+| v2.1 | PV and wind assets, captured price, co-located storage |
+| v2.2 | Net load, curtailment, storage sizing, emissions |
+| v3.0 | System dispatch with conventional generation via PyPSA |
 
+Ideas and bug reports are welcome in [issues](https://github.com/koulakhilesh/OpenEnergy/issues).
 
-See the [open issues](https://github.com/koulakhilesh/OpenEnergy/issues) for a full list of proposed features (and known issues).
+## Data
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+The bundled prices come from Open Power System Data:
 
+> Open Power System Data. 2020. Data Package Time series. Version 2020-10-06.
+> https://doi.org/10.25832/time_series/2020-10-06. (Primary data from various sources,
+> for a complete list see URL).
 
-<!-- CONTRIBUTING -->
-## Contributing
-
-OpenEnergy thrives on the contributions of energy enthusiasts, developers, and researchers. Your contributions are what drive the growth and effectiveness of this tool, making the open-source community a fertile ground for innovation and collaboration. Every contribution, no matter how small, is valued and appreciated.
-
-If you have ideas or suggestions that could enhance OpenEnergy:
-
-1. **Fork the Project**: Create a copy of the project under your own account.
-2. **Create your Feature Branch**: `git checkout -b feature/YourFeature`
-3. **Make your Changes**: Implement your changes or improvements in your feature branch.
-4. **Commit your Changes**: `git commit -m 'Add YourFeature'`
-5. **Push to the Branch**: `git push origin feature/YourFeature`
-6. **Open a Pull Request**: Go to the original project and open a pull request with a clear description of your changes.
-
-Feel free to open an issue with the tag "enhancement" to discuss potential features or improvements. And don't forget to give the project a star if you find it useful!
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+MIT. See [LICENSE.txt](LICENSE.txt).
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
 ## Contact
 
-Akhilesh Koul | [koulakhilesh@gmail.com](mailto:koulakhilesh@gmail.com?subject=Hello) | [LinkedIn](https://linkedin.com/in/akhilesh-koul)
-
-
-Project Link: [https://github.com/koulakhilesh/OpenEnergy](https://github.com/koulakhilesh/OpenEnergy)
-
-
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-1. I am obliged to [Open Power System Data](https://open-power-system-data.org/data-sources) for providing data sources for price and solar related values.
-
-[contributors-shield]: https://img.shields.io/github/contributors/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[contributors-url]: https://github.com/koulakhilesh/OpenEnergy/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[forks-url]: https://github.com/koulakhilesh/OpenEnergy/network/members
-[issues-shield]: https://img.shields.io/github/issues/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[issues-url]: https://github.com/koulakhilesh/OpenEnergy/issues
-[license-shield]: https://img.shields.io/github/license/koulakhilesh/OpenEnergy.svg?style=for-the-badge
-[license-url]: https://github.com/koulakhilesh/OpenEnergy/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/akhilesh-koul
-[product-screenshot]: images/screenshot.png
+Akhilesh Koul · [koulakhilesh@gmail.com](mailto:koulakhilesh@gmail.com) ·
+[LinkedIn](https://linkedin.com/in/akhilesh-koul)
