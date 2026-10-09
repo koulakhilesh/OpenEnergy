@@ -12,6 +12,7 @@ import typer
 import openenergy
 from openenergy.data.opsd import OPSDCsvSource
 from openenergy.errors import OpenEnergyError
+from openenergy.metrics.capture import capture_by_year
 from openenergy.metrics.summary import Summary
 from openenergy.scenario import load_scenario, run_scenario, write_outputs
 
@@ -79,6 +80,37 @@ def compare(
         )
 
 
+@app.command()
+def capture(
+    path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")],
+    zone: Annotated[str, typer.Option("--zone", "-z", help="Bidding zone.")] = "GB_GBN",
+    technology: Annotated[
+        list[str] | None,
+        typer.Option("--technology", "-t", help="Technology (repeatable); default all."),
+    ] = None,
+) -> None:
+    """Captured price and capture rate per year for each renewable technology."""
+    with _reported_errors():
+        source = OPSDCsvSource(path)
+        prices = source.prices(zone)
+        rows = [
+            (tech, metrics)
+            for tech in technology or source.technologies(zone)
+            for metrics in capture_by_year(prices, source.profile(zone, tech))
+        ]
+    unit = f"{prices.currency}/MWh"
+    typer.echo(
+        f"{'year':<6}{'technology':<16}{'CF':>7}{'baseload':>11}{'captured':>11}"
+        f"{'capture':>9}{'neg-price':>11}   (prices in {unit})"
+    )
+    for tech, m in rows:
+        typer.echo(
+            f"{m.label:<6}{tech:<16}{m.capacity_factor:>7.1%}{m.baseload_price:>11.2f}"
+            f"{_number(m.captured_price):>11}{_percent(m.capture_rate):>9}"
+            f"{_percent(m.negative_price_share, digits=2):>11}"
+        )
+
+
 @data_app.command("info")
 def data_info(path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")]) -> None:
     """List price zones with currency, date range and data completeness."""
@@ -112,5 +144,9 @@ def _format_summary(name: str, s: Summary) -> str:
     return "\n  ".join(lines)
 
 
-def _percent(value: float | None) -> str:
-    return "n/a" if value is None else f"{value:.1%}"
+def _percent(value: float | None, digits: int = 1) -> str:
+    return "n/a" if value is None else f"{value:.{digits}%}"
+
+
+def _number(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.2f}"
