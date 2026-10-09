@@ -13,7 +13,14 @@ import openenergy
 from openenergy.data.opsd import OPSDCsvSource
 from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
-from openenergy.scenario import ScenarioRun, load_scenario, run_scenario, write_outputs
+from openenergy.scenario import (
+    ScenarioRun,
+    load_scenario,
+    parse_assignment,
+    run_scenario,
+    sweep,
+    write_outputs,
+)
 from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
 from openenergy.system.storage import sizing_grid
 
@@ -182,6 +189,28 @@ def _floats(text: str, name: str) -> list[float]:
     if not values:
         raise ConfigError(f"--{name} needs at least one value")
     return values
+
+
+@app.command(name="sweep")
+def sweep_command(
+    scenario: Annotated[Path, typer.Argument(help="Scenario YAML file.")],
+    assignments: Annotated[
+        list[str] | None,
+        typer.Option("--set", "-s", help="dotted.key=v1,v2 (repeatable)."),
+    ] = None,
+    out: Annotated[Path | None, typer.Option("--out", "-o", help="Write results CSV.")] = None,
+) -> None:
+    """Run a scenario for every combination of settings and rank by total revenue."""
+    with _reported_errors():
+        if not assignments:
+            raise ConfigError("give at least one --set key=v1,v2")
+        grid = dict(parse_assignment(text) for text in assignments)
+        table = sweep(scenario, grid)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            table.to_csv(out, index=False)
+    shown = table.drop(columns=["final_soh"]).astype(object).where(table.notna(), "n/a")
+    typer.echo(shown.to_string(index=False, float_format=lambda v: f"{v:,.2f}"))
 
 
 @data_app.command("info")

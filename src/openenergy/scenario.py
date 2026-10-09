@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 import dataclasses
+import itertools
 import json
+import math
+import re
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
@@ -46,6 +50,8 @@ ForecastMethod = Literal[
 ]
 # Prices loaded before data.start as forecaster history only; covers the 14-day lag.
 WARMUP_DAYS = 14
+MAX_SWEEP = 100
+_KEY = re.compile(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*")
 
 
 class _Strict(BaseModel):
@@ -221,6 +227,59 @@ class ScenarioRun:
 def load_scenario(path: str | Path) -> Scenario:
     """Read and validate a scenario; relative data paths resolve against the file."""
     path = Path(path)
+    return _validate_scenario(_read(path), path)
+
+
+def parse_assignment(text: str) -> tuple[str, list[Any]]:
+    """Parse ``dotted.key=v1,v2`` into the key and YAML-typed values."""
+    key, sep, values = text.partition("=")
+    parts = [part.strip() for part in values.split(",") if part.strip()]
+    if not sep or not _KEY.fullmatch(key) or not parts:
+        raise ConfigError(f"expected key=value[,value...], got {text!r}")
+    return key, [yaml.safe_load(part) for part in parts]
+
+
+def apply_overrides(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+    """A copy of ``raw`` with each dotted key set, creating nested mappings as needed."""
+    updated = copy.deepcopy(raw)
+    for key, value in overrides.items():
+        node = updated
+        *parents, leaf = key.split(".")
+        for part in parents:
+            child = node.setdefault(part, {})
+            if not isinstance(child, dict):
+                raise ConfigError(f"cannot set {key}: {part} is not a mapping")
+            node = child
+        node[leaf] = value
+    return updated
+
+
+def sweep(path: str | Path, grid: dict[str, list[Any]]) -> pd.DataFrame:
+    """Run a scenario for every combination of ``grid`` values, best total first."""
+    path = Path(path)
+    combinations = math.prod(len(values) for values in grid.values())
+    if combinations > MAX_SWEEP:
+        raise ConfigError(f"{combinations} combinations exceed the limit of {MAX_SWEEP}")
+    raw = _read(path)
+    rows = []
+    for values in itertools.product(*grid.values()):
+        overrides = dict(zip(grid, values, strict=True))
+        summary = run_scenario(_validate_scenario(apply_overrides(raw, overrides), path)).summary
+        rows.append(
+            {
+                **overrides,
+                "total": summary.total,
+                "revenue_per_mw_year": summary.revenue_per_mw_year,
+                "capture_ratio": summary.capture_ratio,
+                "equivalent_cycles": summary.equivalent_cycles,
+                "final_soh": summary.final_soh,
+                "emissions_t": summary.emissions_t,
+            }
+        )
+    return pd.DataFrame(rows).sort_values("total", ascending=False, ignore_index=True)
+
+
+def _read(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ConfigError(f"scenario file not found: {path}")
     try:
@@ -229,6 +288,10 @@ def load_scenario(path: str | Path) -> Scenario:
         raise ConfigError(f"{path}: invalid YAML: {exc}") from exc
     if not isinstance(raw, dict):
         raise ConfigError(f"{path}: scenario must be a mapping of settings")
+    return raw
+
+
+def _validate_scenario(raw: dict[str, Any], path: Path) -> Scenario:
     try:
         return Scenario.model_validate(raw, context={"base": path.parent})
     except pydantic.ValidationError as exc:
