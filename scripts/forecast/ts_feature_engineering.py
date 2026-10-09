@@ -182,9 +182,9 @@ class DataPreprocessor:
             y (array-like): The target values.
         """
 
-        assert (
-            len(df) >= self.history_length + self.forecast_length
-        ), "Input data must be at least history_length + forecast_length"
+        assert len(df) >= self.history_length + self.forecast_length, (
+            "Input data must be at least history_length + forecast_length"
+        )
 
         df_engineered, X_columns, y_columns = self.feature_engineer.transform(
             df, column_name=column_name, include_lead=include_lead

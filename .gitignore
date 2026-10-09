@@ -13,12 +13,27 @@ playground/__pycache__
 scripts/__pycache__
 tests/__pycache__
 
+env/
+
 # Development tools configurations
-.vscode
+.vscode/
+
+# virtual environments
+venv/
+.venv/
+ENV/
+env/
+venv.bak/
+openenergy_env/
+
+# pip/setuptools build artifacts
+build/
+dist/
+*.egg-info/
 
 # Miscellaneous
-_linkedin
-_posts
+_linkedin/
+_posts/
 .coverage
-models/prices
-playground
+models/prices/
+playground/

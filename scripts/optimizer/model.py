@@ -237,7 +237,9 @@ class GLPKOptimizationSolver(IModelSolver):
 
         # Check and log the solver's termination condition and status
         match result.solver.termination_condition:
-            case pyo.TerminationCondition.optimal if result.solver.status == pyo.SolverStatus.ok:
+            case pyo.TerminationCondition.optimal if (
+                result.solver.status == pyo.SolverStatus.ok
+            ):
                 self.logger.debug("Solution is optimal.")
             case (
                 pyo.TerminationCondition.infeasible

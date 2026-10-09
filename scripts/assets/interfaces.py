@@ -147,3 +147,46 @@ class IPVSystem:
             float: The degraded efficiency as a decimal (e.g., 0.14 for 14% efficiency after degradation).
         """
         pass
+
+
+class IWindSystem:
+    """
+    Interface for a Wind Generation System.
+    """
+
+    @abstractmethod
+    def calculate_generation(self, wind_speed_m_per_s: float, hours: float) -> float:
+        """
+        Calculates the electricity generation based on wind speed and turbine characteristics.
+
+        Args:
+            wind_speed_m_per_s (float): Wind speed in meters per second.
+            hours (float): Duration of generation period in hours.
+
+        Returns:
+            float: Generated electricity in MWh.
+        """
+        pass
+
+    @abstractmethod
+    def assess_degradation(self, years: float) -> float:
+        """
+        Assesses the degradation of the wind system's efficiency over time.
+
+        Args:
+            years (float): The number of years the system has been in operation.
+
+        Returns:
+            float: The degraded efficiency as a decimal (e.g., 0.95 for 95% efficiency after degradation).
+        """
+        pass
+
+    @abstractmethod
+    def get_power_curve(self) -> dict:
+        """
+        Gets the wind turbine power curve.
+
+        Returns:
+            dict: Mapping of wind speeds to power output ratios.
+        """
+        pass

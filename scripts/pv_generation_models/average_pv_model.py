@@ -37,9 +37,10 @@ class HistoricalAveragePVGenerationModel(IPVData):
         self.helper = PVDataHelper()
         self.prior_days = prior_days
         if self.interpolate:
-            self.data[self.GENERATION_COLUMN].interpolate(method="linear", inplace=True)
+            self.data = self.data.copy()
+            self.data[self.GENERATION_COLUMN] = self.data[self.GENERATION_COLUMN].interpolate(method="linear")
 
-    def get_generations(
+    def get_generation(
         self, date: datetime.date
     ) -> t.Tuple[t.List[float], t.List[float]]:
         """
@@ -66,6 +67,14 @@ class HistoricalAveragePVGenerationModel(IPVData):
         )
 
         return average_generations_last_week, generations_current_date
+
+    def get_generations(
+        self, date: datetime.date
+    ) -> t.Tuple[t.List[float], t.List[float]]:
+        """
+        Alias for get_generation to maintain backward compatibility.
+        """
+        return self.get_generation(date)
 
     def get_average_generations_last_week(
         self, last_week_data: pd.DataFrame

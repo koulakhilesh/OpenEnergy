@@ -45,9 +45,11 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
     """
 
     def fit(self, X, y, eval_set=None, early_stopping_rounds=None, sample_weight=None):
-        super(MultiOutputRegressor, self)._validate_data(
-            X, y, multi_output=True, accept_sparse="csc", dtype="numeric"
-        )
+        # Validate inputs using sklearn's validation utilities
+        from sklearn.utils.validation import check_X_y
+
+        X, y = check_X_y(X, y, multi_output=True, accept_sparse="csc", dtype="numeric")
+
         if y.ndim == 1:
             raise ValueError("y must be 2-dimensional")
 
@@ -59,14 +61,21 @@ class ProgressMultiOutputRegressor(MultiOutputRegressor):
                 if eval_set is not None
                 else None
             )
-            e = e.fit(
-                X,
-                y[:, i],
-                eval_set=single_eval_set,
-                early_stopping_rounds=early_stopping_rounds,
-                sample_weight=sample_weight,
-                verbose=100,
-            )
+
+            # Build fit arguments based on estimator type
+            fit_kwargs = {"X": X, "y": y[:, i]}
+
+            # Only add specific arguments if the estimator supports them
+            if single_eval_set is not None and hasattr(e, "eval_set"):
+                fit_kwargs["eval_set"] = single_eval_set
+            if sample_weight is not None:
+                fit_kwargs["sample_weight"] = sample_weight
+
+            # For XGBoost, only pass eval_set, not early_stopping_rounds in fit
+            if hasattr(e, "xgb_model"):  # This is an XGBoost estimator
+                fit_kwargs["verbose"] = False  # Reduce verbosity
+
+            e = e.fit(**fit_kwargs)
             self.estimators_.append(e)
 
         return self
@@ -107,10 +116,14 @@ class XGBModel(IModel):
             eval_set: The evaluation set for early stopping.
             early_stopping_rounds: The number of early stopping rounds.
         """
+        # Only pass arguments that ProgressMultiOutputRegressor accepts
+        fit_kwargs = {}
+        if eval_set is not None:
+            fit_kwargs["eval_set"] = eval_set
+        if early_stopping_rounds is not None:
+            fit_kwargs["early_stopping_rounds"] = early_stopping_rounds
 
-        self.model.fit(
-            X, y, eval_set=eval_set, early_stopping_rounds=early_stopping_rounds
-        )
+        self.model.fit(X, y, **fit_kwargs)
 
     def predict(self, X):
         """
@@ -186,9 +199,9 @@ class TimeSeriesForecaster(IForecaster, IEvaluator, ISaver, ILoader):
         Returns:
             array-like: The forecasted values.
         """
-        assert (
-            len(df) >= self.data_preprocessor.history_length
-        ), "Input data must be at least history_length"
+        assert len(df) >= self.data_preprocessor.history_length, (
+            "Input data must be at least history_length"
+        )
 
         # Feature engineer the dataframe
         df_engineered, X_columns, _ = self.data_preprocessor.feature_engineer.transform(
