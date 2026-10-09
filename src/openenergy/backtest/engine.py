@@ -21,9 +21,10 @@ from openenergy.dispatch.colocated import (
     optimise_colocated,
 )
 from openenergy.errors import ConfigError, DataError, InfeasibleDispatchError
-from openenergy.forecast.baseline import Forecaster
+from openenergy.forecast.baseline import Forecaster, NaiveLastWeek
 
 FloatArray = npt.NDArray[np.float64]
+CARBON_PLANNING = ("last_week", "actual")
 
 INTERVAL_COLUMNS = ["price", "forecast", "charge_mw", "discharge_mw", "energy_mwh", "revenue"]
 DAILY_COLUMNS = [
@@ -88,6 +89,30 @@ class Site:
     grid: GridConnection
 
 
+@dataclass(frozen=True, eq=False)
+class Carbon:
+    """Actual grid carbon intensity (gCO2/kWh) for accounting and, with a price, for dispatch.
+
+    ``planning`` sets what dispatch sees: ``last_week`` uses the same interval a week earlier
+    (two weeks if missing), cut off at the decision time like prices; ``actual`` uses the
+    real values and is an upper bound. NESO's archived "forecast" is not used: it is the
+    last forecast before each half-hour, so planning on it the day before would look ahead.
+    Reported money stays market revenue.
+    """
+
+    actual: pd.Series[float]
+    price_per_t: float = 0.0
+    planning: str = "last_week"
+
+    def __post_init__(self) -> None:
+        if not (math.isfinite(self.price_per_t) and self.price_per_t >= 0):
+            raise ConfigError(f"price_per_t must be non-negative, got {self.price_per_t}")
+        if self.planning not in CARBON_PLANNING:
+            raise ConfigError(
+                f"planning must be one of {', '.join(CARBON_PLANNING)}, got {self.planning!r}"
+            )
+
+
 @dataclass(frozen=True)
 class BacktestResult:
     """Interval and daily results; ``skipped`` maps unsimulated days to the reason."""
@@ -101,6 +126,7 @@ class BacktestResult:
     currency: str
     step_hours: float
     site: Site | None = None
+    carbon: Carbon | None = None
 
 
 @dataclass(frozen=True)
@@ -118,10 +144,12 @@ def run_backtest(
     config: BacktestConfig | None = None,
     days: Iterable[date] | None = None,
     site: Site | None = None,
+    carbon: Carbon | None = None,
 ) -> BacktestResult:
     """Simulate each UTC day in order; the battery ages through every calendar day in range.
 
-    With a ``site``, the battery shares a grid connection with renewable output.
+    With a ``site``, the battery shares a grid connection with renewable output. With
+    ``carbon``, emissions are reported and a carbon price steers dispatch.
     """
     config = config or BacktestConfig()
     dt = prices.step_hours
@@ -130,29 +158,53 @@ def run_backtest(
     daily: dict[date, dict[str, float]] = {}
     skipped: dict[date, str] = {}
     available = None if site is None else _on_grid(site.available_mw, prices)
+    required = [] if available is None else [available]
+    actual_ci = None
+    if carbon is not None:
+        actual_ci = carbon.actual.reindex(prices.prices.index)
+        required.append(actual_ci)
 
-    for day, step in _days(prices, forecaster, config, days, available):
+    for day, step in _days(prices, forecaster, config, days, required):
         row: dict[str, float] | None = None
         if isinstance(step, str):
             skipped[day] = step
         elif step is not None:
             day_prices, forecast = step
-            if site is None or available is None:
+            planning: FloatArray | str = forecast
+            if carbon is not None and actual_ci is not None and carbon.price_per_t > 0:
+                planning = _carbon_priced(forecast, day_prices, actual_ci, carbon, config)
+            if isinstance(planning, str):
+                skipped[day] = planning
+            elif site is None or available is None:
                 state, row = _battery_day(
-                    spec, state, day, day_prices, forecast, dt, config, frames
+                    spec, state, day, day_prices, forecast, planning, dt, config, frames
                 )
             else:
                 output = np.asarray(available.loc[day_prices.index], dtype=np.float64)
                 state, row = _site_day(
-                    spec, state, site.grid, day, day_prices, forecast, output, dt, config, frames
+                    spec,
+                    state,
+                    site.grid,
+                    day,
+                    day_prices,
+                    forecast,
+                    planning,
+                    output,
+                    dt,
+                    config,
+                    frames,
                 )
+            if actual_ci is not None and row is not None:
+                _add_emissions(frames[-1], row, actual_ci, dt)
         state = age(spec, state, hours=24.0)
         if row is not None:
             daily[day] = {**row, "soh": state.soh}
 
     if not daily:
         raise DataError(f"no days to simulate for {forecaster.name}; skipped {len(skipped)}")
-    columns = DAILY_COLUMNS if site is None else SITE_DAILY_COLUMNS
+    columns = list(DAILY_COLUMNS if site is None else SITE_DAILY_COLUMNS)
+    if carbon is not None:
+        columns.append("emissions_t")
     return BacktestResult(
         spec=spec,
         intervals=pd.concat(frames),
@@ -163,6 +215,7 @@ def run_backtest(
         currency=prices.currency,
         step_hours=dt,
         site=site,
+        carbon=carbon,
     )
 
 
@@ -179,7 +232,7 @@ def run_plant_backtest(
     available = _on_grid(site.available_mw, prices)
     daily: dict[date, dict[str, float]] = {}
     skipped: dict[date, str] = {}
-    for day, step in _days(prices, forecaster, config, days, available):
+    for day, step in _days(prices, forecaster, config, days, [available]):
         if isinstance(step, str):
             skipped[day] = step
         elif step is not None:
@@ -206,18 +259,19 @@ def _days(
     forecaster: Forecaster,
     config: BacktestConfig,
     days: Iterable[date] | None,
-    available: pd.Series[float] | None,
+    required: list[pd.Series[float]],
 ) -> Iterator[tuple[date, str | tuple[pd.Series[float], FloatArray] | None]]:
     """Yield every calendar day in range with a skip reason, (prices, forecast), or None.
 
-    None marks days outside the requested set; the battery still ages through them.
+    None marks days outside the requested set; the battery still ages through them. A day
+    is simulated only if prices and every ``required`` series cover it completely.
     """
     actual = prices.prices
     index = pd.DatetimeIndex(actual.index)
     complete = set(prices.complete_days())
-    if available is not None:
+    for series in required:
         ppd = prices.periods_per_day
-        counts = available.groupby(pd.DatetimeIndex(available.index).normalize()).count()
+        counts = series.groupby(pd.DatetimeIndex(series.index).normalize()).count()
         complete &= {ts.date() for ts in counts.index[counts == ppd]}
     first, last = index[0].date(), index[-1].date()
     requested = _calendar(first, last) if days is None else sorted(set(days))
@@ -230,7 +284,7 @@ def _days(
         if day not in wanted:
             yield day, None
         elif day not in complete:
-            yield day, "incomplete or missing actual prices or plant output"
+            yield day, "incomplete or missing prices, plant output or carbon intensity"
         else:
             day_prices = prices.day(day)
             start = pd.Timestamp(day, tz="UTC")
@@ -255,12 +309,13 @@ def _battery_day(
     day: date,
     day_prices: pd.Series[float],
     forecast: FloatArray,
+    planning: FloatArray,
     dt: float,
     config: BacktestConfig,
     frames: list[pd.DataFrame],
 ) -> tuple[BatteryState, dict[str, float]]:
     try:
-        plan = optimise_dispatch(spec, state, forecast, dt, config.dispatch)
+        plan = optimise_dispatch(spec, state, planning, dt, config.dispatch)
     except InfeasibleDispatchError as exc:
         raise InfeasibleDispatchError(f"{day}: {exc}") from exc
     outcome = apply_dispatch(spec, state, plan.charge_mw, plan.discharge_mw, dt)
@@ -282,7 +337,7 @@ def _battery_day(
     new = outcome.state
     row = {
         "revenue": float(revenue.sum()),
-        "expected_revenue": plan.expected_revenue,
+        "expected_revenue": float(forecast @ (plan.discharge_mw - plan.charge_mw) * dt),
         "charged_mwh": float(plan.charge_mw.sum() * dt),
         "discharged_mwh": float(plan.discharge_mw.sum() * dt),
         "equivalent_cycles": new.equivalent_cycles,
@@ -298,6 +353,7 @@ def _site_day(
     day: date,
     day_prices: pd.Series[float],
     forecast: FloatArray,
+    planning: FloatArray,
     available: FloatArray,
     dt: float,
     config: BacktestConfig,
@@ -305,7 +361,7 @@ def _site_day(
 ) -> tuple[BatteryState, dict[str, float]]:
     try:
         plan: ColocatedPlan = optimise_colocated(
-            spec, state, available, forecast, dt, grid, config.dispatch
+            spec, state, available, planning, dt, grid, config.dispatch
         )
     except InfeasibleDispatchError as exc:
         raise InfeasibleDispatchError(f"{day}: {exc}") from exc
@@ -337,7 +393,7 @@ def _site_day(
     row = {
         "revenue": float(revenue.sum()),
         "premium": float(premium.sum()),
-        "expected_revenue": plan.expected_revenue,
+        "expected_revenue": float(forecast @ plan.export_mw * dt),
         "available_mwh": float(available.sum() * dt),
         "curtailed_mwh": float(plan.curtailed_mw.sum() * dt),
         "charged_mwh": float(plan.charge_mw.sum() * dt),
@@ -346,6 +402,42 @@ def _site_day(
         "energy_mwh": new.energy_mwh,
     }
     return new, row
+
+
+def _carbon_priced(
+    forecast: FloatArray,
+    day_prices: pd.Series[float],
+    actual_ci: pd.Series[float],
+    carbon: Carbon,
+    config: BacktestConfig,
+) -> FloatArray | str:
+    """Planning price plus the carbon price on planned intensity, or a reason to skip the day."""
+    index = pd.DatetimeIndex(day_prices.index)
+    if carbon.planning == "actual":
+        ci = np.asarray(actual_ci.loc[index], dtype=np.float64)
+    else:
+        cutoff = index[0] - pd.Timedelta(hours=config.lead_hours)
+        history = actual_ci[actual_ci.index < cutoff].dropna()
+        try:
+            ci = NaiveLastWeek().forecast(history, index)
+        except DataError as exc:
+            return f"carbon intensity: {exc}"
+    return forecast + carbon.price_per_t * ci / 1000.0
+
+
+def _add_emissions(
+    frame: pd.DataFrame, row: dict[str, float], intensity: pd.Series[float], dt: float
+) -> None:
+    """Net emissions in tCO2: imports add grid emissions, exports displace them."""
+    ci = np.asarray(intensity.loc[frame.index], dtype=np.float64)
+    if "export_mw" in frame:
+        export = frame["export_mw"].to_numpy(dtype=np.float64)
+    else:
+        export = (frame["discharge_mw"] - frame["charge_mw"]).to_numpy(dtype=np.float64)
+    emissions = -ci * export * dt / 1000.0
+    frame["intensity"] = ci
+    frame["emissions_t"] = emissions
+    row["emissions_t"] = float(emissions.sum())
 
 
 def _calendar(first: date, last: date) -> list[date]:

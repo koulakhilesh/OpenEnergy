@@ -32,8 +32,13 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   capture rate by year (`openenergy capture`).
 - **Co-located sites**: a plant and a battery behind one grid connection with export and
   import limits and optional support payments, compared with separate connections.
-- **Data**: hourly GB day-ahead prices for 2015–2020 and solar and wind capacity factors
-  for 2015–2019 from Open Power System Data are bundled.
+- **System analysis**: net load, ramps and renewable surplus as wind and solar scale,
+  storage sizing for the system (`openenergy storage`) and for a site (`openenergy sweep`).
+- **Emissions**: net emissions from GB carbon intensity and an optional carbon price that
+  steers dispatch, planned without lookahead.
+- **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
+  and capacity factors for 2015–2019 from Open Power System Data, and half-hourly GB carbon
+  intensity for 2018–2020 from NESO, are bundled.
 
 ## Quick start
 
@@ -43,7 +48,7 @@ Requires Python 3.14 and [uv](https://docs.astral.sh/uv/).
 git clone https://github.com/koulakhilesh/OpenEnergy.git
 cd OpenEnergy
 uv sync --extra forecast
-uv run openenergy compare examples/*.yaml
+uv run openenergy compare examples/gb-2019-{naive,ml,perfect}.yaml
 ```
 
 ```text
@@ -79,22 +84,30 @@ uv run mkdocs serve
 |---------|-------|
 | v2.0 | Battery arbitrage backtesting |
 | v2.1 | PV and wind assets, captured price, co-located storage |
-| v2.2 | Net load, curtailment, storage sizing, emissions |
+| v2.2 | Net load, surplus, storage sizing, emissions |
 | v3.0 | System dispatch with conventional generation via PyPSA |
 
 Ideas and bug reports are welcome in [issues](https://github.com/koulakhilesh/OpenEnergy/issues).
 
 ## Data
 
-The bundled prices come from Open Power System Data:
+Prices, load and renewable generation come from Open Power System Data:
 
 > Open Power System Data. 2020. Data Package Time series. Version 2020-10-06.
 > https://doi.org/10.25832/time_series/2020-10-06. (Primary data from various sources,
 > for a complete list see URL).
 
+GB carbon intensity comes from the National Energy System Operator (NESO) Carbon Intensity
+API, https://carbonintensity.org.uk/, licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+See [data/time_series](data/time_series/README.md) and
+[data/carbon_intensity](data/carbon_intensity/README.md) for sources, changes and known
+issues. OpenEnergy is not affiliated with or endorsed by either provider.
+
 ## License
 
-MIT. See [LICENSE.txt](LICENSE.txt).
+MIT for the code; see [LICENSE.txt](LICENSE.txt). Bundled data keeps its own licence.
 
 ## Contact
 

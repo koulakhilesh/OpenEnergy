@@ -11,9 +11,18 @@ import typer
 
 import openenergy
 from openenergy.data.opsd import OPSDCsvSource
-from openenergy.errors import OpenEnergyError
+from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
-from openenergy.scenario import ScenarioRun, load_scenario, run_scenario, write_outputs
+from openenergy.scenario import (
+    ScenarioRun,
+    load_scenario,
+    parse_assignment,
+    run_scenario,
+    sweep,
+    write_outputs,
+)
+from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
+from openenergy.system.storage import sizing_grid
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help=__doc__)
 data_app = typer.Typer(no_args_is_help=True, help="Inspect market data files.")
@@ -110,6 +119,100 @@ def capture(
         )
 
 
+@app.command()
+def netload(
+    path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")],
+    zone: Annotated[str, typer.Option("--zone", "-z", help="Bidding zone.")] = "GB_GBN",
+    scale_wind: Annotated[float, typer.Option(help="Multiply wind output by this.")] = 1.0,
+    scale_solar: Annotated[float, typer.Option(help="Multiply solar output by this.")] = 1.0,
+    must_run: Annotated[float, typer.Option(help="Must-run floor in MW.")] = 0.0,
+) -> None:
+    """Net load, ramps and renewable surplus per year, optionally with renewables scaled."""
+    with _reported_errors():
+        system = load_system(OPSDCsvSource(path), zone)
+        rows = netload_by_year(system.frame, scale_wind, scale_solar, must_run)
+    typer.echo(
+        f"net load for {zone}: wind x{scale_wind:g}, solar x{scale_solar:g}, "
+        f"must-run {must_run:,.0f} MW (GW unless stated; "
+        f"{system.load_flagged} load glitches removed)"
+    )
+    typer.echo(
+        f"{'year':<6}{'RE share':>9}{'mean':>7}{'peak':>7}{'min':>7}{'ramp1h':>8}{'ramp3h':>8}"
+        f"{'surplus TWh':>12}{'hours':>7}{'of RE':>7}{'GBP/MWh per GW':>16}"
+    )
+    for s in rows:
+        slope = "n/a" if s.price_slope_per_gw is None else f"{s.price_slope_per_gw:.2f}"
+        typer.echo(
+            f"{s.year:<6}{s.renewable_share:>9.1%}{s.mean_net_mw / 1e3:>7.1f}"
+            f"{s.peak_net_mw / 1e3:>7.1f}{s.min_net_mw / 1e3:>7.1f}"
+            f"{s.ramp_1h_p99_mw / 1e3:>8.1f}{s.ramp_3h_p99_mw / 1e3:>8.1f}"
+            f"{s.surplus_mwh / 1e6:>12.2f}{s.surplus_hours:>7}{s.surplus_share:>7.1%}{slope:>16}"
+        )
+    typer.echo("ramps are 99th percentiles of absolute hourly and 3-hour changes")
+
+
+@app.command()
+def storage(
+    path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")],
+    zone: Annotated[str, typer.Option("--zone", "-z", help="Bidding zone.")] = "GB_GBN",
+    scale_wind: Annotated[float, typer.Option(help="Multiply wind output by this.")] = 1.0,
+    scale_solar: Annotated[float, typer.Option(help="Multiply solar output by this.")] = 1.0,
+    must_run: Annotated[float, typer.Option(help="Must-run floor in MW.")] = 0.0,
+    power: Annotated[str, typer.Option(help="Fleet powers in MW, comma-separated.")] = (
+        "1000,5000,10000,20000"
+    ),
+    hours: Annotated[str, typer.Option(help="Durations in hours, comma-separated.")] = ("2,4,8,24"),
+) -> None:
+    """Share of renewable surplus absorbed by storage fleets of each power and duration."""
+    with _reported_errors():
+        powers, durations = _floats(power, "power"), _floats(hours, "hours")
+        system = load_system(OPSDCsvSource(path), zone)
+        net = net_load(system.frame, scale_wind, scale_solar)
+        grid = sizing_grid(net, powers, durations, must_run_mw=must_run)
+    total = float(surplus(net, must_run).sum())
+    typer.echo(
+        f"surplus absorbed: wind x{scale_wind:g}, solar x{scale_solar:g}, "
+        f"must-run {must_run:,.0f} MW, surplus {total / 1e6:,.2f} TWh over the data"
+    )
+    table = grid.pivot(index="power_mw", columns="hours", values="absorbed_share")
+    typer.echo(f"{'GW':>8}" + "".join(f"{f'{h:g}h':>9}" for h in table.columns))
+    for power_mw in table.index:
+        shares = "".join(f"{share:>9.1%}" for share in table.loc[power_mw])
+        typer.echo(f"{power_mw / 1e3:>8.1f}{shares}")
+
+
+def _floats(text: str, name: str) -> list[float]:
+    try:
+        values = [float(part) for part in text.split(",") if part.strip()]
+    except ValueError as exc:
+        raise ConfigError(f"--{name} must be comma-separated numbers, got {text!r}") from exc
+    if not values:
+        raise ConfigError(f"--{name} needs at least one value")
+    return values
+
+
+@app.command(name="sweep")
+def sweep_command(
+    scenario: Annotated[Path, typer.Argument(help="Scenario YAML file.")],
+    assignments: Annotated[
+        list[str] | None,
+        typer.Option("--set", "-s", help="dotted.key=v1,v2 (repeatable)."),
+    ] = None,
+    out: Annotated[Path | None, typer.Option("--out", "-o", help="Write results CSV.")] = None,
+) -> None:
+    """Run a scenario for every combination of settings and rank by total revenue."""
+    with _reported_errors():
+        if not assignments:
+            raise ConfigError("give at least one --set key=v1,v2")
+        grid = dict(parse_assignment(text) for text in assignments)
+        table = sweep(scenario, grid)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            table.to_csv(out, index=False)
+    shown = table.drop(columns=["final_soh"]).astype(object).where(table.notna(), "n/a")
+    typer.echo(shown.to_string(index=False, float_format=lambda v: f"{v:,.2f}"))
+
+
 @data_app.command("info")
 def data_info(path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")]) -> None:
     """List price zones with currency, date range and data completeness."""
@@ -151,6 +254,8 @@ def _format_run(run: ScenarioRun) -> str:
         f"forecast MAE / RMSE   {s.forecast_mae:,.2f} / {s.forecast_rmse:,.2f} {money}/MWh",
         f"capture ratio         {_percent(s.capture_ratio)}",
     ]
+    if s.emissions_t is not None:
+        lines.append(f"net emissions         {s.emissions_t:,.1f} tCO2 (average intensity)")
     if run.plant_capture is not None:
         p = run.plant_capture
         lines.append(

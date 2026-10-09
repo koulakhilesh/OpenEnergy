@@ -6,6 +6,10 @@
 
 ::: openenergy.data.opsd
 
+::: openenergy.data.carbon
+
+::: openenergy.data.quality
+
 ## Assets
 
 ::: openenergy.assets.battery
@@ -31,6 +35,12 @@
 ::: openenergy.metrics.summary
 
 ::: openenergy.metrics.capture
+
+## System analysis
+
+::: openenergy.system.netload
+
+::: openenergy.system.storage
 
 ## Scenarios
 

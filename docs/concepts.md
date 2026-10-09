@@ -34,6 +34,11 @@ $\kappa$ per MWh of throughput:
 
 $$\max \sum_t \hat p_t\, (d_t - c_t)\, \Delta t - \kappa \sum_t (c_t + d_t)\, \Delta t$$
 
+With a carbon price $\lambda$ (currency per tCO2), the planning price becomes
+$\hat p_t + \lambda \hat e_t / 1000$ for planned carbon intensity $\hat e_t$ in gCO2/kWh,
+so importing is dearer and exporting worth more when the grid is carbon-intensive. Reported
+revenue stays at market prices; see [System analysis](guides/system.md#emissions).
+
 subject to the energy balance above for $t = 0 \dots T-1$ with $E_0$ fixed, and:
 
 - $0 \le c_t \le P\, u_t$ and $0 \le d_t \le P\,(1 - u_t)$ with $u_t \in \{0, 1\}$, so the

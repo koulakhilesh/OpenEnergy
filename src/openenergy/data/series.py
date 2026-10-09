@@ -6,11 +6,14 @@ import dataclasses
 import re
 from dataclasses import dataclass, field
 from datetime import date
-from typing import overload
+from typing import TYPE_CHECKING, overload
 
 import pandas as pd
 
 from openenergy.errors import DataError
+
+if TYPE_CHECKING:
+    from openenergy.data.carbon import IntensitySeries
 
 _DAY = pd.Timedelta(days=1)
 _HOUR = pd.Timedelta(hours=1)
@@ -98,9 +101,11 @@ class ProfileSeries:
 def fill_gaps(series: PriceSeries, max_gap_hours: float) -> tuple[PriceSeries, int]: ...
 @overload
 def fill_gaps(series: ProfileSeries, max_gap_hours: float) -> tuple[ProfileSeries, int]: ...
+@overload
+def fill_gaps(series: IntensitySeries, max_gap_hours: float) -> tuple[IntensitySeries, int]: ...
 def fill_gaps(
-    series: PriceSeries | ProfileSeries, max_gap_hours: float
-) -> tuple[PriceSeries | ProfileSeries, int]:
+    series: PriceSeries | ProfileSeries | IntensitySeries, max_gap_hours: float
+) -> tuple[PriceSeries | ProfileSeries | IntensitySeries, int]:
     """Linearly interpolate interior gaps no longer than ``max_gap_hours``.
 
     Returns the filled series and the number of intervals filled.

@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 import dataclasses
+import itertools
 import json
+import math
+import re
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
@@ -20,11 +24,13 @@ from openenergy.assets.renewable import RenewableSpec
 from openenergy.backtest.engine import (
     BacktestConfig,
     BacktestResult,
+    Carbon,
     PlantResult,
     Site,
     run_backtest,
     run_plant_backtest,
 )
+from openenergy.data.carbon import CARBON_ATTRIBUTION, CarbonIntensitySource
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.series import PriceSeries, fill_gaps
 from openenergy.dispatch.arbitrage import DispatchConfig
@@ -44,10 +50,20 @@ ForecastMethod = Literal[
 ]
 # Prices loaded before data.start as forecaster history only; covers the 14-day lag.
 WARMUP_DAYS = 14
+MAX_SWEEP = 100
+_KEY = re.compile(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*")
 
 
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
+
+
+def _resolve(value: Path, info: ValidationInfo) -> Path:
+    """Resolve a path relative to the scenario file's directory."""
+    base = (info.context or {}).get("base")
+    if base is not None and not value.is_absolute():
+        value = Path(base) / value
+    return value.resolve()
 
 
 class DataSection(_Strict):
@@ -61,10 +77,7 @@ class DataSection(_Strict):
     @pydantic.field_validator("path")
     @classmethod
     def _resolve_path(cls, value: Path, info: ValidationInfo) -> Path:
-        base = (info.context or {}).get("base")
-        if base is not None and not value.is_absolute():
-            value = Path(base) / value
-        return value.resolve()
+        return _resolve(value, info)
 
 
 class ForecastSection(_Strict):
@@ -122,6 +135,19 @@ class GridSection(_Strict):
     premium_per_mwh: float = 0.0
 
 
+class CarbonSection(_Strict):
+    """Carbon intensity file, an optional carbon price, and what dispatch plans on."""
+
+    path: Path
+    price_per_t: float = Field(default=0.0, ge=0)
+    planning: Literal["last_week", "actual"] = "last_week"
+
+    @pydantic.field_validator("path")
+    @classmethod
+    def _resolve_path(cls, value: Path, info: ValidationInfo) -> Path:
+        return _resolve(value, info)
+
+
 class Scenario(_Strict):
     # Restricted so the name is safe to use as an output directory.
     name: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
@@ -132,6 +158,7 @@ class Scenario(_Strict):
     lead_hours: float = Field(default=12.0, ge=0)
     assets: AssetsSection | None = None
     grid: GridSection | None = None
+    carbon: CarbonSection | None = None
 
     @pydantic.field_validator("forecast", mode="before")
     @classmethod
@@ -194,11 +221,65 @@ class ScenarioRun:
     colocation: Colocation | None = None
     plant_capture: CaptureMetrics | None = None
     clipped_intervals: int = 0
+    carbon_rejected: int | None = None
 
 
 def load_scenario(path: str | Path) -> Scenario:
     """Read and validate a scenario; relative data paths resolve against the file."""
     path = Path(path)
+    return _validate_scenario(_read(path), path)
+
+
+def parse_assignment(text: str) -> tuple[str, list[Any]]:
+    """Parse ``dotted.key=v1,v2`` into the key and YAML-typed values."""
+    key, sep, values = text.partition("=")
+    parts = [part.strip() for part in values.split(",") if part.strip()]
+    if not sep or not _KEY.fullmatch(key) or not parts:
+        raise ConfigError(f"expected key=value[,value...], got {text!r}")
+    return key, [yaml.safe_load(part) for part in parts]
+
+
+def apply_overrides(raw: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+    """A copy of ``raw`` with each dotted key set, creating nested mappings as needed."""
+    updated = copy.deepcopy(raw)
+    for key, value in overrides.items():
+        node = updated
+        *parents, leaf = key.split(".")
+        for part in parents:
+            child = node.setdefault(part, {})
+            if not isinstance(child, dict):
+                raise ConfigError(f"cannot set {key}: {part} is not a mapping")
+            node = child
+        node[leaf] = value
+    return updated
+
+
+def sweep(path: str | Path, grid: dict[str, list[Any]]) -> pd.DataFrame:
+    """Run a scenario for every combination of ``grid`` values, best total first."""
+    path = Path(path)
+    combinations = math.prod(len(values) for values in grid.values())
+    if combinations > MAX_SWEEP:
+        raise ConfigError(f"{combinations} combinations exceed the limit of {MAX_SWEEP}")
+    raw = _read(path)
+    rows = []
+    for values in itertools.product(*grid.values()):
+        overrides = dict(zip(grid, values, strict=True))
+        summary = run_scenario(_validate_scenario(apply_overrides(raw, overrides), path)).summary
+        rows.append(
+            {
+                **overrides,
+                "total": summary.total,
+                "revenue_per_mw_year": summary.revenue_per_mw_year,
+                "capture_ratio": summary.capture_ratio,
+                "equivalent_cycles": summary.equivalent_cycles,
+                "final_soh": summary.final_soh,
+                "emissions_t": summary.emissions_t,
+            }
+        )
+    return pd.DataFrame(rows).sort_values("total", ascending=False, ignore_index=True)
+
+
+def _read(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ConfigError(f"scenario file not found: {path}")
     try:
@@ -207,6 +288,10 @@ def load_scenario(path: str | Path) -> Scenario:
         raise ConfigError(f"{path}: invalid YAML: {exc}") from exc
     if not isinstance(raw, dict):
         raise ConfigError(f"{path}: scenario must be a mapping of settings")
+    return raw
+
+
+def _validate_scenario(raw: dict[str, Any], path: Path) -> Scenario:
     try:
         return Scenario.model_validate(raw, context={"base": path.parent})
     except pydantic.ValidationError as exc:
@@ -234,14 +319,17 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
 
     forecaster = _forecaster(scenario, source, prices)
     site, clipped = _site(scenario, source, prices, load_start)
-    result = run_backtest(scenario.battery, prices, forecaster, config, days=days, site=site)
+    carbon, rejected = _carbon(scenario, prices, load_start)
+    result = run_backtest(
+        scenario.battery, prices, forecaster, config, days=days, site=site, carbon=carbon
+    )
     simulated = list(result.daily.index)
     benchmark: BacktestResult | None = None
     if scenario.forecast.method == "perfect_foresight":
         summary = summarise(result, benchmark=result)
     else:
         benchmark = run_backtest(
-            scenario.battery, prices, PerfectForesight(prices), config, simulated, site
+            scenario.battery, prices, PerfectForesight(prices), config, simulated, site, carbon
         )
         summary = summarise(result, benchmark=benchmark)
 
@@ -252,7 +340,9 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
         plant = run_plant_backtest(
             Site(site.available_mw, own), prices, forecaster, config, simulated
         )
-        battery = run_backtest(scenario.battery, prices, forecaster, config, simulated)
+        battery = run_backtest(
+            scenario.battery, prices, forecaster, config, simulated, carbon=carbon
+        )
         colocation = _compare(result, plant, battery)
         output = site.available_mw[_in_days(site.available_mw, simulated)]
         plant_capture = capture_metrics(prices, output, capacity, label="plant")
@@ -265,6 +355,7 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
         colocation=colocation,
         plant_capture=plant_capture,
         clipped_intervals=clipped,
+        carbon_rejected=rejected,
     )
 
 
@@ -291,8 +382,32 @@ def write_outputs(run: ScenarioRun, directory: str | Path) -> Path:
             "Plans use actual plant output (perfect generation foresight), so co-location "
             "results are an upper bound."
         )
+    if run.carbon_rejected is not None:
+        payload["carbon_attribution"] = CARBON_ATTRIBUTION
+        payload["carbon_rejected_values"] = run.carbon_rejected
+        payload["carbon_note"] = (
+            "Emissions use average grid carbon intensity; storage changes the marginal plant, "
+            "whose emissions can differ. Negative emissions_t means net emissions avoided. "
+            f"Dispatch planned on {run.scenario.carbon.planning if run.scenario.carbon else ''} "
+            "intensity."
+        )
     (out / "summary.json").write_text(json.dumps(payload, indent=2) + "\n")
     return out
+
+
+def _carbon(
+    scenario: Scenario, prices: PriceSeries, start: date | None
+) -> tuple[Carbon | None, int | None]:
+    section = scenario.carbon
+    if section is None:
+        return None, None
+    # Two weeks of extra history so last-week planning works from the first simulated day.
+    history_start = start - timedelta(days=WARMUP_DAYS) if start else None
+    loaded = CarbonIntensitySource(section.path).intensity(
+        "actual", history_start, scenario.data.end, step=prices.step
+    )
+    actual, _ = fill_gaps(loaded, scenario.data.max_gap_hours)
+    return Carbon(actual.values, section.price_per_t, section.planning), loaded.rejected
 
 
 def _site(
