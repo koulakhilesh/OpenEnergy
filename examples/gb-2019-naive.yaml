@@ -1,0 +1,18 @@
+# GB 2019, 1 MW / 2 MWh battery planned on last week's prices.
+# Run: uv run openenergy run examples/gb-2019-naive.yaml
+name: gb-2019-naive
+data:
+  path: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  zone: GB_GBN
+  start: 2019-01-01
+  end: 2019-12-31
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
+  cycle_fade: 0.00002
+  calendar_fade: 0.01
+forecast: naive_last_week
+dispatch:
+  degradation_cost: 5

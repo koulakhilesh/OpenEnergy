@@ -1,0 +1,18 @@
+# Upper bound: the same battery planned on the actual prices.
+# Compare all three: uv run openenergy compare examples/*.yaml
+name: gb-2019-perfect
+data:
+  path: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  zone: GB_GBN
+  start: 2019-01-01
+  end: 2019-12-31
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
+  cycle_fade: 0.00002
+  calendar_fade: 0.01
+forecast: perfect_foresight
+dispatch:
+  degradation_cost: 5
