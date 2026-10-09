@@ -89,7 +89,7 @@ def optimise_dispatch(
     cost[d : d + n] = (price - config.degradation_cost) * dt
 
     col_lower = np.zeros(num_col)
-    col_upper = np.full(num_col, power)
+    col_upper = np.full(num_col, power, dtype=np.float64)
     col_lower[e : e + n + 1] = lower
     col_upper[e : e + n + 1] = upper
     col_lower[e] = col_upper[e] = state.energy_mwh

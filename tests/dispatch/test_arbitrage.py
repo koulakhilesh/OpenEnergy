@@ -119,6 +119,13 @@ def test_never_charges_and_discharges_together_at_negative_prices() -> None:
     assert plan.expected_revenue == pytest.approx(50 * (1 - 0.81))
 
 
+def test_integer_ratings_do_not_truncate_bounds() -> None:
+    spec = BatterySpec(power_mw=1, energy_mwh=2)
+    state = dataclasses.replace(spec.initial_state(), energy_mwh=1.9)
+    plan = optimise_dispatch(spec, state, [50.0, 110.0], 1.0)
+    assert plan.energy_mwh[0] == pytest.approx(1.9)
+
+
 def test_plan_is_physically_feasible() -> None:
     rng = np.random.default_rng(7)
     spec = battery(
