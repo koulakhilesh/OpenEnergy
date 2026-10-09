@@ -14,6 +14,7 @@ from openenergy.data.opsd import OPSDCsvSource
 from openenergy.errors import OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
 from openenergy.scenario import ScenarioRun, load_scenario, run_scenario, write_outputs
+from openenergy.system.netload import load_system, netload_by_year
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help=__doc__)
 data_app = typer.Typer(no_args_is_help=True, help="Inspect market data files.")
@@ -108,6 +109,38 @@ def capture(
             f"{_number(m.captured_price):>11}{_percent(m.capture_rate):>9}"
             f"{_percent(m.negative_price_share, digits=2):>11}"
         )
+
+
+@app.command()
+def netload(
+    path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")],
+    zone: Annotated[str, typer.Option("--zone", "-z", help="Bidding zone.")] = "GB_GBN",
+    scale_wind: Annotated[float, typer.Option(help="Multiply wind output by this.")] = 1.0,
+    scale_solar: Annotated[float, typer.Option(help="Multiply solar output by this.")] = 1.0,
+    must_run: Annotated[float, typer.Option(help="Must-run floor in MW.")] = 0.0,
+) -> None:
+    """Net load, ramps and renewable surplus per year, optionally with renewables scaled."""
+    with _reported_errors():
+        system = load_system(OPSDCsvSource(path), zone)
+        rows = netload_by_year(system.frame, scale_wind, scale_solar, must_run)
+    typer.echo(
+        f"net load for {zone}: wind x{scale_wind:g}, solar x{scale_solar:g}, "
+        f"must-run {must_run:,.0f} MW (GW unless stated; "
+        f"{system.load_flagged} load glitches removed)"
+    )
+    typer.echo(
+        f"{'year':<6}{'RE share':>9}{'mean':>7}{'peak':>7}{'min':>7}{'ramp1h':>8}{'ramp3h':>8}"
+        f"{'surplus TWh':>12}{'hours':>7}{'of RE':>7}{'GBP/MWh per GW':>16}"
+    )
+    for s in rows:
+        slope = "n/a" if s.price_slope_per_gw is None else f"{s.price_slope_per_gw:.2f}"
+        typer.echo(
+            f"{s.year:<6}{s.renewable_share:>9.1%}{s.mean_net_mw / 1e3:>7.1f}"
+            f"{s.peak_net_mw / 1e3:>7.1f}{s.min_net_mw / 1e3:>7.1f}"
+            f"{s.ramp_1h_p99_mw / 1e3:>8.1f}{s.ramp_3h_p99_mw / 1e3:>8.1f}"
+            f"{s.surplus_mwh / 1e6:>12.2f}{s.surplus_hours:>7}{s.surplus_share:>7.1%}{slope:>16}"
+        )
+    typer.echo("ramps are 99th percentiles of absolute hourly and 3-hour changes")
 
 
 @data_app.command("info")
