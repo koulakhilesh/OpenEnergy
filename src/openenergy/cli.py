@@ -11,10 +11,11 @@ import typer
 
 import openenergy
 from openenergy.data.opsd import OPSDCsvSource
-from openenergy.errors import OpenEnergyError
+from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
 from openenergy.scenario import ScenarioRun, load_scenario, run_scenario, write_outputs
-from openenergy.system.netload import load_system, netload_by_year
+from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
+from openenergy.system.storage import sizing_grid
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help=__doc__)
 data_app = typer.Typer(no_args_is_help=True, help="Inspect market data files.")
@@ -141,6 +142,46 @@ def netload(
             f"{s.surplus_mwh / 1e6:>12.2f}{s.surplus_hours:>7}{s.surplus_share:>7.1%}{slope:>16}"
         )
     typer.echo("ramps are 99th percentiles of absolute hourly and 3-hour changes")
+
+
+@app.command()
+def storage(
+    path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")],
+    zone: Annotated[str, typer.Option("--zone", "-z", help="Bidding zone.")] = "GB_GBN",
+    scale_wind: Annotated[float, typer.Option(help="Multiply wind output by this.")] = 1.0,
+    scale_solar: Annotated[float, typer.Option(help="Multiply solar output by this.")] = 1.0,
+    must_run: Annotated[float, typer.Option(help="Must-run floor in MW.")] = 0.0,
+    power: Annotated[str, typer.Option(help="Fleet powers in MW, comma-separated.")] = (
+        "1000,5000,10000,20000"
+    ),
+    hours: Annotated[str, typer.Option(help="Durations in hours, comma-separated.")] = ("2,4,8,24"),
+) -> None:
+    """Share of renewable surplus absorbed by storage fleets of each power and duration."""
+    with _reported_errors():
+        powers, durations = _floats(power, "power"), _floats(hours, "hours")
+        system = load_system(OPSDCsvSource(path), zone)
+        net = net_load(system.frame, scale_wind, scale_solar)
+        grid = sizing_grid(net, powers, durations, must_run_mw=must_run)
+    total = float(surplus(net, must_run).sum())
+    typer.echo(
+        f"surplus absorbed: wind x{scale_wind:g}, solar x{scale_solar:g}, "
+        f"must-run {must_run:,.0f} MW, surplus {total / 1e6:,.2f} TWh over the data"
+    )
+    table = grid.pivot(index="power_mw", columns="hours", values="absorbed_share")
+    typer.echo(f"{'GW':>8}" + "".join(f"{f'{h:g}h':>9}" for h in table.columns))
+    for power_mw in table.index:
+        shares = "".join(f"{share:>9.1%}" for share in table.loc[power_mw])
+        typer.echo(f"{power_mw / 1e3:>8.1f}{shares}")
+
+
+def _floats(text: str, name: str) -> list[float]:
+    try:
+        values = [float(part) for part in text.split(",") if part.strip()]
+    except ValueError as exc:
+        raise ConfigError(f"--{name} must be comma-separated numbers, got {text!r}") from exc
+    if not values:
+        raise ConfigError(f"--{name} needs at least one value")
+    return values
 
 
 @data_app.command("info")
