@@ -1,0 +1,21 @@
+# GB 2019 battery trading day-ahead prices with a carbon price steering dispatch.
+# Carbon intensity: NESO Carbon Intensity API (CC BY 4.0), see data/carbon_intensity.
+# Run: uv run openenergy run examples/gb-2019-carbon.yaml
+name: gb-2019-carbon
+data:
+  path: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  zone: GB_GBN
+  start: 2019-01-01
+  end: 2019-12-31
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
+forecast: naive_last_week
+dispatch:
+  degradation_cost: 5
+carbon:
+  path: ../data/carbon_intensity/gb_national.csv
+  price_per_t: 50
+  planning: last_week

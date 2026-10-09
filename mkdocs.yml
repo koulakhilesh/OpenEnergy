@@ -49,6 +49,7 @@ nav:
       - Scenarios: guides/scenarios.md
       - Command line: guides/cli.md
       - Research with the Python API: guides/research.md
+      - System analysis: guides/system.md
   - Data: data.md
   - API reference: api.md
 

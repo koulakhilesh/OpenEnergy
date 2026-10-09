@@ -102,6 +102,26 @@ Only valid with `assets`.
 | `import_limit_mw` | export limit | Grid charging limit; `0` forbids grid charging |
 | `premium_per_mwh` | `0` | Support paid per MWh of renewable output delivered |
 
+## `carbon`
+
+Optional. Reports net emissions and can steer dispatch with a carbon price.
+
+```yaml
+carbon:
+  path: ../data/carbon_intensity/gb_national.csv
+  price_per_t: 50
+  planning: last_week
+```
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `path` | required | NESO carbon-intensity CSV; relative to the scenario file |
+| `price_per_t` | `0` | Carbon price in currency per tCO2 added to planning prices |
+| `planning` | `last_week` | Intensity dispatch plans on: `last_week` (no lookahead) or `actual` (upper bound) |
+
+Carbon intensity covers 2018 to September 2020. Days without complete intensity are
+skipped.
+
 ## Outputs
 
 `openenergy run` writes to `outputs/<name>/` unless `--out` is given:
@@ -114,4 +134,6 @@ Only valid with `assets`.
 - `summary.json`: the headline metrics, skipped days with reasons, the number of
   interpolated intervals, the full validated configuration, the package version and the
   data attribution; sites add the co-location comparison, the plant's capture metrics,
-  the number of clipped capacity factors and the upper-bound note.
+  the number of clipped capacity factors and the upper-bound note; carbon runs add
+  `emissions_t`, the NESO attribution, rejected intensity values and the
+  average-intensity caveat.

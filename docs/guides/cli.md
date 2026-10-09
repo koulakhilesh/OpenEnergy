@@ -65,11 +65,41 @@ year  technology           CF   baseload   captured  capture  neg-price   (price
 ## `openenergy compare`
 
 ```bash
-uv run openenergy compare examples/*.yaml
+uv run openenergy compare examples/gb-2019-{naive,ml,perfect}.yaml
 ```
 
 Runs several scenarios and ranks them by revenue (plus any premium), with revenue per
 MW-year (battery-only scenarios), capture ratio and cycles.
+
+## `openenergy netload`
+
+```bash
+uv run openenergy netload data/time_series/time_series_60min_singleindex_filtered.csv \
+  [--scale-wind 3] [--scale-solar 3] [--must-run 8000]
+```
+
+Net load per year: renewable share, mean, peak and minimum, 99th-percentile 1-hour and
+3-hour ramps, surplus above the must-run floor and, for the actual system, the price slope
+per GW of net load. See [System analysis](system.md).
+
+## `openenergy storage`
+
+```bash
+uv run openenergy storage DATA --scale-wind 3 --scale-solar 3 --must-run 8000 \
+  --power 2000,5000,10000 --hours 4,8,24
+```
+
+Share of surplus absorbed by storage fleets of each power (MW) and duration (hours).
+
+## `openenergy sweep`
+
+```bash
+uv run openenergy sweep examples/gb-2019-naive.yaml \
+  --set battery.energy_mwh=1,2,4 --set dispatch.degradation_cost=0,5 [--out sweep.csv]
+```
+
+Runs a scenario for every combination of `--set dotted.key=v1,v2` values (up to 100) and
+ranks them by total revenue.
 
 ## `openenergy data info`
 
