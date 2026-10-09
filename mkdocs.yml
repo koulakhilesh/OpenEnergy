@@ -10,19 +10,34 @@ theme:
   name: material
   logo: assets/logo.png
   favicon: assets/logo.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Libre Franklin
+    code: JetBrains Mono
   features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
     - navigation.sections
+    - navigation.footer
     - navigation.top
-    - content.code.copy
+    - toc.follow
+    - search.suggest
     - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - content.tooltips
+  # Light paper first, like the website; the toggle remembers the reader's choice.
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: teal
+    - scheme: default
+      primary: custom
+      accent: custom
       toggle: {icon: material/weather-night, name: Dark mode}
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: teal
+    - scheme: slate
+      primary: custom
+      accent: custom
       toggle: {icon: material/weather-sunny, name: Light mode}
 
 nav:
@@ -39,13 +54,36 @@ nav:
 exclude_docs: |
   design/
 
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/solid/house
+      link: https://koulakhilesh.github.io/
+      name: Akhilesh Koul
+    - icon: fontawesome/brands/github
+      link: https://github.com/koulakhilesh/OpenEnergy
+      name: OpenEnergy on GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/akhilesh-koul
+      name: LinkedIn
+
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
+  - footnotes
   - tables
   - toc: {permalink: true}
   - pymdownx.arithmatex: {generic: true}
+  - pymdownx.details
   - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed: {alternate_style: true}
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_javascript:
   - javascripts/katex.js
@@ -53,6 +91,7 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js
 extra_css:
   - https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css
+  - stylesheets/extra.css
 
 plugins:
   - search

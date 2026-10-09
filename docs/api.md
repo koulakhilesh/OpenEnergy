@@ -10,9 +10,13 @@
 
 ::: openenergy.assets.battery
 
+::: openenergy.assets.renewable
+
 ## Dispatch
 
 ::: openenergy.dispatch.arbitrage
+
+::: openenergy.dispatch.colocated
 
 ## Forecasting
 
@@ -25,6 +29,8 @@
 ::: openenergy.backtest.engine
 
 ::: openenergy.metrics.summary
+
+::: openenergy.metrics.capture
 
 ## Scenarios
 

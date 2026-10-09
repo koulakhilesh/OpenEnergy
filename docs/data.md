@@ -15,6 +15,18 @@ skipped.
 Prices include genuine scarcity spikes, up to £999/MWh in September–November 2016;
 they are kept.
 
+## Renewable capacity factors
+
+The extract also has hourly capacity-factor profiles (generation divided by installed
+capacity) for `solar`, `wind`, `wind_onshore` and `wind_offshore`, from 2015 to
+29 December 2019; OPSD stops publishing capacity after that.
+
+In 233 hours the solar profile exceeds 1.0 (up to 1.367): reported capacity lags new
+build, so generation divided by capacity overshoots. OpenEnergy clips profiles to [0, 1]
+and reports how many values were clipped. The same lag pushes GB solar capacity factors to
+15–18%, above the roughly 11% usually quoted; this changes absolute output but not
+capture rates, which depend on the shape of the profile.
+
 Other OPSD zones can be used by pointing `data.path` at a larger OPSD
 `time_series_*_singleindex.csv`. OPSD publishes GB prices in GBP and all other zones in
 EUR; OpenEnergy labels the currency accordingly.

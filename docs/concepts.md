@@ -82,3 +82,56 @@ before the backtest starts.
 | Equivalent cycles | Lifetime $N$ at the end of the run |
 | Forecast MAE / RMSE | Error of the forecast against actual prices |
 | Capture ratio | Revenue / perfect-foresight revenue on common days |
+
+## Renewable plants
+
+A plant has a technology, an installed capacity $C$ and an annual degradation rate $r$.
+Its available output follows the OPSD capacity factor $cf_t$:
+
+$$g_t = C \cdot cf_t \cdot (1 - r)^{\text{age}}$$
+
+## Captured price
+
+The captured price is what the market paid per MWh the plant actually produced; the
+capture rate compares it with the time-weighted (baseload) average:
+
+$$\bar p_{cap} = \frac{\sum_t p_t\, g_t}{\sum_t g_t} \qquad
+\text{capture rate} = \frac{\bar p_{cap}}{\frac{1}{T}\sum_t p_t}$$
+
+A capture rate below 100% means the technology tends to produce when prices are low;
+falling capture rates as a technology's share grows are known as cannibalisation.
+`openenergy capture` reports this per year, together with capacity factor and the share of
+output produced at negative prices.
+
+## Co-located sites
+
+A plant and a battery can share one grid connection with an export limit $X$, an import
+limit $I$ and an optional premium $\pi$ per MWh of renewable output delivered (ROC- or
+CfD-like support).
+
+```mermaid
+flowchart LR
+    G[Plant output] -->|y| Grid
+    G -->|s| B[Battery]
+    G -->|k| C[Curtailed]
+    Grid -->|m| B
+    B -->|d| Grid
+```
+
+Each interval, output $G_t = y_t + s_t + k_t$ goes to the grid, to the battery, or is
+curtailed; the battery charges $c_t = s_t + m_t$ from the plant and the grid
+($m_t \le I$), and net export $x_t = y_t + d_t - m_t \le X$. The daily plan maximises
+
+$$\sum_t \left[\hat p_t\, x_t + \pi\,(y_t + s_t)\right]\Delta t - \kappa \sum_t (c_t + d_t)\,\Delta t$$
+
+with the battery constraints above. Output is curtailed when the price falls below $-\pi$
+or the connection is full and the battery cannot absorb it.
+
+Every site run is compared with the same plant and battery on **separate connections**:
+the plant exports up to its own capacity and the battery trades on its own. The difference
+is the **co-location value**; it is negative when a shared connection is too small, and
+should be weighed against the connection capacity saved.
+
+!!! warning "Upper bound"
+    Plans use the actual plant output (perfect generation foresight) and forecast prices.
+    Co-location results are therefore an upper bound.
