@@ -1,39 +1,31 @@
 # Jupyter Notebook checkpoints
 **/*.ipynb_checkpoints
 
-# Python cache and related directories
-.mypy_cache
+# Python cache and build output
+**/__pycache__
 .pytest_cache
 .ruff_cache
-**/__pycache__
+.mypy_cache
+.venv
+dist
+build
+*.egg-info
 
-# Specific directories' cache
-notebooks/.pytest_cache
-playground/__pycache__
-scripts/__pycache__
-tests/__pycache__
+# Coverage
+.coverage
+htmlcov
 
-env/
+# Docs build
+site
+
+# Run outputs; models/ holds untracked 1.x model files
+outputs
+models
 
 # Development tools configurations
-.vscode/
-
-# virtual environments
-venv/
-.venv/
-ENV/
-env/
-venv.bak/
-openenergy_env/
-
-# pip/setuptools build artifacts
-build/
-dist/
-*.egg-info/
+.vscode
 
 # Miscellaneous
-_linkedin/
-_posts/
-.coverage
-models/prices/
-playground/
+playground
+_posts
+

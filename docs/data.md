@@ -1,0 +1,29 @@
+# Data
+
+## Bundled extract
+
+`data/time_series/time_series_60min_singleindex_filtered.csv` is an hourly extract of the
+Open Power System Data time-series package covering Great Britain from 31 December 2014
+to 30 September 2020. It contains the GB day-ahead price (in **GBP**/MWh), load, and solar
+and wind generation and capacity. Timestamps are UTC (`utc_timestamp`).
+
+Of 2,101 days, 2,085 have a complete set of prices. The gaps are two-hour holes on the
+spring clock change each year, two single missing hours, and four outages of about a day.
+With the default `max_gap_hours: 2`, the short gaps are interpolated and the outages are
+skipped.
+
+Prices include genuine scarcity spikes, up to £999/MWh in September–November 2016;
+they are kept.
+
+Other OPSD zones can be used by pointing `data.path` at a larger OPSD
+`time_series_*_singleindex.csv`. OPSD publishes GB prices in GBP and all other zones in
+EUR; OpenEnergy labels the currency accordingly.
+
+## Attribution
+
+> Open Power System Data. 2020. Data Package Time series. Version 2020-10-06.
+> <https://doi.org/10.25832/time_series/2020-10-06>.
+> (Primary data from various sources, for a complete list see URL).
+
+The primary price and load data come from the ENTSO-E Transparency Platform. Every
+`summary.json` written by OpenEnergy repeats this attribution.

@@ -1,0 +1,22 @@
+# Same battery, planned on a gradient-boosting forecast trained on 2015-2018.
+# Needs the forecast extra: uv sync --extra forecast
+# Run: uv run openenergy run examples/gb-2019-ml.yaml
+name: gb-2019-ml
+data:
+  path: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  zone: GB_GBN
+  start: 2019-01-01
+  end: 2019-12-31
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
+  cycle_fade: 0.00002
+  calendar_fade: 0.01
+forecast:
+  method: gradient_boosting
+  train_start: 2015-01-01
+  train_end: 2018-12-31
+dispatch:
+  degradation_cost: 5

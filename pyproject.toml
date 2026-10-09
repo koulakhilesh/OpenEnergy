@@ -1,0 +1,82 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openenergy"
+dynamic = ["version"]
+description = "Backtest battery storage and renewables against real power-market data."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+authors = [{ name = "Akhilesh Koul" }]
+requires-python = ">=3.14"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "highspy>=1.7",
+    "pydantic>=2.5",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+forecast = ["scikit-learn>=1.4", "threadpoolctl>=3.1"]
+
+[project.scripts]
+openenergy = "openenergy.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/koulakhilesh/OpenEnergy"
+Documentation = "https://koulakhilesh.github.io/OpenEnergy/"
+Issues = "https://github.com/koulakhilesh/OpenEnergy/issues"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pandas-stubs>=2.1",
+    "types-PyYAML>=6.0",
+]
+# MkDocs 2.0 removes the plugin and theme systems that Material relies on.
+docs = ["mkdocs>=1.6,<2", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.25"]
+
+[tool.hatch.version]
+path = "src/openenergy/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openenergy"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "NPY"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+files = ["src"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "threadpoolctl"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+
+[tool.coverage.run]
+source = ["openenergy"]
+branch = true
