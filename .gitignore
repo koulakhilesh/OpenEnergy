@@ -2,23 +2,38 @@
 **/*.ipynb_checkpoints
 
 # Python cache and related directories
-**/__pycache__
+.mypy_cache
 .pytest_cache
 .ruff_cache
-.mypy_cache
+**/__pycache__
 
 # Specific directories' cache
-tests/__pycache__
+notebooks/.pytest_cache
 playground/__pycache__
 scripts/__pycache__
-notebooks/.pytest_cache
+tests/__pycache__
+
+env/
 
 # Development tools configurations
-.vscode
+.vscode/
+
+# virtual environments
+venv/
+.venv/
+ENV/
+env/
+venv.bak/
+openenergy_env/
+
+# pip/setuptools build artifacts
+build/
+dist/
+*.egg-info/
 
 # Miscellaneous
-playground
+_linkedin/
+_posts/
 .coverage
-_posts
-models/prices
-
+models/prices/
+playground/
