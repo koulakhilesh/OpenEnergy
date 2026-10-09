@@ -86,15 +86,23 @@ Ideas and bug reports are welcome in [issues](https://github.com/koulakhilesh/Op
 
 ## Data
 
-The bundled prices come from Open Power System Data:
+Prices, load and renewable generation come from Open Power System Data:
 
 > Open Power System Data. 2020. Data Package Time series. Version 2020-10-06.
 > https://doi.org/10.25832/time_series/2020-10-06. (Primary data from various sources,
 > for a complete list see URL).
 
+GB carbon intensity comes from the National Energy System Operator (NESO) Carbon Intensity
+API, https://carbonintensity.org.uk/, licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+See [data/time_series](data/time_series/README.md) and
+[data/carbon_intensity](data/carbon_intensity/README.md) for sources, changes and known
+issues. OpenEnergy is not affiliated with or endorsed by either provider.
+
 ## License
 
-MIT. See [LICENSE.txt](LICENSE.txt).
+MIT for the code; see [LICENSE.txt](LICENSE.txt). Bundled data keeps its own licence.
 
 ## Contact
 

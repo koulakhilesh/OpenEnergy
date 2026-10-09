@@ -1,7 +1,10 @@
 """Download GB national carbon intensity from NESO's Carbon Intensity API.
 
-Data: National Energy System Operator, Carbon Intensity API, CC BY 4.0,
-https://carbonintensity.org.uk/. Writes half-hourly forecast and actual gCO2/kWh.
+Source: National Energy System Operator (NESO), Carbon Intensity API,
+https://carbonintensity.org.uk/ (API docs: https://carbon-intensity.github.io/api-definitions/).
+Licence: CC BY 4.0, https://creativecommons.org/licenses/by/4.0/; terms of use:
+https://github.com/carbon-intensity/terms. Writes half-hourly forecast and actual gCO2/kWh
+unchanged. OpenEnergy is not affiliated with or endorsed by NESO.
 
 Run: uv run python scripts/fetch_carbon_intensity.py [--start 2018-01-01] [--end 2020-09-30]
 """

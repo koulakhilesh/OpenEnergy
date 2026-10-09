@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from openenergy.data.series import PriceSeries, ProfileSeries, _between
+from openenergy.data.series import PriceSeries, ProfileSeries, _between, _validate
 from openenergy.errors import DataError
 
 OPSD_ATTRIBUTION = (
@@ -74,6 +74,31 @@ class OPSDCsvSource:
         # Reported capacity can lag new build, pushing generation / capacity above 1.
         clipped = int(((values > 1) | (values < 0)).sum())
         return ProfileSeries(values.clip(0.0, 1.0), technology, zone, clipped=clipped)
+
+    def series(
+        self, column: str, start: date | None = None, end: date | None = None
+    ) -> pd.Series[float]:
+        """Any column as a validated series over whole UTC days, ``start`` and ``end`` inclusive."""
+        if column not in self._columns():
+            prefix = column.split("_", 2)[:2]
+            similar = [c for c in self._columns() if c.split("_", 2)[:2] == prefix]
+            hint = f"; similar: {', '.join(similar)}" if similar else ""
+            raise DataError(f"no column {column!r} in {self.path.name}{hint}")
+        values, _ = _validate(self._load(column))
+        return values if start is None and end is None else _between(values, start, end, column)
+
+    def load(
+        self, zone: str, start: date | None = None, end: date | None = None
+    ) -> pd.Series[float]:
+        """Actual load in MW (ENTSO-E Transparency)."""
+        return self.series(f"{zone}_load_actual_entsoe_transparency", start, end).rename("load_mw")
+
+    def generation(
+        self, zone: str, technology: str, start: date | None = None, end: date | None = None
+    ) -> pd.Series[float]:
+        """Actual generation in MW for ``technology`` (e.g. ``solar``, ``wind``)."""
+        column = f"{zone}_{technology}_generation_actual"
+        return self.series(column, start, end).rename(f"{technology}_mw")
 
     def _load(self, column: str) -> pd.Series[float]:
         if _TIMESTAMP not in self._columns():

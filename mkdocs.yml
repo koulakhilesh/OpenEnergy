@@ -4,7 +4,9 @@ site_url: https://koulakhilesh.github.io/OpenEnergy/
 repo_url: https://github.com/koulakhilesh/OpenEnergy
 repo_name: koulakhilesh/OpenEnergy
 edit_uri: edit/master/docs/
-copyright: MIT licence. Market data from Open Power System Data (CC BY 4.0).
+copyright: >
+  MIT licence. Data: Open Power System Data;
+  carbon intensity from NESO's Carbon Intensity API (CC BY 4.0).
 
 theme:
   name: material
