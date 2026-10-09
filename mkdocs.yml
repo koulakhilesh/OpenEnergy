@@ -34,7 +34,9 @@ nav:
       - Research with the Python API: guides/research.md
   - Data: data.md
   - API reference: api.md
-  - Design (v2.0): design/v2.0.md
+  - Design:
+      - v2.0: design/v2.0.md
+      - v2.1: design/v2.1.md
 
 markdown_extensions:
   - admonition
