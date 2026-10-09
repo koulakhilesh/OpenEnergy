@@ -12,8 +12,8 @@ import typer
 import openenergy
 from openenergy.data.opsd import OPSDCsvSource
 from openenergy.errors import OpenEnergyError
-from openenergy.metrics.summary import Summary
-from openenergy.scenario import load_scenario, run_scenario, write_outputs
+from openenergy.metrics.capture import capture_by_year
+from openenergy.scenario import ScenarioRun, load_scenario, run_scenario, write_outputs
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help=__doc__)
 data_app = typer.Typer(no_args_is_help=True, help="Inspect market data files.")
@@ -55,7 +55,7 @@ def run(
         loaded = load_scenario(scenario)
         result = run_scenario(loaded)
         destination = write_outputs(result, out or Path("outputs") / loaded.name)
-    typer.echo(_format_summary(loaded.name, result.summary))
+    typer.echo(_format_run(result))
     typer.echo(f"  {'outputs':<22}{destination}")
 
 
@@ -63,19 +63,50 @@ def run(
 def compare(
     scenarios: Annotated[list[Path], typer.Argument(help="Scenario YAML files.")],
 ) -> None:
-    """Run several scenarios and rank them by revenue."""
+    """Run several scenarios and rank them by revenue (including any premium)."""
     with _reported_errors():
         rows = [(s.name, run_scenario(s).summary) for s in map(load_scenario, scenarios)]
-    rows.sort(key=lambda row: row[1].revenue, reverse=True)
+    rows.sort(key=lambda row: row[1].total, reverse=True)
     name_width = max(len("scenario"), *(len(name) for name, _ in rows)) + 2
     forecast_width = max(len("forecast"), *(len(s.forecaster) for _, s in rows)) + 2
     header = f"{'scenario':<{name_width}}{'forecast':<{forecast_width}}"
     typer.echo(header + f"{'days':>6}{'revenue':>14}{'per MW-yr':>12}{'capture':>10}{'cycles':>9}")
     for name, s in rows:
+        per_mw = "n/a" if s.revenue_per_mw_year is None else f"{s.revenue_per_mw_year:,.0f}"
         typer.echo(
-            f"{name:<{name_width}}{s.forecaster:<{forecast_width}}{s.days:>6}{s.revenue:>14,.0f}"
-            f"{s.revenue_per_mw_year:>12,.0f}{_percent(s.capture_ratio):>10}"
-            f"{s.equivalent_cycles:>9.0f}"
+            f"{name:<{name_width}}{s.forecaster:<{forecast_width}}{s.days:>6}{s.total:>14,.0f}"
+            f"{per_mw:>12}{_percent(s.capture_ratio):>10}{s.equivalent_cycles:>9.0f}"
+        )
+
+
+@app.command()
+def capture(
+    path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")],
+    zone: Annotated[str, typer.Option("--zone", "-z", help="Bidding zone.")] = "GB_GBN",
+    technology: Annotated[
+        list[str] | None,
+        typer.Option("--technology", "-t", help="Technology (repeatable); default all."),
+    ] = None,
+) -> None:
+    """Captured price and capture rate per year for each renewable technology."""
+    with _reported_errors():
+        source = OPSDCsvSource(path)
+        prices = source.prices(zone)
+        rows = [
+            (tech, metrics)
+            for tech in technology or source.technologies(zone)
+            for metrics in capture_by_year(prices, source.profile(zone, tech))
+        ]
+    unit = f"{prices.currency}/MWh"
+    typer.echo(
+        f"{'year':<6}{'technology':<16}{'CF':>7}{'baseload':>11}{'captured':>11}"
+        f"{'capture':>9}{'neg-price':>11}   (prices in {unit})"
+    )
+    for tech, m in rows:
+        typer.echo(
+            f"{m.label:<6}{tech:<16}{m.capacity_factor:>7.1%}{m.baseload_price:>11.2f}"
+            f"{_number(m.captured_price):>11}{_percent(m.capture_rate):>9}"
+            f"{_percent(m.negative_price_share, digits=2):>11}"
         )
 
 
@@ -95,22 +126,50 @@ def data_info(path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")
             )
 
 
-def _format_summary(name: str, s: Summary) -> str:
-    money = s.currency
-    spread = "n/a" if s.captured_spread is None else f"{s.captured_spread:,.2f} {money}/MWh"
+def _format_run(run: ScenarioRun) -> str:
+    s, money = run.summary, run.summary.currency
     lines = [
-        f"{name} ({s.forecaster}, {money})",
+        f"{run.scenario.name} ({s.forecaster}, {money})",
         f"days simulated        {s.days} ({s.skipped_days} skipped)",
         f"revenue               {s.revenue:,.2f} {money}",
-        f"revenue per MW-year   {s.revenue_per_mw_year:,.2f} {money}",
-        f"captured spread       {spread}",
+    ]
+    if s.revenue_per_mw_year is not None:
+        spread = "n/a" if s.captured_spread is None else f"{s.captured_spread:,.2f} {money}/MWh"
+        lines += [
+            f"revenue per MW-year   {s.revenue_per_mw_year:,.2f} {money}",
+            f"captured spread       {spread}",
+        ]
+    if s.premium is not None and s.available_mwh is not None and s.curtailed_mwh is not None:
+        curtailed = s.curtailed_mwh / s.available_mwh if s.available_mwh > 0 else None
+        lines += [
+            f"premium               {s.premium:,.2f} {money}",
+            f"plant output          {s.available_mwh:,.0f} MWh ({_percent(curtailed)} curtailed)",
+        ]
+    lines += [
         f"equivalent cycles     {s.equivalent_cycles:,.1f}",
         f"final SOH             {s.final_soh:.4f}",
         f"forecast MAE / RMSE   {s.forecast_mae:,.2f} / {s.forecast_rmse:,.2f} {money}/MWh",
         f"capture ratio         {_percent(s.capture_ratio)}",
     ]
+    if run.plant_capture is not None:
+        p = run.plant_capture
+        lines.append(
+            f"plant captured price  {_number(p.captured_price)} {money}/MWh "
+            f"({_percent(p.capture_rate)} of baseload)"
+        )
+    if run.colocation is not None:
+        c = run.colocation
+        lines += [
+            f"separate assets       {c.plant_alone + c.battery_alone:,.2f} {money} "
+            f"(plant {c.plant_alone:,.0f} + battery {c.battery_alone:,.0f})",
+            f"co-location value     {c.value:,.2f} {money} (upper bound: plant output known)",
+        ]
     return "\n  ".join(lines)
 
 
-def _percent(value: float | None) -> str:
-    return "n/a" if value is None else f"{value:.1%}"
+def _percent(value: float | None, digits: int = 1) -> str:
+    return "n/a" if value is None else f"{value:.{digits}%}"
+
+
+def _number(value: float | None) -> str:
+    return "n/a" if value is None else f"{value:.2f}"

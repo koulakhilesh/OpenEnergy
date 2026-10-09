@@ -1,0 +1,24 @@
+# 10 MW of GB solar with a 5 MW / 10 MWh battery behind a shared 7 MW connection.
+# Plans use actual solar output, so co-location value is an upper bound.
+# Run: uv run openenergy run examples/gb-2019-pv-colocated.yaml
+name: gb-2019-pv-colocated
+data:
+  path: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  zone: GB_GBN
+  start: 2019-01-01
+  # OPSD capacity factors end on 2019-12-29.
+  end: 2019-12-29
+battery:
+  power_mw: 5
+  energy_mwh: 10
+  eta_charge: 0.95
+  eta_discharge: 0.95
+assets:
+  pv:
+    capacity_mw: 10
+    degradation_per_year: 0.005
+grid:
+  export_limit_mw: 7
+forecast: naive_last_week
+dispatch:
+  degradation_cost: 5

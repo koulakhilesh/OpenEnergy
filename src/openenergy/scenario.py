@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -15,10 +16,19 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationInfo
 
 import openenergy
 from openenergy.assets.battery import BatterySpec
-from openenergy.backtest.engine import BacktestConfig, BacktestResult, run_backtest
+from openenergy.assets.renewable import RenewableSpec
+from openenergy.backtest.engine import (
+    BacktestConfig,
+    BacktestResult,
+    PlantResult,
+    Site,
+    run_backtest,
+    run_plant_backtest,
+)
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.series import PriceSeries, fill_gaps
 from openenergy.dispatch.arbitrage import DispatchConfig
+from openenergy.dispatch.colocated import GridConnection
 from openenergy.errors import ConfigError
 from openenergy.forecast.baseline import (
     Forecaster,
@@ -26,6 +36,7 @@ from openenergy.forecast.baseline import (
     NoisyForesight,
     PerfectForesight,
 )
+from openenergy.metrics.capture import CaptureMetrics, capture_metrics
 from openenergy.metrics.summary import Summary, summarise
 
 ForecastMethod = Literal[
@@ -74,6 +85,43 @@ class ForecastSection(_Strict):
         return self
 
 
+class PlantSection(_Strict):
+    capacity_mw: float = Field(gt=0)
+    degradation_per_year: float = Field(default=0.0, ge=0, lt=1)
+    technology: str | None = None
+
+
+class AssetsSection(_Strict):
+    """Renewable plants sharing the battery's grid connection."""
+
+    pv: PlantSection | None = None
+    wind: PlantSection | None = None
+
+    @pydantic.model_validator(mode="after")
+    def _at_least_one(self) -> AssetsSection:
+        if self.pv is None and self.wind is None:
+            raise ValueError("assets needs at least one of pv or wind")
+        return self
+
+    def plants(self) -> list[RenewableSpec]:
+        defaults = {"pv": (self.pv, "solar"), "wind": (self.wind, "wind")}
+        return [
+            RenewableSpec(
+                section.technology or tech, section.capacity_mw, section.degradation_per_year
+            )
+            for section, tech in defaults.values()
+            if section is not None
+        ]
+
+
+class GridSection(_Strict):
+    """Shared connection; export defaults to total plant capacity, import to export."""
+
+    export_limit_mw: float | None = Field(default=None, ge=0)
+    import_limit_mw: float | None = Field(default=None, ge=0)
+    premium_per_mwh: float = 0.0
+
+
 class Scenario(_Strict):
     # Restricted so the name is safe to use as an output directory.
     name: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
@@ -82,11 +130,28 @@ class Scenario(_Strict):
     forecast: ForecastSection = ForecastSection()
     dispatch: DispatchConfig = DispatchConfig()
     lead_hours: float = Field(default=12.0, ge=0)
+    assets: AssetsSection | None = None
+    grid: GridSection | None = None
 
     @pydantic.field_validator("forecast", mode="before")
     @classmethod
     def _method_shorthand(cls, value: Any) -> Any:
         return {"method": value} if isinstance(value, str) else value
+
+    @pydantic.model_validator(mode="after")
+    def _grid_needs_assets(self) -> Scenario:
+        if self.grid is not None and self.assets is None:
+            raise ValueError("grid applies only to co-located assets; add an assets section")
+        return self
+
+    def connection(self) -> GridConnection | None:
+        """The shared grid connection, or None for a battery-only scenario."""
+        if self.assets is None:
+            return None
+        grid = self.grid or GridSection()
+        capacity = sum(plant.capacity_mw for plant in self.assets.plants())
+        export = capacity if grid.export_limit_mw is None else grid.export_limit_mw
+        return GridConnection(export, grid.import_limit_mw, grid.premium_per_mwh)
 
     @pydantic.model_validator(mode="after")
     def _training_precedes_backtest(self) -> Scenario:
@@ -103,6 +168,22 @@ class Scenario(_Strict):
 
 
 @dataclass(frozen=True)
+class Colocation:
+    """Site total against the same plant and battery on separate connections (common days)."""
+
+    colocated: float
+    plant_alone: float
+    battery_alone: float
+
+    @property
+    def value(self) -> float:
+        return self.colocated - self.plant_alone - self.battery_alone
+
+    def to_dict(self) -> dict[str, float]:
+        return {**dataclasses.asdict(self), "value": self.value}
+
+
+@dataclass(frozen=True)
 class ScenarioRun:
     scenario: Scenario
     result: BacktestResult
@@ -110,6 +191,9 @@ class ScenarioRun:
     summary: Summary
     filled_intervals: int = 0
     attribution: str = field(default=OPSD_ATTRIBUTION)
+    colocation: Colocation | None = None
+    plant_capture: CaptureMetrics | None = None
+    clipped_intervals: int = 0
 
 
 def load_scenario(path: str | Path) -> Scenario:
@@ -149,16 +233,39 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
         days = [data.start + timedelta(days=i) for i in range((last - data.start).days + 1)]
 
     forecaster = _forecaster(scenario, source, prices)
-    result = run_backtest(scenario.battery, prices, forecaster, config, days=days)
+    site, clipped = _site(scenario, source, prices, load_start)
+    result = run_backtest(scenario.battery, prices, forecaster, config, days=days, site=site)
+    simulated = list(result.daily.index)
     benchmark: BacktestResult | None = None
     if scenario.forecast.method == "perfect_foresight":
         summary = summarise(result, benchmark=result)
     else:
         benchmark = run_backtest(
-            scenario.battery, prices, PerfectForesight(prices), config, days=result.daily.index
+            scenario.battery, prices, PerfectForesight(prices), config, simulated, site
         )
         summary = summarise(result, benchmark=benchmark)
-    return ScenarioRun(scenario, result, benchmark, summary, filled_intervals=filled)
+
+    colocation = plant_capture = None
+    if site is not None and scenario.assets is not None:
+        capacity = sum(plant.capacity_mw for plant in scenario.assets.plants())
+        own = GridConnection(capacity, 0.0, site.grid.premium_per_mwh)
+        plant = run_plant_backtest(
+            Site(site.available_mw, own), prices, forecaster, config, simulated
+        )
+        battery = run_backtest(scenario.battery, prices, forecaster, config, simulated)
+        colocation = _compare(result, plant, battery)
+        output = site.available_mw[_in_days(site.available_mw, simulated)]
+        plant_capture = capture_metrics(prices, output, capacity, label="plant")
+    return ScenarioRun(
+        scenario,
+        result,
+        benchmark,
+        summary,
+        filled_intervals=filled,
+        colocation=colocation,
+        plant_capture=plant_capture,
+        clipped_intervals=clipped,
+    )
 
 
 def write_outputs(run: ScenarioRun, directory: str | Path) -> Path:
@@ -176,8 +283,47 @@ def write_outputs(run: ScenarioRun, directory: str | Path) -> Path:
         "config": run.scenario.model_dump(mode="json"),
         "attribution": run.attribution,
     }
+    if run.colocation is not None and run.plant_capture is not None:
+        payload["colocation"] = run.colocation.to_dict()
+        payload["plant_capture"] = run.plant_capture.to_dict()
+        payload["clipped_capacity_factors"] = run.clipped_intervals
+        payload["note"] = (
+            "Plans use actual plant output (perfect generation foresight), so co-location "
+            "results are an upper bound."
+        )
     (out / "summary.json").write_text(json.dumps(payload, indent=2) + "\n")
     return out
+
+
+def _site(
+    scenario: Scenario, source: OPSDCsvSource, prices: PriceSeries, start: date | None
+) -> tuple[Site | None, int]:
+    grid = scenario.connection()
+    if grid is None or scenario.assets is None:
+        return None, 0
+    total = pd.Series(0.0, index=prices.prices.index)
+    clipped = 0
+    for plant in scenario.assets.plants():
+        profile = source.profile(scenario.data.zone, plant.technology, start, scenario.data.end)
+        clipped += profile.clipped
+        profile, _ = fill_gaps(profile, scenario.data.max_gap_hours)
+        total = total + plant.generation_mw(profile).reindex(total.index)
+    return Site(total, grid), clipped
+
+
+def _in_days(series: pd.Series[float], days: list[date]) -> Any:
+    return pd.DatetimeIndex(series.index).normalize().isin(pd.to_datetime(days).tz_localize("UTC"))
+
+
+def _compare(result: BacktestResult, plant: PlantResult, battery: BacktestResult) -> Colocation:
+    common = result.daily.index.intersection(plant.daily.index).intersection(battery.daily.index)
+
+    def total(daily: pd.DataFrame) -> float:
+        rows = daily.loc[common]
+        premium = float(rows["premium"].sum()) if "premium" in rows else 0.0
+        return float(rows["revenue"].sum()) + premium
+
+    return Colocation(total(result.daily), total(plant.daily), total(battery.daily))
 
 
 def _forecaster(scenario: Scenario, source: OPSDCsvSource, prices: PriceSeries) -> Forecaster:

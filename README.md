@@ -28,8 +28,12 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   time; plans settle at actual prices.
 - **Forecasters**: perfect foresight, last week's prices, noisy foresight and a
   gradient-boosting model.
-- **Data**: hourly GB day-ahead prices for 2015–2020 from Open Power System Data are
-  bundled.
+- **Renewables**: solar and wind plants from capacity-factor profiles, captured price and
+  capture rate by year (`openenergy capture`).
+- **Co-located sites**: a plant and a battery behind one grid connection with export and
+  import limits and optional support payments, compared with separate connections.
+- **Data**: hourly GB day-ahead prices for 2015–2020 and solar and wind capacity factors
+  for 2015–2019 from Open Power System Data are bundled.
 
 ## Quick start
 
