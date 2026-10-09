@@ -28,7 +28,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-forecast = ["scikit-learn>=1.4", "xgboost>=2.0"]
+forecast = ["scikit-learn>=1.4", "threadpoolctl>=3.1"]
 
 [project.scripts]
 openenergy = "openenergy.cli:app"
@@ -67,6 +67,10 @@ python_version = "3.14"
 strict = true
 files = ["src"]
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "threadpoolctl"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

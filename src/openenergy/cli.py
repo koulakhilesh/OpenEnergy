@@ -67,11 +67,13 @@ def compare(
     with _reported_errors():
         rows = [(s.name, run_scenario(s).summary) for s in map(load_scenario, scenarios)]
     rows.sort(key=lambda row: row[1].revenue, reverse=True)
-    header = f"{'scenario':<24}{'forecast':<20}{'days':>6}{'revenue':>14}{'per MW-yr':>12}"
-    typer.echo(header + f"{'capture':>10}{'cycles':>9}")
+    name_width = max(len("scenario"), *(len(name) for name, _ in rows)) + 2
+    forecast_width = max(len("forecast"), *(len(s.forecaster) for _, s in rows)) + 2
+    header = f"{'scenario':<{name_width}}{'forecast':<{forecast_width}}"
+    typer.echo(header + f"{'days':>6}{'revenue':>14}{'per MW-yr':>12}{'capture':>10}{'cycles':>9}")
     for name, s in rows:
         typer.echo(
-            f"{name:<24}{s.forecaster:<20}{s.days:>6}{s.revenue:>14,.0f}"
+            f"{name:<{name_width}}{s.forecaster:<{forecast_width}}{s.days:>6}{s.revenue:>14,.0f}"
             f"{s.revenue_per_mw_year:>12,.0f}{_percent(s.capture_ratio):>10}"
             f"{s.equivalent_cycles:>9.0f}"
         )

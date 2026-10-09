@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: "3.14"
           enable-cache: true
-      - run: uv sync --locked
+      - run: uv sync --locked --all-extras
       - run: uv run ruff check
       - run: uv run ruff format --check
       - run: uv run mypy
