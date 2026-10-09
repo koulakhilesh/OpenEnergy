@@ -28,7 +28,11 @@ def test_all_satisfy_protocol() -> None:
         NaiveLastWeek(),
         NoisyForesight(actual, error_std=1.0),
     ]
-    assert [f.name for f in forecasters] == ["perfect_foresight", "naive_last_week", "noisy_foresight"]
+    assert [f.name for f in forecasters] == [
+        "perfect_foresight",
+        "naive_last_week",
+        "noisy_foresight",
+    ]
 
 
 def test_perfect_foresight_returns_actual() -> None:
@@ -56,7 +60,7 @@ def test_naive_last_week_falls_back_to_two_weeks() -> None:
     history = history_before(actual, "2019-01-16 12:00").copy()
     history.loc[day_index("2019-01-10")[:3]] = np.nan
     result = NaiveLastWeek().forecast(history, day_index("2019-01-17"))
-    expected = actual.prices.loc[day_index("2019-01-10")].to_numpy()
+    expected = actual.prices.loc[day_index("2019-01-10")].to_numpy().copy()
     expected[:3] = actual.prices.loc[day_index("2019-01-03")[:3]].to_numpy()
     assert result.tolist() == expected.tolist()
 
@@ -90,7 +94,6 @@ def test_noisy_foresight_is_reproducible_and_order_independent() -> None:
     b2, a2 = second.forecast(empty, b), second.forecast(empty, a)
     assert a1.tolist() == a2.tolist()
     assert b1.tolist() == b2.tolist()
-    assert a1.tolist() != (a1 - actual.prices.loc[a].to_numpy() + actual.prices.loc[b].to_numpy()).tolist() or True
 
 
 def test_noisy_foresight_error_has_requested_spread() -> None:
@@ -100,7 +103,9 @@ def test_noisy_foresight_error_has_requested_spread() -> None:
     errors = np.concatenate(
         [
             forecaster.forecast(empty, idx) - actual.prices.loc[idx].to_numpy()
-            for idx in (day_index(str(day.date())) for day in pd.date_range("2019-01-01", periods=400))
+            for idx in (
+                day_index(str(day.date())) for day in pd.date_range("2019-01-01", periods=400)
+            )
         ]
     )
     assert abs(errors.mean()) < 0.5
