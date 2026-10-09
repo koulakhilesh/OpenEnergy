@@ -30,6 +30,9 @@ dependencies = [
 [project.optional-dependencies]
 forecast = ["scikit-learn>=1.4", "xgboost>=2.0"]
 
+[project.scripts]
+openenergy = "openenergy.cli:app"
+
 [project.urls]
 Homepage = "https://github.com/koulakhilesh/OpenEnergy"
 Documentation = "https://koulakhilesh.github.io/OpenEnergy/"

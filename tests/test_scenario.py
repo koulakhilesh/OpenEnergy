@@ -39,20 +39,22 @@ forecast: {{method: noisy_foresight, error_std: 5, seed: 3}}
     assert scenario.data.start == date(2019, 1, 2)
 
 
+VALID = "name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1}\n"
+
+
 @pytest.mark.parametrize(
     ("body", "message"),
     [
-        ("name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1, colour: red}", "colour"),
+        (
+            "name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1, colour: red}",
+            "colour",
+        ),
         ("name: x\ndata: {path: a.csv}\nbattery: {power_mw: -1, energy_mwh: 1}", "power_mw"),
         ("name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1}", "energy_mwh"),
-        ("name: ../evil\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1}", "name"),
-        (
-            "name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1}\n"
-            "forecast: noisy_foresight",
-            "error_std",
-        ),
-        ("name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1}\nforecast: oracle", "forecast"),
-        ("name: x\ndata: {path: a.csv}\nbattery: {power_mw: 1, energy_mwh: 1}\nlead_hours: -1", "lead_hours"),
+        (VALID.replace("name: x", "name: ../evil"), "name"),
+        (VALID + "forecast: noisy_foresight", "error_std"),
+        (VALID + "forecast: oracle", "forecast"),
+        (VALID + "lead_hours: -1", "lead_hours"),
         ("- just\n- a list", "mapping"),
         ("name: [unclosed", "YAML"),
     ],

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 import openenergy
@@ -24,11 +25,8 @@ def test_run_writes_outputs_and_prints_summary(scenario_file: Path, tmp_path: Pa
 
 
 def test_run_defaults_output_to_outputs_name(
-    scenario_file: Path, tmp_path: Path, monkeypatch: object
+    scenario_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import pytest
-
-    assert isinstance(monkeypatch, pytest.MonkeyPatch)
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["run", str(scenario_file)])
     assert result.exit_code == 0, result.output
@@ -37,9 +35,11 @@ def test_run_defaults_output_to_outputs_name(
 
 def test_compare_ranks_scenarios(scenario_file: Path, tmp_path: Path) -> None:
     pf = scenario_file.with_name("pf.yaml")
-    pf.write_text(scenario_file.read_text().replace("gb-test", "gb-pf").replace(
-        "naive_last_week", "perfect_foresight"
-    ))
+    pf.write_text(
+        scenario_file.read_text()
+        .replace("gb-test", "gb-pf")
+        .replace("naive_last_week", "perfect_foresight")
+    )
     result = runner.invoke(app, ["compare", str(scenario_file), str(pf)])
     assert result.exit_code == 0, result.output
     lines = result.output.splitlines()
