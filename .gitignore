@@ -1,24 +1,31 @@
 # Jupyter Notebook checkpoints
 **/*.ipynb_checkpoints
 
-# Python cache and related directories
+# Python cache and build output
 **/__pycache__
 .pytest_cache
 .ruff_cache
 .mypy_cache
+.venv
+dist
+build
+*.egg-info
 
-# Specific directories' cache
-tests/__pycache__
-playground/__pycache__
-scripts/__pycache__
-notebooks/.pytest_cache
+# Coverage
+.coverage
+htmlcov
+
+# Docs build
+site
+
+# Run outputs and trained forecast artifacts
+outputs
+models
 
 # Development tools configurations
 .vscode
 
 # Miscellaneous
 playground
-.coverage
 _posts
-models/prices
 
