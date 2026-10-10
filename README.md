@@ -36,9 +36,14 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   storage sizing for the system (`openenergy storage`) and for a site (`openenergy sweep`).
 - **Emissions**: net emissions from GB carbon intensity and an optional carbon price that
   steers dispatch, planned without lookahead.
+- **GB system model**: CCGT, coal and peaking plant dispatched in merit order from fleet,
+  fuel and carbon data, checked against 2015–2020 prices and fuel use
+  (`openenergy system validate`), with scenarios for renewables, storage, fleet and
+  carbon policy (`openenergy system run`); storage uses the optional PyPSA backend.
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
-  and capacity factors for 2015–2019 from Open Power System Data, and half-hourly GB carbon
-  intensity for 2018–2020 from NESO, are bundled.
+  and capacity factors for 2015–2019 from Open Power System Data, half-hourly GB carbon
+  intensity for 2018–2020 and generation by fuel for 2015–2020 from NESO, and GB fleet,
+  fuel and carbon prices from DESNZ, HMRC, the World Bank and the ECB, are bundled.
 
 ## Quick start
 
@@ -67,6 +72,14 @@ Run one scenario and write its results to `outputs/<name>/`:
 uv run openenergy run examples/gb-2019-naive.yaml
 ```
 
+Rebuild GB prices from the plants behind them and compare with what happened:
+
+```bash
+uv run openenergy system validate
+uv sync --extra system   # PyPSA, needed for scenarios with storage
+uv run openenergy system run examples/gb-2019-wind3-storage.yaml
+```
+
 See the [documentation](https://koulakhilesh.github.io/OpenEnergy/) for the equations,
 every scenario setting and the Python API.
 
@@ -85,7 +98,7 @@ uv run mkdocs serve
 | v2.0 | Battery arbitrage backtesting |
 | v2.1 | PV and wind assets, captured price, co-located storage |
 | v2.2 | Net load, surplus, storage sizing, emissions |
-| v3.0 | System dispatch with conventional generation via PyPSA |
+| v3.0 | GB system dispatch with conventional generation via PyPSA |
 
 Ideas and bug reports are welcome in [issues](https://github.com/koulakhilesh/OpenEnergy/issues).
 
@@ -101,9 +114,30 @@ GB carbon intensity comes from the National Energy System Operator (NESO) Carbon
 API, https://carbonintensity.org.uk/, licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-See [data/time_series](data/time_series/README.md) and
-[data/carbon_intensity](data/carbon_intensity/README.md) for sources, changes and known
-issues. OpenEnergy is not affiliated with or endorsed by either provider.
+GB generation by fuel comes from NESO's
+[historic generation mix](https://www.neso.energy/data-portal/historic-generation-mix),
+licensed under the [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+Supported by National Energy SO Open Data.
+
+Fleet capacity and efficiency (DUKES 5.8 and 5.10) and fuel prices (Quarterly Energy
+Prices 3.2.1) come from the Department for Energy Security and Net Zero, and carbon price
+support rates from HM Revenue & Customs; they contain public sector information licensed
+under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+EU ETS prices come from the World Bank
+[Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price)
+([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), converted to GBP with a cross
+rate OpenEnergy derives from euro reference rates (source: European Central Bank). All
+accessed 10 October 2026.
+
+The optional storage backend uses PyPSA (Brown, Hörsch and Schlachtberger, *PyPSA: Python
+for Power System Analysis*, Journal of Open Research Software 6(1), 2018,
+https://doi.org/10.5334/jors.188).
+
+See [data/time_series](data/time_series/README.md),
+[data/carbon_intensity](data/carbon_intensity/README.md) and
+[data/system](data/system/README.md) for sources, changes and known issues. OpenEnergy is
+not affiliated with or endorsed by any data provider.
 
 ## License
 

@@ -122,6 +122,13 @@ carbon:
 Carbon intensity covers 2018 to September 2020. Days without complete intensity are
 skipped.
 
+## System scenarios
+
+A file with a `system:` section instead of `data:` describes one GB year for the
+[system model](system-model.md): scaled renewables and fixed profiles, thermal capacity,
+fuel and carbon prices, added storage, and optionally a `battery` valued on the modelled
+prices. Run it with `openenergy system run`; the full reference is on that page.
+
 ## Outputs
 
 `openenergy run` writes to `outputs/<name>/` unless `--out` is given:

@@ -14,6 +14,8 @@ It is built for research questions such as:
 - Can a battery share a solar farm's grid connection without losing money?
 - As wind and solar grow, how much surplus appears, and how much storage absorbs it?
 - What do storage and renewables do to emissions, and what does a carbon price change?
+- How well does a cost-based model of GB plants reproduce real prices, and what changes
+  with more wind, more storage or a different carbon price?
 
 ## Quick start
 
@@ -55,6 +57,17 @@ Tripling 2019 wind and solar would leave 14 TWh of surplus above an 8 GW must-ru
 a 10 GW / 24 h storage fleet absorbs about three-quarters of it
 (see [System analysis](guides/system.md)).
 
+And the plants behind the price:
+
+```bash
+uv run openenergy system validate
+```
+
+Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes out at
+£42.3/MWh against £42.9 actual, but its peaks are far too low: a battery that earned
+£16k per MW-year on real 2019 prices earns almost nothing on the modelled ones
+(see [System model](guides/system-model.md)).
+
 ## What it does
 
 1. **Loads prices, capacity factors, demand and carbon intensity** from the bundled
@@ -72,6 +85,9 @@ a 10 GW / 24 h storage fleet absorbs about three-quarters of it
    price and the value of co-location against separate connections.
 6. **Analyses the system**: net load, ramps and surplus as renewables scale, and the
    storage needed to absorb that surplus; `openenergy sweep` sizes storage for a site.
+7. **Models GB dispatch**: CCGT, coal and peaking plant in merit order from DUKES fleet
+   data, fuel and carbon prices, checked against 2015–2020, with scenarios for renewables,
+   storage, fleet and carbon policy (storage via the optional PyPSA backend).
 
 See [Concepts](concepts.md) for the equations and [Scenarios](guides/scenarios.md) for
 every setting.
@@ -82,5 +98,5 @@ every setting.
 |---------|-------|
 | v2.0 | Battery arbitrage backtesting |
 | v2.1 | PV and wind assets, captured price, co-located storage |
-| v2.2 | Net load, surplus, storage sizing, emissions (this release) |
-| v3.0 | System dispatch with conventional generation via PyPSA |
+| v2.2 | Net load, surplus, storage sizing, emissions |
+| v3.0 | GB system dispatch with conventional generation via PyPSA (this release) |
