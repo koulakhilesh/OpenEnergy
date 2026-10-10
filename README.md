@@ -32,7 +32,6 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   capture rate by year (`openenergy capture`).
 - **Co-located sites**: a plant and a battery behind one grid connection with export and
   import limits and optional support payments, compared with separate connections.
-rged
 - **System analysis**: net load, ramps and renewable surplus as wind and solar scale,
   storage sizing for the system (`openenergy storage`) and for a site (`openenergy sweep`).
 - **Emissions**: net emissions from GB carbon intensity and an optional carbon price that

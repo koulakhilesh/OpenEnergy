@@ -25,6 +25,18 @@ FLEET_ATTRIBUTION = (
     "interpolated between year ends; units converted to GBP per MWh. OpenEnergy is not "
     "affiliated with or endorsed by any of these bodies."
 )
+UNIT_ATTRIBUTION = (
+    "Unit size and minimum load: Danish Energy Agency, Technology Data for Generation of "
+    "Electricity and District Heating (data sheet, May 2025), "
+    "https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-"
+    "district-heating, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Start-up "
+    "costs: N. Kumar et al., Power Plant Cycling Costs, NREL/SR-5500-55433, 2012, Table 1-1 "
+    "median warm-start costs (https://www.osti.gov/biblio/1046269), converted from 2011 US$ "
+    "with European Central Bank 2011 average reference rates (source: ECB). These are "
+    "lower-bound costs for typical plant, not GB-specific values. OpenEnergy is not "
+    "affiliated with or endorsed by these bodies."
+)
+UNIT_COLUMNS = ("unit_mw", "min_stable", "start_cost_gbp_per_mw")
 CAPACITY_COLUMNS = (
     "ccgt_mw", "coal_mw", "gas_turbine_mw", "oil_engine_mw", "nuclear_mw", "pumped_storage_mw",
 )  # fmt: skip
@@ -40,10 +52,15 @@ _GJ_PER_MWH = 3.6
 
 
 class SystemInputs:
-    """Reads ``fleet.csv``, ``fuel_prices.csv`` and ``carbon_prices.csv`` from one directory."""
+    """Reads the system CSVs written by ``scripts/fetch_system_data.py`` from one directory."""
 
     def __init__(self, directory: str | Path) -> None:
         self.directory = Path(directory)
+
+    def unit_parameters(self) -> pd.DataFrame:
+        """Unit size (MW), minimum stable output (share) and start cost (GBP/MW) by technology."""
+        table = self._read("unit_parameters.csv", ["technology", *UNIT_COLUMNS])
+        return table.set_index("technology")[list(UNIT_COLUMNS)].astype(float)
 
     def capacity(self, index: pd.DatetimeIndex) -> pd.DataFrame:
         """MW at each timestamp, linear in time between end-of-year values."""

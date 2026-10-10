@@ -4,15 +4,20 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from openenergy.data.series import _validate
 from openenergy.errors import ConfigError, DataError
 
+if TYPE_CHECKING:
+    from openenergy.system.commitment import Commitment
+
 Backend = Literal["auto", "merit", "pypsa"]
+PriceKind = Literal["marginal", "start"]
 RENEWABLES = frozenset({"wind", "solar"})
 DEFAULT_VOLL = 6000.0
 
@@ -103,7 +108,11 @@ class SystemSpec:
 
 @dataclass(frozen=True, eq=False)
 class SystemResult:
-    """Dispatch outcome. Power in MW per snapshot; ``storage`` is net discharge."""
+    """Dispatch outcome. Power in MW per snapshot; ``storage`` is net discharge.
+
+    Unit commitment adds ``start_price`` (marginal price including start costs),
+    ``units_online`` and ``starts`` per committed tranche.
+    """
 
     price: pd.Series[float]
     generation: pd.DataFrame
@@ -114,6 +123,9 @@ class SystemResult:
     cost: float
     backend: str
     technologies: dict[str, str]
+    start_price: pd.Series[float] | None = None
+    units_online: pd.DataFrame | None = None
+    starts: pd.DataFrame | None = None
 
     def by_technology(self) -> pd.DataFrame:
         """Generation summed by technology, plus storage and unserved energy."""
@@ -123,14 +135,32 @@ class SystemResult:
         grouped["unserved"] = self.unserved
         return grouped
 
+    def price_of(self, kind: PriceKind) -> pd.Series[float]:
+        """The marginal price, or (unit commitment only) the price including start costs."""
+        if kind == "marginal":
+            return self.price
+        if self.start_price is None:
+            raise ConfigError("the start-cost price needs unit commitment")
+        return self.start_price
 
-def solve(spec: SystemSpec, backend: Backend = "auto") -> SystemResult:
+
+def solve(
+    spec: SystemSpec, backend: Backend = "auto", commitment: Commitment | None = None
+) -> SystemResult:
     """Dispatch ``spec`` at least cost.
 
     Without storage every hour is independent and the merit order is the exact optimum,
     so ``auto`` uses it; with storage ``auto`` uses PyPSA (``pip install openenergy[system]``).
+    With ``commitment``, thermal units have start-up costs and minimum stable output and
+    days are solved in turn with a lookahead (storage included).
     """
     _check_must_run(spec)
+    if commitment is not None:
+        if backend != "auto":
+            raise ConfigError("unit commitment has its own solver; leave backend as 'auto'")
+        from openenergy.system.commitment import commit
+
+        return commit(spec, commitment)
     if backend == "auto":
         backend = "pypsa" if spec.storage else "merit"
     if backend == "merit":
@@ -157,7 +187,7 @@ def _check_must_run(spec: SystemSpec) -> None:
 
 
 def result_frames(
-    spec: SystemSpec, dispatch: np.ndarray[tuple[int, int], np.dtype[np.float64]]
+    spec: SystemSpec, dispatch: npt.NDArray[np.float64]
 ) -> tuple[pd.DataFrame, pd.Series[float], pd.Series[float]]:
     """Generation frame, renewable curtailment and emissions from a T x G dispatch array."""
     index = spec.demand.index

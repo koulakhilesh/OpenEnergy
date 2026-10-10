@@ -13,13 +13,19 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from openenergy.data.fleet import EMISSION_FACTORS, FLEET_ATTRIBUTION, SystemInputs
+from openenergy.data.fleet import (
+    EMISSION_FACTORS,
+    FLEET_ATTRIBUTION,
+    UNIT_ATTRIBUTION,
+    SystemInputs,
+)
 from openenergy.data.neso import MIX_ATTRIBUTION
 from openenergy.data.opsd import OPSD_ATTRIBUTION
 from openenergy.data.series import PriceSeries
-from openenergy.errors import DataError
+from openenergy.errors import ConfigError, DataError
+from openenergy.system.commitment import Commitment
 from openenergy.system.fleet import Adjustments, FleetAssumptions, build_system
-from openenergy.system.model import Backend, Storage, SystemResult, solve
+from openenergy.system.model import Backend, PriceKind, Storage, SystemResult, solve
 
 # Carbon price support rates per fuel are published from 1 April 2015; OPSD prices end
 # 30 September 2020.
@@ -29,7 +35,12 @@ BACKCAST_NOTE = (
     "Cost-based model: plants bid short-run marginal cost (fuel, carbon price support, "
     "EU ETS). Imports, nuclear, biomass, hydro and pumped storage are fixed at historic "
     "output; demand is NESO total generation. No parameter is fitted to prices; scarcity "
-    "pricing, start-up costs and bidding above cost are not modelled."
+    "pricing and bidding above cost are not modelled."
+)
+COMMITMENT_NOTE = (
+    "Unit commitment: thermal units have start-up costs and minimum stable output and are "
+    "committed day by day with a lookahead; unit parameters are typical published values, "
+    "not GB-specific. The start price spreads each run's start cost over its energy."
 )
 _MWH_PER_TWH = 1e6
 
@@ -52,6 +63,10 @@ class BackcastYear:
     correlation: float
     p95_model: float
     p95_actual: float
+    std_model: float
+    std_actual: float
+    daily_spread_model: float
+    daily_spread_actual: float
     gas_twh_model: float
     gas_twh_actual: float
     coal_twh_model: float
@@ -79,32 +94,40 @@ def backcast(
     adjustments: Adjustments | None = None,
     storage: Sequence[Storage] = (),
     backend: Backend = "auto",
+    commitment: Commitment | None = None,
+    price: PriceKind = "marginal",
 ) -> Backcast:
     """Solve each calendar year of ``mix`` and compare with actual prices and fuel use.
 
     Nothing is fitted: assumptions are applied as given and the gap is the finding.
+    ``price`` chooses which modelled price is compared (``start`` needs ``commitment``).
     """
     index = pd.DatetimeIndex(mix.index)
     if len(index) < 2:
         raise DataError("generation mix needs at least two periods")
     if index[1] - index[0] != prices.step:
         raise DataError(f"mix step {index[1] - index[0]} differs from price step {prices.step}")
+    if price == "start" and commitment is None:
+        raise ConfigError("the start-cost price needs unit commitment")
     years, frames, results = [], [], {}
     for year in sorted(set(index.year)):
         part = mix[index.year == year]
-        result = solve(build_system(part, inputs, assumptions, adjustments, storage), backend)
+        spec = build_system(part, inputs, assumptions, adjustments, storage)
+        result = solve(spec, backend, commitment)
         results[int(year)] = result
-        frame = _hourly(part, result, prices)
+        frame = _hourly(part, result, prices, price)
         frames.append(frame)
         years.append(_compare(int(year), part, frame, result, inputs, prices.step))
     return Backcast(years, pd.concat(frames), results)
 
 
-def _hourly(part: pd.DataFrame, result: SystemResult, prices: PriceSeries) -> pd.DataFrame:
+def _hourly(
+    part: pd.DataFrame, result: SystemResult, prices: PriceSeries, price: PriceKind
+) -> pd.DataFrame:
     by_tech = result.by_technology()
     return pd.DataFrame(
         {
-            "price_model": result.price,
+            "price_model": result.price_of(price),
             "price_actual": prices.prices.reindex(part.index),
             "gas_model_mw": by_tech["ccgt"] + by_tech["peaking"],
             "gas_actual_mw": part["gas"],
@@ -148,6 +171,10 @@ def _compare(
         correlation=float(np.corrcoef(model, actual)[0, 1]),
         p95_model=float(model.quantile(0.95)),
         p95_actual=float(actual.quantile(0.95)),
+        std_model=float(model.std()),
+        std_actual=float(actual.std()),
+        daily_spread_model=_daily_spread(model),
+        daily_spread_actual=_daily_spread(actual),
         gas_twh_model=twh("gas_model_mw"),
         gas_twh_actual=twh("gas_actual_mw"),
         coal_twh_model=twh("coal_model_mw"),
@@ -158,8 +185,19 @@ def _compare(
     )
 
 
+def _daily_spread(prices: pd.Series[float]) -> float:
+    """Mean over UTC days of the highest minus the lowest price."""
+    days = pd.DatetimeIndex(prices.index).normalize()
+    grouped = prices.groupby(days)
+    return float((grouped.max() - grouped.min()).mean())
+
+
 def write_backcast(
-    result: Backcast, directory: Path, assumptions: FleetAssumptions | None = None
+    result: Backcast,
+    directory: Path,
+    assumptions: FleetAssumptions | None = None,
+    commitment: Commitment | None = None,
+    price: PriceKind = "marginal",
 ) -> Path:
     """Write ``backcast.csv`` (per year), ``hourly.csv`` and ``summary.json`` with sources."""
     directory.mkdir(parents=True, exist_ok=True)
@@ -167,11 +205,20 @@ def write_backcast(
         directory / "backcast.csv", index=False
     )
     result.hourly.to_csv(directory / "hourly.csv", index_label="utc_timestamp")
-    summary = {
+    attribution = [MIX_ATTRIBUTION, FLEET_ATTRIBUTION, OPSD_ATTRIBUTION]
+    summary: dict[str, Any] = {
         "years": [y.to_dict() for y in result.years],
         "assumptions": dataclasses.asdict(assumptions or FleetAssumptions()),
+        "price": price,
         "note": BACKCAST_NOTE,
-        "attribution": [MIX_ATTRIBUTION, FLEET_ATTRIBUTION, OPSD_ATTRIBUTION],
     }
+    if commitment is not None:
+        summary["commitment"] = {
+            "units": {name: dataclasses.asdict(u) for name, u in commitment.units.items()},
+            "lookahead_hours": commitment.lookahead_hours,
+        }
+        summary["note"] = BACKCAST_NOTE + " " + COMMITMENT_NOTE
+        attribution.append(UNIT_ATTRIBUTION)
+    summary["attribution"] = attribution
     (directory / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     return directory
