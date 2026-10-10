@@ -1,0 +1,15 @@
+# GB 2019 with unit commitment (start-up costs, minimum stable output) and a 1 MW / 2 MWh
+# battery valued on the start price. Takes about a minute.
+# Run: uv run openenergy system run examples/gb-2019-commitment.yaml
+name: gb-2019-commitment
+system:
+  data: ../data/system
+  prices: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  year: 2019
+  commitment: true
+  price: start
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95

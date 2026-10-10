@@ -58,6 +58,7 @@ direction and rough scale, not causal impact.
 | `fleet.csv` | GB capacity at each year end 2014–2020 (CCGT, coal, gas turbines, oil engines, nuclear, pumped storage) and CCGT and coal efficiency | DUKES 5.8 and 5.10 |
 | `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2020 | DESNZ QEP 3.2.1 |
 | `carbon_prices.csv` | EU ETS price on 1 April 2015–2020 with ECB exchange rates, and carbon price support rates | World Bank, ECB, HMRC |
+| `unit_parameters.csv` | Unit size, minimum stable output and start-up cost for CCGT, coal and peaking plant (unit commitment) | Danish Energy Agency, NREL, ECB |
 
 Known issues: NESO fills gaps by seasonal decomposition and sets net-negative values to
 zero, so pumping demand and net exports are absent; transmission solar and batteries are
@@ -133,10 +134,29 @@ The three UK government sources contain public sector information licensed under
 OpenEnergy derives a USD-to-GBP cross rate from the two ECB rates to convert the World
 Bank's US$ prices; the stored rates are unchanged.
 
+**Unit sizes and minimum loads**
+
+> Danish Energy Agency. Technology Data for Generation of Electricity and District
+> Heating, data sheet (May 2025 edition).
+> <https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating>
+> (accessed 10 October 2026). Licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+**Start-up costs**
+
+> N. Kumar, P. Besuner, S. Lefton, D. Agan and D. Hilleman. Power Plant Cycling Costs.
+> NREL/SR-5500-55433. National Renewable Energy Laboratory, Golden, CO, 2012. Table 1-1,
+> median warm-start costs. <https://www.osti.gov/biblio/1046269> (accessed 10 October 2026).
+
+OpenEnergy converts the 2011 US$ values to GBP with 2011 annual average ECB reference rates
+(source: European Central Bank) and does not inflate them; they are lower-bound costs for
+typical plant, not GB-specific.
+
 The system files keep source values unchanged apart from dropped rows and columns, GB
-totals (England and Wales plus Scotland) and integer MW; changes are listed in
-`data/system/README.md`. OpenEnergy is not affiliated with or endorsed by Open Power
-System Data, NESO, DESNZ, HMRC, the World Bank or the ECB.
+totals (England and Wales plus Scotland), integer MW and the start-cost conversion;
+changes are listed in `data/system/README.md`. OpenEnergy is not affiliated with or
+endorsed by Open Power System Data, NESO, DESNZ, HMRC, the World Bank, the ECB, the Danish
+Energy Agency or NREL.
 
 ## Software
 

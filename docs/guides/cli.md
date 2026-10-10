@@ -106,12 +106,16 @@ given and reports price, emissions, curtailment, cost and any battery's revenue.
 
 ```bash
 uv run openenergy system validate [--start 2015-04-01] [--end 2020-09-30] [--out backcast/]
+uv run openenergy system validate --commitment --price start
 ```
 
 Rebuilds GB prices and gas and coal output from fuel, carbon and fleet data, and compares
-each year with what happened. `--data` and `--prices` point at other copies of
-`data/system` and the OPSD file. `--out` writes `backcast.csv`, `hourly.csv` and
-`summary.json`.
+each year with what happened: mean, MAE, correlation, 95th percentile and average daily
+spread of price, gas and coal output, and CO2. `--commitment` adds start-up costs and
+minimum stable output ([unit commitment](system-model.md#unit-commitment); about a minute
+per year). `--price start` compares the start price instead of the marginal price and
+needs `--commitment`. `--data` and `--prices` point at other copies of `data/system` and
+the OPSD file. `--out` writes `backcast.csv`, `hourly.csv` and `summary.json`.
 
 ## `openenergy system run`
 

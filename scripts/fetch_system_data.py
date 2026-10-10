@@ -18,6 +18,11 @@ any of them):
 - HMRC, Excise Notice CCL1/6, carbon price support rates,
   https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor.
   Open Government Licence v3.0.
+- Danish Energy Agency, Technology Data for Generation of Electricity and District Heating
+  (data sheet updated May 2025), https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating.
+  CC BY 4.0.
+- N. Kumar et al., Power Plant Cycling Costs, NREL/SR-5500-55433, 2012, Table 1-1,
+  https://www.osti.gov/biblio/1046269 (US government-sponsored report).
 
 Run: uv run --with openpyxl python scripts/fetch_system_data.py
 """
@@ -61,6 +66,22 @@ EU_ETS_USD = {
 }  # fmt: skip
 # HMRC carbon price support rates: gas GBP/kWh, coal GBP/GJ (gross calorific value).
 CPS = {2015: (0.00334, 1.56860), **dict.fromkeys(range(2016, 2021), (0.00331, 1.54790))}
+
+DEA_SHEET = "https://ens.dk/media/8615/download"
+# (sheet, column header holding the value for unit size, for minimum load)
+DEA = {
+    "ccgt": ("05 Gas turb. CC, steam extract.", "upper", "2015"),
+    "coal": ("01 Coal CHP", "2015", "2015"),
+    "peaking": ("04 Gas turb. simple cycle, L", "lower", "2015"),
+}
+# NREL Power Plant Cycling Costs, Table 1-1, median warm-start capital and maintenance
+# cost, 2011 US$ per MW of capacity: Gas CC, Coal large sub-critical, Gas aero-derivative
+# CT. The report is a PDF, so the published values are recorded here.
+NREL_WARM_START_USD = {"ccgt": 55.0, "coal": 65.0, "peaking": 24.0}
+ECB_2011 = (
+    "https://data-api.ecb.europa.eu/service/data/EXR/A.GBP+USD.EUR.SP00.A"
+    "?startPeriod=2011&endPeriod=2011&format=csvdata"
+)
 
 
 def download(url: str) -> bytes:
@@ -179,12 +200,62 @@ def carbon_prices() -> None:
     print(f"carbon_prices.csv: {len(rows)} years")
 
 
+def unit_parameters() -> None:
+    book = pd.ExcelFile(io.BytesIO(download(DEA_SHEET)))
+    rates = {
+        row["CURRENCY"]: float(row["OBS_VALUE"])
+        for row in csv.DictReader(io.StringIO(download(ECB_2011).decode()))
+    }
+    gbp_per_usd = rates["GBP"] / rates["USD"]
+    rows = []
+    for technology, (sheet, size_column, load_column) in DEA.items():
+        frame = pd.read_excel(book, sheet, header=None)
+        header = next(i for i in range(len(frame)) if "2020" in frame.iloc[i].astype(str).tolist())
+        unit_mw = _dea_value(frame, header, "Generating capacity for one unit", size_column)
+        min_stable = _dea_value(frame, header, "Minimum load", load_column)
+        usd = NREL_WARM_START_USD[technology]
+        rows.append(
+            [
+                technology,
+                unit_mw,
+                min_stable,
+                usd,
+                round(gbp_per_usd, 6),
+                round(usd * gbp_per_usd, 2),
+            ]
+        )
+    with (OUTPUT / "unit_parameters.csv").open("w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(
+            [
+                "technology", "unit_mw", "min_stable", "start_cost_usd2011_per_mw",
+                "gbp_per_usd_2011", "start_cost_gbp_per_mw",
+            ]
+        )  # fmt: skip
+        writer.writerows(rows)
+    print(f"unit_parameters.csv: {len(rows)} technologies")
+
+
+def _dea_value(frame: pd.DataFrame, header: int, label: str, column: str) -> float:
+    """A DEA cell by row label and column: a year, or the lower/upper 2020 range bound."""
+    row = next(i for i in range(len(frame)) if str(frame.iat[i, 1]).startswith(label))
+    years = [str(v).split(".")[0] for v in frame.iloc[header].tolist()]
+    if column in ("lower", "upper"):
+        position = [i for i, year in enumerate(years) if year == "2020"][
+            1 if column == "lower" else 2
+        ]
+    else:
+        position = years.index(column)
+    return float(frame.iat[row, position])
+
+
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     generation_mix()
     fleet()
     fuel_prices()
     carbon_prices()
+    unit_parameters()
 
 
 if __name__ == "__main__":

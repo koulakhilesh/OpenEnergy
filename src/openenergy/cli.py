@@ -25,6 +25,8 @@ from openenergy.scenario import (
     sweep,
     write_outputs,
 )
+from openenergy.system.commitment import Commitment
+from openenergy.system.model import PriceKind
 from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
 from openenergy.system.scenario import (
     SystemRun,
@@ -310,30 +312,49 @@ def system_validate(
     ),
     start: Annotated[str, typer.Option(help="First day, YYYY-MM-DD.")] = str(BACKCAST_START),
     end: Annotated[str, typer.Option(help="Last day, YYYY-MM-DD.")] = str(BACKCAST_END),
+    commitment: Annotated[
+        bool, typer.Option(help="Unit commitment: start-up costs and minimum stable output.")
+    ] = False,
+    price: Annotated[
+        str, typer.Option(help="Modelled price to compare: marginal, or start (commitment).")
+    ] = "marginal",
     out: Annotated[Path | None, typer.Option("--out", "-o", help="Output directory.")] = None,
 ) -> None:
     """Rebuild GB prices and fuel use from costs and compare with what happened."""
     with _reported_errors():
         first, last = _day(start, "start"), _day(end, "end")
+        if price not in ("marginal", "start"):
+            raise ConfigError(f"--price must be marginal or start, got {price!r}")
+        kind: PriceKind = "start" if price == "start" else "marginal"
         mix = GenerationMixSource(data / "generation_mix.csv").mix(
             first, last, step=pd.Timedelta(hours=1)
         )
         actual = OPSDCsvSource(prices).prices("GB_GBN", first, last)
-        result = backcast(mix, SystemInputs(data), actual)
-        destination = write_backcast(result, out) if out is not None else None
-    typer.echo(f"GB backcast {first} to {last}: model vs actual (GBP/MWh, TWh, MtCO2)")
+        inputs = SystemInputs(data)
+        units = Commitment.from_inputs(inputs) if commitment else None
+        result = backcast(mix, inputs, actual, commitment=units, price=kind)
+        destination = (
+            write_backcast(result, out, commitment=units, price=kind) if out is not None else None
+        )
+    mode = "unit commitment" if commitment else "merit order"
     typer.echo(
-        f"{'year':<6}{'hours':>6}{'model':>8}{'actual':>8}{'bias':>7}{'MAE':>6}{'corr':>6}"
-        f"{'p95 m/a':>10}{'gas m/a':>12}{'coal m/a':>11}{'CO2 m/a':>11}"
+        f"GB backcast {first} to {last}, {mode}, {kind} price: "
+        "model vs actual (GBP/MWh, TWh, MtCO2)"
+    )
+    typer.echo(
+        f"{'year':<6}{'hours':>6}{'model':>8}{'actual':>8}{'MAE':>6}{'corr':>6}"
+        f"{'p95 m/a':>10}{'spread m/a':>12}{'gas m/a':>11}{'coal m/a':>11}{'CO2 m/a':>11}"
     )
     for y in result.years:
         typer.echo(
-            f"{y.year:<6}{y.hours:>6}{y.price_model:>8.1f}{y.price_actual:>8.1f}{y.bias:>7.1f}"
+            f"{y.year:<6}{y.hours:>6}{y.price_model:>8.1f}{y.price_actual:>8.1f}"
             f"{y.mae:>6.1f}{y.correlation:>6.2f}{f'{y.p95_model:.0f}/{y.p95_actual:.0f}':>10}"
-            f"{f'{y.gas_twh_model:.0f}/{y.gas_twh_actual:.0f}':>12}"
+            f"{f'{y.daily_spread_model:.0f}/{y.daily_spread_actual:.0f}':>12}"
+            f"{f'{y.gas_twh_model:.0f}/{y.gas_twh_actual:.0f}':>11}"
             f"{f'{y.coal_twh_model:.1f}/{y.coal_twh_actual:.1f}':>11}"
             f"{f'{y.emissions_mt_model:.1f}/{y.emissions_mt_actual_mix:.1f}':>11}"
         )
+    typer.echo("spread = mean daily highest minus lowest price")
     typer.echo("CO2 actual = actual gas and coal at the model's emission factors and efficiencies")
     if destination is not None:
         typer.echo(f"outputs written to {destination}")

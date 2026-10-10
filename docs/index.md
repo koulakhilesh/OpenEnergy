@@ -87,7 +87,8 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
    storage needed to absorb that surplus; `openenergy sweep` sizes storage for a site.
 7. **Models GB dispatch**: CCGT, coal and peaking plant in merit order from DUKES fleet
    data, fuel and carbon prices, checked against 2015–2020, with scenarios for renewables,
-   storage, fleet and carbon policy (storage via the optional PyPSA backend).
+   storage, fleet and carbon policy (storage via the optional PyPSA backend), and optional
+   unit commitment with start-up costs and minimum stable output.
 
 See [Concepts](concepts.md) for the equations and [Scenarios](guides/scenarios.md) for
 every setting.
@@ -101,23 +102,24 @@ every setting.
 | v2.0 | Battery arbitrage backtesting: physics, ageing, dispatch, forecasters, CLI |
 | v2.1 | PV and wind assets, captured price, co-located storage |
 | v2.2 | Net load, surplus, storage sizing, emissions |
-| v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 (current) |
+| v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
+| v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.1 | Realistic prices: scarcity pricing and optional unit commitment (start-up costs, minimum stable output), re-checked against 2015–2020 without fitting to prices |
 | v3.2 | Data after 2020: cached connectors for NESO and the Carbon Intensity API, current GB prices (subject to licence), newer DUKES and fuel prices, UK ETS |
 | v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
 | v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
 | v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 
-Why this order: v3.0's backcast matches average prices but its peaks are too low, so a
-battery earns almost nothing on modelled prices. Fixing that (v3.1) and bringing the data
-up to date (v3.2) come first; planning under uncertainty means more once prices have
-realistic spikes; the app reuses the v3.4 charts.
+Why this order: v3.0's backcast matched average prices but its peaks were too low, so a
+battery earned almost nothing on modelled prices. v3.1's unit commitment restores much of
+the daily shape (2019 perfect-foresight battery value £10k against £22.5k on real prices);
+bringing the data up to date (v3.2) comes next; planning under uncertainty means more once
+prices have realistic spikes; the app reuses the v3.4 charts.
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
 versioned docs. Ideas are welcome in

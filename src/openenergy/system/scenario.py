@@ -18,7 +18,7 @@ from pydantic import Field, ValidationInfo
 import openenergy
 from openenergy.assets.battery import BatterySpec
 from openenergy.backtest.engine import BacktestConfig, run_backtest
-from openenergy.data.fleet import FLEET_ATTRIBUTION, SystemInputs
+from openenergy.data.fleet import FLEET_ATTRIBUTION, UNIT_ATTRIBUTION, SystemInputs
 from openenergy.data.neso import MIX_ATTRIBUTION, GenerationMixSource
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.series import PriceSeries
@@ -26,9 +26,15 @@ from openenergy.errors import ConfigError
 from openenergy.forecast.baseline import Forecaster, NaiveLastWeek, PerfectForesight
 from openenergy.metrics.summary import Summary, summarise
 from openenergy.scenario import MAX_SWEEP, _read, _resolve, _Strict, apply_overrides
+from openenergy.system.commitment import Commitment
 from openenergy.system.fleet import Adjustments, FleetAssumptions, build_system
-from openenergy.system.model import Storage, SystemResult, solve
-from openenergy.system.validate import BACKCAST_END, BACKCAST_START
+from openenergy.system.model import PriceKind, Storage, SystemResult, solve
+from openenergy.system.validate import (
+    BACKCAST_END,
+    BACKCAST_START,
+    COMMITMENT_NOTE,
+    _daily_spread,
+)
 
 SYSTEM_NOTE = (
     "Cost-based dispatch of GB on one bus: plants bid short-run marginal cost; imports, "
@@ -61,6 +67,8 @@ class SystemSection(_Strict):
     data: Path
     prices: Path | None = None
     year: int = Field(ge=BACKCAST_START.year, le=BACKCAST_END.year)
+    start: date | None = None
+    end: date | None = None
     scale: dict[str, float] = Field(default_factory=dict)
     capacity_mw: dict[str, float] = Field(default_factory=dict)
     fuel_price_scale: dict[str, float] = Field(default_factory=dict)
@@ -70,6 +78,20 @@ class SystemSection(_Strict):
     assumptions: AssumptionsSection = AssumptionsSection()
     voll: float = Field(default=6000.0, gt=0)
     backend: Literal["auto", "merit", "pypsa"] = "auto"
+    commitment: bool = False
+    lookahead_hours: float = Field(default=24.0, ge=0)
+    price: Literal["marginal", "start"] = "marginal"
+
+    @pydantic.model_validator(mode="after")
+    def _start_price_needs_commitment(self) -> SystemSection:
+        if self.price == "start" and not self.commitment:
+            raise ValueError("price: start needs commitment: true")
+        if self.commitment and self.backend != "auto":
+            raise ValueError("commitment has its own solver; leave backend as auto")
+        first, last = self.window()
+        if first > last:
+            raise ValueError(f"no days between {first} and {last} in {self.year}")
+        return self
 
     @pydantic.field_validator("data", "prices")
     @classmethod
@@ -77,9 +99,10 @@ class SystemSection(_Strict):
         return None if value is None else _resolve(value, info)
 
     def window(self) -> tuple[date, date]:
-        return max(date(self.year, 1, 1), BACKCAST_START), min(
-            date(self.year, 12, 31), BACKCAST_END
-        )
+        """Days modelled: the year, narrowed by ``start``/``end`` and the data window."""
+        first = max(date(self.year, 1, 1), BACKCAST_START, self.start or BACKCAST_START)
+        last = min(date(self.year, 12, 31), BACKCAST_END, self.end or BACKCAST_END)
+        return first, last
 
 
 class SystemScenario(_Strict):
@@ -96,10 +119,12 @@ class SystemSummary:
 
     year: int
     periods: int
+    price: str
     price_mean: float
     price_std: float
     price_p05: float
     price_p95: float
+    daily_spread: float
     generation_twh: dict[str, float]
     curtailment_twh: float
     unserved_mwh: float
@@ -139,9 +164,10 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
     section = scenario.system
     first, last = section.window()
     mix = GenerationMixSource(section.data / "generation_mix.csv").mix(first, last, step=_HOUR)
+    inputs = SystemInputs(section.data)
     spec = build_system(
         mix,
-        SystemInputs(section.data),
+        inputs,
         FleetAssumptions(**section.assumptions.model_dump()),
         Adjustments(
             scale=section.scale,
@@ -157,14 +183,17 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
         ],
         section.voll,
     )
-    result = solve(spec, section.backend)
+    commitment = (
+        Commitment.from_inputs(inputs, section.lookahead_hours) if section.commitment else None
+    )
+    result = solve(spec, section.backend, commitment)
     actual = None
     if section.prices is not None:
         actual = OPSDCsvSource(section.prices).prices("GB_GBN", first, last).prices.mean()
-    summary = _summarise(section.year, spec.storage, result, actual)
+    summary = _summarise(section.year, spec.storage, result, actual, section.price)
     if scenario.battery is None:
         return SystemRun(scenario, result, summary, None)
-    prices = PriceSeries(result.price, currency="GBP", zone="GB_GBN")
+    prices = PriceSeries(result.price_of(section.price), currency="GBP", zone="GB_GBN")
     config = BacktestConfig(lead_hours=scenario.lead_hours)
     forecaster: Forecaster = (
         PerfectForesight(prices) if scenario.forecast == "perfect_foresight" else NaiveLastWeek()
@@ -187,17 +216,24 @@ def write_system_outputs(run: SystemRun, directory: str | Path) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     frame = run.result.by_technology()
     frame.insert(0, "price", run.result.price)
+    if run.result.start_price is not None:
+        frame.insert(1, "start_price", run.result.start_price)
     frame["curtailment"] = run.result.curtailment
     frame["emissions_t"] = run.result.emissions_t
     frame.to_csv(out / "dispatch.csv", index_label="utc_timestamp")
+    attribution = [MIX_ATTRIBUTION, FLEET_ATTRIBUTION]
+    if run.scenario.system.commitment:
+        attribution.append(UNIT_ATTRIBUTION)
+    if run.scenario.system.prices:
+        attribution.append(OPSD_ATTRIBUTION)
+    note = SYSTEM_NOTE + (" " + COMMITMENT_NOTE if run.scenario.system.commitment else "")
     payload: dict[str, Any] = {
         "scenario": run.scenario.name,
         "openenergy_version": openenergy.__version__,
         "system": run.summary.to_dict(),
         "config": run.scenario.model_dump(mode="json"),
-        "note": SYSTEM_NOTE,
-        "attribution": [MIX_ATTRIBUTION, FLEET_ATTRIBUTION]
-        + ([OPSD_ATTRIBUTION] if run.scenario.system.prices else []),
+        "note": note,
+        "attribution": attribution,
     }
     if run.battery is not None and run.battery_benchmark is not None:
         payload["battery"] = run.battery.to_dict()
@@ -222,6 +258,7 @@ def system_sweep(path: str | Path, grid: dict[str, list[Any]]) -> pd.DataFrame:
             **overrides,
             "price_mean": s.price_mean,
             "price_std": s.price_std,
+            "daily_spread": s.daily_spread,
             "emissions_mt": s.emissions_mt,
             "curtailment_twh": s.curtailment_twh,
             "unserved_mwh": s.unserved_mwh,
@@ -248,9 +285,14 @@ def _validate(raw: dict[str, Any], path: Path) -> SystemScenario:
 
 
 def _summarise(
-    year: int, storage: tuple[Storage, ...], result: SystemResult, actual: float | None
+    year: int,
+    storage: tuple[Storage, ...],
+    result: SystemResult,
+    actual: float | None,
+    kind: PriceKind,
 ) -> SystemSummary:
-    hours = float(pd.Timedelta(result.price.index[1] - result.price.index[0]) / _HOUR)
+    price = result.price_of(kind)
+    hours = float(pd.Timedelta(price.index[1] - price.index[0]) / _HOUR)
     by_tech = result.by_technology()
     generation = {
         name: float(by_tech[name].sum() * hours / 1e6)
@@ -264,11 +306,13 @@ def _summarise(
     }
     return SystemSummary(
         year=year,
-        periods=len(result.price),
-        price_mean=float(result.price.mean()),
-        price_std=float(result.price.std()),
-        price_p05=float(result.price.quantile(0.05)),
-        price_p95=float(result.price.quantile(0.95)),
+        periods=len(price),
+        price=kind,
+        price_mean=float(price.mean()),
+        price_std=float(price.std()),
+        price_p05=float(price.quantile(0.05)),
+        price_p95=float(price.quantile(0.95)),
+        daily_spread=_daily_spread(price),
         generation_twh=generation,
         curtailment_twh=float(result.curtailment.sum() * hours / 1e6),
         unserved_mwh=float(result.unserved.sum() * hours),

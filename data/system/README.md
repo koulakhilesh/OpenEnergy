@@ -70,3 +70,20 @@ OpenEnergy converts the EU ETS price to GBP as
 `eu_ets_usd_per_t / usd_per_eur * gbp_per_eur`. One price per year misses movements within
 the year. Emission factors are taken from the carbon price support rates, which are set
 at £18/tCO2 from April 2016: gas 0.1839 tCO2/MWh and coal 0.3096 tCO2/MWh of fuel.
+
+## `unit_parameters.csv`
+
+Typical unit size, minimum stable output and start-up cost for the unit commitment model,
+one row per thermal technology (`ccgt`, `coal`, `peaking`).
+
+| Column | Source |
+|--------|--------|
+| `unit_mw`, `min_stable` | Danish Energy Agency, [Technology Data for Generation of Electricity and District Heating](https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating), data sheet (May 2025 edition, <https://ens.dk/media/8615/download>), rows "Generating capacity for one unit" and "Minimum load". CCGT: sheet *05 Gas turb. CC, steam extract.*, 2020 upper bound for size, 2015 for minimum load. Coal: *01 Coal CHP*, 2015. Peaking: *04 Gas turb. simple cycle, L*, 2020 lower bound for size, 2015 for minimum load. [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `start_cost_usd2011_per_mw` | N. Kumar, P. Besuner, S. Lefton, D. Agan and D. Hilleman, *Power Plant Cycling Costs*, NREL/SR-5500-55433, National Renewable Energy Laboratory, 2012, Table 1-1, median warm-start capital and maintenance cost: gas CC (CCGT), large sub-critical coal (coal), aero-derivative gas turbine (peaking). <https://www.osti.gov/biblio/1046269>. US government-sponsored report; values recorded by hand from the PDF, unchanged |
+| `gbp_per_usd_2011` | Source: European Central Bank, [euro reference rates](https://data.ecb.europa.eu/), 2011 annual averages (series EXR.A.GBP.EUR.SP00.A and EXR.A.USD.EUR.SP00.A). OpenEnergy derives the USD-to-GBP cross rate |
+| `start_cost_gbp_per_mw` | `start_cost_usd2011_per_mw * gbp_per_usd_2011`, not inflated to later years |
+
+Known issues: these are typical published values, not GB-specific. The DEA sheets describe
+modern Danish plant, so older GB coal units likely had higher minimum loads than the coal
+CHP figure. DEA gives minimum load in percent; it is stored as a fraction. NREL's start costs are lower-bound
+estimates of wear and exclude start fuel, and they are in 2011 dollars.

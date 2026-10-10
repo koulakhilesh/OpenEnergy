@@ -1,0 +1,4 @@
+technology,unit_mw,min_stable,start_cost_usd2011_per_mw,gbp_per_usd_2011,start_cost_gbp_per_mw
+ccgt,500.0,0.4,55.0,0.6235,34.29
+coal,500.0,0.18,65.0,0.6235,40.53
+peaking,40.0,0.25,24.0,0.6235,14.96
