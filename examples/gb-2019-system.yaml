@@ -1,0 +1,10 @@
+name: gb-2019-system
+system:
+  data: ../data/system
+  prices: ../data/time_series/time_series_60min_singleindex_filtered.csv
+  year: 2019
+battery:
+  power_mw: 1.0
+  energy_mwh: 2.0
+  eta_charge: 0.92
+  eta_discharge: 0.92
