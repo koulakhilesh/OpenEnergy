@@ -77,6 +77,24 @@ def test_start_costs_keep_a_unit_on_overnight() -> None:
     assert (costly.price[~night & (idx.hour >= 8) & (idx.hour < 21)] == 50.0).all()
 
 
+def test_it_starts_a_unit_rather_than_shed_a_sliver_of_load() -> None:
+    idx = index(24)
+    demand = pd.Series(100.0, index=idx)
+    demand.iloc[12] = 100.01
+    gens = (gen(idx, "base", 100.0, 10.0), gen(idx, "mid", 200.0, 50.0, "ccgt"))
+    spec = SystemSpec(demand, gens, voll=6000.0)
+    result = commit(spec, Commitment({"ccgt": UnitParameters(100.0, 0.5, 1000.0)}))
+    assert result.unserved.sum() == 0.0
+    assert result.price.max() < 6000.0
+    assert result.units_online is not None and result.units_online["mid"].iloc[12] == 1
+    short = commit(
+        SystemSpec(demand + 200.0, gens, voll=6000.0),
+        Commitment({"ccgt": UnitParameters(100.0, 0.5, 1000.0)}),
+    )
+    assert short.unserved.iloc[12] == pytest.approx(0.01)
+    assert short.price.iloc[12] == pytest.approx(6000.0)
+
+
 def test_start_price_adds_start_costs_over_each_run() -> None:
     demand = two_days(night=100.0, day=200.0)
     idx = demand.index

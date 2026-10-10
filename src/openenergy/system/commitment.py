@@ -122,8 +122,17 @@ class _Model:
         integers = [layout.u(i, t) for i in self.units for t in range(stop - start)]
         # HighsLp array properties return copies, so modify and assign back whole arrays.
         lower, upper = np.array(lp.col_lower_), np.array(lp.col_upper_)
-        lower[integers] = upper[integers] = np.round(solution[integers])
+        rounded = np.round(solution[integers])
+        lower[integers] = upper[integers] = rounded
         lp.col_lower_, lp.col_upper_ = lower, upper
+        # Keep the MILP's integrality tolerance so its solution stays feasible once rounded.
+        drift = dict(zip(integers, solution[integers] - rounded, strict=True))
+        row_lower, row_upper = np.array(lp.row_lower_), np.array(lp.row_upper_)
+        for row, column, coefficient in layout.unit_rows:
+            shift = -coefficient * drift[column]
+            row_lower[row] = min(row_lower[row], row_lower[row] + shift)
+            row_upper[row] = max(row_upper[row], row_upper[row] + shift)
+        lp.row_lower_, lp.row_upper_ = row_lower, row_upper
         lp.integrality_ = []
         fixed = highspy.Highs()  # type: ignore[no-untyped-call]
         fixed.setOptionValue("output_flag", False)
@@ -177,7 +186,9 @@ class _Model:
                 upper[u] = math.ceil(available / unit.unit_mw - 1e-9)
                 cost[p] = self.cost[row, i] * dt
                 cost[s] = unit.start_cost_per_mw * unit.unit_mw
+                layout.unit_rows.append((len(rows), u, -unit.unit_mw))
                 rows.append(([p, u], [1.0, -unit.unit_mw], -_INF, 0.0))
+                layout.unit_rows.append((len(rows), u, -unit.min_stable * unit.unit_mw))
                 rows.append(([p, u], [1.0, -unit.min_stable * unit.unit_mw], 0.0, _INF))
                 if t == 0:
                     if self.previous is not None:
@@ -209,6 +220,9 @@ class _Model:
                 balance[1].extend([1.0, -1.0])
             shed = layout.shed(t)
             cost[shed] = self.spec.voll * dt
+            # Shed only what capacity cannot cover; otherwise a sliver at VoLL beats a start.
+            supply = sum(self.capacity[row, i] for i in [*self.flex, *self.units])
+            upper[shed] = max(0.0, self.residual[row] - supply)
             balance[0].append(shed)
             balance[1].append(1.0)
             layout.balance_rows.append(len(rows))
@@ -295,6 +309,8 @@ class _Layout:
         self.per_period = len(flex) + 3 * len(units) + 3 * storage + 1
         self.size = self.per_period * periods
         self.balance_rows: list[int] = []
+        # (row, u column, coefficient of u) for rows that link output to units online
+        self.unit_rows: list[tuple[int, int, float]] = []
 
     def _base(self, t: int) -> int:
         return t * self.per_period

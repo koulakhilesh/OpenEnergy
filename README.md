@@ -101,12 +101,12 @@ uv run mkdocs serve
 | v2.1 | PV and wind assets, captured price, co-located storage |
 | v2.2 | Net load, surplus, storage sizing, emissions |
 | v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
+| v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.1 | Realistic prices: scarcity pricing and optional unit commitment (start-up costs, minimum stable output), re-checked against 2015–2020 without fitting to prices |
 | v3.2 | Data after 2020: cached connectors for NESO and the Carbon Intensity API, current GB prices (subject to licence), newer DUKES and fuel prices, UK ETS |
 | v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
 | v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
@@ -143,8 +143,13 @@ under the
 EU ETS prices come from the World Bank
 [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price)
 ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), converted to GBP with a cross
-rate OpenEnergy derives from euro reference rates (source: European Central Bank). All
-accessed 10 October 2026.
+rate OpenEnergy derives from euro reference rates (source: European Central Bank). Unit
+sizes and minimum loads for unit commitment come from the Danish Energy Agency's
+[Technology Data catalogue](https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating)
+([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), and start-up costs from Kumar
+et al., *Power Plant Cycling Costs*, NREL/SR-5500-55433, 2012, Table 1-1
+(https://www.osti.gov/biblio/1046269), converted with 2011 ECB rates. All accessed
+10 October 2026.
 
 The optional storage backend uses PyPSA (Brown, Hörsch and Schlachtberger, *PyPSA: Python
 for Power System Analysis*, Journal of Open Research Software 6(1), 2018,
