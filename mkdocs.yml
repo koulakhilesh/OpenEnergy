@@ -5,10 +5,11 @@ repo_url: https://github.com/koulakhilesh/OpenEnergy
 repo_name: koulakhilesh/OpenEnergy
 edit_uri: edit/master/docs/
 copyright: >
-  MIT licence. Data: Open Power System Data;
-  NESO Carbon Intensity API (CC BY 4.0); NESO historic generation mix, supported by
-  National Energy SO Open Data; DESNZ and HMRC (Open Government Licence v3.0);
-  World Bank Carbon Pricing Dashboard (CC BY 4.0); ECB.
+  Code: MIT licence. Documentation: CC BY 4.0. Data keeps its own licence: Open Power
+  System Data; Ember (CC BY 4.0); NESO Carbon Intensity API (CC BY 4.0); NESO historic
+  generation mix, supported by National Energy SO Open Data; DESNZ and HMRC (Open
+  Government Licence v3.0); World Bank Carbon Pricing Dashboard and Danish Energy Agency
+  (CC BY 4.0); NREL; ECB.
 
 theme:
   name: material

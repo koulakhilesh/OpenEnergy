@@ -176,7 +176,22 @@ not affiliated with or endorsed by any data provider.
 
 ## License
 
-MIT for the code; see [LICENSE.txt](LICENSE.txt). Bundled data keeps its own licence.
+The code is MIT licensed; see [LICENSE.txt](LICENSE.txt). The written documentation in
+`docs/` (text, tables and findings) is licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Bundled data is not covered by
+either and keeps its own licence:
+
+| Folder | Data | Licence |
+|---|---|---|
+| `data/time_series` | Open Power System Data time series (prices, load, renewables, to 2020) | Terms of the original sources; see the [OPSD package](https://doi.org/10.25832/time_series/2020-10-06) |
+| `data/prices` | Ember GB day-ahead prices; ECB exchange rates | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); ECB reuse terms |
+| `data/carbon_intensity` | NESO Carbon Intensity API | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `data/system` | NESO historic generation mix | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
+| `data/system` | DESNZ (DUKES, Quarterly Energy Prices, UK ETS 2021), HMRC | [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
+| `data/system` | World Bank Carbon Pricing Dashboard; Danish Energy Agency technology data | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `data/system` | NREL Power Plant Cycling Costs (values recorded from the report) | US government-sponsored report |
+
+Reuse of any of these requires the attribution given in the folder's `README.md`.
 
 ## Contact
 
