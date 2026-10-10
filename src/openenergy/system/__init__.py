@@ -18,9 +18,12 @@ from openenergy.system.netload import (
     surplus,
 )
 from openenergy.system.storage import FleetResult, absorb_surplus, sizing_grid
+from openenergy.system.validate import Backcast, BackcastYear, backcast, write_backcast
 
 __all__ = [
     "Adjustments",
+    "Backcast",
+    "BackcastYear",
     "FleetAssumptions",
     "FleetResult",
     "Generator",
@@ -30,6 +33,7 @@ __all__ = [
     "SystemResult",
     "SystemSpec",
     "absorb_surplus",
+    "backcast",
     "build_system",
     "duration_curve",
     "load_system",
@@ -40,4 +44,5 @@ __all__ = [
     "solve",
     "surplus",
     "thermal_generators",
+    "write_backcast",
 ]

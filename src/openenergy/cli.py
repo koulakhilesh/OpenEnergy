@@ -1,15 +1,19 @@
-"""Command-line interface: ``openenergy run | compare | data info``."""
+"""Command-line interface: ``openenergy run | compare | sweep | system | data``."""
 
 from __future__ import annotations
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import date
 from pathlib import Path
 from typing import Annotated
 
+import pandas as pd
 import typer
 
 import openenergy
+from openenergy.data.fleet import SystemInputs
+from openenergy.data.neso import GenerationMixSource
 from openenergy.data.opsd import OPSDCsvSource
 from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
@@ -23,10 +27,16 @@ from openenergy.scenario import (
 )
 from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
 from openenergy.system.storage import sizing_grid
+from openenergy.system.validate import BACKCAST_END, BACKCAST_START, backcast, write_backcast
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help=__doc__)
 data_app = typer.Typer(no_args_is_help=True, help="Inspect market data files.")
 app.add_typer(data_app, name="data")
+system_app = typer.Typer(no_args_is_help=True, help="Model the GB power system.")
+app.add_typer(system_app, name="system")
+
+SYSTEM_DATA = Path("data/system")
+OPSD_DATA = Path("data/time_series/time_series_60min_singleindex_filtered.csv")
 
 
 @contextmanager
@@ -227,6 +237,52 @@ def data_info(path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")
             typer.echo(
                 f"{zone:<10}{series.currency:<5}{first} to {last}  {complete}/{total} complete days"
             )
+
+
+@system_app.command("validate")
+def system_validate(
+    data: Annotated[Path, typer.Option(help="Directory from scripts/fetch_system_data.py.")] = (
+        SYSTEM_DATA
+    ),
+    prices: Annotated[Path, typer.Option(help="OPSD time-series CSV with GB prices.")] = (
+        OPSD_DATA
+    ),
+    start: Annotated[str, typer.Option(help="First day, YYYY-MM-DD.")] = str(BACKCAST_START),
+    end: Annotated[str, typer.Option(help="Last day, YYYY-MM-DD.")] = str(BACKCAST_END),
+    out: Annotated[Path | None, typer.Option("--out", "-o", help="Output directory.")] = None,
+) -> None:
+    """Rebuild GB prices and fuel use from costs and compare with what happened."""
+    with _reported_errors():
+        first, last = _day(start, "start"), _day(end, "end")
+        mix = GenerationMixSource(data / "generation_mix.csv").mix(
+            first, last, step=pd.Timedelta(hours=1)
+        )
+        actual = OPSDCsvSource(prices).prices("GB_GBN", first, last)
+        result = backcast(mix, SystemInputs(data), actual)
+        destination = write_backcast(result, out) if out is not None else None
+    typer.echo(f"GB backcast {first} to {last}: model vs actual (GBP/MWh, TWh, MtCO2)")
+    typer.echo(
+        f"{'year':<6}{'hours':>6}{'model':>8}{'actual':>8}{'bias':>7}{'MAE':>6}{'corr':>6}"
+        f"{'p95 m/a':>10}{'gas m/a':>12}{'coal m/a':>11}{'CO2 m/a':>11}"
+    )
+    for y in result.years:
+        typer.echo(
+            f"{y.year:<6}{y.hours:>6}{y.price_model:>8.1f}{y.price_actual:>8.1f}{y.bias:>7.1f}"
+            f"{y.mae:>6.1f}{y.correlation:>6.2f}{f'{y.p95_model:.0f}/{y.p95_actual:.0f}':>10}"
+            f"{f'{y.gas_twh_model:.0f}/{y.gas_twh_actual:.0f}':>12}"
+            f"{f'{y.coal_twh_model:.1f}/{y.coal_twh_actual:.1f}':>11}"
+            f"{f'{y.emissions_mt_model:.1f}/{y.emissions_mt_actual_mix:.1f}':>11}"
+        )
+    typer.echo("CO2 actual = actual gas and coal at the model's emission factors and efficiencies")
+    if destination is not None:
+        typer.echo(f"outputs written to {destination}")
+
+
+def _day(text: str, name: str) -> date:
+    try:
+        return date.fromisoformat(text)
+    except ValueError as exc:
+        raise ConfigError(f"--{name} must be YYYY-MM-DD, got {text!r}") from exc
 
 
 def _format_run(run: ScenarioRun) -> str:
