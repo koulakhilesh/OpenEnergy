@@ -99,7 +99,30 @@ uv run openenergy sweep examples/gb-2019-naive.yaml \
 ```
 
 Runs a scenario for every combination of `--set dotted.key=v1,v2` values (up to 100) and
-ranks them by total revenue.
+ranks them by total revenue. For a [system scenario](system-model.md) it keeps the order
+given and reports price, emissions, curtailment, cost and any battery's revenue.
+
+## `openenergy system validate`
+
+```bash
+uv run openenergy system validate [--start 2015-04-01] [--end 2020-09-30] [--out backcast/]
+```
+
+Rebuilds GB prices and gas and coal output from fuel, carbon and fleet data, and compares
+each year with what happened. `--data` and `--prices` point at other copies of
+`data/system` and the OPSD file. `--out` writes `backcast.csv`, `hourly.csv` and
+`summary.json`.
+
+## `openenergy system run`
+
+```bash
+uv run openenergy system run examples/gb-2019-system.yaml [--out outputs/gb-2019-system]
+```
+
+Dispatches one GB year with a scenario's changes and prints price, generation by
+technology, curtailment, emissions, system cost and, if the scenario has a battery, its
+revenue on the modelled prices. Writes `dispatch.csv` and `summary.json`. Scenarios with
+storage need the `system` extra (`uv sync --extra system`).
 
 ## `openenergy data info`
 

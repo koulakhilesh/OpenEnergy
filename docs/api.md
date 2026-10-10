@@ -8,6 +8,10 @@
 
 ::: openenergy.data.carbon
 
+::: openenergy.data.neso
+
+::: openenergy.data.fleet
+
 ::: openenergy.data.quality
 
 ## Assets
@@ -41,6 +45,18 @@
 ::: openenergy.system.netload
 
 ::: openenergy.system.storage
+
+## System model
+
+::: openenergy.system.model
+
+::: openenergy.system.fleet
+
+::: openenergy.system.merit
+
+::: openenergy.system.validate
+
+::: openenergy.system.scenario
 
 ## Scenarios
 

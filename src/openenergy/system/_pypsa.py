@@ -65,10 +65,11 @@ def dispatch(spec: SystemSpec) -> SystemResult:
         },
         index=index,
     )
+    price = network.buses_t.marginal_price[BUS].to_numpy(dtype=np.float64)
+    # Solver round-off leaves duals like -1e-12 in hours set by free wind.
+    price = np.where(np.abs(price) < 1e-9, 0.0, price)
     return SystemResult(
-        price=pd.Series(
-            network.buses_t.marginal_price[BUS].to_numpy(dtype=np.float64), index=index
-        ),
+        price=pd.Series(price, index=index),
         generation=generation,
         storage=storage,
         unserved=pd.Series(p[_UNSERVED].to_numpy(dtype=np.float64), index=index),

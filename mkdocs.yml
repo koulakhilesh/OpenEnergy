@@ -6,7 +6,9 @@ repo_name: koulakhilesh/OpenEnergy
 edit_uri: edit/master/docs/
 copyright: >
   MIT licence. Data: Open Power System Data;
-  carbon intensity from NESO's Carbon Intensity API (CC BY 4.0).
+  NESO Carbon Intensity API (CC BY 4.0); NESO historic generation mix, supported by
+  National Energy SO Open Data; DESNZ and HMRC (Open Government Licence v3.0);
+  World Bank Carbon Pricing Dashboard (CC BY 4.0); ECB.
 
 theme:
   name: material
@@ -50,6 +52,7 @@ nav:
       - Command line: guides/cli.md
       - Research with the Python API: guides/research.md
       - System analysis: guides/system.md
+      - System model: guides/system-model.md
   - Data: data.md
   - API reference: api.md
 

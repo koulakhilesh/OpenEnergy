@@ -1,0 +1,15 @@
+# GB 2019 weather and demand with three times the wind and 10 GW of 4-hour storage.
+# Needs the system extra (PyPSA): uv sync --extra system
+# Run: uv run openenergy system run examples/gb-2019-wind3-storage.yaml
+name: gb-2019-wind3-storage
+system:
+  data: ../data/system
+  year: 2019
+  scale: {wind: 3.0}
+  storage:
+    fleet: {power_mw: 10000, hours: 4, efficiency: 0.85}
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
