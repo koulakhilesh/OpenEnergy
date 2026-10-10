@@ -68,6 +68,7 @@ Either a method name, or a mapping with `method` and its options.
 | `degradation_cost` | `0` | Cost per MWh of throughput, in the price currency |
 | `max_cycles` | none | Cap on equivalent full cycles per day |
 | `mip_rel_gap` | `1e-6` | Solver optimality tolerance |
+| `lookahead_days` | `0` | Also plan this many following days (0–6) on forecasts made at the same decision time; only the first day is settled. The perfect-foresight benchmark uses the same lookahead. See [Concepts](../concepts.md#backtest-timing) |
 
 ## Other keys
 

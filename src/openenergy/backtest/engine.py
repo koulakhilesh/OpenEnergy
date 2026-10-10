@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
@@ -164,15 +165,17 @@ def run_backtest(
         actual_ci = carbon.actual.reindex(prices.prices.index)
         required.append(actual_ci)
 
-    for day, step in _days(prices, forecaster, config, days, required):
+    lookahead = config.dispatch.lookahead_days
+    for day, step in _days(prices, forecaster, config, days, required, lookahead):
         row: dict[str, float] | None = None
         if isinstance(step, str):
             skipped[day] = step
         elif step is not None:
             day_prices, forecast = step
+            horizon = _horizon(day_prices, forecast.size)
             planning: FloatArray | str = forecast
             if carbon is not None and actual_ci is not None and carbon.price_per_t > 0:
-                planning = _carbon_priced(forecast, day_prices, actual_ci, carbon, config)
+                planning = _carbon_priced(forecast, horizon, actual_ci, carbon, config)
             if isinstance(planning, str):
                 skipped[day] = planning
             elif site is None or available is None:
@@ -180,7 +183,7 @@ def run_backtest(
                     spec, state, day, day_prices, forecast, planning, dt, config, frames
                 )
             else:
-                output = np.asarray(available.loc[day_prices.index], dtype=np.float64)
+                output = np.asarray(available.loc[horizon], dtype=np.float64)
                 state, row = _site_day(
                     spec,
                     state,
@@ -260,19 +263,23 @@ def _days(
     config: BacktestConfig,
     days: Iterable[date] | None,
     required: list[pd.Series[float]],
+    lookahead: int = 0,
 ) -> Iterator[tuple[date, str | tuple[pd.Series[float], FloatArray] | None]]:
     """Yield every calendar day in range with a skip reason, (prices, forecast), or None.
 
     None marks days outside the requested set; the battery still ages through them. A day
-    is simulated only if prices and every ``required`` series cover it completely.
+    is simulated only if prices and every ``required`` series cover it completely. The
+    forecast covers the day and up to ``lookahead`` following days, fewer where a forecast
+    or a ``required`` series is unavailable (for example at the end of the data).
     """
     actual = prices.prices
     index = pd.DatetimeIndex(actual.index)
-    complete = set(prices.complete_days())
+    ppd = prices.periods_per_day
+    covered = {ts.date() for ts in index.normalize().unique()}
     for series in required:
-        ppd = prices.periods_per_day
         counts = series.groupby(pd.DatetimeIndex(series.index).normalize()).count()
-        complete &= {ts.date() for ts in counts.index[counts == ppd]}
+        covered &= {ts.date() for ts in counts.index[counts == ppd]}
+    complete = covered & set(prices.complete_days())
     first, last = index[0].date(), index[-1].date()
     requested = _calendar(first, last) if days is None else sorted(set(days))
     if not requested:
@@ -289,12 +296,35 @@ def _days(
             day_prices = prices.day(day)
             start = pd.Timestamp(day, tz="UTC")
             history = actual.iloc[: index.searchsorted(start - lead)]
-            try:
-                forecast = forecaster.forecast(history, pd.DatetimeIndex(day_prices.index))
-            except DataError as exc:
-                yield day, str(exc)
-            else:
-                yield day, (day_prices, forecast)
+            ahead = 0
+            while ahead < lookahead and day + timedelta(days=ahead + 1) in covered:
+                ahead += 1
+            while True:
+                horizon = pd.date_range(start, periods=ppd * (1 + ahead), freq=prices.step)
+                try:
+                    forecast = forecaster.forecast(history, horizon)
+                except DataError as exc:
+                    if ahead == 0:
+                        yield day, str(exc)
+                        break
+                    ahead -= 1
+                else:
+                    yield day, (day_prices, forecast)
+                    break
+
+
+def _horizon(day_prices: pd.Series[float], periods: int) -> pd.DatetimeIndex:
+    """The planning timestamps: the day's, extended on the same grid to ``periods``."""
+    index = pd.DatetimeIndex(day_prices.index)
+    return pd.date_range(index[0], periods=periods, freq=index[1] - index[0])
+
+
+def _planning_config(config: BacktestConfig, periods: int, per_day: int) -> DispatchConfig:
+    """Dispatch settings for a horizon of ``periods``: the cycle cap scales per day planned."""
+    dispatch = config.dispatch
+    if dispatch.max_cycles is None or periods == per_day:
+        return dispatch
+    return dataclasses.replace(dispatch, max_cycles=dispatch.max_cycles * periods / per_day)
 
 
 def _on_grid(available: pd.Series[float], prices: PriceSeries) -> pd.Series[float]:
@@ -314,20 +344,24 @@ def _battery_day(
     config: BacktestConfig,
     frames: list[pd.DataFrame],
 ) -> tuple[BatteryState, dict[str, float]]:
+    n = len(day_prices)
     try:
-        plan = optimise_dispatch(spec, state, planning, dt, config.dispatch)
+        plan = optimise_dispatch(
+            spec, state, planning, dt, _planning_config(config, planning.size, n)
+        )
     except InfeasibleDispatchError as exc:
         raise InfeasibleDispatchError(f"{day}: {exc}") from exc
-    outcome = apply_dispatch(spec, state, plan.charge_mw, plan.discharge_mw, dt)
+    charge, discharge, forecast = plan.charge_mw[:n], plan.discharge_mw[:n], forecast[:n]
+    outcome = apply_dispatch(spec, state, charge, discharge, dt)
     price = np.asarray(day_prices, dtype=np.float64)
-    revenue = price * (plan.discharge_mw - plan.charge_mw) * dt
+    revenue = price * (discharge - charge) * dt
     frames.append(
         pd.DataFrame(
             {
                 "price": price,
                 "forecast": forecast,
-                "charge_mw": plan.charge_mw,
-                "discharge_mw": plan.discharge_mw,
+                "charge_mw": charge,
+                "discharge_mw": discharge,
                 "energy_mwh": outcome.energy_mwh[1:],
                 "revenue": revenue,
             },
@@ -337,9 +371,9 @@ def _battery_day(
     new = outcome.state
     row = {
         "revenue": float(revenue.sum()),
-        "expected_revenue": float(forecast @ (plan.discharge_mw - plan.charge_mw) * dt),
-        "charged_mwh": float(plan.charge_mw.sum() * dt),
-        "discharged_mwh": float(plan.discharge_mw.sum() * dt),
+        "expected_revenue": float(forecast @ (discharge - charge) * dt),
+        "charged_mwh": float(charge.sum() * dt),
+        "discharged_mwh": float(discharge.sum() * dt),
         "equivalent_cycles": new.equivalent_cycles,
         "energy_mwh": new.energy_mwh,
     }
@@ -359,12 +393,21 @@ def _site_day(
     config: BacktestConfig,
     frames: list[pd.DataFrame],
 ) -> tuple[BatteryState, dict[str, float]]:
+    n = len(day_prices)
     try:
-        plan: ColocatedPlan = optimise_colocated(
-            spec, state, available, planning, dt, grid, config.dispatch
+        full: ColocatedPlan = optimise_colocated(
+            spec,
+            state,
+            available,
+            planning,
+            dt,
+            grid,
+            _planning_config(config, planning.size, n),
         )
     except InfeasibleDispatchError as exc:
         raise InfeasibleDispatchError(f"{day}: {exc}") from exc
+    plan = _first(full, n)
+    available, forecast = available[:n], forecast[:n]
     outcome = apply_dispatch(spec, state, plan.charge_mw, plan.discharge_mw, dt)
     price = np.asarray(day_prices, dtype=np.float64)
     revenue = price * plan.export_mw * dt
@@ -404,15 +447,29 @@ def _site_day(
     return new, row
 
 
+def _first(plan: ColocatedPlan, n: int) -> ColocatedPlan:
+    """The first ``n`` intervals of a plan (the day that is settled)."""
+    return dataclasses.replace(
+        plan,
+        plant_to_grid_mw=plan.plant_to_grid_mw[:n],
+        plant_to_battery_mw=plan.plant_to_battery_mw[:n],
+        curtailed_mw=plan.curtailed_mw[:n],
+        grid_to_battery_mw=plan.grid_to_battery_mw[:n],
+        charge_mw=plan.charge_mw[:n],
+        discharge_mw=plan.discharge_mw[:n],
+        export_mw=plan.export_mw[:n],
+        energy_mwh=plan.energy_mwh[: n + 1],
+    )
+
+
 def _carbon_priced(
     forecast: FloatArray,
-    day_prices: pd.Series[float],
+    index: pd.DatetimeIndex,
     actual_ci: pd.Series[float],
     carbon: Carbon,
     config: BacktestConfig,
 ) -> FloatArray | str:
     """Planning price plus the carbon price on planned intensity, or a reason to skip the day."""
-    index = pd.DatetimeIndex(day_prices.index)
     if carbon.planning == "actual":
         ci = np.asarray(actual_ci.loc[index], dtype=np.float64)
     else:

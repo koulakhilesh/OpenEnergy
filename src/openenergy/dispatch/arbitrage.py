@@ -12,19 +12,26 @@ from openenergy.assets.battery import TOLERANCE, BatterySpec, BatteryState
 from openenergy.dispatch._milp import INF, FloatArray, Row, clean, solve_milp, validate_horizon
 from openenergy.errors import ConfigError, InfeasibleDispatchError
 
+# Naive last-week forecasts stay before the decision time for up to six days ahead.
+MAX_LOOKAHEAD_DAYS = 6
+
 
 @dataclass(frozen=True)
 class DispatchConfig:
     """Optimisation settings.
 
     ``end_soc`` is a fraction of usable energy; ``None`` means return to the starting energy.
-    ``max_cycles`` caps equivalent full cycles over the horizon.
+    ``max_cycles`` caps equivalent full cycles over the horizon (the backtest scales it by
+    the days planned, so it stays a per-day cap). ``lookahead_days`` makes the backtest plan
+    each day together with that many following days of forecasts, settling only the first;
+    the end-energy target then applies at the end of the last day.
     """
 
     end_soc: float | None = None
     degradation_cost: float = 0.0
     max_cycles: float | None = None
     mip_rel_gap: float = 1e-6
+    lookahead_days: int = 0
 
     def __post_init__(self) -> None:
         if self.end_soc is not None and not 0 <= self.end_soc <= 1:
@@ -35,6 +42,10 @@ class DispatchConfig:
             raise ConfigError(f"max_cycles must be positive, got {self.max_cycles}")
         if not self.mip_rel_gap >= 0:
             raise ConfigError(f"mip_rel_gap must be non-negative, got {self.mip_rel_gap}")
+        if not 0 <= self.lookahead_days <= MAX_LOOKAHEAD_DAYS:
+            raise ConfigError(
+                f"lookahead_days must be 0 to {MAX_LOOKAHEAD_DAYS}, got {self.lookahead_days}"
+            )
 
 
 @dataclass(frozen=True)

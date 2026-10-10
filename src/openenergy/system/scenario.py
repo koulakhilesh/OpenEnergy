@@ -22,6 +22,7 @@ from openenergy.data.ember import gb_prices
 from openenergy.data.fleet import FLEET_ATTRIBUTION, UNIT_ATTRIBUTION, SystemInputs
 from openenergy.data.neso import MIX_ATTRIBUTION, GenerationMixSource
 from openenergy.data.series import PriceSeries
+from openenergy.dispatch.arbitrage import DispatchConfig
 from openenergy.errors import ConfigError
 from openenergy.forecast.baseline import Forecaster, NaiveLastWeek, PerfectForesight
 from openenergy.metrics.summary import Summary, summarise
@@ -124,6 +125,7 @@ class SystemScenario(_Strict):
     battery: BatterySpec | None = None
     forecast: Literal["naive_last_week", "perfect_foresight"] = "naive_last_week"
     lead_hours: float = Field(default=12.0, ge=0)
+    dispatch: DispatchConfig = DispatchConfig()
 
 
 @dataclass(frozen=True)
@@ -207,7 +209,7 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
     if scenario.battery is None:
         return SystemRun(scenario, result, summary, None)
     prices = PriceSeries(result.price_of(section.price), currency="GBP", zone="GB_GBN")
-    config = BacktestConfig(lead_hours=scenario.lead_hours)
+    config = BacktestConfig(lead_hours=scenario.lead_hours, dispatch=scenario.dispatch)
     forecaster: Forecaster = (
         PerfectForesight(prices) if scenario.forecast == "perfect_foresight" else NaiveLastWeek()
     )
