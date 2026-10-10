@@ -39,7 +39,7 @@ def write(tmp_path: Path, **extra: object) -> Path:
 
 
 def test_runs_the_year_within_the_data_window(tmp_path: Path) -> None:
-    run = run_system_scenario(load_system_scenario(write(tmp_path)))
+    run = run_system_scenario(load_system_scenario(write(tmp_path, system={"end": "2020-09-30"})))
     s = run.summary
     assert s.year == 2020
     assert s.periods == 274 * 24  # 2020-01-01 to 2020-09-30

@@ -1,0 +1,20 @@
+# GB 2022, the gas-crisis year, 1 MW / 2 MWh battery planned on last week's prices.
+# Prices from Ember (CC BY 4.0), converted from EUR at ECB daily rates.
+# Run: uv run openenergy run examples/gb-2022-naive.yaml
+name: gb-2022-naive
+data:
+  source: ember
+  path: ../data/prices/gb_day_ahead_ember.csv
+  zone: GB_GBN
+  start: 2022-01-01
+  end: 2022-12-31
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
+  cycle_fade: 0.00002
+  calendar_fade: 0.01
+forecast: naive_last_week
+dispatch:
+  degradation_cost: 5

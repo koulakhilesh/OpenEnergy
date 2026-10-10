@@ -12,12 +12,15 @@ any of them):
 - DESNZ, Quarterly Energy Prices table 3.2.1 (fuels bought by major power producers),
   https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers.
   Open Government Licence v3.0.
-- World Bank, Carbon Pricing Dashboard, EU ETS price on 1 April (US$/tCO2e),
-  https://carbonpricingdashboard.worldbank.org/compliance/price. CC BY 4.0.
-- European Central Bank, euro reference exchange rates (GBP, USD), https://data.ecb.europa.eu/.
-- HMRC, Excise Notice CCL1/6, carbon price support rates,
-  https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor.
+- World Bank, Carbon Pricing Dashboard, EU ETS (to 2020) and UK ETS (from 2022) price on
+  1 April (US$/tCO2e), https://carbonpricingdashboard.worldbank.org/compliance/price. CC BY 4.0.
+- DESNZ (UK ETS Authority), UK ETS carbon price for 2021 (mean auction clearing price,
+  January to November 2021),
+  https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price.
   Open Government Licence v3.0.
+- European Central Bank, euro reference exchange rates (GBP, USD), https://data.ecb.europa.eu/.
+- HMRC, Excise Notice CCL1/6 and Climate Change Levy rates, carbon price support rates,
+  https://www.gov.uk/guidance/climate-change-levy-rates. Open Government Licence v3.0.
 - Danish Energy Agency, Technology Data for Generation of Electricity and District Heating
   (data sheet updated May 2025), https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating.
   CC BY 4.0.
@@ -36,8 +39,8 @@ from pathlib import Path
 import pandas as pd
 
 OUTPUT = Path(__file__).parents[1] / "data/system"
-START, END = "2015-01-01", "2020-10-01"
-YEARS = range(2014, 2021)
+START, END = "2015-01-01", "2026-01-01"
+YEARS = range(2014, 2026)
 
 NESO_MIX = (
     "https://api.neso.energy/dataset/88313ae5-94e4-4ddc-a790-593554d8c6b9/resource/"
@@ -58,14 +61,21 @@ ECB = (
 )
 GB_REGIONS = ("England and Wales", "Scotland")
 
-# World Bank Carbon Pricing Dashboard, EU ETS, US$/tCO2e on 1 April (accessed 2026-10-10).
-# The dashboard blocks scripted downloads, so the published values are recorded here.
-EU_ETS_USD = {
-    2015: 7.689825, 2016: 5.921776, 2017: 5.644848, 2018: 16.26372, 2019: 24.505716,
-    2020: 18.53652,
+# World Bank Carbon Pricing Dashboard, US$/tCO2e on 1 April (accessed 2026-10-10): EU ETS
+# to 2020, UK ETS from 2022. The dashboard blocks scripted downloads, so the published values
+# are recorded here. It has no UK ETS price on 1 April 2021 (first auction 19 May 2021).
+ETS_USD = {
+    2015: ("EU ETS", 7.689825), 2016: ("EU ETS", 5.921776), 2017: ("EU ETS", 5.644848),
+    2018: ("EU ETS", 16.26372), 2019: ("EU ETS", 24.505716), 2020: ("EU ETS", 18.53652),
+    2022: ("UK ETS", 98.5575), 2023: ("UK ETS", 88.1259355), 2024: ("UK ETS", 45.061676),
+    2025: ("UK ETS", 57.2278135),
 }  # fmt: skip
-# HMRC carbon price support rates: gas GBP/kWh, coal GBP/GJ (gross calorific value).
-CPS = {2015: (0.00334, 1.56860), **dict.fromkeys(range(2016, 2021), (0.00331, 1.54790))}
+# DESNZ determination of the UK ETS carbon price for 2021: GBP/tCO2e, mean auction clearing
+# price 1 January to 11 November 2021.
+ETS_GBP = {2021: ("UK ETS", 47.96)}
+# HMRC carbon price support rates: gas GBP/kWh, coal GBP/GJ (gross calorific value);
+# unchanged from 1 April 2016 to 31 March 2028.
+CPS = {2015: (0.00334, 1.56860), **dict.fromkeys(range(2016, 2026), (0.00331, 1.54790))}
 
 DEA_SHEET = "https://ens.dk/media/8615/download"
 # (sheet, column header holding the value for unit size, for minimum load)
@@ -100,10 +110,14 @@ def download(url: str) -> bytes:
 def generation_mix() -> None:
     frame = pd.read_csv(io.BytesIO(download(NESO_MIX)), usecols=["DATETIME", *MIX_COLUMNS])
     stamps = pd.to_datetime(frame["DATETIME"])
-    frame = frame[(stamps >= START) & (stamps < END)]
-    expected = (pd.Timestamp(END) - pd.Timestamp(START)) // pd.Timedelta(minutes=30)
-    if len(frame) != expected:
-        raise ValueError(f"expected {expected} half-hours from NESO, got {len(frame)}; retry")
+    keep = (stamps >= START) & (stamps < END)
+    # NESO's file is not strictly in time order, so sort and check for a complete grid.
+    frame, stamps = frame[keep], stamps[keep]
+    order = stamps.sort_values().index
+    frame, stamps = frame.loc[order], stamps.loc[order]
+    grid = pd.date_range(START, END, freq="30min", inclusive="left")
+    if not stamps.reset_index(drop=True).equals(pd.Series(grid)):
+        raise ValueError("NESO generation mix is not a complete half-hourly grid; retry")
     out = frame[MIX_COLUMNS].rename(columns=str.lower)
     if (out % 1 != 0).any().any():
         raise ValueError("NESO generation mix has fractional MW; update the integer conversion")
@@ -147,7 +161,8 @@ def fleet() -> None:
         "nuclear_mw": gb(by_fuel, "Nuclear stations"),
         "pumped_storage_mw": gb(by_fuel, "Pumped storage hydro"),
         "ccgt_efficiency": eff.loc["Combined cycle gas turbine stations"] / 100,
-        "coal_efficiency": eff.loc["Coal fired stations"] / 100,
+        # DUKES reports 0 when no coal station ran; no efficiency exists, so store blank.
+        "coal_efficiency": eff.loc["Coal fired stations"].replace(0, float("nan")) / 100,
     }
     out = pd.DataFrame(columns).loc[list(YEARS)].round(4)
     out.index.name = "year"
@@ -162,13 +177,18 @@ def fuel_prices() -> None:
     body = body[body[1].astype(str).str.contains(" to ")]
     body = body[pd.to_numeric(body[0], errors="coerce").isin(YEARS)]
     quarters = {"Jan to Mar": 1, "Apr to Jun": 2, "Jul to Sep": 3, "Oct to Dec": 4}
+
+    def price(column: int) -> pd.Series:
+        # DESNZ suppresses some coal prices (".."); they stay blank.
+        return pd.to_numeric(body[column], errors="coerce")
+
     out = pd.DataFrame(
         {
             "year": body[0].astype(int),
             "quarter": body[1].str.strip().map(quarters).astype(int),
-            "coal_p_per_kwh": body[3].astype(float),
-            "oil_p_per_kwh": body[5].astype(float),
-            "gas_p_per_kwh": body[6].astype(float),
+            "coal_p_per_kwh": price(3),
+            "oil_p_per_kwh": price(5),
+            "gas_p_per_kwh": price(6),
         }
     ).round(4)
     out.to_csv(OUTPUT / "fuel_prices.csv", index=False)
@@ -177,7 +197,7 @@ def fuel_prices() -> None:
 
 def carbon_prices() -> None:
     rows = []
-    for year, usd in EU_ETS_USD.items():
+    for year in YEARS[1:]:
         text = download(ECB.format(year=year)).decode()
         rates: dict[str, tuple[str, float]] = {}
         for record in csv.DictReader(io.StringIO(text)):
@@ -186,12 +206,23 @@ def carbon_prices() -> None:
                 rates[currency] = (day, float(record["OBS_VALUE"]))
         if rates["GBP"][0] != rates["USD"][0]:
             raise ValueError(f"ECB rates for {year} are on different days: {rates}")
+        if year in ETS_USD:
+            scheme, price = ETS_USD[year]
+            currency, source = "USD", "World Bank"
+        else:
+            scheme, price = ETS_GBP[year]
+            currency, source = "GBP", "DESNZ"
         gas, coal = CPS[year]
         day = rates["GBP"][0]
-        rows.append([f"{year}-04-01", usd, day, rates["USD"][1], rates["GBP"][1], gas, coal])
+        rows.append(
+            [
+                f"{year}-04-01", scheme, price, currency, source, day, rates["USD"][1],
+                rates["GBP"][1], gas, coal,
+            ]
+        )  # fmt: skip
     header = [
-        "valid_from", "eu_ets_usd_per_t", "fx_date", "usd_per_eur", "gbp_per_eur",
-        "cps_gas_gbp_per_kwh", "cps_coal_gbp_per_gj",
+        "valid_from", "scheme", "ets_price_per_t", "ets_currency", "ets_source", "fx_date",
+        "usd_per_eur", "gbp_per_eur", "cps_gas_gbp_per_kwh", "cps_coal_gbp_per_gj",
     ]  # fmt: skip
     with (OUTPUT / "carbon_prices.csv").open("w", newline="") as handle:
         writer = csv.writer(handle)

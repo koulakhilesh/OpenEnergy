@@ -36,14 +36,16 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   storage sizing for the system (`openenergy storage`) and for a site (`openenergy sweep`).
 - **Emissions**: net emissions from GB carbon intensity and an optional carbon price that
   steers dispatch, planned without lookahead.
-- **GB system model**: CCGT, coal and peaking plant dispatched in merit order from fleet,
-  fuel and carbon data, checked against 2015–2020 prices and fuel use
-  (`openenergy system validate`), with scenarios for renewables, storage, fleet and
-  carbon policy (`openenergy system run`); storage uses the optional PyPSA backend.
+- **GB system model**: CCGT, coal and peaking plant dispatched in merit order (optionally
+  with unit commitment) from fleet, fuel and carbon data, checked against 2015–2025 prices
+  and fuel use (`openenergy system validate`), with scenarios for renewables, storage,
+  fleet and carbon policy (`openenergy system run`); storage uses the optional PyPSA backend.
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
-  and capacity factors for 2015–2019 from Open Power System Data, half-hourly GB carbon
-  intensity for 2018–2020 and generation by fuel for 2015–2020 from NESO, and GB fleet,
-  fuel and carbon prices from DESNZ, HMRC, the World Bank and the ECB, are bundled.
+  and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
+  prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
+  2018–2025 and generation by fuel for 2015–2025 from NESO; and GB fleet, fuel and carbon
+  prices from DESNZ, HMRC, the World Bank and the ECB, are bundled.
+  `openenergy data update` downloads the latest prices.
 
 ## Quick start
 
@@ -64,7 +66,9 @@ gb-2019-naive    naive_last_week       363        13,918      13,995     73.0%  
 ```
 
 A 1 MW / 2 MWh battery trading GB day-ahead prices in 2019 would have earned about £14k
-per MW-year planning on last week's prices: 73% of what perfect foresight allows.
+per MW-year planning on last week's prices: 73% of what perfect foresight allows. In the
+2022 gas crisis the same battery would have earned about £77k
+(`examples/gb-2022-naive.yaml`, on Ember prices).
 
 Run one scenario and write its results to `outputs/<name>/`:
 
@@ -102,12 +106,12 @@ uv run mkdocs serve
 | v2.2 | Net load, surplus, storage sizing, emissions |
 | v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
 | v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
+| v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.2 | Data after 2020: cached connectors for NESO and the Carbon Intensity API, current GB prices (subject to licence), newer DUKES and fuel prices, UK ETS |
 | v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
 | v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
 | v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows |
@@ -126,6 +130,12 @@ Prices, load and renewable generation come from Open Power System Data:
 > https://doi.org/10.25832/time_series/2020-10-06. (Primary data from various sources,
 > for a complete list see URL).
 
+GB day-ahead prices after September 2020 come from Ember,
+[European Wholesale Electricity Price Data](https://ember-energy.org/data/european-wholesale-electricity-price-data/)
+(primary sources ENTSO-E and EMR Settlement), licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and are converted from EUR with
+European Central Bank reference rates (source: ECB).
+
 GB carbon intensity comes from the National Energy System Operator (NESO) Carbon Intensity
 API, https://carbonintensity.org.uk/, licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
@@ -136,11 +146,13 @@ licensed under the [NESO Open Data Licence v1.0](https://www.neso.energy/data-po
 Supported by National Energy SO Open Data.
 
 Fleet capacity and efficiency (DUKES 5.8 and 5.10) and fuel prices (Quarterly Energy
-Prices 3.2.1) come from the Department for Energy Security and Net Zero, and carbon price
-support rates from HM Revenue & Customs; they contain public sector information licensed
-under the
+Prices 3.2.1) come from the Department for Energy Security and Net Zero, the 2021 UK ETS
+price from the UK ETS Authority's
+[carbon price determination](https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price),
+and carbon price support rates from HM Revenue & Customs; they contain public sector
+information licensed under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
-EU ETS prices come from the World Bank
+EU ETS (to 2020) and UK ETS (from 2022) prices come from the World Bank
 [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price)
 ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), converted to GBP with a cross
 rate OpenEnergy derives from euro reference rates (source: European Central Bank). Unit
@@ -156,6 +168,7 @@ for Power System Analysis*, Journal of Open Research Software 6(1), 2018,
 https://doi.org/10.5334/jors.188).
 
 See [data/time_series](data/time_series/README.md),
+[data/prices](data/prices/README.md),
 [data/carbon_intensity](data/carbon_intensity/README.md) and
 [data/system](data/system/README.md) for sources, changes and known issues. OpenEnergy is
 not affiliated with or endorsed by any data provider.

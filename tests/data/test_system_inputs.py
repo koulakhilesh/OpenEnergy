@@ -80,7 +80,7 @@ def test_mix_filters_whole_days(tmp_path: Path) -> None:
 def test_bundled_mix_covers_period() -> None:
     mix = GenerationMixSource(BUNDLED / "generation_mix.csv").mix(step=pd.Timedelta(hours=1))
     assert mix.index[0] == pd.Timestamp("2015-01-01", tz="UTC")
-    assert mix.index[-1] == pd.Timestamp("2020-09-30 23:00", tz="UTC")
+    assert mix.index[-1] == pd.Timestamp("2025-12-31 23:00", tz="UTC")
     assert not mix.isna().any().any()
     june = mix.loc["2019-06"]
     assert june["solar"].groupby(june.index.hour).mean().idxmax() in (11, 12)
@@ -155,11 +155,55 @@ def test_carbon_prices_change_on_1_april(tmp_path: Path) -> None:
     inputs = SystemInputs(write_inputs(tmp_path))
     index = pd.DatetimeIndex(["2019-03-31 23:00", "2019-04-01"], tz="UTC")
     carbon = inputs.carbon_prices(index)
-    assert carbon["eu_ets_gbp_per_t"].tolist() == pytest.approx([9.0, 18.0])
+    assert carbon["ets_gbp_per_t"].tolist() == pytest.approx([9.0, 18.0])
     assert carbon["cps_gas"].iloc[0] == pytest.approx(3.31)
     assert carbon["cps_coal"].iloc[0] == pytest.approx(1.5479 * 3.6)
     with pytest.raises(DataError, match="covers"):
         inputs.carbon_prices(pd.DatetimeIndex(["2018-01-01"], tz="UTC"))
+
+
+def test_carbon_prices_in_any_currency(tmp_path: Path) -> None:
+    inputs = SystemInputs(write_inputs(tmp_path))
+    pd.DataFrame(
+        {
+            "valid_from": ["2020-04-01", "2021-04-01", "2022-04-01"],
+            "scheme": ["EU ETS", "UK ETS", "UK ETS"],
+            "ets_price_per_t": [24.0, 40.0, 50.0],
+            "ets_currency": ["USD", "GBP", "EUR"],
+            "usd_per_eur": [1.2, 1.2, 1.2],
+            "gbp_per_eur": [0.9, 0.9, 0.8],
+            "cps_gas_gbp_per_kwh": [0.00331] * 3,
+            "cps_coal_gbp_per_gj": [1.5479] * 3,
+        }
+    ).to_csv(tmp_path / "carbon_prices.csv", index=False)
+    index = pd.DatetimeIndex(["2020-05-01", "2021-05-01", "2022-05-01"], tz="UTC")
+    carbon = inputs.carbon_prices(index)
+    assert carbon["ets_gbp_per_t"].tolist() == pytest.approx([18.0, 40.0, 40.0])
+    frame = pd.read_csv(tmp_path / "carbon_prices.csv")
+    frame.loc[0, "ets_currency"] = "JPY"
+    frame.to_csv(tmp_path / "carbon_prices.csv", index=False)
+    with pytest.raises(DataError, match="JPY"):
+        inputs.carbon_prices(index)
+    frame.drop(columns="ets_currency").to_csv(tmp_path / "carbon_prices.csv", index=False)
+    with pytest.raises(DataError, match="ets_currency"):
+        inputs.carbon_prices(index)
+
+
+def test_blank_values_fall_back_to_earlier_ones(tmp_path: Path) -> None:
+    inputs = SystemInputs(write_inputs(tmp_path))
+    fleet = pd.read_csv(tmp_path / "fleet.csv")
+    fleet.loc[1, "coal_efficiency"] = None
+    fleet.to_csv(tmp_path / "fleet.csv", index=False)
+    assert inputs.efficiency(2019)["coal"] == 0.35
+    fuel = pd.read_csv(tmp_path / "fuel_prices.csv")
+    fuel.loc[[1, 2, 3], "coal_p_per_kwh"] = None
+    fuel.to_csv(tmp_path / "fuel_prices.csv", index=False)
+    index = pd.DatetimeIndex(["2019-01-01", "2019-12-31"], tz="UTC")
+    assert inputs.fuel_prices(index)["coal"].tolist() == pytest.approx([9.0, 9.0])
+    fleet["coal_efficiency"] = None
+    fleet.to_csv(tmp_path / "fleet.csv", index=False)
+    with pytest.raises(DataError, match="no coal efficiency"):
+        inputs.efficiency(2019)
 
 
 def test_missing_input_file(tmp_path: Path) -> None:
@@ -177,11 +221,14 @@ def test_emission_factors_follow_cps_rates() -> None:
 
 def test_bundled_inputs_cover_backcast() -> None:
     inputs = SystemInputs(BUNDLED)
-    index = pd.date_range("2015-04-01", "2020-09-30 23:00", freq="1h", tz="UTC")
+    index = pd.date_range("2015-04-01", "2025-12-31 23:00", freq="1h", tz="UTC")
     assert not inputs.capacity(index).isna().any().any()
     assert not inputs.fuel_prices(index).isna().any().any()
     carbon = inputs.carbon_prices(index)
-    assert carbon.loc["2019-06-01", "eu_ets_gbp_per_t"].iloc[0] == pytest.approx(18.68, abs=0.01)
+    assert carbon.loc["2019-06-01", "ets_gbp_per_t"].iloc[0] == pytest.approx(18.68, abs=0.01)
+    assert carbon.loc["2021-06-01", "ets_gbp_per_t"].iloc[0] == pytest.approx(47.96)
+    assert carbon.loc["2022-06-01", "ets_gbp_per_t"].iloc[0] == pytest.approx(75.04, abs=0.01)
+    assert inputs.efficiency(2025)["coal"] == pytest.approx(0.4151)
 
 
 def test_attributions_name_sources_and_licences() -> None:

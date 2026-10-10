@@ -27,15 +27,17 @@ from openenergy.system.commitment import Commitment
 from openenergy.system.fleet import Adjustments, FleetAssumptions, build_system
 from openenergy.system.model import Backend, PriceKind, Storage, SystemResult, solve
 
-# Carbon price support rates per fuel are published from 1 April 2015; OPSD prices end
-# 30 September 2020.
+# Carbon price support rates per fuel are published from 1 April 2015. The default backcast
+# ends with the OPSD prices on 30 September 2020; system data reaches DATA_END.
 BACKCAST_START = date(2015, 4, 1)
 BACKCAST_END = date(2020, 9, 30)
+DATA_END = date(2025, 12, 31)
 BACKCAST_NOTE = (
     "Cost-based model: plants bid short-run marginal cost (fuel, carbon price support, "
-    "EU ETS). Imports, nuclear, biomass, hydro and pumped storage are fixed at historic "
-    "output; demand is NESO total generation. No parameter is fitted to prices; scarcity "
-    "pricing and bidding above cost are not modelled."
+    "EU ETS to 2020, UK ETS from 2021). Imports, nuclear, biomass, hydro and pumped storage "
+    "are fixed at historic output; demand is NESO total generation. Fuel prices are "
+    "quarterly averages. No parameter is fitted to prices; scarcity pricing and bidding "
+    "above cost are not modelled."
 )
 COMMITMENT_NOTE = (
     "Unit commitment: thermal units have start-up costs and minimum stable output and are "
@@ -198,6 +200,7 @@ def write_backcast(
     assumptions: FleetAssumptions | None = None,
     commitment: Commitment | None = None,
     price: PriceKind = "marginal",
+    price_attribution: Sequence[str] = (OPSD_ATTRIBUTION,),
 ) -> Path:
     """Write ``backcast.csv`` (per year), ``hourly.csv`` and ``summary.json`` with sources."""
     directory.mkdir(parents=True, exist_ok=True)
@@ -205,7 +208,7 @@ def write_backcast(
         directory / "backcast.csv", index=False
     )
     result.hourly.to_csv(directory / "hourly.csv", index_label="utc_timestamp")
-    attribution = [MIX_ATTRIBUTION, FLEET_ATTRIBUTION, OPSD_ATTRIBUTION]
+    attribution = [MIX_ATTRIBUTION, FLEET_ATTRIBUTION, *price_attribution]
     summary: dict[str, Any] = {
         "years": [y.to_dict() for y in result.years],
         "assumptions": dataclasses.asdict(assumptions or FleetAssumptions()),

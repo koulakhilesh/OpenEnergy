@@ -13,14 +13,14 @@ from typing import Any, Literal
 
 import pandas as pd
 import pydantic
-from pydantic import Field, ValidationInfo
+from pydantic import AliasChoices, Field, ValidationInfo
 
 import openenergy
 from openenergy.assets.battery import BatterySpec
 from openenergy.backtest.engine import BacktestConfig, run_backtest
+from openenergy.data.ember import gb_prices
 from openenergy.data.fleet import FLEET_ATTRIBUTION, UNIT_ATTRIBUTION, SystemInputs
 from openenergy.data.neso import MIX_ATTRIBUTION, GenerationMixSource
-from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.series import PriceSeries
 from openenergy.errors import ConfigError
 from openenergy.forecast.baseline import Forecaster, NaiveLastWeek, PerfectForesight
@@ -30,9 +30,9 @@ from openenergy.system.commitment import Commitment
 from openenergy.system.fleet import Adjustments, FleetAssumptions, build_system
 from openenergy.system.model import PriceKind, Storage, SystemResult, solve
 from openenergy.system.validate import (
-    BACKCAST_END,
     BACKCAST_START,
     COMMITMENT_NOTE,
+    DATA_END,
     _daily_spread,
 )
 
@@ -40,8 +40,8 @@ SYSTEM_NOTE = (
     "Cost-based dispatch of GB on one bus: plants bid short-run marginal cost; imports, "
     "nuclear, biomass, hydro and pumped storage follow (scaled) historic output; storage "
     "is optimised with perfect foresight over the year, so results are an idealised "
-    "benchmark. Scarcity pricing and start-up costs are not modelled, so price spreads "
-    "are narrower than in the real market."
+    "benchmark. Scarcity pricing is not modelled, and start-up costs only with unit "
+    "commitment, so price spreads are narrower than in the real market."
 )
 _HOUR = pd.Timedelta(hours=1)
 
@@ -65,14 +65,17 @@ class AssumptionsSection(_Strict):
 
 class SystemSection(_Strict):
     data: Path
-    prices: Path | None = None
-    year: int = Field(ge=BACKCAST_START.year, le=BACKCAST_END.year)
+    prices: list[Path] | None = None
+    year: int = Field(ge=BACKCAST_START.year, le=DATA_END.year)
     start: date | None = None
     end: date | None = None
     scale: dict[str, float] = Field(default_factory=dict)
     capacity_mw: dict[str, float] = Field(default_factory=dict)
     fuel_price_scale: dict[str, float] = Field(default_factory=dict)
-    eu_ets_gbp_per_t: float | None = Field(default=None, ge=0)
+    # eu_ets_gbp_per_t is the v3.1 name, kept so older scenarios still load.
+    ets_gbp_per_t: float | None = Field(
+        default=None, ge=0, validation_alias=AliasChoices("ets_gbp_per_t", "eu_ets_gbp_per_t")
+    )
     carbon_price_support: bool = True
     storage: dict[str, StorageSection] = Field(default_factory=dict)
     assumptions: AssumptionsSection = AssumptionsSection()
@@ -93,15 +96,25 @@ class SystemSection(_Strict):
             raise ValueError(f"no days between {first} and {last} in {self.year}")
         return self
 
-    @pydantic.field_validator("data", "prices")
+    @pydantic.field_validator("prices", mode="before")
     @classmethod
-    def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
-        return None if value is None else _resolve(value, info)
+    def _one_or_many(cls, value: Any) -> Any:
+        return [value] if isinstance(value, str | Path) else value
+
+    @pydantic.field_validator("data")
+    @classmethod
+    def _resolve_path(cls, value: Path, info: ValidationInfo) -> Path:
+        return _resolve(value, info)
+
+    @pydantic.field_validator("prices")
+    @classmethod
+    def _resolve_paths(cls, value: list[Path] | None, info: ValidationInfo) -> list[Path] | None:
+        return None if value is None else [_resolve(path, info) for path in value]
 
     def window(self) -> tuple[date, date]:
         """Days modelled: the year, narrowed by ``start``/``end`` and the data window."""
         first = max(date(self.year, 1, 1), BACKCAST_START, self.start or BACKCAST_START)
-        last = min(date(self.year, 12, 31), BACKCAST_END, self.end or BACKCAST_END)
+        last = min(date(self.year, 12, 31), DATA_END, self.end or DATA_END)
         return first, last
 
 
@@ -173,7 +186,7 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
             scale=section.scale,
             capacity_mw=section.capacity_mw,
             fuel_price_scale=section.fuel_price_scale,
-            eu_ets_gbp_per_t=section.eu_ets_gbp_per_t,
+            ets_gbp_per_t=section.ets_gbp_per_t,
             carbon_price_support=section.carbon_price_support,
         ),
         [
@@ -188,8 +201,8 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
     )
     result = solve(spec, section.backend, commitment)
     actual = None
-    if section.prices is not None:
-        actual = OPSDCsvSource(section.prices).prices("GB_GBN", first, last).prices.mean()
+    if section.prices:
+        actual = gb_prices(section.prices, first, last)[0].prices.mean()
     summary = _summarise(section.year, spec.storage, result, actual, section.price)
     if scenario.battery is None:
         return SystemRun(scenario, result, summary, None)
@@ -225,7 +238,8 @@ def write_system_outputs(run: SystemRun, directory: str | Path) -> Path:
     if run.scenario.system.commitment:
         attribution.append(UNIT_ATTRIBUTION)
     if run.scenario.system.prices:
-        attribution.append(OPSD_ATTRIBUTION)
+        first, last = run.scenario.system.window()
+        attribution.extend(gb_prices(run.scenario.system.prices, first, last)[1])
     note = SYSTEM_NOTE + (" " + COMMITMENT_NOTE if run.scenario.system.commitment else "")
     payload: dict[str, Any] = {
         "scenario": run.scenario.name,

@@ -68,22 +68,23 @@ class Adjustments:
 
     ``scale`` multiplies historic profiles (wind, solar, nuclear, imports, ...);
     ``capacity_mw`` replaces installed thermal capacity (ccgt, coal, peaking);
-    ``fuel_price_scale`` multiplies gas or coal prices; ``eu_ets_gbp_per_t`` replaces the
-    EU ETS price; ``carbon_price_support`` keeps or removes the GB top-up.
+    ``fuel_price_scale`` multiplies gas or coal prices; ``ets_gbp_per_t`` replaces the ETS
+    price (EU ETS to 2020, UK ETS from 2021); ``carbon_price_support`` keeps or removes the
+    GB top-up.
     """
 
     scale: Mapping[str, float] = field(default_factory=dict)
     capacity_mw: Mapping[str, float] = field(default_factory=dict)
     fuel_price_scale: Mapping[str, float] = field(default_factory=dict)
-    eu_ets_gbp_per_t: float | None = None
+    ets_gbp_per_t: float | None = None
     carbon_price_support: bool = True
 
     def __post_init__(self) -> None:
         _check_keys("scale", self.scale, SCALABLE)
         _check_keys("capacity_mw", self.capacity_mw, THERMAL_GROUPS)
         _check_keys("fuel_price_scale", self.fuel_price_scale, ("gas", "coal"))
-        if self.eu_ets_gbp_per_t is not None:
-            _check_non_negative("eu_ets_gbp_per_t", self.eu_ets_gbp_per_t)
+        if self.ets_gbp_per_t is not None:
+            _check_non_negative("ets_gbp_per_t", self.ets_gbp_per_t)
 
 
 def thermal_generators(
@@ -107,10 +108,10 @@ def thermal_generators(
     }
     fuel = inputs.fuel_prices(index)
     carbon = inputs.carbon_prices(index)
-    eu_ets = (
-        carbon["eu_ets_gbp_per_t"]
-        if adjustments.eu_ets_gbp_per_t is None
-        else pd.Series(adjustments.eu_ets_gbp_per_t, index=index)
+    ets = (
+        carbon["ets_gbp_per_t"]
+        if adjustments.ets_gbp_per_t is None
+        else pd.Series(adjustments.ets_gbp_per_t, index=index)
     )
     support = 1.0 if adjustments.carbon_price_support else 0.0
 
@@ -123,7 +124,7 @@ def thermal_generators(
         fuel_cost = (
             fuel[fuel_name] * adjustments.fuel_price_scale.get(fuel_name, 1.0)
             + support * carbon[f"cps_{fuel_name}"]
-            + eu_ets * EMISSION_FACTORS[fuel_name]
+            + ets * EMISSION_FACTORS[fuel_name]
         )
         for k, eta in enumerate(_efficiencies(group, efficiency, assumptions)):
             share = 1.0 / (1 if group == "peaking" else assumptions.tranches)
