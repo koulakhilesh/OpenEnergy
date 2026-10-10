@@ -32,6 +32,7 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   capture rate by year (`openenergy capture`).
 - **Co-located sites**: a plant and a battery behind one grid connection with export and
   import limits and optional support payments, compared with separate connections.
+rged
 - **System analysis**: net load, ramps and renewable surplus as wind and solar scale,
   storage sizing for the system (`openenergy storage`) and for a site (`openenergy sweep`).
 - **Emissions**: net emissions from GB carbon intensity and an optional carbon price that
@@ -93,12 +94,28 @@ uv run mkdocs serve
 
 ## Roadmap
 
+**Released**
+
 | Release | Scope |
 |---------|-------|
-| v2.0 | Battery arbitrage backtesting |
+| v2.0 | Battery arbitrage backtesting: physics, ageing, dispatch, forecasters, CLI |
 | v2.1 | PV and wind assets, captured price, co-located storage |
 | v2.2 | Net load, surplus, storage sizing, emissions |
-| v3.0 | GB system dispatch with conventional generation via PyPSA |
+| v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
+
+**Planned**
+
+| Release | Scope |
+|---------|-------|
+| v3.1 | Realistic prices: scarcity pricing and optional unit commitment (start-up costs, minimum stable output), re-checked against 2015–2020 without fitting to prices |
+| v3.2 | Data after 2020: cached connectors for NESO and the Carbon Intensity API, current GB prices (subject to licence), newer DUKES and fuel prices, UK ETS |
+| v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
+| v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
+| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows |
+| v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
+
+Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
+versioned docs.
 
 Ideas and bug reports are welcome in [issues](https://github.com/koulakhilesh/OpenEnergy/issues).
 

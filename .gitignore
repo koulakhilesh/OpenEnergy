@@ -18,6 +18,9 @@ htmlcov
 # Docs build
 site
 
+# Design notes are kept locally only
+docs/design/
+
 # Run outputs; models/ holds untracked 1.x model files
 outputs
 models
