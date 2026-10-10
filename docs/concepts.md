@@ -56,9 +56,16 @@ For each day $D$:
 
 1. The forecaster receives prices strictly before the decision time, `lead_hours` before
    the start of $D$ (default 12, i.e. noon on $D-1$).
-2. The optimiser plans $D$ on the forecast.
-3. The plan is applied through the battery physics and valued at actual prices.
-4. The battery state carries into $D+1$.
+2. The optimiser plans $D$ on the forecast, together with the next `lookahead_days` days
+   of forecasts if set (all made at the same decision time); the end-energy target then
+   applies at the end of the last planned day.
+3. Only $D$'s part of the plan is applied through the battery physics and valued at actual
+   prices.
+4. The battery state carries into $D+1$, which is planned afresh.
+
+Near the end of the data, or before a gap, the lookahead shortens to the days that can be
+forecast. With `lookahead_days: 0` (the default) each day is planned alone and must end
+with the energy it started with.
 
 Days with missing prices, or for which the forecaster has no usable history, are skipped
 and listed with the reason. Scenarios that are not perfect foresight also run a

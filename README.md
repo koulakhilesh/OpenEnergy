@@ -23,7 +23,8 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
 
 - **Battery physics**: power and energy ratings, charge/discharge efficiencies, SOC
   window, cycle and calendar ageing.
-- **Dispatch**: a daily mixed-integer optimisation solved with HiGHS.
+- **Dispatch**: a daily mixed-integer optimisation solved with HiGHS, optionally planning
+  the following days too (`dispatch.lookahead_days`; one day adds 5–15% revenue).
 - **Backtesting without lookahead**: forecasts see only data available at the decision
   time; plans settle at actual prices.
 - **Forecasters**: perfect foresight, last week's prices, noisy foresight and a
@@ -107,14 +108,14 @@ uv run mkdocs serve
 | v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
 | v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
 | v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
+| v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
 | v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
-| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows |
+| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows, with stochastic planning where a later market lets the battery react to prices |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
@@ -175,7 +176,22 @@ not affiliated with or endorsed by any data provider.
 
 ## License
 
-MIT for the code; see [LICENSE.txt](LICENSE.txt). Bundled data keeps its own licence.
+The code is MIT licensed; see [LICENSE.txt](LICENSE.txt). The written documentation in
+`docs/` (text, tables and findings) is licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Bundled data is not covered by
+either and keeps its own licence:
+
+| Folder | Data | Licence |
+|---|---|---|
+| `data/time_series` | Open Power System Data time series (prices, load, renewables, to 2020) | Terms of the original sources; see the [OPSD package](https://doi.org/10.25832/time_series/2020-10-06) |
+| `data/prices` | Ember GB day-ahead prices; ECB exchange rates | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); ECB reuse terms |
+| `data/carbon_intensity` | NESO Carbon Intensity API | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `data/system` | NESO historic generation mix | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
+| `data/system` | DESNZ (DUKES, Quarterly Energy Prices, UK ETS 2021), HMRC | [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
+| `data/system` | World Bank Carbon Pricing Dashboard; Danish Energy Agency technology data | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `data/system` | NREL Power Plant Cycling Costs (values recorded from the report) | US government-sponsored report |
+
+Reuse of any of these requires the attribution given in the folder's `README.md`.
 
 ## Contact
 

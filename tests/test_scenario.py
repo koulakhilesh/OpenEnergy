@@ -102,6 +102,24 @@ def test_write_outputs(scenario_file: Path, tmp_path: Path) -> None:
     assert (out / "intervals.csv").read_text().startswith("timestamp,price,forecast")
 
 
+def test_lookahead_applies_to_forecast_and_benchmark(tmp_path: Path, opsd_csv: Path) -> None:
+    path = write(
+        tmp_path / "ahead.yaml",
+        f"name: ahead\ndata: {{path: {opsd_csv}, start: 2019-01-08, end: 2019-01-21}}\n"
+        "battery: {power_mw: 1, energy_mwh: 2}\ndispatch: {lookahead_days: 1}\n",
+    )
+    scenario = load_scenario(path)
+    assert scenario.dispatch.lookahead_days == 1
+    run = run_scenario(scenario)
+    assert run.summary.days == 14
+    assert run.summary.capture_ratio is not None and run.summary.capture_ratio > 0
+    payload = json.loads((write_outputs(run, tmp_path / "out") / "summary.json").read_text())
+    assert payload["config"]["dispatch"]["lookahead_days"] == 1
+    bad = write(tmp_path / "bad.yaml", VALID + "dispatch: {lookahead_days: 9}\n")
+    with pytest.raises(ConfigError, match="lookahead_days"):
+        load_scenario(bad)
+
+
 def test_scenario_is_immutable(scenario_file: Path) -> None:
     scenario = load_scenario(scenario_file)
     assert isinstance(scenario, Scenario)

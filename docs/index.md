@@ -118,23 +118,25 @@ every setting.
 | v2.2 | Net load, surplus, storage sizing, emissions |
 | v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
 | v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
-| v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit (current) |
+| v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
+| v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
 | v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
-| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows |
+| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows, with stochastic planning where a later market lets the battery react to prices |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 
 Why this order: v3.0's backcast matched average prices but its peaks were too low, so a
 battery earned almost nothing on modelled prices. v3.1's unit commitment restores much of
 the daily shape (2019 perfect-foresight battery value £10k against £22.5k on real prices);
 v3.2 brings the data to 2025, where the model misses the size and timing of the 2021–2022
-price rise. Planning under uncertainty (v3.3) matters most for such years; the app reuses
-the v3.4 charts.
+price rise. v3.3 measured that, for a battery trading only day-ahead, planning across price
+scenarios adds nothing over one forecast while planning one day ahead adds 5–15% revenue;
+so stochastic planning moves to v3.5, where balancing and frequency-response markets give the
+battery a later decision that can react to prices. The app reuses the v3.4 charts.
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
 versioned docs. Ideas are welcome in
