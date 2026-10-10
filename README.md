@@ -126,8 +126,13 @@ under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 EU ETS prices come from the World Bank
 [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price)
-([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), converted with euro reference
-rates from the European Central Bank.
+([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), converted to GBP with a cross
+rate OpenEnergy derives from euro reference rates (source: European Central Bank). All
+accessed 10 October 2026.
+
+The optional storage backend uses PyPSA (Brown, Hörsch and Schlachtberger, *PyPSA: Python
+for Power System Analysis*, Journal of Open Research Software 6(1), 2018,
+https://doi.org/10.5334/jors.188).
 
 See [data/time_series](data/time_series/README.md),
 [data/carbon_intensity](data/carbon_intensity/README.md) and

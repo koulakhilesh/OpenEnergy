@@ -62,8 +62,8 @@ One row per carbon year starting 1 April 2015-2020.
 
 | Column | Source |
 |--------|--------|
-| `eu_ets_usd_per_t` | World Bank, [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price), EU ETS price on 1 April, US$/tCO2e, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Recorded by hand from the dashboard (it blocks scripted downloads) |
-| `fx_date`, `usd_per_eur`, `gbp_per_eur` | European Central Bank, [euro reference exchange rates](https://data.ecb.europa.eu/), on 1 April or the last business day before. Source: ECB |
+| `eu_ets_usd_per_t` | World Bank, [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price), EU ETS price on 1 April (or latest before), US$/tCO2e, accessed 2026-10-10, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Recorded by hand from the dashboard's price-trend chart (it blocks scripted downloads); values unchanged |
+| `fx_date`, `usd_per_eur`, `gbp_per_eur` | Source: European Central Bank, [euro foreign exchange reference rates](https://data.ecb.europa.eu/) (series EXR.D.GBP.EUR.SP00.A and EXR.D.USD.EUR.SP00.A), on 1 April or the last business day before. Stored unchanged; OpenEnergy derives the USD-to-GBP cross rate from them |
 | `cps_gas_gbp_per_kwh`, `cps_coal_gbp_per_gj` | HM Revenue & Customs, [Excise Notice CCL1/6: carbon price floor](https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor), carbon price support rates (gross calorific value). Open Government Licence v3.0 |
 
 OpenEnergy converts the EU ETS price to GBP as

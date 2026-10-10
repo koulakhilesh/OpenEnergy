@@ -11,12 +11,19 @@ from openenergy.errors import DataError
 
 FLEET_ATTRIBUTION = (
     "Fleet and fuel data: Department for Energy Security and Net Zero, Digest of UK Energy "
-    "Statistics tables 5.8 and 5.10 and Quarterly Energy Prices table 3.2.1; HM Revenue & "
-    "Customs, Excise Notice CCL1/6 carbon price support rates. Contains public sector "
-    "information licensed under the Open Government Licence v3.0. EU ETS prices: World "
-    "Bank, Carbon Pricing Dashboard, CC BY 4.0, converted with European Central Bank "
-    "reference rates (source: ECB). Changes: GB totals from England and Wales plus "
-    "Scotland; capacity interpolated between year ends; units converted to GBP per MWh."
+    "Statistics 2026, tables 5.8 and 5.10 (https://www.gov.uk/government/statistics/"
+    "electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes), and Quarterly "
+    "Energy Prices table 3.2.1 (https://www.gov.uk/government/statistical-data-sets/"
+    "prices-of-fuels-purchased-by-major-power-producers); HM Revenue & Customs, Excise "
+    "Notice CCL1/6 carbon price support rates. Contains public sector information licensed "
+    "under the Open Government Licence v3.0 (https://www.nationalarchives.gov.uk/doc/"
+    "open-government-licence/version/3/). EU ETS prices: World Bank, Carbon Pricing "
+    "Dashboard (https://carbonpricingdashboard.worldbank.org/, accessed 2026-10-10), "
+    "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Exchange rates: source "
+    "European Central Bank; OpenEnergy derives a USD-to-GBP cross rate from its EUR "
+    "reference rates. Changes: GB totals from England and Wales plus Scotland; capacity "
+    "interpolated between year ends; units converted to GBP per MWh. OpenEnergy is not "
+    "affiliated with or endorsed by any of these bodies."
 )
 CAPACITY_COLUMNS = (
     "ccgt_mw", "coal_mw", "gas_turbine_mw", "oil_engine_mw", "nuclear_mw", "pumped_storage_mw",

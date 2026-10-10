@@ -12,10 +12,11 @@ from openenergy.errors import DataError
 
 MIX_ATTRIBUTION = (
     "Generation mix: National Energy System Operator (NESO), Historic generation mix and "
-    "carbon intensity, https://www.neso.energy/data-portal/historic-generation-mix, NESO "
-    "Open Data Licence v1.0. Supported by National Energy SO Open Data. Changes: derived "
-    "columns dropped, half-hours averaged to the analysis step. OpenEnergy is not "
-    "affiliated with or endorsed by NESO."
+    "carbon intensity, https://www.neso.energy/data-portal/historic-generation-mix "
+    "(accessed 2026-10-10), NESO Open Data Licence v1.0 "
+    "(https://www.neso.energy/data-portal/neso-open-licence). Supported by National Energy "
+    "SO Open Data. Changes: derived columns dropped, half-hours averaged to the analysis "
+    "step. OpenEnergy is not affiliated with or endorsed by NESO."
 )
 FUELS = (
     "gas", "coal", "nuclear", "wind", "wind_emb", "hydro", "imports", "biomass", "other",

@@ -89,29 +89,63 @@ step; the bundled file itself is unchanged.
 **Generation mix**
 
 > National Energy System Operator (NESO). Historic generation mix and carbon intensity.
-> <https://www.neso.energy/data-portal/historic-generation-mix>. Licensed under the
+> <https://www.neso.energy/data-portal/historic-generation-mix> (accessed 10 October 2026).
+> Licensed under the
 > [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
 > Supported by National Energy SO Open Data.
 
-**Fleet, fuel prices and carbon price support**
+**Fleet capacity and efficiency**
 
-> Department for Energy Security and Net Zero. Digest of UK Energy Statistics (DUKES),
-> tables 5.8 and 5.10, and Quarterly Energy Prices, table 3.2.1. HM Revenue & Customs.
-> Excise Notice CCL1/6: a guide to carbon price floor. Contains public sector information
-> licensed under the
-> [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+> Department for Energy Security and Net Zero. Digest of UK Energy Statistics (DUKES)
+> 2026, Chapter 5: table 5.8 (major power producers plant capacity, England and Wales,
+> Scotland and Northern Ireland) and table 5.10 (plant loads, demand and efficiency).
+> <https://www.gov.uk/government/statistics/electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes>
+> (accessed 10 October 2026).
 
-**EU ETS prices and exchange rates**
+**Fuel prices**
 
-> World Bank. Carbon Pricing Dashboard.
-> <https://carbonpricingdashboard.worldbank.org/compliance/price>. Licensed under
-> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Converted to GBP with euro
-> reference exchange rates; source: European Central Bank.
+> Department for Energy Security and Net Zero. Quarterly Energy Prices, table 3.2.1:
+> average prices of fuels purchased by the major UK power producers.
+> <https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers>
+> (accessed 10 October 2026).
+
+**Carbon price support**
+
+> HM Revenue & Customs. Excise Notice CCL1/6: a guide to carbon price floor, section 2.3.
+> <https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor>
+> (accessed 10 October 2026).
+
+The three UK government sources contain public sector information licensed under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+
+**EU ETS prices**
+
+> World Bank. Carbon Pricing Dashboard: price of EU ETS allowances on 1 April each year.
+> <https://carbonpricingdashboard.worldbank.org/compliance/price> (accessed
+> 10 October 2026). Licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+**Exchange rates**
+
+> Source: European Central Bank, euro foreign exchange reference rates for GBP and USD.
+> <https://data.ecb.europa.eu/> (accessed 10 October 2026).
+
+OpenEnergy derives a USD-to-GBP cross rate from the two ECB rates to convert the World
+Bank's US$ prices; the stored rates are unchanged.
 
 The system files keep source values unchanged apart from dropped rows and columns, GB
 totals (England and Wales plus Scotland) and integer MW; changes are listed in
 `data/system/README.md`. OpenEnergy is not affiliated with or endorsed by Open Power
 System Data, NESO, DESNZ, HMRC, the World Bank or the ECB.
+
+## Software
+
+The system model's storage dispatch uses PyPSA:
+
+> T. Brown, J. Hörsch, D. Schlachtberger. PyPSA: Python for Power System Analysis.
+> Journal of Open Research Software 6(1), 2018. <https://doi.org/10.5334/jors.188>.
+
+Optimisation problems are solved with [HiGHS](https://highs.dev) (MIT licence).
 
 Each data folder has a `README.md` with the full source, licence and known issues, and
 every `summary.json` repeats the attribution for the data a run used.

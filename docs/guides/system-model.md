@@ -175,6 +175,27 @@ uv run openenergy sweep examples/gb-2019-system.yaml \
 `openenergy system run` writes `dispatch.csv` (hourly price, output by technology,
 storage, curtailment, emissions) and `summary.json` with the data attributions.
 
+## Data sources
+
+| Input | Source | Licence |
+|---|---|---|
+| Generation by fuel, demand | NESO, [historic generation mix](https://www.neso.energy/data-portal/historic-generation-mix). Supported by National Energy SO Open Data | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
+| Plant capacity and efficiency | DESNZ, [DUKES 2026](https://www.gov.uk/government/statistics/electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes) tables 5.8 and 5.10 | [OGL v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
+| Fuel prices | DESNZ, [Quarterly Energy Prices 3.2.1](https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers) | OGL v3.0 |
+| Carbon price support | HMRC, [Excise Notice CCL1/6](https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor) | OGL v3.0 |
+| EU ETS price | World Bank, [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Exchange rates | Source: European Central Bank, euro reference rates (USD-to-GBP cross rate derived by OpenEnergy) | ECB reuse terms |
+| Actual prices (validation) | [Open Power System Data](https://doi.org/10.25832/time_series/2020-10-06), GB day-ahead | see [Data](../data.md) |
+
+All accessed 10 October 2026. Full references, changes and known issues are on the
+[Data](../data.md) page and in `data/system/README.md`; every `summary.json` repeats the
+attribution for the data a run used. OpenEnergy is not affiliated with or endorsed by any
+of these providers.
+
+Storage dispatch uses PyPSA: T. Brown, J. Hörsch, D. Schlachtberger, *PyPSA: Python for
+Power System Analysis*, Journal of Open Research Software 6(1), 2018,
+<https://doi.org/10.5334/jors.188>.
+
 ## Limits
 
 - One bus: no transmission constraints between Scotland and England.
