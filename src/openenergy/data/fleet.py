@@ -14,15 +14,18 @@ FLEET_ATTRIBUTION = (
     "Statistics 2026, tables 5.8 and 5.10 (https://www.gov.uk/government/statistics/"
     "electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes), and Quarterly "
     "Energy Prices table 3.2.1 (https://www.gov.uk/government/statistical-data-sets/"
-    "prices-of-fuels-purchased-by-major-power-producers); HM Revenue & Customs, Excise "
-    "Notice CCL1/6 carbon price support rates. Contains public sector information licensed "
-    "under the Open Government Licence v3.0 (https://www.nationalarchives.gov.uk/doc/"
-    "open-government-licence/version/3/). EU ETS prices: World Bank, Carbon Pricing "
-    "Dashboard (https://carbonpricingdashboard.worldbank.org/, accessed 2026-10-10), "
-    "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Exchange rates: source "
-    "European Central Bank; OpenEnergy derives a USD-to-GBP cross rate from its EUR "
+    "prices-of-fuels-purchased-by-major-power-producers); HM Revenue & Customs, carbon price "
+    "support rates (Excise Notice CCL1/6, Climate Change Levy rates); DESNZ, UK ETS carbon "
+    "price for 2021 (https://www.gov.uk/government/publications/determinations-of-the-uk-"
+    "ets-carbon-price). Contains public sector information licensed under the Open "
+    "Government Licence v3.0 (https://www.nationalarchives.gov.uk/doc/open-government-"
+    "licence/version/3/). EU ETS (to 2020) and UK ETS (from 2022) prices: World Bank, "
+    "Carbon Pricing Dashboard (https://carbonpricingdashboard.worldbank.org/, accessed "
+    "2026-10-10), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Exchange rates: "
+    "source European Central Bank; OpenEnergy derives a USD-to-GBP cross rate from its EUR "
     "reference rates. Changes: GB totals from England and Wales plus Scotland; capacity "
-    "interpolated between year ends; units converted to GBP per MWh. OpenEnergy is not "
+    "interpolated between year ends; coal prices suppressed by DESNZ carried forward from "
+    "the last published quarter; units converted to GBP per MWh. OpenEnergy is not "
     "affiliated with or endorsed by any of these bodies."
 )
 UNIT_ATTRIBUTION = (
@@ -78,21 +81,30 @@ class SystemInputs:
         return pd.DataFrame(columns, index=index)
 
     def efficiency(self, year: int) -> dict[str, float]:
-        """Fleet-average thermal efficiency (gross calorific value) for ``year``."""
+        """Fleet-average thermal efficiency (gross calorific value) for ``year``.
+
+        A blank value (no station of that type ran) falls back to the latest earlier year.
+        """
         fleet = self._read("fleet.csv", ["year", "ccgt_efficiency", "coal_efficiency"])
-        row = fleet[fleet["year"] == year]
-        if row.empty:
+        fleet = fleet[fleet["year"] <= year]
+        if fleet.empty or fleet["year"].iloc[-1] != year:
             raise DataError(f"no efficiency for {year} in fleet.csv")
-        return {
-            "ccgt": float(row["ccgt_efficiency"].iloc[0]),
-            "coal": float(row["coal_efficiency"].iloc[0]),
-        }
+        result = {}
+        for name in ("ccgt", "coal"):
+            known = fleet[f"{name}_efficiency"].dropna()
+            if known.empty:
+                raise DataError(f"no {name} efficiency up to {year} in fleet.csv")
+            result[name] = float(known.iloc[-1])
+        return result
 
     def fuel_prices(self, index: pd.DatetimeIndex) -> pd.DataFrame:
-        """GBP per MWh of fuel at each timestamp, from the quarter it falls in."""
+        """GBP per MWh of fuel at each timestamp, from the quarter it falls in.
+
+        Blank (suppressed) prices carry forward from the latest earlier quarter.
+        """
         prices = self._read("fuel_prices.csv", ["year", "quarter", *FUEL_COLUMNS.values()])
         keys = pd.MultiIndex.from_arrays([index.year, index.quarter])
-        table = prices.set_index(["year", "quarter"])
+        table = prices.sort_values(["year", "quarter"]).set_index(["year", "quarter"]).ffill()
         found = keys.isin(table.index)
         if not found.all():
             first = index[~found][0]
@@ -107,39 +119,51 @@ class SystemInputs:
         )
 
     def carbon_prices(self, index: pd.DatetimeIndex) -> pd.DataFrame:
-        """EU ETS price (GBP/t) and carbon price support (GBP/MWh of fuel) at each timestamp.
+        """ETS price (GBP/t) and carbon price support (GBP/MWh of fuel) at each timestamp.
 
-        Each row applies from its ``valid_from`` date (1 April) to the next.
+        Each row applies from its ``valid_from`` date (1 April) to the next. The ETS is the EU
+        ETS to 2020 and the UK ETS from 2021; prices in USD or EUR convert at the stored ECB
+        rates. Files with only ``eu_ets_usd_per_t`` (v3.1 and earlier) are still read.
         """
-        table = self._read(
-            "carbon_prices.csv",
-            [
-                "valid_from", "eu_ets_usd_per_t", "usd_per_eur", "gbp_per_eur",
-                "cps_gas_gbp_per_kwh", "cps_coal_gbp_per_gj",
-            ],
-        )  # fmt: skip
+        common = ["valid_from", "usd_per_eur", "gbp_per_eur"]
+        support = ["cps_gas_gbp_per_kwh", "cps_coal_gbp_per_gj"]
+        table = self._read("carbon_prices.csv", [*common, *support])
+        if "ets_price_per_t" in table.columns:
+            self._require(table, "carbon_prices.csv", ["ets_price_per_t", "ets_currency"])
+            currency, price = table["ets_currency"], table["ets_price_per_t"]
+        else:
+            self._require(table, "carbon_prices.csv", ["eu_ets_usd_per_t"])
+            currency, price = pd.Series("USD", index=table.index), table["eu_ets_usd_per_t"]
+        unknown = sorted(set(currency) - {"GBP", "USD", "EUR"})
+        if unknown:
+            raise DataError(f"carbon_prices.csv has unsupported currencies: {unknown}")
+        eur = np.where(currency == "USD", price / table["usd_per_eur"], price)
+        gbp = np.where(currency == "GBP", price, eur * table["gbp_per_eur"])
         starts = pd.DatetimeIndex(pd.to_datetime(table["valid_from"], utc=True))
         _check_within(index, starts[0], None, "carbon_prices.csv")
         row = np.searchsorted(_nanoseconds(starts), _nanoseconds(index), side="right") - 1
         rows = table.iloc[row]
-        eu_ets = rows["eu_ets_usd_per_t"] / rows["usd_per_eur"] * rows["gbp_per_eur"]
         return pd.DataFrame(
             {
-                "eu_ets_gbp_per_t": eu_ets.to_numpy(dtype=np.float64),
+                "ets_gbp_per_t": gbp.astype(np.float64)[row],
                 "cps_gas": rows["cps_gas_gbp_per_kwh"].to_numpy(dtype=np.float64) * 1000,
                 "cps_coal": rows["cps_coal_gbp_per_gj"].to_numpy(dtype=np.float64) * _GJ_PER_MWH,
             },
             index=index,
         )
 
+    @staticmethod
+    def _require(frame: pd.DataFrame, name: str, columns: list[str]) -> None:
+        missing = sorted(set(columns) - set(frame.columns))
+        if missing:
+            raise DataError(f"{name} is missing columns: {', '.join(missing)}")
+
     def _read(self, name: str, columns: list[str]) -> pd.DataFrame:
         path = self.directory / name
         if not path.is_file():
             raise DataError(f"system data file not found: {path}")
         frame = pd.read_csv(path)
-        missing = sorted(set(columns) - set(frame.columns))
-        if missing:
-            raise DataError(f"{name} is missing columns: {', '.join(missing)}")
+        self._require(frame, name, columns)
         return frame
 
 

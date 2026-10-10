@@ -15,6 +15,31 @@ skipped.
 Prices include genuine scarcity spikes, up to £999/MWh in September–November 2016;
 they are kept.
 
+## GB prices after 2020
+
+OPSD's GB prices stop in September 2020. `data/prices/gb_day_ahead_ember.csv` carries the
+GB hourly day-ahead price from 30 June 2016 to 5 October 2026 (90,000 hours, no gaps),
+from Ember's European wholesale price data (CC BY 4.0), stored in EUR/MWh as published.
+OpenEnergy converts each hour to GBP at the ECB reference rate for its day
+(`data/prices/ecb_gbp_per_eur.csv`; the latest earlier rate on weekends and holidays).
+Use it with `data: {source: ember, path: ...}`; `openenergy data update` downloads the
+latest months into a user cache.
+
+Where both exist (July 2016 to September 2020, 37,239 hours) the converted Ember price
+matches OPSD with correlation 0.99996 and a mean absolute difference of £0.11/MWh, so the
+two can be joined. The system model's backcast does exactly that: OPSD where it has a
+price, Ember otherwise.
+
+| Year | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Mean £/MWh | 45.3 | 57.4 | 42.9 | 35.3 | 117.8 | 204.8 | 94.1 | 72.5 | 80.7 |
+| Mean daily spread £/MWh | 41.6 | 40.6 | 32.9 | 39.6 | 146.4 | 155.6 | 70.0 | 59.9 | 67.5 |
+
+The series keeps 615 negative hours (down to −€60/MWh) and 38 hours at €1,000/MWh or more
+(up to €2,576/MWh in 2021–2022). From 2021 Ember takes the UK price from EMR Settlement,
+whose own reuse terms could not be read (the site blocks scripted access); OpenEnergy
+relies on Ember's CC BY 4.0 publication and cites both.
+
 ## Renewable capacity factors
 
 The extract also has hourly capacity-factor profiles (generation divided by installed
@@ -34,14 +59,15 @@ EUR; OpenEnergy labels the currency accordingly.
 ## Carbon intensity
 
 `data/carbon_intensity/gb_national.csv` holds GB national carbon intensity for every
-half-hour from 1 January 2018 to 30 September 2020: NESO's forecast and its estimated
+half-hour from 1 January 2018 to 31 December 2025: NESO's forecast and its estimated
 actual, in gCO2/kWh. It was downloaded with `scripts/fetch_carbon_intensity.py` and is
-stored exactly as published.
+stored exactly as published; 179 half-hours the API did not return are left blank.
 
-The archive has 438 half-hours without an actual value (nine runs, the longest about three
+The archive has 804 half-hours without an actual value (18 runs, the longest about three
 days) and 16 implausible forecasts (up to 13,579 gCO2/kWh). OpenEnergy treats any value
 outside 0–1000 gCO2/kWh as missing and reports how many it rejected. Annual mean actual
-intensity falls from 248 (2018) to 214 (2019) and 182 gCO2/kWh (2020 to September).
+intensity falls from 248 (2018) to 214 (2019), 180 (2020), 188 (2021), 183 (2022), 152
+(2023), 125 (2024) and 129 gCO2/kWh (2025).
 
 These are **average** intensities of the whole system. Storage and renewables change the
 **marginal** plant, whose emissions can differ; emissions results in OpenEnergy show
@@ -54,18 +80,24 @@ direction and rough scale, not causal impact.
 
 | File | Contents | Source |
 |---|---|---|
-| `generation_mix.csv` | Half-hourly GB generation by fuel, MW, 2015-01-01 to 2020-09-30 (100,800 rows, no gaps) | NESO historic generation mix |
-| `fleet.csv` | GB capacity at each year end 2014–2020 (CCGT, coal, gas turbines, oil engines, nuclear, pumped storage) and CCGT and coal efficiency | DUKES 5.8 and 5.10 |
-| `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2020 | DESNZ QEP 3.2.1 |
-| `carbon_prices.csv` | EU ETS price on 1 April 2015–2020 with ECB exchange rates, and carbon price support rates | World Bank, ECB, HMRC |
+| `generation_mix.csv` | Half-hourly GB generation by fuel, MW, 2015-01-01 to 2025-12-31 (192,864 rows, no gaps) | NESO historic generation mix |
+| `fleet.csv` | GB capacity at each year end 2014–2025 (CCGT, coal, gas turbines, oil engines, nuclear, pumped storage) and CCGT and coal efficiency | DUKES 5.8 and 5.10 |
+| `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2025 | DESNZ QEP 3.2.1 |
+| `carbon_prices.csv` | EU ETS (2015–2020) and UK ETS (2021–2025) price on 1 April with ECB exchange rates, and carbon price support rates | World Bank, DESNZ (2021), ECB, HMRC |
 | `unit_parameters.csv` | Unit size, minimum stable output and start-up cost for CCGT, coal and peaking plant (unit commitment) | Danish Energy Agency, NREL, ECB |
 
 Known issues: NESO fills gaps by seasonal decomposition and sets net-negative values to
 zero, so pumping demand and net exports are absent; transmission solar and batteries are
-in "other". DUKES efficiencies are UK-wide averages. One EU ETS price per year misses moves
-within the year (2018 rose from about €10 to €25). Emission factors (gas 0.1839, coal
-0.3096 tCO2 per MWh of fuel) follow from the carbon price support rates, which are set at
-£18/tCO2.
+in "other". DUKES efficiencies are UK-wide averages. One ETS price per year misses moves
+within the year (EU ETS 2018 rose from about €10 to €25; UK ETS 2021–2023 swung more). The
+World Bank dashboard has no UK ETS price on 1 April 2021, before the first auction, so
+2021 uses DESNZ's 2021 carbon price (mean auction price, £47.96/t). DESNZ suppresses some
+coal prices from 2023 (carried forward) and gives no coal efficiency for 2025 (latest
+earlier value used). Fuel prices are what power producers paid, including contracts
+agreed earlier, so they lag market gas prices: see the
+[system model](guides/system-model.md#after-2020-gas-crisis-and-coal-exit). Emission
+factors (gas 0.1839, coal 0.3096 tCO2 per MWh of fuel) follow from the carbon price support
+rates, which are set at £18/tCO2.
 
 ## Attribution
 
@@ -112,19 +144,38 @@ step; the bundled file itself is unchanged.
 
 **Carbon price support**
 
-> HM Revenue & Customs. Excise Notice CCL1/6: a guide to carbon price floor, section 2.3.
-> <https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor>
+> HM Revenue & Customs. Excise Notice CCL1/6: a guide to carbon price floor, section 2.3,
+> <https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor>,
+> and Climate Change Levy rates, <https://www.gov.uk/guidance/climate-change-levy-rates>
+> (both accessed 10 October 2026).
+
+**UK ETS price for 2021**
+
+> Department for Energy Security and Net Zero (UK ETS Authority). UK ETS: carbon prices for
+> use in civil penalties, 2021 and 2022.
+> <https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price>
 > (accessed 10 October 2026).
 
-The three UK government sources contain public sector information licensed under the
+The four UK government sources contain public sector information licensed under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
-**EU ETS prices**
+**EU ETS and UK ETS prices**
 
-> World Bank. Carbon Pricing Dashboard: price of EU ETS allowances on 1 April each year.
+> World Bank. Carbon Pricing Dashboard: price of EU ETS (2015–2020) and UK ETS (2022–2025)
+> allowances on 1 April each year.
 > <https://carbonpricingdashboard.worldbank.org/compliance/price> (accessed
 > 10 October 2026). Licensed under
 > [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+**GB prices after 2020**
+
+> Ember. European Wholesale Electricity Price Data, hourly, United Kingdom.
+> <https://ember-energy.org/data/european-wholesale-electricity-price-data/> (accessed
+> 10 October 2026). Licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Primary sources: ENTSO-E
+> Transparency Platform and EMR Settlement.
+
+OpenEnergy keeps Ember's EUR prices unchanged and converts them to GBP with ECB daily rates.
 
 **Exchange rates**
 
@@ -132,7 +183,8 @@ The three UK government sources contain public sector information licensed under
 > <https://data.ecb.europa.eu/> (accessed 10 October 2026).
 
 OpenEnergy derives a USD-to-GBP cross rate from the two ECB rates to convert the World
-Bank's US$ prices; the stored rates are unchanged.
+Bank's US$ prices, and uses the daily GBP rate to convert Ember's EUR prices; the stored
+rates are unchanged.
 
 **Unit sizes and minimum loads**
 
@@ -156,7 +208,7 @@ The system files keep source values unchanged apart from dropped rows and column
 totals (England and Wales plus Scotland), integer MW and the start-cost conversion;
 changes are listed in `data/system/README.md`. OpenEnergy is not affiliated with or
 endorsed by Open Power System Data, NESO, DESNZ, HMRC, the World Bank, the ECB, the Danish
-Energy Agency or NREL.
+Energy Agency, NREL or Ember.
 
 ## Software
 

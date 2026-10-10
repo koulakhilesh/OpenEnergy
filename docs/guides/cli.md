@@ -106,16 +106,20 @@ given and reports price, emissions, curtailment, cost and any battery's revenue.
 
 ```bash
 uv run openenergy system validate [--start 2015-04-01] [--end 2020-09-30] [--out backcast/]
+uv run openenergy system validate --start 2021-01-01 --end 2025-12-31
 uv run openenergy system validate --commitment --price start
 ```
 
 Rebuilds GB prices and gas and coal output from fuel, carbon and fleet data, and compares
 each year with what happened: mean, MAE, correlation, 95th percentile and average daily
-spread of price, gas and coal output, and CO2. `--commitment` adds start-up costs and
-minimum stable output ([unit commitment](system-model.md#unit-commitment); about a minute
-per year). `--price start` compares the start price instead of the marginal price and
-needs `--commitment`. `--data` and `--prices` point at other copies of `data/system` and
-the OPSD file. `--out` writes `backcast.csv`, `hourly.csv` and `summary.json`.
+spread of price, gas and coal output, and CO2. The system data runs to the end of 2025.
+Actual prices come from the bundled OPSD file and, after it ends in September 2020, the
+Ember file; `--prices` (repeatable, earlier files first) points at other copies.
+`--commitment` adds start-up costs and minimum stable output
+([unit commitment](system-model.md#unit-commitment); about a minute per year). `--price
+start` compares the start price instead of the marginal price and needs `--commitment`.
+`--data` points at another copy of `data/system`. `--out` writes `backcast.csv`,
+`hourly.csv` and `summary.json`.
 
 ## `openenergy system run`
 
@@ -135,6 +139,18 @@ uv run openenergy data info data/time_series/time_series_60min_singleindex_filte
 ```
 
 Lists each price zone with its currency, date range and number of complete days.
+
+## `openenergy data update`
+
+```bash
+uv run openenergy data update [--dir DIR]
+```
+
+Downloads the latest GB hourly day-ahead prices from Ember (CC BY 4.0, in EUR as
+published) and the ECB's daily GBP rates into `DIR` (default
+`~/.cache/openenergy/prices`, or `$XDG_CACHE_HOME/openenergy/prices`). Point a scenario at
+the result with `data: {source: ember, path: DIR/gb_day_ahead_ember.csv}`. The bundled copy
+in `data/prices/` is refreshed by `scripts/fetch_prices.py`.
 
 ## Errors
 

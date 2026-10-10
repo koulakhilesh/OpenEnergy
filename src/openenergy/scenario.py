@@ -31,6 +31,7 @@ from openenergy.backtest.engine import (
     run_plant_backtest,
 )
 from openenergy.data.carbon import CARBON_ATTRIBUTION, CarbonIntensitySource
+from openenergy.data.ember import EMBER_ATTRIBUTION, EmberPriceSource
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.series import PriceSeries, fill_gaps
 from openenergy.dispatch.arbitrage import DispatchConfig
@@ -67,7 +68,7 @@ def _resolve(value: Path, info: ValidationInfo) -> Path:
 
 
 class DataSection(_Strict):
-    source: Literal["opsd"] = "opsd"
+    source: Literal["opsd", "ember"] = "opsd"
     path: Path
     zone: str = "GB_GBN"
     start: date | None = None
@@ -169,6 +170,8 @@ class Scenario(_Strict):
     def _grid_needs_assets(self) -> Scenario:
         if self.grid is not None and self.assets is None:
             raise ValueError("grid applies only to co-located assets; add an assets section")
+        if self.assets is not None and self.data.source != "opsd":
+            raise ValueError("assets need OPSD capacity-factor profiles; use data.source: opsd")
         return self
 
     def connection(self) -> GridConnection | None:
@@ -307,7 +310,7 @@ def _validate_scenario(raw: dict[str, Any], path: Path) -> Scenario:
 def run_scenario(scenario: Scenario) -> ScenarioRun:
     """Backtest the scenario and, unless it is already perfect foresight, its benchmark."""
     data = scenario.data
-    source = OPSDCsvSource(data.path)
+    source = EmberPriceSource(data.path) if data.source == "ember" else OPSDCsvSource(data.path)
     load_start = data.start - timedelta(days=WARMUP_DAYS) if data.start else None
     raw = source.prices(data.zone, load_start, data.end)
     prices, filled = fill_gaps(raw, data.max_gap_hours)
@@ -352,6 +355,7 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
         benchmark,
         summary,
         filled_intervals=filled,
+        attribution=EMBER_ATTRIBUTION if data.source == "ember" else OPSD_ATTRIBUTION,
         colocation=colocation,
         plant_capture=plant_capture,
         clipped_intervals=clipped,
@@ -411,10 +415,13 @@ def _carbon(
 
 
 def _site(
-    scenario: Scenario, source: OPSDCsvSource, prices: PriceSeries, start: date | None
+    scenario: Scenario,
+    source: OPSDCsvSource | EmberPriceSource,
+    prices: PriceSeries,
+    start: date | None,
 ) -> tuple[Site | None, int]:
     grid = scenario.connection()
-    if grid is None or scenario.assets is None:
+    if grid is None or scenario.assets is None or not isinstance(source, OPSDCsvSource):
         return None, 0
     total = pd.Series(0.0, index=prices.prices.index)
     clipped = 0
@@ -441,7 +448,9 @@ def _compare(result: BacktestResult, plant: PlantResult, battery: BacktestResult
     return Colocation(total(result.daily), total(plant.daily), total(battery.daily))
 
 
-def _forecaster(scenario: Scenario, source: OPSDCsvSource, prices: PriceSeries) -> Forecaster:
+def _forecaster(
+    scenario: Scenario, source: OPSDCsvSource | EmberPriceSource, prices: PriceSeries
+) -> Forecaster:
     section = scenario.forecast
     if section.method == "perfect_foresight":
         return PerfectForesight(prices)

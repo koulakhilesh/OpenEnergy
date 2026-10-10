@@ -26,8 +26,9 @@ GB is one bus. Each hour, demand must equal supply:
 
 $$c_{k,t} = \frac{p_{f,q(t)} + s_{f,t} + \lambda_t\, e_f}{\eta_k} + v$$
 
-with fuel price $p$ (quarterly, DESNZ), carbon price support $s$ (HMRC), EU ETS price
-$\lambda$ (World Bank, 1 April each year), emission factor $e_f$ and efficiency
+with fuel price $p$ (quarterly, DESNZ), carbon price support $s$ (HMRC), ETS price
+$\lambda$ (EU ETS to 2020, UK ETS from 2021; one price per year from 1 April), emission
+factor $e_f$ and efficiency
 $\eta_k$. The price is the cost of the last unit needed, or the value of lost load
 (default £6,000/MWh) if capacity runs out.
 
@@ -167,6 +168,49 @@ So unit commitment fixes much of the missing daily shape without fitting anythin
 the model still has no scarcity pricing or bidding above cost. Commitment stays off by
 default so earlier results and quick runs are unchanged.
 
+## After 2020: gas crisis and coal exit
+
+The system data runs to the end of 2025, and Ember's prices cover the years after OPSD
+stops (see [Data](../data.md#gb-prices-after-2020)). The default backcast still ends in
+September 2020, so the tables above do not change; later years are one flag away:
+
+```bash
+uv run openenergy system validate --start 2021-01-01 --end 2025-12-31 [--commitment --price start]
+```
+
+| Year | Model £/MWh merit / UC start | Actual £/MWh | MAE merit / UC | Corr. merit / UC | p95 merit / UC / actual | Daily spread merit / UC / actual | Gas TWh model / actual | Coal TWh model / actual |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2021 | 83.5 / 88.0 | 117.8 | 38.5 / 35.8 | 0.58 / 0.59 | 143 / 152 / 258 | 7 / 34 / 146 | 102 / 107 | 10.2 / 5.0 |
+| 2022 | 157.7 / 163.5 | 204.8 | 78.1 / 76.2 | 0.40 / 0.40 | 200 / 203 / 415 | 9 / 39 / 156 | 106 / 111 | 9.4 / 4.3 |
+| 2023 | 121.1 / 125.9 | 94.1 | 32.9 / 36.1 | 0.52 / 0.52 | 140 / 149 / 156 | 7 / 33 / 70 | 86 / 87 | 3.5 / 2.8 |
+| 2024 | 89.2 / 93.8 | 72.5 | 27.7 / 29.0 | 0.10 / 0.18 | 126 / 134 / 110 | 6 / 35 / 60 | 69 / 73 | 5.6 / 1.6 |
+| 2025 | 87.5 / 92.1 | 80.7 | 18.7 / 19.8 | 0.57 / 0.52 | 106 / 115 / 123 | 6 / 37 / 67 | 77 / 77 | 0.0 / 0.0 |
+
+Gas and coal TWh are from the merit order; unit commitment gives gas within 1 TWh of it.
+No hour hit the value of lost load in any year.
+
+What the table shows:
+
+- **Gas volume is right; the gas price timing is not.** Modelled gas output is within
+  5 TWh of actual every year. Prices are not: by quarter, the merit-order model is £42–102
+  too low in four of the five quarters from July 2021 to September 2022, then £22–57 too
+  high from April 2023 to March 2024, and within £12 from April 2024. This pattern is
+  consistent with the fuel input: DESNZ's quarterly series is the price power producers
+  paid, contracts included, which can lag the market (its Q1 2024 gas price, 4.46 p/kWh,
+  is close to Q4 2023's 4.84 while the actual power price fell from £83 to £65). An open
+  daily gas price would test this; none is bundled.
+- **Spikes are missed.** In 2022 the actual 95th percentile is £415; the model reaches
+  £200. Daily spreads in 2021–2022 averaged £146–156; unit commitment gets £34–39.
+- **2024 is the weakest year** (correlation 0.10): early 2024 combines the lagging gas
+  price with a coal price DESNZ reported at 1.5 p/kWh, so the model runs 5.6 TWh of coal
+  where 1.6 ran before the last coal plant closed in September 2024.
+- **2025 is the closest of these years**: mean within £7, correlation 0.57, no coal on
+  either side.
+
+The cost-based model explains the level of prices when fuel prices are stable and the
+direction of the 2021–2022 rise, but not its size or timing. Read results for those years
+as a lower bound on prices and spreads.
+
 ## What if: more wind
 
 The same 2019 weather and demand with wind output scaled (`system.scale.wind`):
@@ -241,14 +285,16 @@ size of the effect as an upper bound.
 name: gb-2019-wind3-storage
 system:
   data: ../data/system                 # written by scripts/fetch_system_data.py
-  prices: ../data/time_series/time_series_60min_singleindex_filtered.csv  # optional
-  year: 2019                           # 2015 (from April) to 2020 (to September)
+  prices:                              # optional: actual prices to compare, earlier files first
+    - ../data/time_series/time_series_60min_singleindex_filtered.csv
+    - ../data/prices/gb_day_ahead_ember.csv
+  year: 2019                           # 2015 (from April) to 2025
   start: 2019-01-01                    # optional: a shorter window within the year
   end: 2019-03-31
   scale: {wind: 3.0, solar: 1.0}       # also nuclear, biomass, hydro, imports, other, pumped_storage
   capacity_mw: {coal: 0}               # replace installed ccgt, coal or peaking MW
   fuel_price_scale: {gas: 1.5}         # multiply gas or coal prices
-  eu_ets_gbp_per_t: 50                 # replace the EU ETS price
+  ets_gbp_per_t: 50                    # replace the ETS price (eu_ets_gbp_per_t also accepted)
   carbon_price_support: true
   storage:
     fleet: {power_mw: 10000, hours: 4, efficiency: 0.85}   # power_mw 0 leaves it out
@@ -280,12 +326,13 @@ storage, curtailment, emissions) and `summary.json` with the data attributions.
 | Generation by fuel, demand | NESO, [historic generation mix](https://www.neso.energy/data-portal/historic-generation-mix). Supported by National Energy SO Open Data | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
 | Plant capacity and efficiency | DESNZ, [DUKES 2026](https://www.gov.uk/government/statistics/electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes) tables 5.8 and 5.10 | [OGL v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
 | Fuel prices | DESNZ, [Quarterly Energy Prices 3.2.1](https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers) | OGL v3.0 |
-| Carbon price support | HMRC, [Excise Notice CCL1/6](https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor) | OGL v3.0 |
-| EU ETS price | World Bank, [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| Carbon price support | HMRC, [Excise Notice CCL1/6](https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor) and [Climate Change Levy rates](https://www.gov.uk/guidance/climate-change-levy-rates) | OGL v3.0 |
+| EU ETS (2015–2020) and UK ETS (2022–2025) price | World Bank, [Carbon Pricing Dashboard](https://carbonpricingdashboard.worldbank.org/compliance/price) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| UK ETS price 2021 | DESNZ, [determination of the UK ETS carbon price](https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price) (mean 2021 auction price) | OGL v3.0 |
 | Exchange rates | Source: European Central Bank, euro reference rates (USD-to-GBP cross rate derived by OpenEnergy) | ECB reuse terms |
 | Unit size, minimum load | Danish Energy Agency, [Technology Data for Generation of Electricity and District Heating](https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | Start-up costs | N. Kumar et al., [Power Plant Cycling Costs](https://www.osti.gov/biblio/1046269), NREL/SR-5500-55433, 2012, Table 1-1 (2011 US$, converted with ECB 2011 rates) | US government-sponsored report |
-| Actual prices (validation) | [Open Power System Data](https://doi.org/10.25832/time_series/2020-10-06), GB day-ahead | see [Data](../data.md) |
+| Actual prices (validation) | [Open Power System Data](https://doi.org/10.25832/time_series/2020-10-06), GB day-ahead, to September 2020; then [Ember](https://ember-energy.org/data/european-wholesale-electricity-price-data/), converted at ECB daily rates | see [Data](../data.md); Ember CC BY 4.0 |
 
 All accessed 10 October 2026. Full references, changes and known issues are on the
 [Data](../data.md) page and in `data/system/README.md`; every `summary.json` repeats the
@@ -302,6 +349,7 @@ Power System Analysis*, Journal of Open Research Software 6(1), 2018,
 - Unit commitment is optional and simplified: no minimum up or down times, ramp limits or
   start fuel, typical rather than GB-specific unit data, and one day planned at a time.
 - Imports and other fixed profiles cannot respond to price.
-- Fuel prices are quarterly averages; EU ETS is one price per year (from 1 April).
+- Fuel prices are quarterly averages of what power producers paid, which can lag market
+  gas prices (most visible in 2021–2024); the ETS is one price per year (from 1 April).
 - Storage optimisation has perfect foresight over the year.
 - Emissions cover GB fossil plant only (no imports or biomass).

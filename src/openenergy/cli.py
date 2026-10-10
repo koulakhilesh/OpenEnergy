@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import zipfile
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import date
@@ -12,9 +13,11 @@ import pandas as pd
 import typer
 
 import openenergy
+from openenergy.data.ember import EMBER_ATTRIBUTION, gb_prices
 from openenergy.data.fleet import SystemInputs
 from openenergy.data.neso import GenerationMixSource
 from openenergy.data.opsd import OPSDCsvSource
+from openenergy.data.update import cache_dir, update_prices
 from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
 from openenergy.scenario import (
@@ -37,16 +40,23 @@ from openenergy.system.scenario import (
     write_system_outputs,
 )
 from openenergy.system.storage import sizing_grid
-from openenergy.system.validate import BACKCAST_END, BACKCAST_START, backcast, write_backcast
+from openenergy.system.validate import (
+    BACKCAST_END,
+    BACKCAST_START,
+    DATA_END,
+    backcast,
+    write_backcast,
+)
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help=__doc__)
-data_app = typer.Typer(no_args_is_help=True, help="Inspect market data files.")
+data_app = typer.Typer(no_args_is_help=True, help="Inspect and update market data files.")
 app.add_typer(data_app, name="data")
 system_app = typer.Typer(no_args_is_help=True, help="Model the GB power system.")
 app.add_typer(system_app, name="system")
 
 SYSTEM_DATA = Path("data/system")
 OPSD_DATA = Path("data/time_series/time_series_60min_singleindex_filtered.csv")
+EMBER_DATA = Path("data/prices/gb_day_ahead_ember.csv")
 
 
 @contextmanager
@@ -254,6 +264,25 @@ def data_info(path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")
             )
 
 
+@data_app.command("update")
+def data_update(
+    directory: Annotated[
+        Path | None,
+        typer.Option("--dir", help="Where to write; default ~/.cache/openenergy/prices."),
+    ] = None,
+) -> None:
+    """Download the latest GB day-ahead prices (Ember, CC BY 4.0) and ECB GBP rates."""
+    target = directory or cache_dir()
+    try:
+        path, hours, first, last = update_prices(target)
+    except (OSError, KeyError, zipfile.BadZipFile) as exc:
+        typer.echo(f"error: download failed: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(f"{hours:,} hours from {first} to {last} UTC written to {path}")
+    typer.echo("Use it in a scenario with data: {source: ember, path: <that file>}.")
+    typer.echo(f"Prices: {EMBER_ATTRIBUTION}")
+
+
 @system_app.command("run")
 def system_run(
     scenario: Annotated[Path, typer.Argument(help="System scenario YAML file.")],
@@ -307,11 +336,16 @@ def system_validate(
     data: Annotated[Path, typer.Option(help="Directory from scripts/fetch_system_data.py.")] = (
         SYSTEM_DATA
     ),
-    prices: Annotated[Path, typer.Option(help="OPSD time-series CSV with GB prices.")] = (
-        OPSD_DATA
-    ),
+    prices: Annotated[
+        list[Path] | None,
+        typer.Option(
+            help="GB price files (OPSD or Ember), earlier ones first; default both bundled."
+        ),
+    ] = None,
     start: Annotated[str, typer.Option(help="First day, YYYY-MM-DD.")] = str(BACKCAST_START),
-    end: Annotated[str, typer.Option(help="Last day, YYYY-MM-DD.")] = str(BACKCAST_END),
+    end: Annotated[str, typer.Option(help=f"Last day, YYYY-MM-DD (data to {DATA_END}).")] = str(
+        BACKCAST_END
+    ),
     commitment: Annotated[
         bool, typer.Option(help="Unit commitment: start-up costs and minimum stable output.")
     ] = False,
@@ -329,12 +363,14 @@ def system_validate(
         mix = GenerationMixSource(data / "generation_mix.csv").mix(
             first, last, step=pd.Timedelta(hours=1)
         )
-        actual = OPSDCsvSource(prices).prices("GB_GBN", first, last)
+        actual, sources = gb_prices(prices or [OPSD_DATA, EMBER_DATA], first, last)
         inputs = SystemInputs(data)
         units = Commitment.from_inputs(inputs) if commitment else None
         result = backcast(mix, inputs, actual, commitment=units, price=kind)
         destination = (
-            write_backcast(result, out, commitment=units, price=kind) if out is not None else None
+            write_backcast(result, out, commitment=units, price=kind, price_attribution=sources)
+            if out is not None
+            else None
         )
     mode = "unit commitment" if commitment else "merit order"
     typer.echo(

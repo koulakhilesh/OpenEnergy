@@ -194,7 +194,7 @@ def test_adjustments_change_costs_and_capacity(tmp_path: Path) -> None:
     adjustments = Adjustments(
         capacity_mw={"coal": 0.0},
         fuel_price_scale={"gas": 2.0},
-        eu_ets_gbp_per_t=0.0,
+        ets_gbp_per_t=0.0,
         carbon_price_support=False,
     )
     gens = {g.name: g for g in thermal_generators(INDEX, inputs, None, adjustments)}
@@ -229,8 +229,8 @@ def test_adjustment_validation() -> None:
         Adjustments(scale={"tidal": 2.0})
     with pytest.raises(ConfigError, match=r"capacity_mw\.coal"):
         Adjustments(capacity_mw={"coal": -1.0})
-    with pytest.raises(ConfigError, match="eu_ets"):
-        Adjustments(eu_ets_gbp_per_t=float("nan"))
+    with pytest.raises(ConfigError, match="ets_gbp_per_t"):
+        Adjustments(ets_gbp_per_t=float("nan"))
 
 
 def bundled_mix(start: date, end: date) -> pd.DataFrame:

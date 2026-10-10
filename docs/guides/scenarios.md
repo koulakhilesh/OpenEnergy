@@ -26,12 +26,16 @@ dispatch:
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `path` | required | OPSD time-series CSV; relative paths resolve against the scenario file |
-| `zone` | `GB_GBN` | Bidding zone (see `openenergy data info`) |
+| `source` | `opsd` | `opsd` (OPSD time series, to September 2020) or `ember` (GB hourly prices from June 2016, converted to GBP at ECB daily rates) |
+| `path` | required | Price CSV; relative paths resolve against the scenario file |
+| `zone` | `GB_GBN` | Bidding zone (see `openenergy data info`); `ember` covers GB only |
 | `start`, `end` | whole file | First and last UTC day to simulate, inclusive |
 | `max_gap_hours` | `2` | Interior price gaps up to this length are linearly interpolated |
 
 When `start` is set, the 14 days before it are loaded as forecaster history only.
+Co-located `assets` need OPSD's capacity-factor profiles, so they require `source: opsd`.
+`examples/gb-2022-naive.yaml` backtests a battery on 2022 prices from the bundled Ember file;
+`openenergy data update` downloads the latest months.
 
 ## `battery`
 

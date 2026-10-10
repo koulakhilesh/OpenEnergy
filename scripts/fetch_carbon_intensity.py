@@ -6,7 +6,7 @@ Licence: CC BY 4.0, https://creativecommons.org/licenses/by/4.0/; terms of use:
 https://github.com/carbon-intensity/terms. Writes half-hourly forecast and actual gCO2/kWh
 unchanged. OpenEnergy is not affiliated with or endorsed by NESO.
 
-Run: uv run python scripts/fetch_carbon_intensity.py [--start 2018-01-01] [--end 2020-09-30]
+Run: uv run python scripts/fetch_carbon_intensity.py [--start 2018-01-01] [--end 2025-12-31]
 """
 
 import argparse
@@ -21,6 +21,7 @@ API = "https://api.carbonintensity.org.uk/intensity/{start}/{end}"
 OUTPUT = Path(__file__).parents[1] / "data/carbon_intensity/gb_national.csv"
 # The API returns at most 14 days per request.
 WINDOW = timedelta(days=14)
+HALF_HOUR = timedelta(minutes=30)
 
 
 def fetch(start: datetime, end: datetime) -> list[dict[str, object]]:
@@ -40,7 +41,7 @@ def fetch(start: datetime, end: datetime) -> list[dict[str, object]]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--start", type=date.fromisoformat, default=date(2018, 1, 1))
-    parser.add_argument("--end", type=date.fromisoformat, default=date(2020, 9, 30))
+    parser.add_argument("--end", type=date.fromisoformat, default=date(2025, 12, 31))
     args = parser.parse_args()
 
     first = datetime.combine(args.start, datetime.min.time(), UTC)
@@ -62,13 +63,19 @@ def main() -> None:
         cursor = stop
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    absent = 0
     with OUTPUT.open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(["utc_timestamp", "forecast", "actual"])
-        for timestamp in sorted(rows):
-            forecast, actual = rows[timestamp]
+        # Every half-hour is written; ones the API did not return are left blank.
+        cursor = first
+        while cursor < last:
+            timestamp = cursor.strftime("%Y-%m-%dT%H:%M:%SZ")
+            forecast, actual = rows.get(timestamp, (None, None))
+            absent += timestamp not in rows
             writer.writerow([timestamp, *("" if v is None else v for v in (forecast, actual))])
-    print(f"wrote {len(rows)} half-hours to {OUTPUT}")
+            cursor += HALF_HOUR
+    print(f"wrote {len(rows)} half-hours ({absent} not returned, left blank) to {OUTPUT}")
 
 
 if __name__ == "__main__":

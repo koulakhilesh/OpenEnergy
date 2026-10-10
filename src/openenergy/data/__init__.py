@@ -1,6 +1,7 @@
 """Market data sources and validated time series."""
 
 from openenergy.data.carbon import CARBON_ATTRIBUTION, CarbonIntensitySource, IntensitySeries
+from openenergy.data.ember import EMBER_ATTRIBUTION, EmberPriceSource, gb_prices
 from openenergy.data.fleet import (
     EMISSION_FACTORS,
     FLEET_ATTRIBUTION,
@@ -13,12 +14,14 @@ from openenergy.data.series import PriceSeries, ProfileSeries, fill_gaps
 
 __all__ = [
     "CARBON_ATTRIBUTION",
+    "EMBER_ATTRIBUTION",
     "EMISSION_FACTORS",
     "FLEET_ATTRIBUTION",
     "MIX_ATTRIBUTION",
     "OPSD_ATTRIBUTION",
     "UNIT_ATTRIBUTION",
     "CarbonIntensitySource",
+    "EmberPriceSource",
     "GenerationMixSource",
     "IntensitySeries",
     "OPSDCsvSource",
@@ -26,4 +29,5 @@ __all__ = [
     "ProfileSeries",
     "SystemInputs",
     "fill_gaps",
+    "gb_prices",
 ]

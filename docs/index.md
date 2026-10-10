@@ -36,6 +36,19 @@ gb-2019-naive    naive_last_week       363        13,918      13,995     73.0%  
 A 1 MW / 2 MWh battery trading GB day-ahead prices in 2019 would have earned about
 £14k per MW-year planning on last week's prices, or 73% of what perfect foresight allows.
 
+The same battery on every year of the bundled prices (`examples/gb-2022-naive.yaml` with
+other dates; Ember prices, GBP per MW-year):
+
+| Year | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Last week's prices | 20,682 | 18,889 | 13,936 | 17,155 | 74,172 | 76,940 | 35,964 | 28,677 | 35,861 |
+| Perfect foresight | 26,252 | 25,380 | 19,538 | 22,362 | 89,282 | 102,550 | 45,968 | 38,870 | 44,564 |
+| Capture | 79% | 74% | 71% | 77% | 83% | 75% | 78% | 74% | 80% |
+
+Revenue followed the gas crisis: over five times the 2019 level in 2021–2022, and two to
+two and a half times it in 2023–2025, while a simple forecast kept 71–83% of the
+perfect-foresight value every year.
+
 Renewables are one command away:
 
 ```bash
@@ -71,8 +84,9 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
 ## What it does
 
 1. **Loads prices, capacity factors, demand and carbon intensity** from the bundled
-   [Open Power System Data and NESO](data.md) extracts and checks them: UTC timestamps, a
-   regular grid, reported gaps and filtered telemetry glitches.
+   [Open Power System Data, Ember and NESO](data.md) extracts (GB prices to October 2026)
+   and checks them: UTC timestamps, a regular grid, reported gaps and filtered telemetry
+   glitches.
 2. **Forecasts** each day using only data available at the decision time (noon the day
    before by default).
 3. **Plans** the day with a mixed-integer optimisation that respects power and energy
@@ -86,7 +100,7 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
 6. **Analyses the system**: net load, ramps and surplus as renewables scale, and the
    storage needed to absorb that surplus; `openenergy sweep` sizes storage for a site.
 7. **Models GB dispatch**: CCGT, coal and peaking plant in merit order from DUKES fleet
-   data, fuel and carbon prices, checked against 2015–2020, with scenarios for renewables,
+   data, fuel and carbon prices, checked against 2015–2025, with scenarios for renewables,
    storage, fleet and carbon policy (storage via the optional PyPSA backend), and optional
    unit commitment with start-up costs and minimum stable output.
 
@@ -103,13 +117,13 @@ every setting.
 | v2.1 | PV and wind assets, captured price, co-located storage |
 | v2.2 | Net load, surplus, storage sizing, emissions |
 | v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
-| v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices (current) |
+| v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
+| v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.2 | Data after 2020: cached connectors for NESO and the Carbon Intensity API, current GB prices (subject to licence), newer DUKES and fuel prices, UK ETS |
 | v3.3 | Planning under uncertainty: stochastic dispatch over price scenarios, and the value of the stochastic solution against one forecast and perfect foresight |
 | v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
 | v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows |
@@ -118,8 +132,9 @@ every setting.
 Why this order: v3.0's backcast matched average prices but its peaks were too low, so a
 battery earned almost nothing on modelled prices. v3.1's unit commitment restores much of
 the daily shape (2019 perfect-foresight battery value £10k against £22.5k on real prices);
-bringing the data up to date (v3.2) comes next; planning under uncertainty means more once
-prices have realistic spikes; the app reuses the v3.4 charts.
+v3.2 brings the data to 2025, where the model misses the size and timing of the 2021–2022
+price rise. Planning under uncertainty (v3.3) matters most for such years; the app reuses
+the v3.4 charts.
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
 versioned docs. Ideas are welcome in
