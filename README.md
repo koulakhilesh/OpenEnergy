@@ -47,6 +47,8 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   2018–2025 and generation by fuel for 2015–2025 from NESO; and GB fleet, fuel and carbon
   prices from DESNZ, HMRC, the World Bank and the ECB, are bundled.
   `openenergy data update` downloads the latest prices.
+- **Reports**: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps
+  into one interactive HTML file of charts and tables (optional `report` extra, plotly).
 
 ## Quick start
 
@@ -71,10 +73,12 @@ per MW-year planning on last week's prices: 73% of what perfect foresight allows
 2022 gas crisis the same battery would have earned about £77k
 (`examples/gb-2022-naive.yaml`, on Ember prices).
 
-Run one scenario and write its results to `outputs/<name>/`:
+Run one scenario and write its results to `outputs/<name>/`, then chart them:
 
 ```bash
 uv run openenergy run examples/gb-2019-naive.yaml
+uv sync --extra report
+uv run openenergy report outputs/gb-2019-naive -o outputs/report.html
 ```
 
 Rebuild GB prices from the plants behind them and compare with what happened:
@@ -109,12 +113,12 @@ uv run mkdocs serve
 | v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
 | v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
 | v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
+| v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
 | v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows, with stochastic planning where a later market lets the battery react to prices |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 

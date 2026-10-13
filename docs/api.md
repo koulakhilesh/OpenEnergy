@@ -6,6 +6,10 @@
 
 ::: openenergy.data.opsd
 
+::: openenergy.data.ember
+
+::: openenergy.data.update
+
 ::: openenergy.data.carbon
 
 ::: openenergy.data.neso
@@ -61,6 +65,14 @@
 ## Scenarios
 
 ::: openenergy.scenario
+
+## Reports
+
+::: openenergy.report.load
+
+::: openenergy.report.figures
+
+::: openenergy.report.document
 
 ## Errors
 

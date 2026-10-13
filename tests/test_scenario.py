@@ -93,7 +93,12 @@ def test_perfect_foresight_is_its_own_benchmark(tmp_path: Path, opsd_csv: Path) 
 def test_write_outputs(scenario_file: Path, tmp_path: Path) -> None:
     run = run_scenario(load_scenario(scenario_file))
     out = write_outputs(run, tmp_path / "out")
-    assert sorted(p.name for p in out.iterdir()) == ["daily.csv", "intervals.csv", "summary.json"]
+    assert sorted(p.name for p in out.iterdir()) == [
+        "benchmark_daily.csv",
+        "daily.csv",
+        "intervals.csv",
+        "summary.json",
+    ]
     payload = json.loads((out / "summary.json").read_text())
     assert payload["scenario"] == "gb-test"
     assert payload["summary"]["days"] == 14

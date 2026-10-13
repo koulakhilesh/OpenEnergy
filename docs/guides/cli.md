@@ -44,6 +44,16 @@ gb-2019-pv-colocated (naive_last_week, GBP)
   co-location value     -2,399.52 GBP (upper bound: plant output known)
 ```
 
+## `openenergy report`
+
+```bash
+uv run openenergy report DIR [DIR ...] [-o report.html] [--title TEXT] [--cdn]
+```
+
+Writes one HTML file of charts and tables from directories written by `run`, `system run`
+or `system validate --out`, or from a `sweep --out` CSV. Needs the `report` extra
+(`uv sync --extra report`). See [Reports](reports.md).
+
 ## `openenergy capture`
 
 ```bash

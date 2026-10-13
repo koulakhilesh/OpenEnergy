@@ -1255,6 +1255,9 @@ forecast = [
     { name = "scikit-learn" },
     { name = "threadpoolctl" },
 ]
+report = [
+    { name = "plotly" },
+]
 system = [
     { name = "pypsa" },
 ]
@@ -1279,6 +1282,7 @@ requires-dist = [
     { name = "highspy", specifier = ">=1.7" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pandas", specifier = ">=2.1" },
+    { name = "plotly", marker = "extra == 'report'", specifier = ">=6.0" },
     { name = "pydantic", specifier = ">=2.5" },
     { name = "pypsa", marker = "extra == 'system'", specifier = ">=1.4" },
     { name = "pyyaml", specifier = ">=6.0" },
@@ -1286,7 +1290,7 @@ requires-dist = [
     { name = "threadpoolctl", marker = "extra == 'forecast'", specifier = ">=3.1" },
     { name = "typer", specifier = ">=0.12" },
 ]
-provides-extras = ["forecast", "system"]
+provides-extras = ["forecast", "report", "system"]
 
 [package.metadata.requires-dev]
 dev = [

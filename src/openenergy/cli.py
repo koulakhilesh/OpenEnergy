@@ -99,6 +99,37 @@ def run(
 
 
 @app.command()
+def report(
+    paths: Annotated[
+        list[Path],
+        typer.Argument(help="Output directories (run, system run, system validate) or sweep CSVs."),
+    ],
+    out: Annotated[Path, typer.Option("--out", "-o", help="HTML file to write.")] = Path(
+        "report.html"
+    ),
+    title: Annotated[str, typer.Option(help="Report title.")] = "OpenEnergy report",
+    cdn: Annotated[
+        bool, typer.Option(help="Load plotly.js from its CDN: much smaller, needs internet.")
+    ] = False,
+) -> None:
+    """Write one HTML report of charts and tables from saved outputs."""
+    with _reported_errors():
+        try:
+            from openenergy.report import build_report, load_output
+        except ImportError as exc:
+            raise ConfigError(
+                "reports need the report extra: pip install 'openenergy[report]'"
+            ) from exc
+        outputs = [load_output(path) for path in paths]
+        document = build_report(outputs, title=title, cdn=cdn)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(document, encoding="utf-8")
+    typer.echo(
+        f"report of {len(outputs)} output(s) written to {out} ({len(document) / 1e6:.1f} MB)"
+    )
+
+
+@app.command()
 def compare(
     scenarios: Annotated[list[Path], typer.Argument(help="Scenario YAML files.")],
 ) -> None:

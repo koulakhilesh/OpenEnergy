@@ -143,9 +143,14 @@ prices. Run it with `openenergy system run`; the full reference is on that page.
   grid charging, net export and premium;
 - `daily.csv`: revenue, expected revenue, energy charged and discharged, cycles, SOH and
   end-of-day energy; sites add premium, available and curtailed energy;
+- `benchmark_daily.csv`: the same daily columns for the perfect-foresight benchmark, when
+  the scenario is not perfect foresight itself;
 - `summary.json`: the headline metrics, skipped days with reasons, the number of
   interpolated intervals, the full validated configuration, the package version and the
   data attribution; sites add the co-location comparison, the plant's capture metrics,
   the number of clipped capacity factors and the upper-bound note; carbon runs add
   `emissions_t`, the NESO attribution, rejected intensity values and the
   average-intensity caveat.
+
+`openenergy report outputs/<name>` turns these files into an HTML page of charts; see
+[Reports](reports.md).
