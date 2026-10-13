@@ -124,8 +124,31 @@ carbon:
 | `price_per_t` | `0` | Carbon price in currency per tCO2 added to planning prices |
 | `planning` | `last_week` | Intensity dispatch plans on: `last_week` (no lookahead) or `actual` (upper bound) |
 
-Carbon intensity covers 2018 to September 2020. Days without complete intensity are
-skipped.
+Carbon intensity covers 2018 to 2025. Days without complete intensity are skipped.
+
+## `response`
+
+Optional, battery-only scenarios. Sells GB dynamic frequency response alongside trading;
+see [Revenue stacking](revenue-stacking.md) for the model and results.
+
+```yaml
+response:
+  path: ../data/response/gb_dynamic_response.csv
+  services: [DCL, DCH]
+  forecast: previous_day
+  energy: unpaid
+```
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `path` | required | Response clearing-price CSV; relative to the scenario file |
+| `utilisation_path` | `gb_response_utilisation.csv` next to `path` | Monthly energy each service moves per MW |
+| `services` | required | Any of `DCL`, `DCH`, `DML`, `DMH`, `DRL`, `DRH` (Dynamic Containment, Moderation, Regulation; low and high) |
+| `forecast` | `previous_day` | Response price planned on: the latest earlier block at the same UK time whose result was public at the decision time, or `actual` (upper bound) |
+| `energy` | `unpaid` | Energy delivered by response: `unpaid` (NESO's ABSVD adjustment) or `day_ahead` (bought and sold at the trading price) |
+
+Response prices start on 16 September 2021 (DM and DR on 26 March 2022). Days with a
+block lacking a clearing price for a chosen service are skipped.
 
 ## System scenarios
 
@@ -150,7 +173,12 @@ prices. Run it with `openenergy system run`; the full reference is on that page.
   data attribution; sites add the co-location comparison, the plant's capture metrics,
   the number of clipped capacity factors and the upper-bound note; carbon runs add
   `emissions_t`, the NESO attribution, rejected intensity values and the
-  average-intensity caveat.
+  average-intensity caveat; response runs add `response_revenue`, the NESO attribution
+  and a note on what the response model leaves out.
+
+With `response`, `intervals.csv` and `daily.csv` also hold `energy_revenue` and
+`response_revenue` (their sum is `revenue`), and `intervals.csv` the MW held for each
+service (`dcl_mw`, ...).
 
 `openenergy report outputs/<name>` turns these files into an HTML page of charts; see
 [Reports](reports.md).

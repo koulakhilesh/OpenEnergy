@@ -57,6 +57,20 @@ def monthly_revenue(daily: pd.Series, currency: str = "GBP") -> go.Figure:
     return _layout(fig, "Revenue by month", "Month", f"Revenue ({currency})")
 
 
+def revenue_by_market(daily: pd.DataFrame, currency: str = "GBP") -> go.Figure:
+    """Monthly trading and frequency-response revenue, stacked."""
+    months = _months(_times(daily))
+    fig = go.Figure()
+    for column, label in (
+        ("energy_revenue", "trading"),
+        ("response_revenue", "frequency response"),
+    ):
+        monthly = daily[column].groupby(months).sum()
+        fig.add_trace(go.Bar(x=monthly.index, y=monthly.to_numpy(), name=label))
+    fig.update_layout(barmode="relative")
+    return _layout(fig, "Revenue by market", "Month", f"Revenue ({currency})")
+
+
 def typical_day(intervals: pd.DataFrame) -> go.Figure:
     """Mean charge and discharge (MW) by hour of day."""
     hour = _times(intervals).hour

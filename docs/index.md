@@ -9,6 +9,7 @@ came to a perfect-foresight benchmark.
 It is built for research questions such as:
 
 - How much is a 2-hour battery worth in the GB day-ahead market?
+- How much more does it earn selling frequency response too?
 - How much revenue does a better price forecast buy?
 - How much of the average price do solar and wind actually capture?
 - Can a battery share a solar farm's grid connection without losing money?
@@ -106,6 +107,9 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
 8. **Reports** any saved run, system scenario, backcast or sweep as one interactive HTML
    page of charts and tables (`openenergy report`; see the
    [example](reports/example.html)).
+9. **Stacks revenue**: GB Dynamic Containment, Moderation and Regulation co-optimised with
+   day-ahead trading in the same plan, with the energy each service moves taken from GB
+   frequency data (see [Revenue stacking](guides/revenue-stacking.md)).
 
 See [Concepts](concepts.md) for the equations and [Scenarios](guides/scenarios.md) for
 every setting.
@@ -123,13 +127,13 @@ every setting.
 | v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
 | v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
 | v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
-| v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python (current) |
+| v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
+| v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value) (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows, with stochastic planning where a later market lets the battery react to prices |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 
 Why this order: v3.0's backcast matched average prices but its peaks were too low, so a
@@ -137,9 +141,11 @@ battery earned almost nothing on modelled prices. v3.1's unit commitment restore
 the daily shape (2019 perfect-foresight battery value £10k against £22.5k on real prices);
 v3.2 brings the data to 2025, where the model misses the size and timing of the 2021–2022
 price rise. v3.3 measured that, for a battery trading only day-ahead, planning across price
-scenarios adds nothing over one forecast while planning one day ahead adds 5–15% revenue;
-so stochastic planning moves to v3.5, where balancing and frequency-response markets give the
-battery a later decision that can react to prices. The app reuses the v3.4 charts.
+scenarios adds nothing over one forecast while planning one day ahead adds 5–15% revenue.
+v3.5 found the same for frequency response, which is committed before its price is known,
+and that balancing pays only with an imbalance-price forecast open data does not give; so
+stochastic planning waits for a later market with an open, forecastable price. The app
+reuses the v3.4 charts.
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
 versioned docs. Ideas are welcome in

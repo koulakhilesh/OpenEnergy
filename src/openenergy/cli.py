@@ -441,6 +441,9 @@ def _format_run(run: ScenarioRun) -> str:
         f"days simulated        {s.days} ({s.skipped_days} skipped)",
         f"revenue               {s.revenue:,.2f} {money}",
     ]
+    if s.response_revenue is not None:
+        energy = s.revenue - s.response_revenue
+        lines.append(f"  energy / response   {energy:,.2f} / {s.response_revenue:,.2f} {money}")
     if s.revenue_per_mw_year is not None:
         spread = "n/a" if s.captured_spread is None else f"{s.captured_spread:,.2f} {money}/MWh"
         lines += [

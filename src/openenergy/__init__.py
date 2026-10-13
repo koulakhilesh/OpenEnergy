@@ -8,7 +8,7 @@ from openenergy.errors import (
     OpenEnergyError,
 )
 
-__version__ = "3.4.0"
+__version__ = "3.5.0"
 
 __all__ = [
     "ConfigError",

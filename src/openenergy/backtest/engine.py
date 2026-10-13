@@ -13,6 +13,7 @@ import numpy.typing as npt
 import pandas as pd
 
 from openenergy.assets.battery import BatterySpec, BatteryState, age, apply_dispatch
+from openenergy.backtest.response import Response, Stacking
 from openenergy.data.series import PriceSeries
 from openenergy.dispatch.arbitrage import DispatchConfig, optimise_dispatch
 from openenergy.dispatch.colocated import (
@@ -65,6 +66,8 @@ SITE_DAILY_COLUMNS = [
     "energy_mwh",
 ]
 PLANT_DAILY_COLUMNS = ["revenue", "premium", "available_mwh", "curtailed_mwh"]
+# With frequency response, ``revenue`` is their sum.
+RESPONSE_DAILY_COLUMNS = ["energy_revenue", "response_revenue"]
 
 
 @dataclass(frozen=True)
@@ -146,18 +149,23 @@ def run_backtest(
     days: Iterable[date] | None = None,
     site: Site | None = None,
     carbon: Carbon | None = None,
+    response: Response | None = None,
 ) -> BacktestResult:
     """Simulate each UTC day in order; the battery ages through every calendar day in range.
 
     With a ``site``, the battery shares a grid connection with renewable output. With
-    ``carbon``, emissions are reported and a carbon price steers dispatch.
+    ``carbon``, emissions are reported and a carbon price steers dispatch. With
+    ``response``, frequency-response availability is sold alongside trading.
     """
     config = config or BacktestConfig()
+    if site is not None and response is not None:
+        raise ConfigError("frequency response is not supported for co-located sites")
     dt = prices.step_hours
     state = spec.initial_state()
     frames: list[pd.DataFrame] = []
     daily: dict[date, dict[str, float]] = {}
     skipped: dict[date, str] = {}
+    stacking = None if response is None else Stacking(response, config.lead_hours)
     available = None if site is None else _on_grid(site.available_mw, prices)
     required = [] if available is None else [available]
     actual_ci = None
@@ -176,11 +184,13 @@ def run_backtest(
             planning: FloatArray | str = forecast
             if carbon is not None and actual_ci is not None and carbon.price_per_t > 0:
                 planning = _carbon_priced(forecast, horizon, actual_ci, carbon, config)
+            if stacking is not None and not isinstance(planning, str):
+                planning = stacking.missing(pd.DatetimeIndex(day_prices.index)) or planning
             if isinstance(planning, str):
                 skipped[day] = planning
             elif site is None or available is None:
                 state, row = _battery_day(
-                    spec, state, day, day_prices, forecast, planning, dt, config, frames
+                    spec, state, day, day_prices, forecast, planning, dt, config, frames, stacking
                 )
             else:
                 output = np.asarray(available.loc[horizon], dtype=np.float64)
@@ -206,6 +216,8 @@ def run_backtest(
     if not daily:
         raise DataError(f"no days to simulate for {forecaster.name}; skipped {len(skipped)}")
     columns = list(DAILY_COLUMNS if site is None else SITE_DAILY_COLUMNS)
+    if response is not None:
+        columns += RESPONSE_DAILY_COLUMNS
     if carbon is not None:
         columns.append("emissions_t")
     return BacktestResult(
@@ -343,18 +355,47 @@ def _battery_day(
     dt: float,
     config: BacktestConfig,
     frames: list[pd.DataFrame],
+    stacking: Stacking | None = None,
 ) -> tuple[BatteryState, dict[str, float]]:
     n = len(day_prices)
+    options = None
+    if stacking is not None:
+        options = stacking.day_reserve(_horizon(day_prices, planning.size))
     try:
         plan = optimise_dispatch(
-            spec, state, planning, dt, _planning_config(config, planning.size, n)
+            spec,
+            state,
+            planning,
+            dt,
+            _planning_config(config, planning.size, n),
+            None if options is None else options.reserve,
         )
     except InfeasibleDispatchError as exc:
         raise InfeasibleDispatchError(f"{day}: {exc}") from exc
     charge, discharge, forecast = plan.charge_mw[:n], plan.discharge_mw[:n], forecast[:n]
-    outcome = apply_dispatch(spec, state, charge, discharge, dt)
     price = np.asarray(day_prices, dtype=np.float64)
     revenue = price * (discharge - charge) * dt
+    expected = float(forecast @ (discharge - charge) * dt)
+    columns: dict[str, FloatArray] = {}
+    response_in = response_out = None
+    if stacking is not None and options is not None and plan.reserve_mw is not None:
+        response_in = _first_n(plan.response_charge_mw, n)
+        response_out = _first_n(plan.response_discharge_mw, n)
+        if options.reserve.energy_paid:
+            revenue = revenue + price * (response_out - response_in) * dt
+            expected += float(forecast @ (response_out - response_in) * dt)
+        block = options.reserve.block[:n]
+        held = plan.reserve_mw[block]
+        paid = (held * options.actual[block]).sum(axis=1) * dt
+        expected += float((held * options.reserve.price[block]).sum() * dt)
+        for j, service in enumerate(options.reserve.services):
+            columns[f"{service.name.lower()}_mw"] = held[:, j]
+        columns["energy_revenue"] = revenue
+        columns["response_revenue"] = paid
+        revenue = revenue + paid
+        end = pd.DatetimeIndex(day_prices.index)[-1] + pd.Timedelta(hours=dt)
+        stacking.commit(options, plan.reserve_mw, end)
+    outcome = apply_dispatch(spec, state, charge, discharge, dt, response_in, response_out)
     frames.append(
         pd.DataFrame(
             {
@@ -364,6 +405,7 @@ def _battery_day(
                 "discharge_mw": discharge,
                 "energy_mwh": outcome.energy_mwh[1:],
                 "revenue": revenue,
+                **columns,
             },
             index=day_prices.index,
         )
@@ -371,13 +413,20 @@ def _battery_day(
     new = outcome.state
     row = {
         "revenue": float(revenue.sum()),
-        "expected_revenue": float(forecast @ (discharge - charge) * dt),
+        "expected_revenue": expected,
         "charged_mwh": float(charge.sum() * dt),
         "discharged_mwh": float(discharge.sum() * dt),
         "equivalent_cycles": new.equivalent_cycles,
         "energy_mwh": new.energy_mwh,
     }
+    if "response_revenue" in columns:
+        row["energy_revenue"] = float(columns["energy_revenue"].sum())
+        row["response_revenue"] = float(columns["response_revenue"].sum())
     return new, row
+
+
+def _first_n(values: FloatArray | None, n: int) -> FloatArray:
+    return np.zeros(n) if values is None else values[:n]
 
 
 def _site_day(

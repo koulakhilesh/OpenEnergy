@@ -97,8 +97,14 @@ def apply_dispatch(
     charge_mw: Sequence[float] | FloatArray,
     discharge_mw: Sequence[float] | FloatArray,
     step_hours: float,
+    response_charge_mw: Sequence[float] | FloatArray | None = None,
+    response_discharge_mw: Sequence[float] | FloatArray | None = None,
 ) -> DispatchOutcome:
-    """Apply a charge/discharge schedule (MW per interval) and return the new state."""
+    """Apply a charge/discharge schedule (MW per interval) and return the new state.
+
+    ``response_charge_mw``/``response_discharge_mw`` are average power moved by frequency
+    response in each interval; they may overlap (low and high services in one interval).
+    """
     if step_hours <= 0:
         raise DispatchError(f"step_hours must be positive, got {step_hours}")
     charge = _as_power(charge_mw)
@@ -117,11 +123,19 @@ def apply_dispatch(
 
     charge = np.clip(charge, 0.0, spec.power_mw)
     discharge = np.clip(discharge, 0.0, spec.power_mw)
+    zero = np.zeros_like(charge)
+    response_in = zero if response_charge_mw is None else _as_power(response_charge_mw)
+    response_out = zero if response_discharge_mw is None else _as_power(response_discharge_mw)
+    if response_in.shape != charge.shape or response_out.shape != charge.shape:
+        raise DispatchError("response power must match the schedule length")
+    _check_power(spec, response_in, "response charge")
+    _check_power(spec, response_out, "response discharge")
+    flow_in, flow_out = charge + response_in, discharge + response_out
     lower, upper = spec.energy_bounds(state)
     energy = np.empty(charge.size + 1)
     energy[0] = state.energy_mwh
     for t in range(charge.size):
-        delta = spec.eta_charge * charge[t] - discharge[t] / spec.eta_discharge
+        delta = spec.eta_charge * flow_in[t] - flow_out[t] / spec.eta_discharge
         stored = energy[t] + delta * step_hours
         if stored > upper + TOLERANCE:
             raise DispatchError(
@@ -133,7 +147,7 @@ def apply_dispatch(
             )
         energy[t + 1] = min(max(stored, lower), upper)
 
-    throughput = float((charge + discharge).sum() * step_hours)
+    throughput = float((flow_in + flow_out).sum() * step_hours)
     new_state = dataclasses.replace(
         state,
         energy_mwh=float(energy[-1]),

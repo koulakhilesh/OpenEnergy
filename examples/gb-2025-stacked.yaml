@@ -1,0 +1,26 @@
+# GB 2025, 1 MW / 2 MWh battery trading day-ahead and selling Dynamic Containment (low and
+# high) in the same plan. Day-ahead prices from Ember (CC BY 4.0); response clearing prices
+# and frequency from NESO (NESO Open Data Licence v1.0).
+# Run: uv run openenergy run examples/gb-2025-stacked.yaml
+name: gb-2025-stacked
+data:
+  source: ember
+  path: ../data/prices/gb_day_ahead_ember.csv
+  zone: GB_GBN
+  start: 2025-01-01
+  end: 2025-12-31
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95
+  cycle_fade: 0.00002
+  calendar_fade: 0.01
+forecast: naive_last_week
+dispatch:
+  degradation_cost: 5
+response:
+  path: ../data/response/gb_dynamic_response.csv
+  services: [DCL, DCH]
+  forecast: previous_day
+  energy: unpaid

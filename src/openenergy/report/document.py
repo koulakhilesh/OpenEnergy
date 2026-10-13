@@ -123,6 +123,8 @@ def _battery(run: BatteryOutput, render: Callable[[go.Figure], str]) -> str:
         rows.append(("Curtailed (MWh)", _num(s.get("curtailed_mwh"))))
     if s.get("emissions_t") is not None:
         rows.append(("Net emissions (tCO2)", _num(s.get("emissions_t"))))
+    if s.get("response_revenue") is not None:
+        rows.insert(3, (f"of which frequency response ({money})", _num(s.get("response_revenue"))))
     revenue = {"this run": run.daily["revenue"]}
     if run.benchmark_daily is not None:
         revenue["perfect foresight"] = run.benchmark_daily["revenue"]
@@ -134,12 +136,22 @@ def _battery(run: BatteryOutput, render: Callable[[go.Figure], str]) -> str:
         figures.price_and_forecast(run.intervals, money),
         figures.forecast_error_by_hour(run.intervals, money),
     ]
+    if "response_revenue" in run.daily:
+        charts.insert(2, figures.revenue_by_market(run.daily, money))
     if "available_mwh" in run.daily:
         charts.append(figures.site_by_month(run.daily))
     if "emissions_t" in run.daily:
         charts.append(figures.cumulative_emissions(run.daily["emissions_t"]))
-    notes = [run.summary.get("note"), run.summary.get("carbon_note")]
-    sources = [run.summary.get("attribution"), run.summary.get("carbon_attribution")]
+    notes = [
+        run.summary.get("note"),
+        run.summary.get("carbon_note"),
+        run.summary.get("response_note"),
+    ]
+    sources = [
+        run.summary.get("attribution"),
+        run.summary.get("carbon_attribution"),
+        run.summary.get("response_attribution"),
+    ]
     return _block(rows, charts, render, notes, sources)
 
 

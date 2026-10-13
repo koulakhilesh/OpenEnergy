@@ -30,9 +30,11 @@ from openenergy.backtest.engine import (
     run_backtest,
     run_plant_backtest,
 )
+from openenergy.backtest.response import Response
 from openenergy.data.carbon import CARBON_ATTRIBUTION, CarbonIntensitySource
 from openenergy.data.ember import EMBER_ATTRIBUTION, EmberPriceSource
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
+from openenergy.data.response import RESPONSE_ATTRIBUTION, ResponseSource
 from openenergy.data.series import PriceSeries, fill_gaps
 from openenergy.dispatch.arbitrage import DispatchConfig
 from openenergy.dispatch.colocated import GridConnection
@@ -49,6 +51,7 @@ from openenergy.metrics.summary import Summary, summarise
 ForecastMethod = Literal[
     "perfect_foresight", "naive_last_week", "noisy_foresight", "gradient_boosting"
 ]
+ServiceName = Literal["DCL", "DCH", "DML", "DMH", "DRL", "DRH"]
 # Prices loaded before data.start as forecaster history only; covers the 14-day lag.
 WARMUP_DAYS = 14
 MAX_SWEEP = 100
@@ -149,6 +152,28 @@ class CarbonSection(_Strict):
         return _resolve(value, info)
 
 
+class ResponseSection(_Strict):
+    """Frequency-response services sold alongside trading (GB dynamic response)."""
+
+    path: Path
+    utilisation_path: Path | None = None
+    services: list[ServiceName] = Field(min_length=1)
+    forecast: Literal["previous_day", "actual"] = "previous_day"
+    energy: Literal["unpaid", "day_ahead"] = "unpaid"
+
+    @pydantic.field_validator("path", "utilisation_path")
+    @classmethod
+    def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
+        return None if value is None else _resolve(value, info)
+
+    @pydantic.field_validator("services")
+    @classmethod
+    def _unique(cls, value: list[str]) -> list[str]:
+        if len(set(value)) != len(value):
+            raise ValueError("services must not repeat")
+        return value
+
+
 class Scenario(_Strict):
     # Restricted so the name is safe to use as an output directory.
     name: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
@@ -160,6 +185,7 @@ class Scenario(_Strict):
     assets: AssetsSection | None = None
     grid: GridSection | None = None
     carbon: CarbonSection | None = None
+    response: ResponseSection | None = None
 
     @pydantic.field_validator("forecast", mode="before")
     @classmethod
@@ -172,6 +198,8 @@ class Scenario(_Strict):
             raise ValueError("grid applies only to co-located assets; add an assets section")
         if self.assets is not None and self.data.source != "opsd":
             raise ValueError("assets need OPSD capacity-factor profiles; use data.source: opsd")
+        if self.assets is not None and self.response is not None:
+            raise ValueError("response is supported for battery-only scenarios; remove assets")
         return self
 
     def connection(self) -> GridConnection | None:
@@ -323,16 +351,33 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
     forecaster = _forecaster(scenario, source, prices)
     site, clipped = _site(scenario, source, prices, load_start)
     carbon, rejected = _carbon(scenario, prices, load_start)
+    response = _response(scenario)
     result = run_backtest(
-        scenario.battery, prices, forecaster, config, days=days, site=site, carbon=carbon
+        scenario.battery,
+        prices,
+        forecaster,
+        config,
+        days=days,
+        site=site,
+        carbon=carbon,
+        response=response,
     )
     simulated = list(result.daily.index)
     benchmark: BacktestResult | None = None
-    if scenario.forecast.method == "perfect_foresight":
+    perfect = response is None or response.forecast == "actual"
+    if scenario.forecast.method == "perfect_foresight" and perfect:
         summary = summarise(result, benchmark=result)
     else:
+        ideal = None if response is None else dataclasses.replace(response, forecast="actual")
         benchmark = run_backtest(
-            scenario.battery, prices, PerfectForesight(prices), config, simulated, site, carbon
+            scenario.battery,
+            prices,
+            PerfectForesight(prices),
+            config,
+            simulated,
+            site,
+            carbon,
+            ideal,
         )
         summary = summarise(result, benchmark=benchmark)
 
@@ -400,8 +445,28 @@ def write_outputs(run: ScenarioRun, directory: str | Path) -> Path:
             f"Dispatch planned on {run.scenario.carbon.planning if run.scenario.carbon else ''} "
             "intensity."
         )
+    if run.scenario.response is not None:
+        payload["response_attribution"] = RESPONSE_ATTRIBUTION
+        settled = {
+            "unpaid": "neither paid nor charged (NESO's ABSVD adjustment)",
+            "day_ahead": "bought and sold at the day-ahead price",
+        }[run.scenario.response.energy]
+        payload["response_note"] = (
+            "Frequency response is modelled as a price-taker: every MW offered is accepted "
+            "at the clearing price, delivery is always available and never penalised, and "
+            "the energy it moves is the monthly average for GB frequency. Energy delivered "
+            f"by response is {settled}."
+        )
     (out / "summary.json").write_text(json.dumps(payload, indent=2) + "\n")
     return out
+
+
+def _response(scenario: Scenario) -> Response | None:
+    section = scenario.response
+    if section is None:
+        return None
+    market = ResponseSource(section.path, section.utilisation_path).market(list(section.services))
+    return Response(market, section.forecast, energy_paid=section.energy == "day_ahead")
 
 
 def _carbon(
