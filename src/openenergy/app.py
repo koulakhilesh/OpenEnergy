@@ -7,6 +7,7 @@ repository root. Data are read from ``$OPENENERGY_DATA`` or ``./data``.
 from __future__ import annotations
 
 import html
+import logging
 import os
 import tempfile
 from datetime import date
@@ -38,6 +39,8 @@ from openenergy.system.scenario import SYSTEM_NOTE
 
 HISTORY_YEARS = (2017, 2025)
 RESPONSE_FROM = 2022
+
+logger = logging.getLogger(__name__)
 SCENARIO_YEARS = (2030, 2035)
 WEATHER_YEAR = 2025
 SERVICES = {"none": [], "dc": ["DCL", "DCH"], "dc_dm": ["DCL", "DCH", "DML", "DMH"]}
@@ -159,7 +162,11 @@ def battery(
             output = _scenario(spec, pathway, target, forecast)
             title = f"{power_mw:g} MW / {hours:g} h battery, {pathway} {target}"
     except (ConfigError, DataError) as exc:
-        return HTMLResponse(_page("Cannot run", f"<p>{html.escape(str(exc))}</p>"), 400)
+        logger.exception("Battery run failed")
+        return HTMLResponse(
+            _page("Cannot run", "<p>The request could not be processed. Please check inputs and try again.</p>"),
+            400,
+        )
     return HTMLResponse(build_report([output], title=title, cdn=True))
 
 
