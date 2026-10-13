@@ -21,6 +21,10 @@ ECB_DAILY = (
 )
 PRICE_FILE = "gb_day_ahead_ember.csv"
 RATE_FILE = "ecb_gbp_per_eur.csv"
+NEIGHBOUR_FILE = "europe_day_ahead_ember.csv"
+# Markets GB has interconnectors to, as Ember names its country files.
+NEIGHBOURS = ("France", "Netherlands", "Belgium", "Norway", "Denmark", "Ireland")
+NEIGHBOURS_FROM = "2015-01-01"
 
 
 def cache_dir() -> Path:
@@ -58,7 +62,31 @@ def update_prices(directory: str | Path) -> tuple[Path, int, str, str]:
         writer.writerow(["date", "gbp_per_eur"])
         for record in sorted(records, key=lambda r: r["TIME_PERIOD"]):
             writer.writerow([record["TIME_PERIOD"], record["OBS_VALUE"]])
+    _write_neighbours(archive, out / NEIGHBOUR_FILE)
     return prices, len(rows), rows[0]["Datetime (UTC)"], rows[-1]["Datetime (UTC)"]
+
+
+def _write_neighbours(archive: zipfile.ZipFile, path: Path) -> None:
+    """Hourly EUR prices of GB's interconnected neighbours, one column each, unchanged."""
+    columns: dict[str, dict[str, str]] = {}
+    for country in NEIGHBOURS:
+        name = next((n for n in archive.namelist() if n.endswith(f"{country}.csv")), None)
+        if name is None:
+            raise OSError(f"{country}.csv not found in the Ember archive")
+        with archive.open(name) as handle:
+            reader = csv.DictReader(io.TextIOWrapper(handle, encoding="utf-8"))
+            columns[country] = {
+                row["Datetime (UTC)"]: row["Price (EUR/MWhe)"]
+                for row in reader
+                if row["Datetime (UTC)"] >= NEIGHBOURS_FROM
+            }
+    stamps = sorted(set().union(*columns.values()))
+    with path.open("w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["utc_timestamp", *(c.lower() for c in NEIGHBOURS)])
+        for stamp in stamps:
+            values = [columns[c].get(stamp, "") for c in NEIGHBOURS]
+            writer.writerow([stamp.replace(" ", "T") + "Z", *values])
 
 
 def _download(url: str) -> bytes:

@@ -5,7 +5,9 @@
 `data/time_series/time_series_60min_singleindex_filtered.csv` is an hourly extract of the
 Open Power System Data time-series package covering Great Britain from 31 December 2014
 to 30 September 2020. It contains the GB day-ahead price (in **GBP**/MWh), load, and solar
-and wind generation and capacity. Timestamps are UTC (`utc_timestamp`).
+and wind generation and capacity. Timestamps are UTC (`utc_timestamp`). Version
+2020-10-06 is still OPSD's latest time-series release (checked 13 October 2026), so
+later years come from the sources below.
 
 Of 2,101 days, 2,085 have a complete set of prices. The gaps are two-hour holes on the
 spring clock change each year, two single missing hours, and four outages of about a day.
@@ -40,6 +42,31 @@ The series keeps 615 negative hours (down to −€60/MWh) and 38 hours at €1,
 whose own reuse terms could not be read (the site blocks scripted access); OpenEnergy
 relies on Ember's CC BY 4.0 publication and cites both.
 
+## Neighbouring markets
+
+`data/prices/europe_day_ahead_ember.csv` holds the hourly day-ahead prices of the six
+markets GB's interconnectors reach (France, the Netherlands, Belgium, Norway, Denmark and
+Ireland), EUR/MWh as published by Ember, from 1 January 2015 (Ireland from 1 October
+2018) to 7 October 2026. The system model's [interconnector links](guides/forward-scenarios.md)
+trade at these prices, converted to GBP like the GB price.
+
+| Mean £/MWh (ECB rates) | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| GB | 42.9 | 35.3 | 117.8 | 204.8 | 94.1 | 72.5 | 80.7 |
+| France | 34.6 | 28.7 | 93.4 | 235.1 | 84.4 | 48.9 | 52.2 |
+| Netherlands | 36.1 | 28.7 | 88.1 | 206.2 | 83.5 | 65.3 | 74.3 |
+| Belgium | 34.5 | 28.4 | 89.1 | 208.4 | 84.7 | 59.4 | 70.6 |
+| Norway | 34.2 | 8.2 | 53.6 | 118.8 | 51.5 | 32.8 | 40.9 |
+| Denmark | 34.2 | 23.5 | 75.4 | 184.0 | 73.7 | 59.8 | 69.9 |
+| Ireland | 44.2 | 33.5 | 116.3 | 192.5 | 110.0 | 92.0 | 97.8 |
+
+From 2023 to 2025 GB's mean price was above every neighbour's except Ireland's, which
+helps explain why price-taking links import so much.
+
+Known issues: Ember publishes one price for Norway and one for Denmark, without saying how
+the bidding zones are combined; GB's links land in southern Norway (NO2) and western
+Denmark (DK1). A few hours are blank on 31 July and 30 September 2026 (none before 2026).
+
 ## Renewable capacity factors
 
 The extract also has hourly capacity-factor profiles (generation divided by installed
@@ -59,7 +86,7 @@ EUR; OpenEnergy labels the currency accordingly.
 ## Carbon intensity
 
 `data/carbon_intensity/gb_national.csv` holds GB national carbon intensity for every
-half-hour from 1 January 2018 to 31 December 2025: NESO's forecast and its estimated
+half-hour from 1 January 2018 to 12 October 2026: NESO's forecast and its estimated
 actual, in gCO2/kWh. It was downloaded with `scripts/fetch_carbon_intensity.py` and is
 stored exactly as published; 179 half-hours the API did not return are left blank.
 
@@ -67,7 +94,7 @@ The archive has 804 half-hours without an actual value (18 runs, the longest abo
 days) and 16 implausible forecasts (up to 13,579 gCO2/kWh). OpenEnergy treats any value
 outside 0–1000 gCO2/kWh as missing and reports how many it rejected. Annual mean actual
 intensity falls from 248 (2018) to 214 (2019), 180 (2020), 188 (2021), 183 (2022), 152
-(2023), 125 (2024) and 129 gCO2/kWh (2025).
+(2023), 125 (2024), 129 (2025) and 122 gCO2/kWh (2026 to 12 October).
 
 These are **average** intensities of the whole system. Storage and renewables change the
 **marginal** plant, whose emissions can differ; emissions results in OpenEnergy show
@@ -85,6 +112,13 @@ direction and rough scale, not causal impact.
 | `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2025 | DESNZ QEP 3.2.1 |
 | `carbon_prices.csv` | EU ETS (2015–2020) and UK ETS (2021–2025) price on 1 April with ECB exchange rates, and carbon price support rates | World Bank, DESNZ (2021), ECB, HMRC |
 | `unit_parameters.csv` | Unit size, minimum stable output and start-up cost for CCGT, coal and peaking plant (unit commitment) | Danish Energy Agency, NREL, ECB |
+| `interconnectors.csv` | GB's ten built interconnectors: neighbour, import and export capacity (MW) | NESO Interconnector Register, 12 October 2026 |
+| `interconnector_flows.csv` | Daily imports and exports per link, MWh, 2016-01-01 to 2026-10-12 | Elexon BMRS FUELHH |
+
+The model's inputs stop at the latest complete calendar year, 2025 (checked 13 October
+2026): DUKES publishes a year's fleet the following July, so 2026 has none yet, and the
+2026 fuel and carbon prices that exist are not added until the year is complete, so every
+model year has the same kind of inputs.
 
 Known issues: NESO fills gaps by seasonal decomposition and sets net-negative values to
 zero, so pumping demand and net exports are absent; transmission solar and batteries are
@@ -98,6 +132,30 @@ agreed earlier, so they lag market gas prices: see the
 [system model](guides/system-model.md#after-2020-gas-crisis-and-coal-exit). Emission
 factors (gas 0.1839, coal 0.3096 tCO2 per MWh of fuel) follow from the carbon price support
 rates, which are set at £18/tCO2.
+
+The interconnector register holds today's capacities only. Each link's first day in
+service comes from its flows (the first flow in the first 14 days carrying at least a
+fifth of its capacity, which skips commissioning tests): Nemo Link 2019-01-30, IFA2
+2021-01-22, NS Link 2021-09-23, ElecLink 2022-05-23, Viking Link 2023-12-29 and Greenlink
+2025-01-19. The flows also show limits the register does not (Moyle about 300 MW in
+2016–2017, IFA about half its capacity in 2022, BritNed never above about 1,050 of
+1,200 MW), so modelled link capacity is overstated in those periods.
+
+## Future Energy Scenarios
+
+`data/fes/` holds NESO's Future Energy Scenarios tables unchanged, written by
+`scripts/fetch_fes.py`: the electricity supply (ES1) and demand summary (ED1) tables of
+*FES: Pathways to Net Zero 2025* (pathways Holistic Transition, Electric Engagement,
+Hydrogen Evolution and Falling Behind, plus the Ten Year Forecast; 2024–2050) and of the
+*2026 Ten Year Outlook* (2025–2036). `system.fes` uses their capacities (MW), storage
+(GWh) and annual system demand; see [forward scenarios](guides/forward-scenarios.md).
+FES 2025's 2025 column is already a projection and differs by pathway; FES publishes no
+fuel or carbon prices and no storage efficiencies.
+
+`data/scenarios/` is model output, not source data: hourly modelled prices for each
+pathway in 2030 and 2035 on 2025's weather (`fes_prices.csv`) and a summary next to FES's
+own figures (`fes_summary.csv`), written by `scripts/build_scenario_prices.py` for the
+[web app](guides/web-app.md).
 
 ## Frequency response
 
@@ -120,7 +178,8 @@ delivery of a unit following the envelope exactly. See `data/response/README.md`
 ## Imbalance prices
 
 `data/balancing/gb_system_prices.csv`, written by `scripts/fetch_system_prices.py`, holds
-the GB system (imbalance) price for every half-hour from 2016 to 2025 (175,344 periods, 20
+the GB system (imbalance) price for every half-hour from 2016 to 12 October 2026 (189,024
+periods, 22
 blank where Elexon's API returned nothing). GB has a single imbalance price, so the sell
 and buy prices are equal; it is used by `examples/imbalance_value.py`.
 
@@ -201,6 +260,39 @@ The four UK government sources contain public sector information licensed under 
 > Transparency Platform and EMR Settlement.
 
 OpenEnergy keeps Ember's EUR prices unchanged and converts them to GBP with ECB daily rates.
+
+**Neighbouring day-ahead prices**
+
+> Ember. European Wholesale Electricity Price Data, hourly, France, Netherlands, Belgium,
+> Norway, Denmark and Ireland.
+> <https://ember-energy.org/data/european-wholesale-electricity-price-data/> (accessed
+> 13 October 2026). Licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Primary sources: ENTSO-E
+> Transparency Platform and SEMOpx (Ireland).
+
+**Interconnectors**
+
+> National Energy System Operator (NESO). Interconnector Register (12 October 2026).
+> <https://www.neso.energy/data-portal/interconnector-register> (accessed 13 October 2026).
+> Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
+> Elexon. BMRS Insights API, generation by fuel type (FUELHH), interconnector flows,
+> <https://bmrs.elexon.co.uk/> (accessed 13 October 2026). Reused under the
+> [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+> Contains BMRS data © Elexon Limited copyright and database right 2026.
+
+**Future Energy Scenarios**
+
+> National Energy System Operator (NESO). FES: Pathways to Net Zero 2025 and 2026 Ten
+> Year Outlook: Electricity Supply Data Table (ES1),
+> <https://www.neso.energy/data-portal/future-energy-scenario-electricity-supply-data-table-es1>,
+> and Electricity Demand Summary (ED1),
+> <https://www.neso.energy/data-portal/fes-electricity-demand-summary-data-table-ed1>
+> (accessed 13 October 2026). Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
 
 **Exchange rates**
 

@@ -19,7 +19,9 @@ import openenergy
 from openenergy.assets.battery import BatterySpec
 from openenergy.backtest.engine import BacktestConfig, run_backtest
 from openenergy.data.ember import gb_prices
+from openenergy.data.fes import FES_ATTRIBUTION, PATHWAYS, FesSource
 from openenergy.data.fleet import FLEET_ATTRIBUTION, UNIT_ATTRIBUTION, SystemInputs
+from openenergy.data.interconnectors import INTERCONNECTOR_ATTRIBUTION, NEIGHBOUR_FILE
 from openenergy.data.neso import MIX_ATTRIBUTION, GenerationMixSource
 from openenergy.data.series import PriceSeries
 from openenergy.dispatch.arbitrage import DispatchConfig
@@ -29,7 +31,15 @@ from openenergy.metrics.summary import Summary, summarise
 from openenergy.scenario import MAX_SWEEP, _read, _resolve, _Strict, apply_overrides
 from openenergy.system.commitment import Commitment
 from openenergy.system.fleet import Adjustments, FleetAssumptions, build_system
-from openenergy.system.model import PriceKind, Storage, SystemResult, solve
+from openenergy.system.forward import (
+    FES_NOTE,
+    FES_YEARS,
+    LINKS_FROM,
+    LINKS_NOTE,
+    fes_changes,
+    links,
+)
+from openenergy.system.model import Link, PriceKind, Storage, SystemResult, solve
 from openenergy.system.validate import (
     BACKCAST_START,
     COMMITMENT_NOTE,
@@ -64,6 +74,54 @@ class AssumptionsSection(_Strict):
     variable_cost: float = Field(default=0.0, ge=0)
 
 
+class InterconnectorSection(_Strict):
+    """``fixed`` keeps historic imports; ``links`` trades at neighbours' actual prices.
+
+    ``prices`` defaults to ``prices/europe_day_ahead_ember.csv`` next to the system data.
+    """
+
+    mode: Literal["fixed", "links"] = "fixed"
+    prices: Path | None = None
+    hurdle_gbp_per_mwh: float = Field(default=0.0, ge=0)
+    availability: float = Field(default=1.0, gt=0, le=1)
+
+    @pydantic.model_validator(mode="before")
+    @classmethod
+    def _shorthand(cls, value: Any) -> Any:
+        return {"mode": value} if isinstance(value, str) else value
+
+    @pydantic.field_validator("prices")
+    @classmethod
+    def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
+        return None if value is None else _resolve(value, info)
+
+
+class FesSection(_Strict):
+    """A NESO FES pathway and year applied to the weather year (``system.year``).
+
+    Storage efficiencies are stated assumptions; FES does not publish them.
+    ``data`` defaults to ``fes/`` next to the system data.
+    """
+
+    pathway: str
+    year: int = Field(ge=FES_YEARS[0], le=FES_YEARS[1])
+    data: Path | None = None
+    battery_efficiency: float = Field(default=0.85, gt=0, le=1)
+    ldes_efficiency: float = Field(default=0.75, gt=0, le=1)
+
+    @pydantic.field_validator("pathway")
+    @classmethod
+    def _known(cls, value: str) -> str:
+        if value not in PATHWAYS:
+            raise ValueError(f"unknown pathway {value!r}; choose from {', '.join(PATHWAYS)}")
+        return value
+
+    @pydantic.field_validator("data")
+    @classmethod
+    def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
+        return None if value is None else _resolve(value, info)
+
+
 class SystemSection(_Strict):
     data: Path
     prices: list[Path] | None = None
@@ -85,6 +143,8 @@ class SystemSection(_Strict):
     commitment: bool = False
     lookahead_hours: float = Field(default=24.0, ge=0)
     price: Literal["marginal", "start"] = "marginal"
+    interconnectors: InterconnectorSection = InterconnectorSection()
+    fes: FesSection | None = None
 
     @pydantic.model_validator(mode="after")
     def _start_price_needs_commitment(self) -> SystemSection:
@@ -92,6 +152,17 @@ class SystemSection(_Strict):
             raise ValueError("price: start needs commitment: true")
         if self.commitment and self.backend != "auto":
             raise ValueError("commitment has its own solver; leave backend as auto")
+        if self.commitment and self.interconnectors.mode == "links":
+            raise ValueError("unit commitment does not support interconnector links yet")
+        if self.interconnectors.mode == "links" and self.year < LINKS_FROM:
+            raise ValueError(f"interconnector links need a year from {LINKS_FROM}")
+        if self.fes is not None:
+            if self.interconnectors.mode != "links":
+                raise ValueError(
+                    "fes needs interconnectors: links (historic imports do not fit a future fleet)"
+                )
+            if self.fes.year < self.year:
+                raise ValueError(f"fes.year {self.fes.year} is before the weather year")
         first, last = self.window()
         if first > last:
             raise ValueError(f"no days between {first} and {last} in {self.year}")
@@ -117,6 +188,12 @@ class SystemSection(_Strict):
         first = max(date(self.year, 1, 1), BACKCAST_START, self.start or BACKCAST_START)
         last = min(date(self.year, 12, 31), DATA_END, self.end or DATA_END)
         return first, last
+
+    def neighbour_prices(self) -> Path:
+        return self.interconnectors.prices or self.data.parent / "prices" / NEIGHBOUR_FILE
+
+    def fes_data(self) -> Path:
+        return (self.fes.data if self.fes else None) or self.data.parent / "fes"
 
 
 class SystemScenario(_Strict):
@@ -148,6 +225,8 @@ class SystemSummary:
     storage_cycles: dict[str, float]
     actual_price_mean: float | None
     backend: str
+    imports_twh: float | None = None
+    exports_twh: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
@@ -180,23 +259,61 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
     first, last = section.window()
     mix = GenerationMixSource(section.data / "generation_mix.csv").mix(first, last, step=_HOUR)
     inputs = SystemInputs(section.data)
+    index = pd.DatetimeIndex(mix.index)
+    scale: dict[str, float] = {}
+    capacity: dict[str, float] = {}
+    storage = [
+        Storage(name, unit.power_mw, unit.hours, unit.efficiency)
+        for name, unit in section.storage.items()
+        if unit.power_mw > 0
+    ]
+    link_scale = 1.0
+    if section.fes is not None:
+        installed = inputs.capacity(index)
+        changes = fes_changes(
+            FesSource(section.fes_data()),
+            section.fes.pathway,
+            section.fes.year,
+            section.year,
+            {
+                "ccgt": float(installed["ccgt_mw"].mean()),
+                "peaking": float((installed["gas_turbine_mw"] + installed["oil_engine_mw"]).mean()),
+            },
+            section.fes.battery_efficiency,
+            section.fes.ldes_efficiency,
+        )
+        scale.update(changes.scale)
+        capacity.update(changes.capacity_mw)
+        storage = [*changes.storage, *storage]
+        link_scale = changes.link_scale
+    trade: tuple[Link, ...] = ()
+    if section.interconnectors.mode == "links":
+        scale["imports"] = 0.0
+        trade = links(
+            index,
+            section.data,
+            section.neighbour_prices(),
+            link_scale,
+            section.interconnectors.hurdle_gbp_per_mwh,
+            section.interconnectors.availability,
+        )
+    # Explicit scale and capacity entries override the FES and links settings.
+    scale.update(section.scale)
+    capacity.update(section.capacity_mw)
     spec = build_system(
         mix,
         inputs,
         FleetAssumptions(**section.assumptions.model_dump()),
         Adjustments(
-            scale=section.scale,
-            capacity_mw=section.capacity_mw,
+            scale=scale,
+            capacity_mw=capacity,
             fuel_price_scale=section.fuel_price_scale,
             ets_gbp_per_t=section.ets_gbp_per_t,
             carbon_price_support=section.carbon_price_support,
         ),
-        [
-            Storage(name, unit.power_mw, unit.hours, unit.efficiency)
-            for name, unit in section.storage.items()
-            if unit.power_mw > 0
-        ],
+        storage,
         section.voll,
+        trade,
     )
     commitment = (
         Commitment.from_inputs(inputs, section.lookahead_hours) if section.commitment else None
@@ -237,12 +354,23 @@ def write_system_outputs(run: SystemRun, directory: str | Path) -> Path:
     frame["emissions_t"] = run.result.emissions_t
     frame.to_csv(out / "dispatch.csv", index_label="utc_timestamp")
     attribution = [MIX_ATTRIBUTION, FLEET_ATTRIBUTION]
-    if run.scenario.system.commitment:
+    section = run.scenario.system
+    if section.commitment:
         attribution.append(UNIT_ATTRIBUTION)
-    if run.scenario.system.prices:
-        first, last = run.scenario.system.window()
-        attribution.extend(gb_prices(run.scenario.system.prices, first, last)[1])
-    note = SYSTEM_NOTE + (" " + COMMITMENT_NOTE if run.scenario.system.commitment else "")
+    if section.interconnectors.mode == "links":
+        attribution.append(INTERCONNECTOR_ATTRIBUTION)
+    if section.fes is not None:
+        attribution.append(FES_ATTRIBUTION)
+    if section.prices:
+        first, last = section.window()
+        attribution.extend(gb_prices(section.prices, first, last)[1])
+    note = SYSTEM_NOTE
+    if section.commitment:
+        note += " " + COMMITMENT_NOTE
+    if section.interconnectors.mode == "links":
+        note += " " + LINKS_NOTE
+    if section.fes is not None:
+        note += " " + FES_NOTE
     payload: dict[str, Any] = {
         "scenario": run.scenario.name,
         "openenergy_version": openenergy.__version__,
@@ -313,8 +441,13 @@ def _summarise(
     generation = {
         name: float(by_tech[name].sum() * hours / 1e6)
         for name in by_tech.columns
-        if name not in ("unserved", "storage")
+        if name not in ("unserved", "storage", "interconnectors")
     }
+    imports = exports = None
+    if result.links is not None:
+        flow = result.links.to_numpy()
+        imports = float(flow.clip(min=0).sum() * hours / 1e6)
+        exports = float(-flow.clip(max=0).sum() * hours / 1e6)
     cycles = {
         unit.name: float(result.storage[unit.name].clip(lower=0).sum() * hours)
         / (unit.power_mw * unit.hours)
@@ -337,4 +470,6 @@ def _summarise(
         storage_cycles=cycles,
         actual_price_mean=None if actual is None else float(actual),
         backend=result.backend,
+        imports_twh=imports,
+        exports_twh=exports,
     )

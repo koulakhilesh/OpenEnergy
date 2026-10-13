@@ -55,6 +55,8 @@ nav:
       - Research with the Python API: guides/research.md
       - System analysis: guides/system.md
       - System model: guides/system-model.md
+      - Forward scenarios: guides/forward-scenarios.md
+      - Web app: guides/web-app.md
       - Reports: guides/reports.md
   - Data: data.md
   - API reference: api.md

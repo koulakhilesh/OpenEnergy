@@ -16,6 +16,7 @@ from openenergy.system.scenario import (
 )
 
 ROOT = Path(__file__).parents[2]
+EMBER = ROOT / "data/prices/gb_day_ahead_ember.csv"
 runner = CliRunner()
 
 
@@ -97,6 +98,65 @@ def test_validation_errors_name_the_field(tmp_path: Path) -> None:
 def test_detects_system_scenarios(tmp_path: Path) -> None:
     assert is_system_scenario(write(tmp_path))
     assert not is_system_scenario(ROOT / "examples/gb-2019-naive.yaml")
+
+
+def test_links_replace_historic_imports(tmp_path: Path) -> None:
+    pytest.importorskip("pypsa")
+    path = write(tmp_path, system={"interconnectors": "links", "end": "2020-01-31"})
+    run = run_system_scenario(load_system_scenario(path))
+    s = run.summary
+    assert s.backend == "pypsa"
+    assert s.generation_twh["imports"] == 0
+    assert s.imports_twh is not None and s.imports_twh > 0
+    assert s.exports_twh is not None and s.exports_twh >= 0
+    assert "interconnectors" in run.result.by_technology()
+    out = write_system_outputs(run, tmp_path / "out")
+    summary = json.loads((out / "summary.json").read_text())
+    assert any("Interconnector Register" in a for a in summary["attribution"])
+    assert "price-taking links" in summary["note"]
+
+
+def test_fes_scenario_scales_the_weather_year(tmp_path: Path) -> None:
+    pytest.importorskip("pypsa")
+    fes = {"pathway": "Holistic Transition", "year": 2030}
+    january = {"year": 2025, "end": "2025-01-31", "prices": str(EMBER)}
+    path = write(
+        tmp_path,
+        system={
+            **january,
+            "interconnectors": {"mode": "links", "hurdle_gbp_per_mwh": 2},
+            "fes": fes,
+            "scale": {"nuclear": 0.5},
+        },
+    )
+    run = run_system_scenario(load_system_scenario(path))
+    assert run.summary.generation_twh["coal"] == 0
+    assert set(run.summary.storage_cycles) == {"fes_battery", "fes_long_duration"}
+    out = write_system_outputs(run, tmp_path / "out")
+    summary = json.loads((out / "summary.json").read_text())
+    assert any("Future Energy Scenarios" in a for a in summary["attribution"])
+    # An explicit scale overrides FES: half of January 2025's nuclear output.
+    fixed = run_system_scenario(load_system_scenario(write(tmp_path, system=january)))
+    assert run.summary.generation_twh["nuclear"] == pytest.approx(
+        fixed.summary.generation_twh["nuclear"] / 2
+    )
+
+
+def test_fes_needs_links_and_a_known_pathway(tmp_path: Path) -> None:
+    fes = {"pathway": "Holistic Transition", "year": 2030}
+    with pytest.raises(ConfigError, match="interconnectors: links"):
+        load_system_scenario(write(tmp_path, system={"year": 2025, "fes": fes}))
+    bad = {"pathway": "Net Zero", "year": 2030}
+    with pytest.raises(ConfigError, match="unknown pathway"):
+        load_system_scenario(
+            write(tmp_path, system={"year": 2025, "interconnectors": "links", "fes": bad})
+        )
+    with pytest.raises(ConfigError, match="links"):
+        load_system_scenario(
+            write(tmp_path, system={"interconnectors": "links", "commitment": True})
+        )
+    with pytest.raises(ConfigError, match="from 2019"):
+        load_system_scenario(write(tmp_path, system={"interconnectors": "links", "year": 2018}))
 
 
 def test_system_sweep_keeps_grid_order(tmp_path: Path) -> None:

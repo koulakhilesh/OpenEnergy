@@ -11,6 +11,10 @@ load, and solar and wind generation, capacity and capacity-factor profiles, from
 > <https://doi.org/10.25832/time_series/2020-10-06>.
 > (Primary data from various sources, for a complete list see URL).
 
-Primary sources include the ENTSO-E Transparency Platform. The extract keeps the GB
+Primary sources include the ENTSO-E Transparency Platform; OPSD derives GB capacities (for
+the capacity-factor profiles) from the UK Government Department for Business, Energy &
+Industrial Strategy (BEIS). Licence: OPSD publishes the package under the terms of each
+original source (see the package page); its documentation text is CC BY. Version
+2020-10-06 is still the latest release of the time-series package (checked 2026-10-13). The extract keeps the GB
 columns of the 60-minute single-index file unchanged. OpenEnergy is not affiliated with or
 endorsed by Open Power System Data.

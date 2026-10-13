@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app.py": {
+      "maxDuration": 120,
+      "excludeFiles": "{tests/**,docs/**,site/**,outputs/**,models/**,playground/**,examples/**,scripts/**,.github/**,data/time_series/**,data/balancing/**,data/carbon_intensity/**,data/fes/**,data/system/**,data/prices/europe_day_ahead_ember.csv}"
+    }
+  }
+}

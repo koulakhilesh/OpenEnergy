@@ -114,7 +114,7 @@ difference between a battery's contracted position and what it delivers. It is t
 obvious "later market": a battery could take a day-ahead position and then deviate when
 the imbalance price looks better.
 [`examples/imbalance_value.py`](https://github.com/koulakhilesh/OpenEnergy/blob/master/examples/imbalance_value.py)
-tests this on Elexon's system prices, 2016–2025 (`data/balancing/`), after a £5/MWh wear
+tests this on Elexon's system prices, 2016 to October 2026 (`data/balancing/`), after a £5/MWh wear
 cost:
 
 | Year | Days | Follow day-ahead | Perfect imbalance foresight | Re-plan each half-hour (t−2 price) | Re-plan on known day-ahead | Imbalance only |

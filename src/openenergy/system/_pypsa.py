@@ -15,6 +15,8 @@ from openenergy.system.model import SystemResult, SystemSpec, result_frames
 
 BUS = "GB"
 _UNSERVED = "__unserved"
+_IMPORT = "__import"
+_EXPORT = "__export"
 _QUIET = ("pypsa", "linopy")
 
 
@@ -68,6 +70,18 @@ def dispatch(spec: SystemSpec) -> SystemResult:
     price = network.buses_t.marginal_price[BUS].to_numpy(dtype=np.float64)
     # Solver round-off leaves duals like -1e-12 in hours set by free wind.
     price = np.where(np.abs(price) < 1e-9, 0.0, price)
+    links = None
+    if spec.links:
+        links = pd.DataFrame(
+            {
+                link.name: (
+                    p[f"{link.name}{_IMPORT}"].to_numpy(dtype=np.float64)
+                    + p[f"{link.name}{_EXPORT}"].to_numpy(dtype=np.float64)
+                )
+                for link in spec.links
+            },
+            index=index,
+        )
     return SystemResult(
         price=pd.Series(price, index=index),
         generation=generation,
@@ -78,6 +92,7 @@ def dispatch(spec: SystemSpec) -> SystemResult:
         cost=float(network.objective),
         backend="pypsa",
         technologies={g.name: g.technology for g in spec.generators},
+        links=links,
     )
 
 
@@ -121,6 +136,24 @@ def _network(pypsa: Any, spec: SystemSpec) -> Any:
             efficiency_dispatch=one_way,
             cyclic_state_of_charge=True,
         )
+    for link in spec.links:
+        # A neighbour is a price taker: imports cost its price, exports earn it.
+        for suffix, limit, sign, cost in (
+            (_IMPORT, link.import_mw, 1.0, link.price + link.hurdle),
+            (_EXPORT, link.export_mw, -1.0, link.price - link.hurdle),
+        ):
+            values = limit.to_numpy(dtype=np.float64)
+            p_nom = max(float(values.max()), 1.0)
+            share = pd.Series(values / p_nom, index=snapshots)
+            network.add(
+                "Generator",
+                f"{link.name}{suffix}",
+                bus=BUS,
+                p_nom=p_nom,
+                p_max_pu=share if sign > 0 else 0.0,
+                p_min_pu=0.0 if sign > 0 else -share,
+                marginal_cost=_values(cost, snapshots),
+            )
     return network
 
 

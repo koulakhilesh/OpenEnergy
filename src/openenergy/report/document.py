@@ -170,6 +170,9 @@ def _system(run: SystemOutput, render: Callable[[go.Figure], str]) -> str:
         ("System cost (GBP m)", _num(s.get("cost_m"))),
         ("Solver", s.get("backend")),
     ]
+    if s.get("imports_twh") is not None:
+        rows.insert(7, ("Interconnector imports (TWh)", _num(s.get("imports_twh"), 1)))
+        rows.insert(8, ("Interconnector exports (TWh)", _num(s.get("exports_twh"), 1)))
     battery = run.summary.get("battery")
     if isinstance(battery, dict):
         rows.append(("Battery revenue per MW-year", _num(battery.get("revenue_per_mw_year"))))

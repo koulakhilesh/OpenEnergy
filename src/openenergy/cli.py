@@ -345,10 +345,11 @@ def _format_system(run: SystemRun) -> str:
         f"emissions             {s.emissions_mt:.2f} MtCO2 (fossil, GB plant)",
         f"system cost           {s.cost_m:,.0f} GBP million",
     ]
-    lines += [
-        f"{name} cycles{'':<{max(0, 15 - len(name))}}{c:.1f}"
-        for name, c in s.storage_cycles.items()
-    ]
+    if s.imports_twh is not None and s.exports_twh is not None:
+        lines.insert(
+            4, f"interconnectors       imports {s.imports_twh:.1f}, exports {s.exports_twh:.1f} TWh"
+        )
+    lines += [f"{name + ' cycles':<21} {c:.1f}" for name, c in s.storage_cycles.items()]
     if run.battery is not None and run.battery_benchmark is not None:
         b, pf = run.battery, run.battery_benchmark
         lines.append(
