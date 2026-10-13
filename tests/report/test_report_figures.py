@@ -47,6 +47,16 @@ def test_battery_operation_charts() -> None:
     assert list(error.data[0].y) == pytest.approx([2.0] * 24)
 
 
+def test_revenue_by_market_chart() -> None:
+    frame = pd.DataFrame(
+        {"energy_revenue": [10.0, 5.0], "response_revenue": [3.0, 4.0]},
+        index=pd.date_range("2019-01-31", periods=2, freq="D"),
+    )
+    fig = figures.revenue_by_market(frame)
+    assert [t.name for t in fig.data] == ["trading", "frequency response"]
+    assert list(fig.data[1].y) == [3.0, 4.0]
+
+
 def test_site_and_emission_charts() -> None:
     frame = pd.DataFrame(
         {"available_mwh": [10.0, 20.0], "curtailed_mwh": [1.0, 0.0]},

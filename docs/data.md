@@ -99,6 +99,31 @@ agreed earlier, so they lag market gas prices: see the
 factors (gas 0.1839, coal 0.3096 tCO2 per MWh of fuel) follow from the carbon price support
 rates, which are set at £18/tCO2.
 
+## Frequency response
+
+`data/response/`, written by `scripts/fetch_response_data.py`, feeds
+[revenue stacking](guides/revenue-stacking.md):
+
+- `gb_dynamic_response.csv`: the clearing price (GBP/MW/h) and cleared volume (MW) of
+  each dynamic response service (DC, DM, DR; low and high) for every four-hour EFA block
+  from 15 September 2021 22:00 to 14 October 2026 22:00 UTC (11,130 blocks, no gaps). DM
+  and DR start on 26 March 2022.
+- `gb_response_utilisation.csv`: for each month from September 2021 to September 2026, the
+  average share of contracted MW each service delivers (MWh per MW per hour), from NESO's
+  one-second GB frequency and the delivery envelopes in NESO's Response Services Service
+  Terms (version 6). The raw frequency files (about 75 MB a month) are not bundled.
+
+Known issues: Dynamic Containment before 16 September 2021 was bought pay-as-bid and is
+not included; some prices are negative (mostly DM and DR high); utilisation is the
+delivery of a unit following the envelope exactly. See `data/response/README.md`.
+
+## Imbalance prices
+
+`data/balancing/gb_system_prices.csv`, written by `scripts/fetch_system_prices.py`, holds
+the GB system (imbalance) price for every half-hour from 2016 to 2025 (175,344 periods, 20
+blank where Elexon's API returned nothing). GB has a single imbalance price, so the sell
+and buy prices are equal; it is used by `examples/imbalance_value.py`.
+
 ## Attribution
 
 **Prices, load and renewables**
@@ -186,6 +211,30 @@ OpenEnergy derives a USD-to-GBP cross rate from the two ECB rates to convert the
 Bank's US$ prices, and uses the daily GBP rate to convert Ember's EUR prices; the stored
 rates are unchanged.
 
+**Frequency response**
+
+> National Energy System Operator (NESO). Dynamic Containment, Regulation and Moderation
+> auction results, <https://www.neso.energy/data-portal/dynamic-containment-data>; Enduring
+> Auction Capability (EAC) auction results,
+> <https://www.neso.energy/data-portal/eac-auction-results>; System frequency data,
+> <https://www.neso.energy/data-portal/system-frequency-data> (all accessed 13 October
+> 2026). Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
+Delivery envelopes: NESO, *Response Services Service Terms*, version 6
+(<https://www.neso.energy/document/384606/download>). Treatment of delivered energy: NESO,
+*Dynamic Response A18 Submission Document* (2025,
+<https://www.neso.energy/document/359721/download>). OpenEnergy keeps prices and volumes
+unchanged, converts delivery times to UTC and reduces frequency to monthly averages.
+
+**Imbalance prices**
+
+> Elexon. BMRS Insights API, settlement system prices (DISEBSP),
+> <https://bmrs.elexon.co.uk/> (accessed 13 October 2026). Reused under the
+> [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+> Contains BMRS data © Elexon Limited copyright and database right 2026.
+
 **Unit sizes and minimum loads**
 
 > Danish Energy Agency. Technology Data for Generation of Electricity and District
@@ -207,8 +256,8 @@ typical plant, not GB-specific.
 The system files keep source values unchanged apart from dropped rows and columns, GB
 totals (England and Wales plus Scotland), integer MW and the start-cost conversion;
 changes are listed in `data/system/README.md`. OpenEnergy is not affiliated with or
-endorsed by Open Power System Data, NESO, DESNZ, HMRC, the World Bank, the ECB, the Danish
-Energy Agency, NREL or Ember.
+endorsed by Open Power System Data, NESO, Elexon, DESNZ, HMRC, the World Bank, the ECB,
+the Danish Energy Agency, NREL or Ember.
 
 ## Software
 

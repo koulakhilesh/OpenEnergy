@@ -24,6 +24,18 @@ def test_run_writes_outputs_and_prints_summary(scenario_file: Path, tmp_path: Pa
     assert (out / "summary.json").exists()
 
 
+def test_run_prints_response_breakdown(opsd_csv: Path, response_csv: Path, tmp_path: Path) -> None:
+    path = tmp_path / "stacked.yaml"
+    path.write_text(
+        f"name: stacked\ndata: {{path: {opsd_csv}, start: 2019-01-08}}\n"
+        "battery: {power_mw: 1, energy_mwh: 2}\n"
+        f"response: {{path: {response_csv}, services: [DCL, DCH]}}\n"
+    )
+    result = runner.invoke(app, ["run", str(path), "--out", str(tmp_path / "out")])
+    assert result.exit_code == 0, result.output
+    assert "energy / response" in result.output
+
+
 def test_run_defaults_output_to_outputs_name(
     scenario_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

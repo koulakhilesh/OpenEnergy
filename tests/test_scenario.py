@@ -130,3 +130,64 @@ def test_scenario_is_immutable(scenario_file: Path) -> None:
     assert isinstance(scenario, Scenario)
     with pytest.raises(ValueError, match="frozen"):
         scenario.name = "other"  # type: ignore[misc]
+
+
+def stacked(tmp_path: Path, opsd_csv: Path, response: str) -> Path:
+    return write(
+        tmp_path / "stacked.yaml",
+        f"name: stacked\ndata: {{path: {opsd_csv}, start: 2019-01-08}}\n"
+        f"battery: {{power_mw: 1, energy_mwh: 2}}\nresponse: {response}\n",
+    )
+
+
+def test_response_section_runs_with_breakdown_and_benchmark(
+    tmp_path: Path, opsd_csv: Path, response_csv: Path
+) -> None:
+    path = stacked(tmp_path, opsd_csv, "{path: data/gb_dynamic_response.csv, services: [DCL, DCH]}")
+    scenario = load_scenario(path)
+    assert scenario.response is not None
+    assert scenario.response.path == response_csv.resolve()
+    run = run_scenario(scenario)
+    assert run.summary.response_revenue is not None and run.summary.response_revenue > 0
+    assert run.benchmark is not None
+    assert "response_revenue" in run.benchmark.daily
+    assert run.summary.capture_ratio is not None and run.summary.capture_ratio <= 1 + 1e-9
+    payload = json.loads((write_outputs(run, tmp_path / "out") / "summary.json").read_text())
+    assert "NESO" in payload["response_attribution"]
+    assert "ABSVD" in payload["response_note"]
+    assert payload["summary"]["response_revenue"] == pytest.approx(run.summary.response_revenue)
+
+
+def test_perfect_foresight_with_response_forecast_still_benchmarks(
+    tmp_path: Path, opsd_csv: Path, response_csv: Path
+) -> None:
+    path = write(
+        tmp_path / "pf.yaml",
+        f"name: pf\ndata: {{path: {opsd_csv}, start: 2019-01-08}}\n"
+        "battery: {power_mw: 1, energy_mwh: 2}\nforecast: perfect_foresight\n"
+        "response: {path: data/gb_dynamic_response.csv, services: [DCL], energy: day_ahead}\n",
+    )
+    run = run_scenario(load_scenario(path))
+    assert run.benchmark is not None
+    payload = json.loads((write_outputs(run, tmp_path / "out") / "summary.json").read_text())
+    assert "day-ahead price" in payload["response_note"]
+
+
+@pytest.mark.parametrize(
+    ("response", "message"),
+    [
+        ("{path: r.csv, services: []}", "services"),
+        ("{path: r.csv, services: [DCL, DCL]}", "repeat"),
+        ("{path: r.csv, services: [FFR]}", "services"),
+        ("{path: r.csv, services: [DCL], forecast: tomorrow}", "forecast"),
+    ],
+)
+def test_invalid_response_sections(tmp_path: Path, response: str, message: str) -> None:
+    with pytest.raises(ConfigError, match=message):
+        load_scenario(write(tmp_path / "bad.yaml", VALID + f"response: {response}\n"))
+
+
+def test_response_needs_a_battery_only_scenario(tmp_path: Path) -> None:
+    body = VALID + "assets: {pv: {capacity_mw: 1}}\n" + "response: {path: r.csv, services: [DCL]}\n"
+    with pytest.raises(ConfigError, match="battery-only"):
+        load_scenario(write(tmp_path / "bad.yaml", body))

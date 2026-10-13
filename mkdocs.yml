@@ -50,6 +50,7 @@ nav:
   - Concepts: concepts.md
   - Guides:
       - Scenarios: guides/scenarios.md
+      - Revenue stacking: guides/revenue-stacking.md
       - Command line: guides/cli.md
       - Research with the Python API: guides/research.md
       - System analysis: guides/system.md

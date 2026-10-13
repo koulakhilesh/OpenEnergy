@@ -138,9 +138,12 @@ One day of lookahead adds 5.5–14.6% revenue every year, and from 2021 does so 
 cycles. Two or three days change revenue by under £20 a year: last week's prices say little
 about the day after tomorrow.
 
-Uncertainty becomes valuable when a later decision can react to prices, such as intraday
-trading, balancing or frequency response; that is planned with revenue stacking. The
-lookahead is a scenario setting, `dispatch.lookahead_days`.
+Uncertainty could matter when a later decision can react to prices, such as balancing or
+frequency response. [Revenue stacking](revenue-stacking.md) checks both: response
+availability is also committed before its price is known, so the same argument applies;
+balancing does give the battery a later decision, but it pays only with an imbalance-price
+forecast that open data does not provide. The lookahead is a scenario setting,
+`dispatch.lookahead_days`.
 
 ## Building blocks
 

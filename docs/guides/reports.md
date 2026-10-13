@@ -17,7 +17,7 @@ the system model), built from the bundled data when these docs are built.
 
 | Input | Written by | Sections |
 |---|---|---|
-| A run directory | `openenergy run` | Key figures; cumulative revenue against perfect foresight; revenue by month; average day; stored energy by day and hour; price and forecast; forecast error by hour; plant output and emissions where the run has them |
+| A run directory | `openenergy run` | Key figures; cumulative revenue against perfect foresight; revenue by month; average day; stored energy by day and hour; price and forecast; forecast error by hour; revenue by market, plant output and emissions where the run has them |
 | A system directory | `openenergy system run` | Key figures; generation by month; price duration curve; mean price by hour; curtailment and emissions by month; battery figures when present |
 | A backcast directory | `openenergy system validate --out` | The per-year table; model and actual price by hour and by month; duration curves; gas and coal by year |
 | A sweep CSV | `openenergy sweep --out` | Results table; ranking; revenue per MW-year against each swept setting |

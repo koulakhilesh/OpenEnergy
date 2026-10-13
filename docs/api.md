@@ -14,6 +14,8 @@
 
 ::: openenergy.data.neso
 
+::: openenergy.data.response
+
 ::: openenergy.data.fleet
 
 ::: openenergy.data.quality
@@ -39,6 +41,8 @@
 ## Backtesting and metrics
 
 ::: openenergy.backtest.engine
+
+::: openenergy.backtest.response
 
 ::: openenergy.metrics.summary
 

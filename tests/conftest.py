@@ -42,6 +42,29 @@ def site_csv(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
+def response_csv(tmp_path: Path) -> Path:
+    """Four-hour DC low/high clearing prices for January 2019 and their utilisation."""
+    starts = pd.date_range("2018-12-31 23:00", "2019-02-01", freq="4h", tz="UTC", inclusive="left")
+    stamp = "%Y-%m-%dT%H:%M:%SZ"
+    path = tmp_path / "data" / "gb_dynamic_response.csv"
+    path.parent.mkdir(exist_ok=True)
+    pd.DataFrame(
+        {
+            "utc_start": starts.strftime(stamp),
+            "utc_end": (starts + pd.Timedelta(hours=4)).strftime(stamp),
+            "dcl_gbp_per_mw_h": 4.0,
+            "dcl_mw": 1000,
+            "dch_gbp_per_mw_h": 2.0,
+            "dch_mw": 1000,
+        }
+    ).to_csv(path, index=False)
+    (path.parent / "gb_response_utilisation.csv").write_text(
+        "month,dcl,dch\n2019-01-01,0.006,0.006\n"
+    )
+    return path
+
+
+@pytest.fixture
 def scenario_file(tmp_path: Path, opsd_csv: Path) -> Path:
     path = tmp_path / "scenarios" / "gb.yaml"
     path.parent.mkdir()

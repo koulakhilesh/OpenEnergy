@@ -27,6 +27,9 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   the following days too (`dispatch.lookahead_days`; one day adds 5–15% revenue).
 - **Backtesting without lookahead**: forecasts see only data available at the decision
   time; plans settle at actual prices.
+- **Revenue stacking**: GB Dynamic Containment, Moderation and Regulation co-optimised with
+  day-ahead trading (`response` in a scenario). Adding Dynamic Containment raised a 2-hour
+  battery's revenue by 58–155% a year in 2022–2025 (`examples/gb-2025-stacked.yaml`).
 - **Forecasters**: perfect foresight, last week's prices, noisy foresight and a
   gradient-boosting model.
 - **Renewables**: solar and wind plants from capacity-factor profiles, captured price and
@@ -44,8 +47,10 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
   and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
   prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
-  2018–2025 and generation by fuel for 2015–2025 from NESO; and GB fleet, fuel and carbon
-  prices from DESNZ, HMRC, the World Bank and the ECB, are bundled.
+  2018–2025 and generation by fuel for 2015–2025 from NESO; GB frequency-response auction
+  prices from September 2021 and monthly response utilisation from NESO; GB imbalance
+  prices for 2016–2025 from Elexon; and GB fleet, fuel and carbon prices from DESNZ, HMRC,
+  the World Bank and the ECB, are bundled.
   `openenergy data update` downloads the latest prices.
 - **Reports**: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps
   into one interactive HTML file of charts and tables (optional `report` extra, plotly).
@@ -114,12 +119,12 @@ uv run mkdocs serve
 | v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
 | v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
 | v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
+| v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows, with stochastic planning where a later market lets the battery react to prices |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
@@ -150,6 +155,19 @@ GB generation by fuel comes from NESO's
 licensed under the [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
 Supported by National Energy SO Open Data.
 
+GB frequency-response clearing prices come from NESO's
+[Dynamic Containment, Regulation and Moderation auction results](https://www.neso.energy/data-portal/dynamic-containment-data)
+and [EAC auction results](https://www.neso.energy/data-portal/eac-auction-results), and
+the energy each service moves is derived from NESO's
+[system frequency data](https://www.neso.energy/data-portal/system-frequency-data) with
+the delivery envelopes in NESO's Response Services Service Terms; all under the
+[NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence),
+accessed 13 October 2026. Supported by National Energy SO Open Data.
+
+GB imbalance (system) prices come from Elexon's BMRS, reused under the
+[BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+Contains BMRS data © Elexon Limited copyright and database right 2026.
+
 Fleet capacity and efficiency (DUKES 5.8 and 5.10) and fuel prices (Quarterly Energy
 Prices 3.2.1) come from the Department for Energy Security and Net Zero, the 2021 UK ETS
 price from the UK ETS Authority's
@@ -174,8 +192,10 @@ https://doi.org/10.5334/jors.188).
 
 See [data/time_series](data/time_series/README.md),
 [data/prices](data/prices/README.md),
-[data/carbon_intensity](data/carbon_intensity/README.md) and
-[data/system](data/system/README.md) for sources, changes and known issues. OpenEnergy is
+[data/carbon_intensity](data/carbon_intensity/README.md),
+[data/system](data/system/README.md),
+[data/response](data/response/README.md) and
+[data/balancing](data/balancing/README.md) for sources, changes and known issues. OpenEnergy is
 not affiliated with or endorsed by any data provider.
 
 ## License
@@ -194,6 +214,8 @@ either and keeps its own licence:
 | `data/system` | DESNZ (DUKES, Quarterly Energy Prices, UK ETS 2021), HMRC | [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
 | `data/system` | World Bank Carbon Pricing Dashboard; Danish Energy Agency technology data | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `data/system` | NREL Power Plant Cycling Costs (values recorded from the report) | US government-sponsored report |
+| `data/response` | NESO response auction results and system frequency (derived monthly averages) | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
+| `data/balancing` | Elexon BMRS system prices | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
 
 Reuse of any of these requires the attribution given in the folder's `README.md`.
 

@@ -19,7 +19,8 @@ class Summary:
     """Headline results. Money is in ``currency``; energy in MWh.
 
     For a co-located site, ``revenue`` covers the whole site and the plant fields are set;
-    per-MW and captured-spread figures apply to battery-only runs.
+    per-MW and captured-spread figures apply to battery-only runs. With frequency response,
+    ``revenue`` includes ``response_revenue`` (availability payments).
     """
 
     forecaster: str
@@ -41,6 +42,7 @@ class Summary:
     available_mwh: float | None = None
     curtailed_mwh: float | None = None
     emissions_t: float | None = None
+    response_revenue: float | None = None
 
     @property
     def total(self) -> float:
@@ -59,6 +61,8 @@ def summarise(result: BacktestResult, benchmark: BacktestResult | None = None) -
     days = len(daily)
     error = (result.intervals["forecast"] - result.intervals["price"]).to_numpy(dtype=np.float64)
     site = result.site is not None
+    response = float(daily["response_revenue"].sum()) if "response_revenue" in daily else None
+    energy = revenue - (response or 0.0)
 
     benchmark_revenue: float | None = None
     capture_ratio: float | None = None
@@ -77,7 +81,7 @@ def summarise(result: BacktestResult, benchmark: BacktestResult | None = None) -
         revenue_per_mw_year=None if site else revenue / result.spec.power_mw * DAYS_PER_YEAR / days,
         charged_mwh=float(daily["charged_mwh"].sum()),
         discharged_mwh=discharged,
-        captured_spread=revenue / discharged if discharged > 0 and not site else None,
+        captured_spread=energy / discharged if discharged > 0 and not site else None,
         equivalent_cycles=result.final_state.equivalent_cycles,
         final_soh=result.final_state.soh,
         forecast_mae=float(np.abs(error).mean()),
@@ -88,6 +92,7 @@ def summarise(result: BacktestResult, benchmark: BacktestResult | None = None) -
         available_mwh=float(daily["available_mwh"].sum()) if site else None,
         curtailed_mwh=float(daily["curtailed_mwh"].sum()) if site else None,
         emissions_t=float(daily["emissions_t"].sum()) if "emissions_t" in daily else None,
+        response_revenue=response,
     )
 
 

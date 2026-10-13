@@ -69,6 +69,22 @@ def test_site_battery_sections(battery_dir: Path) -> None:
     assert "perfect foresight" not in page.split("Cumulative revenue")[0][-200:]
 
 
+def test_stacked_battery_section(battery_dir: Path) -> None:
+    daily = pd.read_csv(battery_dir / "daily.csv")
+    daily["energy_revenue"] = daily["revenue"] - 1.0
+    daily["response_revenue"] = 1.0
+    daily.to_csv(battery_dir / "daily.csv", index=False)
+    summary_path = battery_dir / "summary.json"
+    summary = json.loads(summary_path.read_text())
+    summary["summary"]["response_revenue"] = 14.0
+    summary["response_attribution"] = "Frequency response: NESO"
+    summary["response_note"] = "price-taker"
+    summary_path.write_text(json.dumps(summary))
+    page = build_report([load_output(battery_dir)], cdn=True)
+    assert "Revenue by market" in page and "of which frequency response (GBP)" in page
+    assert "Frequency response: NESO" in page and "price-taker" in page
+
+
 def test_system_with_battery_and_start_price(system_dir: Path) -> None:
     summary_path = system_dir / "summary.json"
     summary = json.loads(summary_path.read_text())
