@@ -44,13 +44,20 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   with unit commitment) from fleet, fuel and carbon data, checked against 2015–2025 prices
   and fuel use (`openenergy system validate`), with scenarios for renewables, storage,
   fleet and carbon policy (`openenergy system run`); storage uses the optional PyPSA backend.
+- **Forward scenarios**: NESO's Future Energy Scenarios pathways (2025–2035) applied to a
+  historic weather year, with GB's ten interconnectors trading at neighbouring markets'
+  actual prices (`system.fes`, `system.interconnectors: links`).
+- **Web app**: value a battery on any GB year from 2017 or on a FES pathway's modelled
+  prices in the browser (`openenergy.app`, FastAPI; deployable to Vercel).
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
   and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
   prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
-  2018–2025 and generation by fuel for 2015–2025 from NESO; GB frequency-response auction
+  2018 to October 2026 and generation by fuel for 2015–2025 from NESO; GB frequency-response auction
   prices from September 2021 and monthly response utilisation from NESO; GB imbalance
-  prices for 2016–2025 from Elexon; and GB fleet, fuel and carbon prices from DESNZ, HMRC,
-  the World Bank and the ECB, are bundled.
+  prices for 2016 to October 2026 from Elexon; and GB fleet, fuel and carbon prices from DESNZ, HMRC,
+  the World Bank and the ECB, are bundled. So are NESO's Future Energy Scenarios tables,
+  its interconnector register, daily interconnector flows from Elexon and hourly
+  day-ahead prices in the six neighbouring markets from Ember.
   `openenergy data update` downloads the latest prices.
 - **Reports**: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps
   into one interactive HTML file of charts and tables (optional `report` extra, plotly).
@@ -92,6 +99,13 @@ Rebuild GB prices from the plants behind them and compare with what happened:
 uv run openenergy system validate
 uv sync --extra system   # PyPSA, needed for scenarios with storage
 uv run openenergy system run examples/gb-2019-wind3-storage.yaml
+uv run openenergy system run examples/gb-2035-holistic.yaml   # a FES pathway in 2035
+```
+
+Run the web app locally:
+
+```bash
+uv run uvicorn openenergy.app:app
 ```
 
 See the [documentation](https://koulakhilesh.github.io/OpenEnergy/) for the equations,
@@ -120,12 +134,13 @@ uv run mkdocs serve
 | v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
 | v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
 | v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value) |
+| v4.0 | Forward scenarios from NESO's Future Energy Scenarios on a historic weather year; GB's interconnectors as price-taking links to six neighbouring markets, checked against actual flows 2019–2025; a web app (FastAPI, Vercel) valuing a battery on history or a FES pathway |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
+| v4.1 | GB zones (Scotland, England and Wales) with the boundary between them, and links that respond to neighbours' supply rather than taking their prices |
 
 Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
 versioned docs.
@@ -168,6 +183,18 @@ GB imbalance (system) prices come from Elexon's BMRS, reused under the
 [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
 Contains BMRS data © Elexon Limited copyright and database right 2026.
 
+Forward scenarios use NESO's Future Energy Scenarios 2025 and 2026 Ten Year Outlook
+([ES1](https://www.neso.energy/data-portal/future-energy-scenario-electricity-supply-data-table-es1)
+and [ED1](https://www.neso.energy/data-portal/fes-electricity-demand-summary-data-table-ed1)
+tables) and its
+[Interconnector Register](https://www.neso.energy/data-portal/interconnector-register),
+under the [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence),
+accessed 13 October 2026; supported by National Energy SO Open Data. Interconnector flows
+come from Elexon's BMRS (FUELHH), under the same BMRS data licence. Day-ahead prices in
+France, the Netherlands, Belgium, Norway, Denmark and Ireland come from Ember's European
+Wholesale Electricity Price Data (primary sources ENTSO-E and SEMOpx),
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), converted with ECB rates.
+
 Fleet capacity and efficiency (DUKES 5.8 and 5.10) and fuel prices (Quarterly Energy
 Prices 3.2.1) come from the Department for Energy Security and Net Zero, the 2021 UK ETS
 price from the UK ETS Authority's
@@ -194,6 +221,8 @@ See [data/time_series](data/time_series/README.md),
 [data/prices](data/prices/README.md),
 [data/carbon_intensity](data/carbon_intensity/README.md),
 [data/system](data/system/README.md),
+[data/fes](data/fes/README.md),
+[data/scenarios](data/scenarios/README.md),
 [data/response](data/response/README.md) and
 [data/balancing](data/balancing/README.md) for sources, changes and known issues. OpenEnergy is
 not affiliated with or endorsed by any data provider.
@@ -208,12 +237,15 @@ either and keeps its own licence:
 | Folder | Data | Licence |
 |---|---|---|
 | `data/time_series` | Open Power System Data time series (prices, load, renewables, to 2020) | Terms of the original sources; see the [OPSD package](https://doi.org/10.25832/time_series/2020-10-06) |
-| `data/prices` | Ember GB day-ahead prices; ECB exchange rates | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); ECB reuse terms |
+| `data/prices` | Ember GB and neighbouring-market day-ahead prices; ECB exchange rates | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); ECB reuse terms |
 | `data/carbon_intensity` | NESO Carbon Intensity API | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
-| `data/system` | NESO historic generation mix | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
+| `data/system` | NESO historic generation mix and Interconnector Register | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
 | `data/system` | DESNZ (DUKES, Quarterly Energy Prices, UK ETS 2021), HMRC | [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
 | `data/system` | World Bank Carbon Pricing Dashboard; Danish Energy Agency technology data | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `data/system` | NREL Power Plant Cycling Costs (values recorded from the report) | US government-sponsored report |
+| `data/system` | Elexon BMRS interconnector flows (daily totals) | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
+| `data/fes` | NESO Future Energy Scenarios tables (unchanged) | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
+| `data/scenarios` | OpenEnergy model output built from the sources above | Attribution of every source used; see its README |
 | `data/response` | NESO response auction results and system frequency (derived monthly averages) | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
 | `data/balancing` | Elexon BMRS system prices | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
 

@@ -1,8 +1,9 @@
-# GB day-ahead prices after 2020
+# Day-ahead prices after 2020: GB and its neighbours
 
-Written by `scripts/fetch_prices.py` (or `openenergy data update`, which writes the same two
-files to a user cache). Downloaded on 2026-10-10. OpenEnergy is not affiliated with or
-endorsed by Ember or the European Central Bank.
+Written by `scripts/fetch_prices.py` (or `openenergy data update`, which writes the same
+files to a user cache). Downloaded on 2026-10-10; neighbouring prices and ECB rates
+refreshed on 2026-10-13. OpenEnergy is not affiliated with or endorsed by Ember or the
+European Central Bank.
 
 ## `gb_day_ahead_ember.csv`
 
@@ -27,9 +28,31 @@ to €2,576/MWh, in 2021–2022); both are kept. Before 2021 the series is the E
 (as in OPSD); from 2021 it follows EMR Settlement, whose own reuse terms could not be read
 (the site blocks scripted access), so OpenEnergy relies on Ember's CC BY 4.0 publication.
 
+## `europe_day_ahead_ember.csv`
+
+Hourly day-ahead prices of the markets GB has interconnectors to, EUR/MWh, 2015-01-01
+00:00 to 2026-10-07 21:00 UTC (103,150 rows, one per hour). Columns: `utc_timestamp`,
+`france`, `netherlands`, `belgium`, `norway`, `denmark` and `ireland`.
+
+Source: Ember, *European Wholesale Electricity Price Data*, hourly files `France.csv`,
+`Netherlands.csv`, `Belgium.csv`, `Norway.csv`, `Denmark.csv` and `Ireland.csv`, from the
+same archive as the GB file. Licence: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+Ember names ENTSO-E as its primary source for these markets and SEMOpx for Ireland.
+
+Changes: one column per country, rows from 2015 joined on the UTC hour; prices unchanged.
+
+Known issues: Norway and Denmark have several bidding zones and Ember publishes one price
+per country without saying how it is formed; GB's links land in southern Norway (NO2,
+North Sea Link) and western Denmark (DK1, Viking Link), whose prices can differ. Ireland
+starts on 2018-10-01, when the Single Electricity Market's I-SEM arrangements began, so the
+system model's interconnector links need a weather year from 2019. Blanks: four hours in
+each column on 31 July and 30 September 2026, Denmark 35 hours on the same days and its
+last 16 hours; none fall in 2015-2025. Negative prices are kept (down to −€500/MWh in
+the Netherlands and Belgium).
+
 ## `ecb_gbp_per_eur.csv`
 
-Daily euro reference rate for the pound, 2016-06-01 to 2026-10-09 (2,653 business days).
+Daily euro reference rate for the pound, 2016-06-01 to 2026-10-13 (2,655 business days).
 Columns: `date` and `gbp_per_eur`.
 
 Source: European Central Bank, euro foreign exchange reference rates, series

@@ -11,7 +11,7 @@ import pandas as pd
 
 from openenergy.data.fleet import EMISSION_FACTORS, SystemInputs
 from openenergy.errors import ConfigError, DataError
-from openenergy.system.model import DEFAULT_VOLL, Generator, Storage, SystemSpec
+from openenergy.system.model import DEFAULT_VOLL, Generator, Link, Storage, SystemSpec
 
 # Historic output held fixed: no open data to model imports or plant-level constraints.
 # Keys are technology names, values the generation-mix columns.
@@ -24,7 +24,7 @@ FIXED_PROFILES = {
     "pumped_storage": "storage",
 }
 RENEWABLE_PROFILES = {"wind": ("wind", "wind_emb"), "solar": ("solar",)}
-SCALABLE = (*FIXED_PROFILES, *RENEWABLE_PROFILES)
+SCALABLE = (*FIXED_PROFILES, *RENEWABLE_PROFILES, "demand")
 THERMAL_GROUPS = ("ccgt", "coal", "peaking")
 FUEL_OF = {"ccgt": "gas", "coal": "coal", "peaking": "gas"}
 
@@ -66,7 +66,7 @@ class FleetAssumptions:
 class Adjustments:
     """Scenario changes to the historic system.
 
-    ``scale`` multiplies historic profiles (wind, solar, nuclear, imports, ...);
+    ``scale`` multiplies historic profiles (wind, solar, nuclear, imports, ...) and demand;
     ``capacity_mw`` replaces installed thermal capacity (ccgt, coal, peaking);
     ``fuel_price_scale`` multiplies gas or coal prices; ``ets_gbp_per_t`` replaces the ETS
     price (EU ETS to 2020, UK ETS from 2021); ``carbon_price_support`` keeps or removes the
@@ -147,11 +147,13 @@ def build_system(
     adjustments: Adjustments | None = None,
     storage: Sequence[Storage] = (),
     voll: float = DEFAULT_VOLL,
+    links: Sequence[Link] = (),
 ) -> SystemSpec:
     """GB on one bus for one calendar year of the generation mix (MW per period).
 
-    Demand is NESO's total generation. Fixed profiles keep their (scaled) historic output;
-    wind and solar can be curtailed; thermal plant follows the merit order.
+    Demand is NESO's total generation (scaled by ``scale['demand']``). Fixed profiles keep
+    their (scaled) historic output; wind and solar can be curtailed; thermal plant follows
+    the merit order; ``links`` trade with neighbours.
     """
     adjustments = adjustments or Adjustments()
     if mix.isna().any().any():
@@ -172,7 +174,8 @@ def build_system(
         output = mix[list(columns)].sum(axis=1) * adjustments.scale.get(name, 1.0)
         generators.append(Generator(name, name, output.rename(None), zero))
     generators += thermal_generators(index, inputs, assumptions, adjustments)
-    return SystemSpec(mix["generation"].rename(None), tuple(generators), tuple(storage), voll)
+    demand = mix["generation"] * adjustments.scale.get("demand", 1.0)
+    return SystemSpec(demand.rename(None), tuple(generators), tuple(storage), voll, tuple(links))
 
 
 def _efficiencies(

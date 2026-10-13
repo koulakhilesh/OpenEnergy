@@ -1,0 +1,11 @@
+link,neighbour,bmrs_fuel_type,import_mw,export_mw,connection_site
+Auchencrosh (interconnector CCT),ireland,INTIRL,500.00,500.00,Auchencrosh 275kV
+Britned,netherlands,INTNED,1200.00,1200.00,Grain 400kV Substation
+East West Interconnector,ireland,INTEW,505.00,585.00,Deeside 400kV Substation
+ElecLink,france,INTELEC,1000.00,1050.00,Sellindge 400kV Substation
+Greenlink,ireland,INTGRNL,504.00,524.00,Pembroke 400kV Substation
+IFA Interconnector,france,INTFR,1988.00,1988.00,Sellindge 400kV Substation
+IFA2 Interconnector,france,INTIFA2,1100.00,1150.00,Chilling 400kV Substation
+Nemo Link,belgium,INTNEM,1020.00,1046.00,Richborough 400kV Substation
+NS Link,norway,INTNSL,1400.00,1480.00,Blyth GSP
+Viking Link Denmark Interconnector,denmark,INTVKL,1500.00,1500.00,Bicker Fen 400kV Substation

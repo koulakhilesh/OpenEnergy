@@ -18,6 +18,10 @@
 
 ::: openenergy.data.fleet
 
+::: openenergy.data.interconnectors
+
+::: openenergy.data.fes
+
 ::: openenergy.data.quality
 
 ## Assets
@@ -66,6 +70,8 @@
 
 ::: openenergy.system.scenario
 
+::: openenergy.system.forward
+
 ## Scenarios
 
 ::: openenergy.scenario
@@ -77,6 +83,10 @@
 ::: openenergy.report.figures
 
 ::: openenergy.report.document
+
+## Web app
+
+::: openenergy.app
 
 ## Errors
 

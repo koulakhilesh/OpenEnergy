@@ -57,13 +57,30 @@ class Storage:
 
 
 @dataclass(frozen=True, eq=False)
+class Link:
+    """A price-taking interconnector to a neighbouring market.
+
+    It imports when GB's price is above ``price`` (the neighbour's, GBP/MWh) and exports
+    when below, up to ``import_mw`` and ``export_mw`` in each snapshot. ``hurdle`` (GBP/MWh)
+    is added to imports and taken off exports (losses and trading costs).
+    """
+
+    name: str
+    import_mw: pd.Series[float] = field(repr=False)
+    export_mw: pd.Series[float] = field(repr=False)
+    price: pd.Series[float] = field(repr=False)
+    hurdle: float = 0.0
+
+
+@dataclass(frozen=True, eq=False)
 class SystemSpec:
-    """Demand (MW), generators and storage on one bus, all on the demand's UTC index."""
+    """Demand (MW), generators, storage and links on one bus, all on the demand's UTC index."""
 
     demand: pd.Series[float] = field(repr=False)
     generators: tuple[Generator, ...]
     storage: tuple[Storage, ...] = ()
     voll: float = DEFAULT_VOLL
+    links: tuple[Link, ...] = ()
     step: pd.Timedelta = field(init=False)
 
     def __post_init__(self) -> None:
@@ -74,7 +91,11 @@ class SystemSpec:
             raise DataError("demand must be non-negative")
         if not self.generators:
             raise ConfigError("a system needs at least one generator")
-        names = [g.name for g in self.generators] + [s.name for s in self.storage]
+        names = (
+            [g.name for g in self.generators]
+            + [s.name for s in self.storage]
+            + [link.name for link in self.links]
+        )
         duplicates = sorted({n for n in names if names.count(n) > 1})
         if duplicates:
             raise ConfigError(f"duplicate names: {', '.join(duplicates)}")
@@ -89,6 +110,20 @@ class SystemSpec:
                     raise DataError(f"{gen.name}: {label} has missing values")
             if (gen.capacity_mw < 0).any():
                 raise DataError(f"{gen.name}: capacity_mw must be non-negative")
+        for link in self.links:
+            for label, series in (
+                ("import_mw", link.import_mw),
+                ("export_mw", link.export_mw),
+                ("price", link.price),
+            ):
+                if not series.index.equals(demand.index):
+                    raise DataError(f"{link.name}: {label} must share the demand index")
+                if series.isna().any():
+                    raise DataError(f"{link.name}: {label} has missing values")
+            if (link.import_mw < 0).any() or (link.export_mw < 0).any():
+                raise DataError(f"{link.name}: import_mw and export_mw must be non-negative")
+            if not (math.isfinite(link.hurdle) and link.hurdle >= 0):
+                raise ConfigError(f"{link.name}: hurdle must be non-negative")
         if not (math.isfinite(self.voll) and self.voll > 0):
             raise ConfigError(f"voll must be positive, got {self.voll}")
         object.__setattr__(self, "demand", demand)
@@ -105,13 +140,20 @@ class SystemSpec:
                 total = total + gen.capacity_mw
         return total
 
+    def export_mw(self) -> pd.Series[float]:
+        total = pd.Series(0.0, index=self.demand.index)
+        for link in self.links:
+            total = total + link.export_mw
+        return total
+
 
 @dataclass(frozen=True, eq=False)
 class SystemResult:
     """Dispatch outcome. Power in MW per snapshot; ``storage`` is net discharge.
 
     Unit commitment adds ``start_price`` (marginal price including start costs),
-    ``units_online`` and ``starts`` per committed tranche.
+    ``units_online`` and ``starts`` per committed tranche. With links, ``links`` holds each
+    link's net flow (MW, positive into GB).
     """
 
     price: pd.Series[float]
@@ -126,12 +168,15 @@ class SystemResult:
     start_price: pd.Series[float] | None = None
     units_online: pd.DataFrame | None = None
     starts: pd.DataFrame | None = None
+    links: pd.DataFrame | None = None
 
     def by_technology(self) -> pd.DataFrame:
-        """Generation summed by technology, plus storage and unserved energy."""
+        """Generation summed by technology, plus storage, net imports and unserved energy."""
         grouped = self.generation.T.groupby(pd.Series(self.technologies)).sum().T
         if not self.storage.empty:
             grouped["storage"] = self.storage.sum(axis=1)
+        if self.links is not None and not self.links.empty:
+            grouped["interconnectors"] = self.links.sum(axis=1)
         grouped["unserved"] = self.unserved
         return grouped
 
@@ -150,22 +195,27 @@ def solve(
     """Dispatch ``spec`` at least cost.
 
     Without storage every hour is independent and the merit order is the exact optimum,
-    so ``auto`` uses it; with storage ``auto`` uses PyPSA (``pip install openenergy[system]``).
-    With ``commitment``, thermal units have start-up costs and minimum stable output and
-    days are solved in turn with a lookahead (storage included).
+    so ``auto`` uses it; with storage or links ``auto`` uses PyPSA
+    (``pip install openenergy[system]``). With ``commitment``, thermal units have start-up
+    costs and minimum stable output and days are solved in turn with a lookahead (storage
+    included; links are not supported).
     """
     _check_must_run(spec)
     if commitment is not None:
         if backend != "auto":
             raise ConfigError("unit commitment has its own solver; leave backend as 'auto'")
+        if spec.links:
+            raise ConfigError("unit commitment does not support interconnector links yet")
         from openenergy.system.commitment import commit
 
         return commit(spec, commitment)
     if backend == "auto":
-        backend = "pypsa" if spec.storage else "merit"
+        backend = "pypsa" if spec.storage or spec.links else "merit"
     if backend == "merit":
-        if spec.storage:
-            raise ConfigError("the merit-order backend cannot dispatch storage; use 'pypsa'")
+        if spec.storage or spec.links:
+            raise ConfigError(
+                "the merit-order backend cannot dispatch storage or links; use 'pypsa'"
+            )
         from openenergy.system.merit import merit_order
 
         return merit_order(spec)
@@ -177,7 +227,7 @@ def solve(
 
 
 def _check_must_run(spec: SystemSpec) -> None:
-    excess = spec.must_run_mw() - spec.demand
+    excess = spec.must_run_mw() - spec.demand - spec.export_mw()
     over = excess > 1e-6
     if over.any():
         raise DataError(

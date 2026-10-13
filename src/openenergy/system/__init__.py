@@ -7,7 +7,7 @@ from openenergy.system.fleet import (
     thermal_generators,
 )
 from openenergy.system.merit import merit_order
-from openenergy.system.model import Generator, Storage, SystemResult, SystemSpec, solve
+from openenergy.system.model import Generator, Link, Storage, SystemResult, SystemSpec, solve
 from openenergy.system.netload import (
     NetLoadStats,
     SystemData,
@@ -27,6 +27,7 @@ __all__ = [
     "FleetAssumptions",
     "FleetResult",
     "Generator",
+    "Link",
     "NetLoadStats",
     "Storage",
     "SystemData",

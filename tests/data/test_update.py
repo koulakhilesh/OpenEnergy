@@ -19,12 +19,24 @@ EMBER_CSV = (
 ECB_CSV = "KEY,TIME_PERIOD,OBS_VALUE\nX,2026-01-02,0.86\nX,2025-12-31,0.85\n"
 
 
+def neighbour_csv(country: str, price: float) -> str:
+    return (
+        "Country,ISO3 Code,Datetime (UTC),Datetime (Local),Price (EUR/MWhe)\n"
+        f"{country},XXX,2014-12-31 23:00:00,2015-01-01 00:00:00,1.0\n"
+        f"{country},XXX,2026-01-01 00:00:00,2026-01-01 01:00:00,{price}\n"
+    )
+
+
 def fake_download(url: str) -> bytes:
     if url == update_module.EMBER_HOURLY:
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w") as archive:
             archive.writestr("hourly/Germany.csv", "x\n")
             archive.writestr("hourly/United Kingdom.csv", EMBER_CSV)
+            for k, country in enumerate(update_module.NEIGHBOURS):
+                if country != "Ireland":
+                    archive.writestr(f"hourly/{country}.csv", neighbour_csv(country, 50 + k))
+            archive.writestr("hourly/Ireland.csv", EMBER_CSV.splitlines()[0] + "\n")
         return buffer.getvalue()
     if url == update_module.ECB_DAILY:
         return ECB_CSV.encode()
@@ -42,6 +54,28 @@ def test_update_writes_files_the_ember_source_reads(
     )
     prices = EmberPriceSource(path).prices()
     assert prices.prices.tolist() == pytest.approx([85.0, 93.5])
+    neighbours = (tmp_path / "prices" / "europe_day_ahead_ember.csv").read_text().splitlines()
+    assert neighbours == [
+        "utc_timestamp,france,netherlands,belgium,norway,denmark,ireland",
+        "2026-01-01T00:00:00Z,50,51,52,53,54,",
+    ]
+
+
+def test_missing_neighbour_is_an_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def no_norway(url: str) -> bytes:
+        if url != update_module.EMBER_HOURLY:
+            return fake_download(url)
+        source = zipfile.ZipFile(io.BytesIO(fake_download(url)))
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            for name in source.namelist():
+                if not name.endswith("Norway.csv"):
+                    archive.writestr(name, source.read(name))
+        return buffer.getvalue()
+
+    monkeypatch.setattr(update_module, "_download", no_norway)
+    with pytest.raises(OSError, match="Norway"):
+        update_prices(tmp_path)
 
 
 def test_cli_data_update(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

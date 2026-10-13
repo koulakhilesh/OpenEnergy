@@ -4,6 +4,13 @@ Inputs for OpenEnergy's GB system model, written by `scripts/fetch_system_data.p
 (run with `uv run --with openpyxl python scripts/fetch_system_data.py`). Downloaded on
 2026-10-10. OpenEnergy is not affiliated with or endorsed by any of the sources below.
 
+The model's files stop at the latest complete calendar year, 2025, and were checked again
+on 2026-10-13. DUKES publishes each year's fleet the following July, so 2026 has no fleet
+or efficiency yet; Quarterly Energy Prices for 2026 and the carbon price on 1 April 2026
+exist but are not added until the year is complete, so every model year has the same
+kind of inputs. The interconnector files (below) are written by `scripts/fetch_fes.py` and
+`scripts/fetch_interconnector_flows.py` and run to October 2026.
+
 ## `generation_mix.csv`
 
 Half-hourly GB generation by fuel, MW, 2015-01-01 00:00 to 2025-12-31 23:30 UTC
@@ -94,3 +101,50 @@ Known issues: these are typical published values, not GB-specific. The DEA sheet
 modern Danish plant, so older GB coal units likely had higher minimum loads than the coal
 CHP figure. DEA gives minimum load in percent; it is stored as a fraction. NREL's start costs are lower-bound
 estimates of wear and exclude start fuel, and they are in 2011 dollars.
+
+## `interconnectors.csv`
+
+GB's ten built interconnectors to other markets, one row each, from the NESO register
+dated 12 October 2026 (downloaded 2026-10-13). Columns: `link` (register project name),
+`neighbour` (column in `../prices/europe_day_ahead_ember.csv`), `bmrs_fuel_type` (the
+link's code in Elexon's FUELHH data), `import_mw` and `export_mw` (register `MW Import -
+Total` and `MW Export - Total`, the link's transmission entry capacity), and
+`connection_site`.
+
+Source: National Energy System Operator (NESO), *Interconnector Register*,
+<https://www.neso.energy/data-portal/interconnector-register>.
+Licence: [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+Supported by National Energy SO Open Data.
+
+Changes: only projects with status `Built` are kept; the Isle of Man link is left out (it
+reaches no priced market); Moyle (`Auchencrosh (interconnector CCT)`), listed in two
+stages, keeps its later, total row. `neighbour` and `bmrs_fuel_type` are added by
+OpenEnergy.
+
+Known issues: the register holds today's capacities only, and OpenEnergy uses them in
+every year once a link is in service. The flows show limits the register does not: the
+highest daily average flow on Moyle was about 300 MW in 2016-2017 and 450 MW since (of
+500 MW), on IFA about 1,030 MW in 2022 (of 1,988 MW), and on BritNed never above about
+1,050 MW (of 1,200 MW). Modelled link capacity is overstated in those periods.
+
+## `interconnector_flows.csv`
+
+Daily energy imported and exported on each link, MWh, 2016-01-01 to 2026-10-12 (3,938 UTC
+days). Columns: `date` and, per link, `<fuel type>_import_mwh` and `<fuel type>_export_mwh`
+(fuel type lower-cased, for example `intfr_import_mwh`). Blank means no record that day.
+
+Source: Elexon, *BMRS Insights: generation by fuel type (FUELHH)*,
+<https://bmrs.elexon.co.uk/>, API dataset `FUELHH`. Reused under the
+[BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+Contains BMRS data © Elexon Limited copyright and database right 2026.
+
+Changes: half-hourly flows (MW, positive into GB) are split into imports and exports,
+converted to MWh and summed by UTC day; fuel types that never carry flow (`INTELE`) are
+dropped.
+
+OpenEnergy uses the flows to date when each link entered service: the first day with flow
+in the first 14 days that carry at least a fifth of the link's capacity, which skips
+months of commissioning test flows. This gives Nemo Link 2019-01-30, IFA2 2021-01-22, NS
+Link 2021-09-23, ElecLink 2022-05-23, Viking Link 2023-12-29 and Greenlink 2025-01-19; the
+other four flow from the start of the record. It also checks the modelled flows
+(`examples/interconnector_check.py`). In 2024 GB imported 43.9 TWh and exported 10.6 TWh.

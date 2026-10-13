@@ -13,7 +13,8 @@ TEMPLATE = "plotly_white"
 TECH_COLOURS = {
     "nuclear": "#7b5ea7", "biomass": "#4f8f3a", "hydro": "#2b7bba", "wind": "#5ec3e6",
     "solar": "#f4c542", "imports": "#a0a0a0", "pumped_storage": "#1f4e79", "other": "#c9c9c9",
-    "ccgt": "#e8743b", "coal": "#4d4d4d", "peaking": "#d62728", "unserved": "#000000",
+    "ccgt": "#e8743b", "coal": "#4d4d4d", "peaking": "#d62728", "interconnectors": "#8c6d31",
+    "unserved": "#000000",
 }  # fmt: skip
 TECH_ORDER = list(TECH_COLOURS)
 

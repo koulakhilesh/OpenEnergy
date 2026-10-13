@@ -1,0 +1,18 @@
+# NESO's Holistic Transition pathway in 2035 on 2025's weather, demand shape and fuel and
+# carbon prices, with GB's interconnectors trading at the neighbours' actual 2025 prices,
+# and a 1 MW / 2 MWh battery valued on the modelled prices. Capacities and demand come
+# from NESO's Future Energy Scenarios (NESO Open Data Licence v1.0).
+# Run: uv run openenergy system run examples/gb-2035-holistic.yaml
+name: gb-2035-holistic
+system:
+  data: ../data/system
+  year: 2025
+  interconnectors: links
+  fes:
+    pathway: Holistic Transition
+    year: 2035
+battery:
+  power_mw: 1
+  energy_mwh: 2
+  eta_charge: 0.95
+  eta_discharge: 0.95

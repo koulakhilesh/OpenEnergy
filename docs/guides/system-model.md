@@ -304,9 +304,13 @@ system:
   commitment: false                    # true: start-up costs and minimum stable output
   lookahead_hours: 24                  # with commitment: hours seen beyond each day
   price: marginal                      # or start (needs commitment)
+  interconnectors: fixed               # or links (from 2019; see Forward scenarios)
+  fes: {pathway: Holistic Transition, year: 2035}   # optional, needs links
 battery: {power_mw: 1, energy_mwh: 2}  # optional: value a battery on modelled prices
 forecast: naive_last_week              # or perfect_foresight
 ```
+
+`interconnectors` and `fes` are described in [Forward scenarios](forward-scenarios.md).
 
 Sweeps work on any setting, in the order given:
 
@@ -348,7 +352,9 @@ Power System Analysis*, Journal of Open Research Software 6(1), 2018,
 - One bus: no transmission constraints between Scotland and England.
 - Unit commitment is optional and simplified: no minimum up or down times, ramp limits or
   start fuel, typical rather than GB-specific unit data, and one day planned at a time.
-- Imports and other fixed profiles cannot respond to price.
+- Imports and other fixed profiles cannot respond to price, unless interconnectors are
+  `links` ([Forward scenarios](forward-scenarios.md)), which take the neighbours' prices
+  as given.
 - Fuel prices are quarterly averages of what power producers paid, which can lag market
   gas prices (most visible in 2021–2024); the ETS is one price per year (from 1 April).
 - Storage optimisation has perfect foresight over the year.

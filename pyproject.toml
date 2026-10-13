@@ -48,12 +48,18 @@ dev = [
     "mypy>=1.11",
     "pandas-stubs>=2.1",
     "types-PyYAML>=6.0",
+    "httpx2>=2.13",
 ]
+# The web app (openenergy.app); Vercel installs default groups other than dev.
+app = ["fastapi>=0.115", "plotly>=6.0", "uvicorn>=0.30"]
 # MkDocs 2.0 removes the plugin and theme systems that Material relies on.
 docs = ["mkdocs>=1.6,<2", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.25"]
 
 [tool.hatch.version]
 path = "src/openenergy/__init__.py"
+
+[tool.uv]
+default-groups = ["dev", "app"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/openenergy"]
