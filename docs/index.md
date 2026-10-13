@@ -103,6 +103,9 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
    data, fuel and carbon prices, checked against 2015–2025, with scenarios for renewables,
    storage, fleet and carbon policy (storage via the optional PyPSA backend), and optional
    unit commitment with start-up costs and minimum stable output.
+8. **Reports** any saved run, system scenario, backcast or sweep as one interactive HTML
+   page of charts and tables (`openenergy report`; see the
+   [example](reports/example.html)).
 
 See [Concepts](concepts.md) for the equations and [Scenarios](guides/scenarios.md) for
 every setting.
@@ -119,13 +122,13 @@ every setting.
 | v3.0 | GB system dispatch with conventional generation via PyPSA, checked against 2015–2020 |
 | v3.1 | Optional unit commitment (start-up costs, minimum stable output) and a start-cost price, re-checked against 2015–2020 without fitting to prices |
 | v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
-| v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue (current) |
+| v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
+| v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v3.4 | Charts and reports: `openenergy report` writes an HTML report of dispatch, revenue, price distributions and backcast fit |
 | v3.5 | Revenue stacking: GB balancing and frequency-response services alongside day-ahead trading, where open data allows, with stochastic planning where a later market lets the battery react to prices |
 | v4.0 | Interactive app on the Python API; forward scenarios from NESO's Future Energy Scenarios; GB zones (Scotland, England and Wales) and interconnectors |
 

@@ -54,12 +54,17 @@ nav:
       - Research with the Python API: guides/research.md
       - System analysis: guides/system.md
       - System model: guides/system-model.md
+      - Reports: guides/reports.md
   - Data: data.md
   - API reference: api.md
 
 # Design records stay in the repo for context but are not published.
 exclude_docs: |
   design/
+
+# Builds docs/reports/example.html from the bundled data (needs the report extra).
+hooks:
+  - scripts/docs_hooks.py
 
 extra:
   generator: false

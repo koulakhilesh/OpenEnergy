@@ -364,11 +364,16 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
 
 
 def write_outputs(run: ScenarioRun, directory: str | Path) -> Path:
-    """Write intervals.csv, daily.csv and summary.json; returns the directory."""
+    """Write intervals.csv, daily.csv and summary.json; returns the directory.
+
+    With a perfect-foresight benchmark, its daily results go to benchmark_daily.csv.
+    """
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     run.result.intervals.to_csv(out / "intervals.csv", index_label="timestamp")
     run.result.daily.to_csv(out / "daily.csv", index_label="date")
+    if run.benchmark is not None:
+        run.benchmark.daily.to_csv(out / "benchmark_daily.csv", index_label="date")
     payload = {
         "scenario": run.scenario.name,
         "openenergy_version": openenergy.__version__,
