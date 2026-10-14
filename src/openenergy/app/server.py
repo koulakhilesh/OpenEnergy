@@ -7,7 +7,7 @@ import logging
 import os
 from functools import cache
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import pandas as pd
 from fastapi import Depends, FastAPI, Query
@@ -24,6 +24,7 @@ from openenergy.app.runs import (
     Request,
     Services,
     Source,
+    from_prices,
     run,
 )
 from openenergy.data.fes import FES_ATTRIBUTION, PATHWAYS
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
 _STYLE = """
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;color:#1f2933}
 main{max-width:900px;margin:0 auto;padding:16px 24px}
-fieldset{border:1px solid #e4e7eb;margin:12px 0;padding:12px}label{margin-right:16px}
+fieldset{border:1px solid #e4e7eb;margin:12px 0;padding:12px}label{margin-right:4px}
 input,select{margin:4px 8px 4px 0}button{padding:6px 16px}
 table{border-collapse:collapse;font-size:14px}th,td{border:1px solid #e4e7eb;padding:4px 8px}
 td{text-align:right}td:first-child{text-align:left}th{background:#f5f7fa}
@@ -44,6 +45,13 @@ td{text-align:right}td:first-child{text-align:left}th{background:#f5f7fa}
 .card{border:1px solid #e4e7eb;border-radius:6px;padding:8px 12px;min-width:140px;font-size:13px}
 .card .value{font-size:20px;font-weight:600}
 .actions a{margin-right:16px}details{margin:16px 0}summary{cursor:pointer;font-weight:600}
+.tip{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;
+border-radius:50%;background:#d9e2ec;font-size:11px;cursor:help;position:relative;
+margin-right:16px}
+.tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:0;top:20px;
+z-index:10;width:min(260px,70vw);padding:8px;background:#1f2933;color:#fff;font-size:12px;
+line-height:1.4;border-radius:4px;text-align:left;font-weight:400}
+.wide{overflow-x:auto}
 """
 _FAILED = "The run could not be completed. Please check the inputs and try again."
 _LOADER = """<script>
@@ -200,22 +208,122 @@ durations take 15 to 45 seconds.</p>
 <select name="year">{years}</select></label><br>
 <label><input type="radio" name="source" value="scenario"> FES pathway
 <select name="pathway">{pathways}</select> in <select name="target">{targets}</select></label>
+{pages.tip("pathway")}
 </fieldset>
 <fieldset><legend>Battery and plan</legend>
 <label>Power (MW) <input name="power_mw" type="number" value="1" min="0.1" max="1000"
-step="0.1"></label>
+step="0.1"></label>{pages.tip("power")}
 <label>Duration (hours) <input name="hours" type="number" value="2" min="0.5" max="8"
-step="0.5"></label><br>
+step="0.5"></label>{pages.tip("duration")}<br>
 <label>Forecast <select name="forecast"><option value="naive_last_week">last week's prices
 </option><option value="perfect_foresight">perfect foresight</option></select></label>
+{pages.tip("forecast")}
 <label>Frequency response (historic {RESPONSE_FROM} onwards)
 <select name="services"><option value="none">none</option>
 <option value="dc">Dynamic Containment</option>
 <option value="dc_dm">Dynamic Containment and Moderation</option></select></label>
+{pages.tip("response")}
 </fieldset>
 <button type="submit">Run</button>
-</form>"""
+</form>
+<p>Or see <a href="/explore">every year and pathway at a glance</a>, or
+<a href="/compare?item=gb-2019&amp;item=gb-2022&amp;item=gb-2025">compare years side by
+side</a>.</p>"""
     return _page("OpenEnergy", form)
+
+
+HoursChoice = Literal["1", "2", "4"]
+
+
+@app.get("/explore", response_class=HTMLResponse)
+def explore_page(
+    hours: HoursChoice = "2",
+    forecast: ForecastName = "naive_last_week",
+    services: Services = "none",
+    power_mw: Annotated[float, Query(gt=0, le=1000)] = 1.0,
+) -> HTMLResponse:
+    """Value by year and by pathway for one battery, from the precomputed results."""
+    store = results.store(data_dir())
+    if store is None:
+        return HTMLResponse(_page("Explore", "<p>Precomputed results are missing.</p>"), 503)
+    controls = _controls("/explore", hours, forecast, power_mw, services=services)
+    body = (
+        f"<h1>Battery value at a glance</h1>{controls}"
+        f"<h2>GB, {HISTORY_YEARS[0]} to {HISTORY_YEARS[1]}</h2>"
+        f"{pages.explore(store, float(hours), forecast, services, power_mw)}"
+    )
+    return HTMLResponse(_page("Explore", body, plots=True))
+
+
+@app.get("/compare", response_class=HTMLResponse)
+def compare_page(
+    item: Annotated[list[str], Query(max_length=3)] = [],  # noqa: B006
+    hours: HoursChoice = "2",
+    forecast: ForecastName = "naive_last_week",
+    power_mw: Annotated[float, Query(gt=0, le=1000)] = 1.0,
+) -> HTMLResponse:
+    """Up to three precomputed results side by side; the URL is the shareable comparison."""
+    store = results.store(data_dir())
+    if store is None:
+        return HTMLResponse(_page("Compare", "<p>Precomputed results are missing.</p>"), 503)
+    chosen = [from_prices(token, float(hours), forecast) for token in item[:3] if token]
+    if any(request is None for request in chosen):
+        return HTMLResponse(_page("Compare", "<p>Choose from the lists offered.</p>"), 400)
+    found = [store.get(request) for request in chosen if request is not None]
+    options = store.requests(float(hours), forecast)
+    selects = "".join(
+        f'<label>{n + 1} <select name="item"><option value="">none</option>'
+        + "".join(
+            f'<option value="{html.escape(o.prices)}"'
+            f"{' selected' if n < len(item) and item[n] == o.prices else ''}>"
+            f"{html.escape(o.where)}</option>"
+            for o in options
+        )
+        + "</select></label>"
+        for n in range(3)
+    )
+    controls = _controls("/compare", hours, forecast, power_mw, extra=selects)
+    body = (
+        f"<h1>Compare</h1>{controls}"
+        f"{pages.compare([x for x in found if x is not None], power_mw)}"
+        "<p>The address of this page is the comparison: copy it to share.</p>"
+    )
+    return HTMLResponse(_page("Compare", body, plots=True))
+
+
+def _controls(
+    action: str,
+    hours: str,
+    forecast: str,
+    power_mw: float,
+    services: str | None = None,
+    extra: str = "",
+) -> str:
+    def options(values: dict[str, str], chosen: str) -> str:
+        return "".join(
+            f'<option value="{v}"{" selected" if v == chosen else ""}>{label}</option>'
+            for v, label in values.items()
+        )
+
+    service_select = ""
+    if services is not None:
+        names = {"none": "none", "dc": "Dynamic Containment", "dc_dm": "DC and Moderation"}
+        service_select = (
+            f'<label>Frequency response <select name="services">{options(names, services)}'
+            f"</select></label>{pages.tip('response')}"
+        )
+    forecasts = {"naive_last_week": "last week's prices", "perfect_foresight": "perfect foresight"}
+    return (
+        f'<form action="{action}" method="get"><fieldset>'
+        f'<label>Duration <select name="hours">'
+        f"{options({h: f'{h} hours' for h in ('1', '2', '4')}, hours)}</select></label>"
+        f"{pages.tip('duration')}"
+        f'<label>Forecast <select name="forecast">{options(forecasts, forecast)}</select>'
+        f"</label>{pages.tip('forecast')}{service_select}"
+        f'<label>Power (MW) <input name="power_mw" type="number" value="{power_mw:g}" '
+        f'min="0.1" max="1000" step="0.1"></label>{pages.tip("power")}<br>{extra}'
+        '<button type="submit">Show</button></fieldset></form>'
+    )
 
 
 @app.get("/scenarios", response_class=HTMLResponse)
@@ -274,7 +382,8 @@ def _page(title: str, body: str, plots: bool = False) -> str:
         '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{html.escape(title)}</title><style>{_STYLE}</style>{script}</head><body><main>"
-        '<nav><a href="/">Battery value</a><a href="/scenarios">FES pathways</a>'
+        '<nav><a href="/">Battery value</a><a href="/explore">Explore</a>'
+        '<a href="/compare">Compare</a><a href="/scenarios">FES pathways</a>'
         '<a href="https://koulakhilesh.github.io/OpenEnergy/">Docs</a></nav>'
         f'{body}<p class="source">OpenEnergy {html.escape(openenergy.__version__)}. '
         "Code MIT; data keep their own licences, credited with each result.</p>"

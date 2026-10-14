@@ -140,6 +140,14 @@ class Store:
         frame = self._daily[request.key][["revenue", "benchmark_revenue"]]
         return Result(request, summary, frame, precomputed=True)
 
+    def requests(self, hours: float, forecast: str) -> list[Request]:
+        """Precomputed requests for one duration and forecast, in grid order."""
+        return [
+            r
+            for r in grid()
+            if r.hours == hours and r.forecast == forecast and r.key in self.summary.index
+        ]
+
 
 SUMMARY_FIELDS = (
     "days",

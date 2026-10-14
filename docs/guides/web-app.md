@@ -18,12 +18,15 @@ Then open <http://127.0.0.1:8000/>.
 | `/result` | The answer: one sentence (revenue for your MW, share of perfect foresight, cycles a day), key numbers, cumulative and monthly revenue charts, what the result assumes, sources, and links to download it. At once for 1, 2 and 4 hour batteries; otherwise a progress counter while it runs |
 | `/download/daily.csv` | Daily revenue and perfect-foresight revenue for your MW, with the data credit on the first line |
 | `/download/scenario.yaml` | The scenario that reproduces the result with `openenergy run` (or `openenergy system run` for a FES pathway) from the repository folder |
+| `/explore` | Battery value by GB year (2017–2025) and by FES pathway (2030, 2035) for one duration, forecast and response option, as bar charts and tables; click a bar to open its result |
+| `/compare` | Up to three results side by side (table, revenue through the year, and each answer); the page address holds the comparison, so it can be shared, e.g. `/compare?item=gb-2019&item=gb-2022&item=falling_behind_2030` |
 | `/battery` | The full hourly report of `openenergy report` (runs the backtest now) |
 | `/scenarios` | Each FES pathway's modelled results on 2025's weather next to NESO's own figures |
 | `/api/result` | JSON: per-MW summary and daily revenue for the same request (without `power_mw`); see below |
 | `/health` | Status and version |
 
-The battery uses 95% efficiency each way and a £5/MWh wear cost. On Vercel a run took
+Every input and key number has a "?" next to it that explains it in a sentence (hover, tab
+to it, or tap). The battery uses 95% efficiency each way and a £5/MWh wear cost. On Vercel a run took
 18 seconds for GB 2024, 14 seconds for a FES pathway and 44 seconds with Dynamic
 Containment (measured 14 October 2026). Pathway prices are precomputed in `data/scenarios/` by
 `scripts/build_scenario_prices.py` (see [Forward scenarios](forward-scenarios.md)), so the

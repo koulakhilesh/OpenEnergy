@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from openenergy.app import app
 from openenergy.app import results as app_results
-from openenergy.app.runs import Request
+from openenergy.app.runs import Request, from_prices
 from openenergy.scenario import Scenario
 from openenergy.system.scenario import SystemScenario
 
@@ -196,3 +196,53 @@ def test_downloads_reproduce_the_result(client: TestClient) -> None:
     )
     system = SystemScenario.model_validate(yaml.safe_load(forward.text), context={"base": ROOT})
     assert system.system.fes is not None and system.system.fes.pathway == "Falling Behind"
+
+
+def test_prices_tokens_round_trip() -> None:
+    for request in app_results.grid():
+        assert from_prices(request.prices, request.hours, request.forecast) == request
+    assert from_prices("gb-2019-dc", 2.0, "naive_last_week") is None  # response from 2022
+    assert from_prices("gb-1999", 2.0, "naive_last_week") is None
+    assert from_prices("<script>", 2.0, "naive_last_week") is None
+
+
+def test_explore_shows_every_year_and_pathway(client: TestClient) -> None:
+    page = client.get("/explore", params={"hours": 4, "forecast": "perfect_foresight"})
+    assert page.status_code == 200
+    text = page.text
+    for year in range(2017, 2026):
+        assert f"GB {year}</td>" in text
+    assert "Ten Year Outlook" in text
+    assert "plotly_click" in text  # bars open their result
+    assert "/result?source=history&amp;hours=4&amp;forecast=perfect_foresight" in text
+    response = client.get("/explore", params={"services": "dc_dm"}).text
+    assert "GB 2022 + DC and DM</td>" in response
+    assert "GB 2021" not in response
+    assert "historic years only" in response
+    assert client.get("/explore", params={"hours": 3}).status_code == 422
+
+
+def test_compare_side_by_side_from_the_url(client: TestClient) -> None:
+    params = [("item", "gb-2019"), ("item", "gb-2022"), ("item", "falling_behind_2030")]
+    page = client.get("/compare", params=[*params, ("power_mw", "5")])
+    assert page.status_code == 200
+    text = page.text
+    assert text.count('<p class="answer">') == 3
+    assert "Revenue through the year" in text
+    assert 'value="gb-2022" selected' in text
+    empty = client.get("/compare", params=[("item", ""), ("item", "gb-2024")])
+    assert empty.status_code == 200
+    assert empty.text.count('<p class="answer">') == 1
+    assert client.get("/compare", params={"item": "gb-1999"}).status_code == 400
+    too_many = [("item", f"gb-{year}") for year in (2017, 2018, 2019, 2020)]
+    assert client.get("/compare", params=too_many).status_code == 422
+
+
+def test_help_next_to_inputs_and_numbers(client: TestClient) -> None:
+    home = client.get("/").text
+    assert home.count('class="tip"') >= 5
+    assert "Revenue scales with it" in home
+    result = client.get("/result", params={"year": 2024}).text
+    assert "an upper bound" in result
+    assert "/compare?hours=2&amp;forecast=naive_last_week&amp;power_mw=1&amp;item=gb-2024" in result
+    assert "/explore?hours=2" in result

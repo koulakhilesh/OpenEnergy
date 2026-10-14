@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import yaml
 from plotly.offline import get_plotlyjs_version
 
-from openenergy.app.results import Result
+from openenergy.app.results import PRECOMPUTED_HOURS, Result, Store
 from openenergy.app.runs import (
     DEGRADATION_COST,
     SCENARIO_ATTRIBUTION,
@@ -29,6 +29,36 @@ SERVICE_NAMES = {
     "dc_dm": "Dynamic Containment and Moderation",
 }
 MODEL_SPREAD_SHARE = 0.6  # modelled 2025 daily spread / actual (forward scenarios guide)
+HELP = {
+    "power": "The most the battery can charge or discharge at once. Revenue scales with it.",
+    "duration": "Hours to fill or empty at full power: a 10 MW, 2-hour battery stores 20 MWh.",
+    "forecast": (
+        "Last week's prices: each day is planned as if prices repeat the same day last "
+        "week, a simple forecast anyone could make. Perfect foresight: planned knowing "
+        "every price, the most the battery could earn."
+    ),
+    "response": (
+        "NESO pays batteries to hold power ready for when grid frequency drifts from 50 Hz: "
+        "Dynamic Containment reacts within a second, Dynamic Moderation keeps frequency "
+        "near 50 Hz. Auction prices exist from late 2021 (Moderation from March 2022)."
+    ),
+    "pathway": (
+        "NESO's Future Energy Scenarios describe GB's power plants and demand to 2050. "
+        "Prices here are OpenEnergy's model of that system on 2025's weather: not a forecast."
+    ),
+    "perfect": "What the same battery earns knowing every price in advance: an upper bound.",
+    "share": "This plan's revenue as a share of perfect foresight on the same days.",
+    "cycles": "Full charge-and-discharge cycles a day; more cycling wears a battery faster.",
+    "spread": "Average price received when selling minus paid when buying, per MWh sold.",
+}
+
+
+def tip(name: str) -> str:
+    """A focusable "?" that shows the explanation on hover, focus or tap."""
+    text = html.escape(HELP[name])
+    return (
+        f'<span class="tip" tabindex="0" role="note" aria-label="{text}" data-tip="{text}">?</span>'
+    )
 
 
 def query(request: Request, power_mw: float) -> str:
@@ -84,16 +114,17 @@ def fragment(result: Result, power_mw: float) -> str:
     r, s = result.request, result.summary
     params = html.escape(query(r, power_mw))
     numbers = [
-        ("Revenue per MW-year", _money(s["revenue_per_mw_year"])),
-        ("Perfect foresight per MW-year", _money(s["perfect_per_mw_year"])),
-        ("Share of perfect foresight", f"{s['capture_ratio']:.0%}"),
-        ("Cycles per day", f"{s['cycles_per_day']:.2f}"),
-        ("Average spread captured", f"£{s['captured_spread']:.2f}/MWh"),
-        ("Days simulated", f"{s['days']:.0f}"),
+        ("Revenue per MW-year", _money(s["revenue_per_mw_year"]), ""),
+        ("Perfect foresight per MW-year", _money(s["perfect_per_mw_year"]), "perfect"),
+        ("Share of perfect foresight", f"{s['capture_ratio']:.0%}", "share"),
+        ("Cycles per day", f"{s['cycles_per_day']:.2f}", "cycles"),
+        ("Average spread captured", f"£{s['captured_spread']:.2f}/MWh", "spread"),
+        ("Days simulated", f"{s['days']:.0f}", ""),
     ]
     cards = "".join(
-        f'<div class="card"><div class="value">{value}</div><div>{name}</div></div>'
-        for name, value in numbers
+        f'<div class="card"><div class="value">{value}</div><div>{name} '
+        f"{tip(help_key) if help_key else ''}</div></div>"
+        for name, value, help_key in numbers
     )
     daily = result.daily.set_axis(pd.to_datetime(result.daily.index)) * power_mw
     charts = [
@@ -104,16 +135,139 @@ def fragment(result: Result, power_mw: float) -> str:
     ]
     plots = "".join(_plot(fig) for fig in charts)
     assumptions = "".join(f"<li>{html.escape(item)}</li>" for item in _assumptions(r, s))
+    more = ""
+    if r.hours in PRECOMPUTED_HOURS:
+        shared = {"hours": f"{r.hours:g}", "forecast": r.forecast, "power_mw": f"{power_mw:g}"}
+        explore = urlencode({**shared, "services": r.services})
+        compare = urlencode({**shared, "item": r.prices})
+        more = (
+            f'<a href="/explore?{html.escape(explore)}">Every year and pathway</a>'
+            f'<a href="/compare?{html.escape(compare)}">Compare with others</a>'
+        )
     return (
         f'<p class="answer">{answer(result, power_mw)}</p>'
         f'<div class="cards">{cards}</div>{plots}'
         f"<details open><summary>What this assumes</summary><ul>{assumptions}</ul></details>"
-        '<p class="actions">'
+        f'<p class="actions">{more}'
         f'<a href="/download/daily.csv?{params}">Daily revenue (CSV)</a>'
         f'<a href="/download/scenario.yaml?{params}">Scenario to run yourself (YAML)</a>'
         f'<a href="/battery?{params}">Full hourly report (runs now, 15 to 45 s)</a></p>'
         f'<p class="source">{html.escape(_sources(r))}</p>'
     )
+
+
+_CLICK = (
+    "document.getElementById('{plot_id}').on('plotly_click', e => {"
+    " const url = e.points[0].customdata; if (url) window.location.href = url; });"
+)
+
+
+def explore(store: Store, hours: float, forecast: str, services: str, power_mw: float) -> str:
+    """Value by GB year and by FES pathway for one battery, each bar opening its result."""
+    found = {r.key: store.get(r) for r in store.requests(hours, forecast)}
+    results = [result for result in found.values() if result is not None]
+    history = [
+        x for x in results if x.request.source == "history" and x.request.services == services
+    ]
+    pathways = [x for x in results if x.request.source == "scenario"]
+    years = _bars(
+        [x.request.where for x in history],
+        {"this plan": history}
+        | ({"perfect foresight": history} if forecast == "naive_last_week" else {}),
+        power_mw,
+        "GB day-ahead prices by year",
+    )
+    by_target = {
+        str(target): [x for x in pathways if x.request.year == target]
+        for target in sorted({x.request.year for x in pathways})
+    }
+    names = [x.request.pathway or "" for x in next(iter(by_target.values()), [])]
+    forward = _bars(names, by_target, power_mw, "FES pathways (modelled prices)")
+    note = (
+        "<p>Frequency response is available on historic years only, so pathways show "
+        "trading alone.</p>"
+        if services != "none"
+        else ""
+    )
+    return (
+        f"{years}{_table(history, power_mw)}<h2>FES pathways {tip('pathway')}</h2>{note}"
+        f"{forward}{_table(pathways, power_mw)}"
+    )
+
+
+def compare(results: list[Result], power_mw: float) -> str:
+    """Side by side: answer sentences, key numbers and revenue through the year."""
+    if not results:
+        return "<p>Choose up to three to compare.</p>"
+    fig = go.Figure()
+    for result in results:
+        cumulative = (result.daily["revenue"] * power_mw).cumsum()
+        fig.add_trace(
+            go.Scatter(
+                x=list(range(1, len(cumulative) + 1)),
+                y=cumulative.to_numpy(),
+                mode="lines",
+                name=result.request.where,
+            )
+        )
+    fig.update_layout(
+        title="Revenue through the year (this plan)",
+        template=figures.TEMPLATE,
+        xaxis_title="Day simulated",
+        yaxis_title="Revenue (GBP)",
+        legend={"orientation": "h", "y": -0.2},
+        margin={"l": 60, "r": 20, "t": 50, "b": 40},
+        height=380,
+    )
+    answers = "".join(f'<p class="answer">{answer(x, power_mw)}</p>' for x in results)
+    return f"{_table(results, power_mw)}{_plot(fig)}{answers}"
+
+
+def _bars(labels: list[str], series: dict[str, list[Result]], power_mw: float, title: str) -> str:
+    if not labels:
+        return "<p>No precomputed results for this choice.</p>"
+    fig = go.Figure()
+    for name, items in series.items():
+        field = "perfect_per_mw_year" if name == "perfect foresight" else "revenue_per_mw_year"
+        fig.add_trace(
+            go.Bar(
+                x=labels,
+                y=[x.summary[field] * power_mw for x in items],
+                name=name,
+                customdata=[f"/result?{query(x.request, power_mw)}" for x in items],
+                hovertemplate="%{x}: £%{y:,.0f} a year<extra>" + name + "</extra>",
+            )
+        )
+    fig.update_layout(
+        title=f"{title} (click a bar to open it)",
+        template=figures.TEMPLATE,
+        yaxis_title=f"Revenue for {power_mw:g} MW (GBP a year)",
+        barmode="group",
+        legend={"orientation": "h", "y": -0.2},
+        margin={"l": 60, "r": 20, "t": 50, "b": 40},
+        height=380,
+        showlegend=len(series) > 1,
+    )
+    return _plot(fig, post_script=_CLICK)
+
+
+def _table(results: list[Result], power_mw: float) -> str:
+    if not results:
+        return ""
+    header = (
+        f"<tr><th>Prices</th><th>Revenue for {power_mw:g} MW</th><th>Per MW</th>"
+        f"<th>Share of perfect foresight {tip('share')}</th>"
+        f"<th>Cycles a day {tip('cycles')}</th><th></th></tr>"
+    )
+    rows = "".join(
+        f"<tr><td>{html.escape(x.request.where)}</td>"
+        f"<td>{_money(x.summary['revenue_per_mw_year'] * power_mw)}</td>"
+        f"<td>{_money(x.summary['revenue_per_mw_year'])}</td>"
+        f"<td>{x.summary['capture_ratio']:.0%}</td><td>{x.summary['cycles_per_day']:.1f}</td>"
+        f'<td><a href="/result?{html.escape(query(x.request, power_mw))}">Open</a></td></tr>'
+        for x in results
+    )
+    return f'<div class="wide"><table>{header}{rows}</table></div>'
 
 
 def daily_csv(result: Result, power_mw: float) -> str:
@@ -205,13 +359,14 @@ def _sources(request: Request) -> str:
     return text
 
 
-def _plot(fig: go.Figure) -> str:
+def _plot(fig: go.Figure, post_script: str | None = None) -> str:
     return str(
         fig.to_html(
             full_html=False,
             include_plotlyjs=False,
             default_width="100%",
             config={"displaylogo": False, "responsive": True},
+            post_script=post_script,
         )
     )
 

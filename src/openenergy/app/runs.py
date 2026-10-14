@@ -71,6 +71,20 @@ class Request:
         return f"{where}-{self.hours:g}h-{self.forecast}-{self.services}"
 
     @property
+    def prices(self) -> str:
+        """Which prices and services, e.g. ``gb-2024``, ``gb-2023-dc``, ``falling_behind_2030``."""
+        if self.source == "scenario":
+            return price_column(str(self.pathway), self.year)
+        return f"gb-{self.year}" + ("" if self.services == "none" else f"-{self.services}")
+
+    @property
+    def where(self) -> str:
+        if self.source == "scenario":
+            return f"{self.pathway} {self.year}"
+        names = {"none": "", "dc": " + DC", "dc_dm": " + DC and DM"}
+        return f"GB {self.year}{names[self.services]}"
+
+    @property
     def label(self) -> str:
         where = f"GB {self.year}" if self.source == "history" else f"{self.pathway} {self.year}"
         return f"{self.hours:g} h battery, {where}"
@@ -88,6 +102,22 @@ class Request:
             if self.services != "none" and self.year < RESPONSE_FROM:
                 return f"Frequency response needs a year from {RESPONSE_FROM}."
         return None
+
+
+def from_prices(prices: str, hours: float, forecast: ForecastName) -> Request | None:
+    """The request for a ``Request.prices`` token, or None if it names nothing known."""
+    options: tuple[Services, ...] = ("dc_dm", "dc", "none")
+    for services in options:
+        suffix = "" if services == "none" else f"-{services}"
+        year = prices.removeprefix("gb-").removesuffix(suffix)
+        if prices.startswith("gb-") and prices.endswith(suffix) and year.isdigit():
+            request = Request("history", int(year), hours, forecast, services)
+            return request if request.problem() is None else None
+    for pathway in PATHWAYS:
+        for target in SCENARIO_YEARS:
+            if prices == price_column(pathway, target):
+                return Request("scenario", target, hours, forecast, pathway=pathway)
+    return None
 
 
 def run(request: Request, data: Path, power_mw: float = 1.0) -> BatteryOutput:
