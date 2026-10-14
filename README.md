@@ -142,10 +142,13 @@ uv run mkdocs serve
 
 | Release | Scope |
 |---------|-------|
-| v4.1 | GB zones (Scotland, England and Wales) with the boundary between them, and links that respond to neighbours' supply rather than taking their prices |
+| v4.1 | A usable [web app](https://open-energy-eight.vercel.app/): the answer first in plain words, instant results for common batteries, value by year and by FES pathway at a glance, side-by-side comparison with shareable links, explanations next to each term, CSV and scenario downloads, and a JSON API; `CITATION.cff` and PyPI release |
+| v4.2 | A more credible model: GB zones (Scotland, England and Wales) with the boundary between them; links that respond to neighbours' supply rather than taking their prices; why modelled daily spreads are about 60% of real ones, checked against history without fitting to prices |
+| v5.0 | A React and TypeScript front end on the v4.1 JSON API, with the same Python back end |
 
-Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
-versioned docs.
+Alongside releases: a Zenodo DOI and versioned docs; refresh and re-check the bundled data
+every release; keep CI and its actions current; revisit stochastic planning if an open,
+forecastable market price appears.
 
 Ideas and bug reports are welcome in [issues](https://github.com/koulakhilesh/OpenEnergy/issues).
 
@@ -225,6 +228,7 @@ See [data/time_series](data/time_series/README.md),
 [data/system](data/system/README.md),
 [data/fes](data/fes/README.md),
 [data/scenarios](data/scenarios/README.md),
+[data/app](data/app/README.md),
 [data/response](data/response/README.md) and
 [data/balancing](data/balancing/README.md) for sources, changes and known issues. OpenEnergy is
 not affiliated with or endorsed by any data provider.
@@ -248,6 +252,7 @@ either and keeps its own licence:
 | `data/system` | Elexon BMRS interconnector flows (daily totals) | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
 | `data/fes` | NESO Future Energy Scenarios tables (unchanged) | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
 | `data/scenarios` | OpenEnergy model output built from the sources above | Attribution of every source used; see its README |
+| `data/app` | Precomputed web app results built from the sources above | Attribution of every source used; see its README |
 | `data/response` | NESO response auction results and system frequency (derived monthly averages) | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
 | `data/balancing` | Elexon BMRS system prices | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
 
