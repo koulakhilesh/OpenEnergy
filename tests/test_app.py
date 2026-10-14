@@ -242,6 +242,10 @@ def test_help_next_to_inputs_and_numbers(client: TestClient) -> None:
     home = client.get("/").text
     assert home.count('class="tip"') >= 5
     assert "Revenue scales with it" in home
+    for name in ("Historic year", "FES pathway", "FES year"):
+        assert f'aria-label="{name}"' in home  # every select has a name
+    assert "this.form.source.value='scenario'" in home
+    assert '<div class="wide"><table>' in client.get("/scenarios").text
     result = client.get("/result", params={"year": 2024}).text
     assert "an upper bound" in result
     assert "/compare?hours=2&amp;forecast=naive_last_week&amp;power_mw=1&amp;item=gb-2024" in result

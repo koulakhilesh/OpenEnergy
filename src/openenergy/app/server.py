@@ -51,6 +51,8 @@ margin-right:16px}
 .tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;left:0;top:20px;
 z-index:10;width:min(260px,70vw);padding:8px;background:#1f2933;color:#fff;font-size:12px;
 line-height:1.4;border-radius:4px;text-align:left;font-weight:400}
+.tip:focus{outline:2px solid #2680c2;outline-offset:2px}
+a:focus,button:focus,select:focus,input:focus,summary:focus{outline:2px solid #2680c2}
 .wide{overflow-x:auto}
 """
 _FAILED = "The run could not be completed. Please check the inputs and try again."
@@ -205,9 +207,13 @@ durations take 15 to 45 seconds.</p>
 <form action="/result" method="get">
 <fieldset><legend>Prices</legend>
 <label><input type="radio" name="source" value="history" checked> Historic GB year
-<select name="year">{years}</select></label><br>
+<select name="year" aria-label="Historic year"
+onchange="this.form.source.value='history'">{years}</select></label><br>
 <label><input type="radio" name="source" value="scenario"> FES pathway
-<select name="pathway">{pathways}</select> in <select name="target">{targets}</select></label>
+<select name="pathway" aria-label="FES pathway"
+onchange="this.form.source.value='scenario'">{pathways}</select> in
+<select name="target" aria-label="FES year"
+onchange="this.form.source.value='scenario'">{targets}</select></label>
 {pages.tip("pathway")}
 </fieldset>
 <fieldset><legend>Battery and plan</legend>
@@ -272,7 +278,7 @@ def compare_page(
     found = [store.get(request) for request in chosen if request is not None]
     options = store.requests(float(hours), forecast)
     selects = "".join(
-        f'<label>{n + 1} <select name="item"><option value="">none</option>'
+        f'<label>Prices {n + 1} <select name="item"><option value="">none</option>'
         + "".join(
             f'<option value="{html.escape(o.prices)}"'
             f"{' selected' if n < len(item) and item[n] == o.prices else ''}>"
@@ -348,7 +354,7 @@ def scenarios() -> str:
         "<p>Prices in GBP/MWh, energy in TWh. FES columns are NESO's own figures for the "
         "same year; the model's are from one weather year with price-taking links, so the "
         "gaps are part of the result.</p>"
-        f"<table>{header}{rows}</table>"
+        f'<div class="wide"><table>{header}{rows}</table></div>'
         f'<p class="source">{html.escape(SCENARIO_NOTE)}</p>'
         f'<p class="source">{html.escape(FES_ATTRIBUTION)}</p>'
     )
