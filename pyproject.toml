@@ -12,6 +12,7 @@ license-files = ["LICENSE.txt"]
 authors = [{ name = "Akhilesh Koul" }]
 requires-python = ">=3.14"
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.14",
     "Intended Audience :: Science/Research",
@@ -31,6 +32,7 @@ dependencies = [
 forecast = ["scikit-learn>=1.4", "threadpoolctl>=3.1"]
 system = ["pypsa>=1.4"]
 report = ["plotly>=6.0"]
+app = ["fastapi>=0.115", "plotly>=6.0", "uvicorn>=0.30"]
 
 [project.scripts]
 openenergy = "openenergy.cli:app"
@@ -39,6 +41,7 @@ openenergy = "openenergy.cli:app"
 Homepage = "https://github.com/koulakhilesh/OpenEnergy"
 Documentation = "https://koulakhilesh.github.io/OpenEnergy/"
 Issues = "https://github.com/koulakhilesh/OpenEnergy/issues"
+App = "https://open-energy-eight.vercel.app/"
 
 [dependency-groups]
 dev = [
@@ -50,7 +53,7 @@ dev = [
     "types-PyYAML>=6.0",
     "httpx2>=2.13",
 ]
-# The web app (openenergy.app); Vercel installs default groups other than dev.
+# The web app (openenergy.app); Vercel installs default groups other than dev, not extras.
 app = ["fastapi>=0.115", "plotly>=6.0", "uvicorn>=0.30"]
 # MkDocs 2.0 removes the plugin and theme systems that Material relies on.
 docs = ["mkdocs>=1.6,<2", "mkdocs-material>=9.5", "mkdocstrings[python]>=0.25"]
@@ -63,6 +66,10 @@ default-groups = ["dev", "app"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/openenergy"]
+
+# The bundled data stay in the repository; the sdist carries the package source only.
+[tool.hatch.build.targets.sdist]
+include = ["/src/openenergy", "/README.md", "/LICENSE.txt", "/CITATION.cff"]
 
 [tool.ruff]
 line-length = 100

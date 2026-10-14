@@ -1,0 +1,175 @@
+key,source,year,pathway,hours,forecast,services,days,revenue_per_mw_year,perfect_per_mw_year,capture_ratio,cycles_per_day,captured_spread,forecast_mae,response_share
+gb-2017-1h-naive_last_week-none,history,2017,,1,naive_last_week,none,365,12106.8,15560.2,0.778064,1.59442,21.927,5.89707,0
+gb-2018-1h-naive_last_week-none,history,2018,,1,naive_last_week,none,365,11216,15035.2,0.745982,1.62241,19.9633,6.75474,0
+gb-2019-1h-naive_last_week-none,history,2019,,1,naive_last_week,none,365,7991.04,11331,0.705239,1.43668,16.0619,6.14104,0
+gb-2020-1h-naive_last_week-none,history,2020,,1,naive_last_week,none,366,10328.1,13326.9,0.774977,1.29911,22.9576,7.69602,0
+gb-2021-1h-naive_last_week-none,history,2021,,1,naive_last_week,none,365,43644.5,53835.8,0.810696,1.87424,67.2447,31.3271,0
+gb-2022-1h-naive_last_week-none,history,2022,,1,naive_last_week,none,365,38603.2,55155.4,0.699899,2.07488,53.7428,61.3637,0
+gb-2022-1h-naive_last_week-dc,history,2022,,1,naive_last_week,dc,365,173105,195409,0.885857,1.11998,45.1495,61.3637,0.908778
+gb-2022-1h-naive_last_week-dc_dm,history,2022,,1,naive_last_week,dc_dm,281,203158,231451,0.877759,0.90777,121.417,60.8985,0.840795
+gb-2023-1h-naive_last_week-none,history,2023,,1,naive_last_week,none,365,19774.4,25394.4,0.778694,1.80237,31.6822,20.0288,0
+gb-2023-1h-naive_last_week-dc,history,2023,,1,naive_last_week,dc,365,53730.9,59502.8,0.902998,0.95049,33.5619,20.0288,0.81928
+gb-2023-1h-naive_last_week-dc_dm,history,2023,,1,naive_last_week,dc_dm,365,65315.2,79495.5,0.821621,0.88335,60.7282,20.0288,0.802457
+gb-2024-1h-naive_last_week-none,history,2024,,1,naive_last_week,none,366,15197.5,21149.3,0.718582,1.68018,26.13,19.5381,0
+gb-2024-1h-naive_last_week-dc,history,2024,,1,naive_last_week,dc,366,38232,42108.7,0.907935,0.854725,27.3046,19.5381,0.824898
+gb-2024-1h-naive_last_week-dc_dm,history,2024,,1,naive_last_week,dc_dm,366,40231.4,47283.5,0.850855,1.00527,38.3115,19.5381,0.775695
+gb-2025-1h-naive_last_week-none,history,2025,,1,naive_last_week,none,365,19080.8,24192.1,0.788722,1.64394,33.517,21.8099,0
+gb-2025-1h-naive_last_week-dc,history,2025,,1,naive_last_week,dc,365,57788.8,61557.2,0.938781,0.732669,31.3233,21.8099,0.891666
+gb-2025-1h-naive_last_week-dc_dm,history,2025,,1,naive_last_week,dc_dm,365,70208.9,79895,0.878765,0.827363,26.956,21.8099,0.960606
+holistic_transition_2030-1h-naive_last_week-none,scenario,2030,Holistic Transition,1,naive_last_week,none,358,3009.38,7777.48,0.386936,0.564848,15.3851,30.975,0
+holistic_transition_2035-1h-naive_last_week-none,scenario,2035,Holistic Transition,1,naive_last_week,none,358,9355.31,14445.4,0.647631,0.658687,41.0142,80.2477,0
+electric_engagement_2030-1h-naive_last_week-none,scenario,2030,Electric Engagement,1,naive_last_week,none,358,3669.06,8896.85,0.4124,0.597153,17.7429,30.6499,0
+electric_engagement_2035-1h-naive_last_week-none,scenario,2035,Electric Engagement,1,naive_last_week,none,358,10634.6,15380.8,0.69142,0.749588,40.9689,53.833,0
+hydrogen_evolution_2030-1h-naive_last_week-none,scenario,2030,Hydrogen Evolution,1,naive_last_week,none,358,4603.75,9789.3,0.470283,0.640506,20.7559,28.211,0
+hydrogen_evolution_2035-1h-naive_last_week-none,scenario,2035,Hydrogen Evolution,1,naive_last_week,none,358,4349.84,9632.28,0.45159,0.707634,17.7509,34.3477,0
+falling_behind_2030-1h-naive_last_week-none,scenario,2030,Falling Behind,1,naive_last_week,none,358,3063.66,7577.84,0.404292,0.537019,16.4743,22.8121,0
+falling_behind_2035-1h-naive_last_week-none,scenario,2035,Falling Behind,1,naive_last_week,none,358,2937.96,9045.95,0.324782,0.584567,14.5133,32.6134,0
+ten_year_forecast_2030-1h-naive_last_week-none,scenario,2030,Ten Year Forecast,1,naive_last_week,none,358,2930.31,7711.01,0.380016,0.546808,15.4751,28.3255,0
+ten_year_forecast_2035-1h-naive_last_week-none,scenario,2035,Ten Year Forecast,1,naive_last_week,none,358,2978.25,7417.1,0.401538,0.591559,14.5384,32.2946,0
+ten_year_outlook_2030-1h-naive_last_week-none,scenario,2030,Ten Year Outlook,1,naive_last_week,none,358,2671.25,6406.65,0.41695,0.468493,16.4652,23.1279,0
+ten_year_outlook_2035-1h-naive_last_week-none,scenario,2035,Ten Year Outlook,1,naive_last_week,none,358,3111.13,7135.12,0.43603,0.551003,16.3049,30.4762,0
+gb-2017-1h-perfect_foresight-none,history,2017,,1,perfect_foresight,none,365,15560.2,15560.2,1,1.60087,28.068,0,0
+gb-2018-1h-perfect_foresight-none,history,2018,,1,perfect_foresight,none,365,15035.2,15035.2,1,1.6198,26.8042,0,0
+gb-2019-1h-perfect_foresight-none,history,2019,,1,perfect_foresight,none,365,11331,11331,1,1.43147,22.8581,0,0
+gb-2020-1h-perfect_foresight-none,history,2020,,1,perfect_foresight,none,366,13326.9,13326.9,1,1.31347,29.2997,0,0
+gb-2021-1h-perfect_foresight-none,history,2021,,1,perfect_foresight,none,365,53835.8,53835.8,1,1.88796,82.3442,0,0
+gb-2022-1h-perfect_foresight-none,history,2022,,1,perfect_foresight,none,365,55155.4,55155.4,1,2.06487,77.159,0,0
+gb-2022-1h-perfect_foresight-dc,history,2022,,1,perfect_foresight,dc,365,182187,195409,0.932334,1.11165,80.1517,0,0.847423
+gb-2022-1h-perfect_foresight-dc_dm,history,2022,,1,perfect_foresight,dc_dm,281,211367,231451,0.913227,0.901883,155.227,0,0.805681
+gb-2023-1h-perfect_foresight-none,history,2023,,1,perfect_foresight,none,365,25394.4,25394.4,1,1.79578,40.8355,0,0
+gb-2023-1h-perfect_foresight-dc,history,2023,,1,perfect_foresight,dc,365,56830.7,59502.8,0.955093,0.921427,47.8026,0,0.765155
+gb-2023-1h-perfect_foresight-dc_dm,history,2023,,1,perfect_foresight,dc_dm,365,68407.8,79495.5,0.860524,0.865069,77.4907,0,0.771915
+gb-2024-1h-perfect_foresight-none,history,2024,,1,perfect_foresight,none,366,21149.3,21149.3,1,1.68127,36.3396,0,0
+gb-2024-1h-perfect_foresight-dc,history,2024,,1,perfect_foresight,dc,366,41173.7,42108.7,0.977796,0.859096,42.387,0,0.746386
+gb-2024-1h-perfect_foresight-dc_dm,history,2024,,1,perfect_foresight,dc_dm,366,43486.4,47283.5,0.919693,0.986771,61.6402,0,0.671321
+gb-2025-1h-perfect_foresight-none,history,2025,,1,perfect_foresight,none,365,24192.1,24192.1,1,1.63571,42.7091,0,0
+gb-2025-1h-perfect_foresight-dc,history,2025,,1,perfect_foresight,dc,365,59934.4,61557.2,0.973638,0.707032,53.3804,0,0.830139
+gb-2025-1h-perfect_foresight-dc_dm,history,2025,,1,perfect_foresight,dc_dm,365,72227.7,79895,0.904033,0.807677,72.2072,0,0.903347
+holistic_transition_2030-1h-perfect_foresight-none,scenario,2030,Holistic Transition,1,perfect_foresight,none,365,7833.1,7833.1,1,0.560874,40.3295,0,0
+holistic_transition_2035-1h-perfect_foresight-none,scenario,2035,Holistic Transition,1,perfect_foresight,none,365,14320.9,14320.9,1,0.657028,62.9421,0,0
+electric_engagement_2030-1h-perfect_foresight-none,scenario,2030,Electric Engagement,1,perfect_foresight,none,365,8917.76,8917.76,1,0.593931,43.3585,0,0
+electric_engagement_2035-1h-perfect_foresight-none,scenario,2035,Electric Engagement,1,perfect_foresight,none,365,15249.2,15249.2,1,0.743443,59.2316,0,0
+hydrogen_evolution_2030-1h-perfect_foresight-none,scenario,2030,Hydrogen Evolution,1,perfect_foresight,none,365,9831.54,9831.54,1,0.632338,44.898,0,0
+hydrogen_evolution_2035-1h-perfect_foresight-none,scenario,2035,Hydrogen Evolution,1,perfect_foresight,none,365,9635.2,9635.2,1,0.703664,39.5412,0,0
+falling_behind_2030-1h-perfect_foresight-none,scenario,2030,Falling Behind,1,perfect_foresight,none,365,7638.61,7638.61,1,0.530835,41.5537,0,0
+falling_behind_2035-1h-perfect_foresight-none,scenario,2035,Falling Behind,1,perfect_foresight,none,365,9091.63,9091.63,1,0.581586,45.1422,0,0
+ten_year_forecast_2030-1h-perfect_foresight-none,scenario,2030,Ten Year Forecast,1,perfect_foresight,none,365,7775.11,7775.11,1,0.540436,41.5448,0,0
+ten_year_forecast_2035-1h-perfect_foresight-none,scenario,2035,Ten Year Forecast,1,perfect_foresight,none,365,7427.55,7427.55,1,0.589816,36.365,0,0
+ten_year_outlook_2030-1h-perfect_foresight-none,scenario,2030,Ten Year Outlook,1,perfect_foresight,none,365,6422.11,6422.11,1,0.462251,40.1194,0,0
+ten_year_outlook_2035-1h-perfect_foresight-none,scenario,2035,Ten Year Outlook,1,perfect_foresight,none,365,7154,7154,1,0.545923,37.8418,0,0
+gb-2017-2h-naive_last_week-none,history,2017,,2,naive_last_week,none,365,20865.5,26469.2,0.788293,1.45452,20.7126,5.89707,0
+gb-2018-2h-naive_last_week-none,history,2018,,2,naive_last_week,none,365,19068.3,25602,0.744797,1.46079,18.8472,6.75474,0
+gb-2019-2h-naive_last_week-none,history,2019,,2,naive_last_week,none,365,14069.6,19701.5,0.714137,1.29236,15.719,6.14104,0
+gb-2020-2h-naive_last_week-none,history,2020,,2,naive_last_week,none,366,17324.9,22561,0.767914,1.1546,21.6653,7.69602,0
+gb-2021-2h-naive_last_week-none,history,2021,,2,naive_last_week,none,365,75067.6,90263.6,0.831649,1.71363,63.2498,31.3271,0
+gb-2022-2h-naive_last_week-none,history,2022,,2,naive_last_week,none,365,77945.9,103705,0.751609,1.82796,61.5674,61.3637,0
+gb-2022-2h-naive_last_week-dc,history,2022,,2,naive_last_week,dc,365,196328,233843,0.839572,1.06491,62.9788,61.3637,0.774878
+gb-2022-2h-naive_last_week-dc_dm,history,2022,,2,naive_last_week,dc_dm,281,217427,259288,0.838551,1.01309,91.4878,60.8985,0.722878
+gb-2023-2h-naive_last_week-none,history,2023,,2,naive_last_week,none,365,36370.5,46440.4,0.783165,1.69363,31.0067,20.0288,0
+gb-2023-2h-naive_last_week-dc,history,2023,,2,naive_last_week,dc,365,62114.4,73297.4,0.847429,1.07595,33.299,20.0288,0.619061
+gb-2023-2h-naive_last_week-dc_dm,history,2023,,2,naive_last_week,dc_dm,365,72561.7,91697,0.79132,0.930106,45.2817,20.0288,0.651392
+gb-2024-2h-naive_last_week-none,history,2024,,2,naive_last_week,none,366,29039.2,39304,0.738836,1.56913,26.7209,19.5381,0
+gb-2024-2h-naive_last_week-dc,history,2024,,2,naive_last_week,dc,366,45421,54015.1,0.840894,0.988654,28.4399,19.5381,0.599189
+gb-2024-2h-naive_last_week-dc_dm,history,2024,,2,naive_last_week,dc_dm,366,47620.7,59024.7,0.806793,1.00137,35.2711,19.5381,0.561818
+gb-2025-2h-naive_last_week-none,history,2025,,2,naive_last_week,none,365,36207.7,44974.2,0.805078,1.57739,33.1425,21.8099,0
+gb-2025-2h-naive_last_week-dc,history,2025,,2,naive_last_week,dc,365,64006.3,73083.3,0.875799,0.883372,32.7976,21.8099,0.711542
+gb-2025-2h-naive_last_week-dc_dm,history,2025,,2,naive_last_week,dc_dm,365,75871.7,90707.2,0.836447,0.807223,34.5739,21.8099,0.824447
+holistic_transition_2030-2h-naive_last_week-none,scenario,2030,Holistic Transition,2,naive_last_week,none,358,6148.46,15500.4,0.396665,0.561702,15.8046,30.975,0
+holistic_transition_2035-2h-naive_last_week-none,scenario,2035,Holistic Transition,2,naive_last_week,none,358,18791.7,28841.3,0.651554,0.656659,41.3191,80.2477,0
+electric_engagement_2030-2h-naive_last_week-none,scenario,2030,Electric Engagement,2,naive_last_week,none,358,7769.45,17756,0.437568,0.595615,18.8343,30.6499,0
+electric_engagement_2035-2h-naive_last_week-none,scenario,2035,Electric Engagement,2,naive_last_week,none,358,21678.7,30695,0.706262,0.745746,41.9727,53.833,0
+hydrogen_evolution_2030-2h-naive_last_week-none,scenario,2030,Hydrogen Evolution,2,naive_last_week,none,358,9504.16,19538.6,0.48643,0.639108,21.4716,28.211,0
+hydrogen_evolution_2035-2h-naive_last_week-none,scenario,2035,Hydrogen Evolution,2,naive_last_week,none,358,8985.55,19179.8,0.46849,0.702886,18.458,34.3477,0
+falling_behind_2030-2h-naive_last_week-none,scenario,2030,Falling Behind,2,naive_last_week,none,358,6301.61,15109.7,0.417057,0.534641,17.0182,22.8121,0
+falling_behind_2035-2h-naive_last_week-none,scenario,2035,Falling Behind,2,naive_last_week,none,358,6391.2,18044.2,0.354196,0.582609,15.8391,32.6134,0
+ten_year_forecast_2030-2h-naive_last_week-none,scenario,2030,Ten Year Forecast,2,naive_last_week,none,358,5918.07,15385.3,0.384657,0.54534,15.6689,28.3255,0
+ten_year_forecast_2035-2h-naive_last_week-none,scenario,2035,Ten Year Forecast,2,naive_last_week,none,358,6036.17,14795.1,0.407985,0.589741,14.7783,32.2946,0
+ten_year_outlook_2030-2h-naive_last_week-none,scenario,2030,Ten Year Outlook,2,naive_last_week,none,358,5472.28,12781.4,0.428145,0.466884,16.9233,23.1279,0
+ten_year_outlook_2035-2h-naive_last_week-none,scenario,2035,Ten Year Outlook,2,naive_last_week,none,358,6369.9,14242.9,0.447235,0.549535,16.7364,30.4762,0
+gb-2017-2h-perfect_foresight-none,history,2017,,2,perfect_foresight,none,365,26469.2,26469.2,1,1.45719,26.227,0,0
+gb-2018-2h-perfect_foresight-none,history,2018,,2,perfect_foresight,none,365,25602,25602,1,1.45929,25.3313,0,0
+gb-2019-2h-perfect_foresight-none,history,2019,,2,perfect_foresight,none,365,19701.5,19701.5,1,1.28838,22.079,0,0
+gb-2020-2h-perfect_foresight-none,history,2020,,2,perfect_foresight,none,366,22561,22561,1,1.16254,28.0206,0,0
+gb-2021-2h-perfect_foresight-none,history,2021,,2,perfect_foresight,none,365,90263.6,90263.6,1,1.72837,75.4048,0,0
+gb-2022-2h-perfect_foresight-none,history,2022,,2,perfect_foresight,none,365,103705,103705,1,1.81466,82.5148,0,0
+gb-2022-2h-perfect_foresight-dc,history,2022,,2,perfect_foresight,dc,365,216373,233843,0.925291,1.06545,96.1678,0,0.687761
+gb-2022-2h-perfect_foresight-dc_dm,history,2022,,2,perfect_foresight,dc_dm,281,234791,259288,0.90552,1.00926,120.817,0,0.662647
+gb-2023-2h-perfect_foresight-none,history,2023,,2,perfect_foresight,none,365,46440.4,46440.4,1,1.68979,39.6815,0,0
+gb-2023-2h-perfect_foresight-dc,history,2023,,2,perfect_foresight,dc,365,69372.9,73297.4,0.946457,1.04926,46.2544,0,0.538714
+gb-2023-2h-perfect_foresight-dc_dm,history,2023,,2,perfect_foresight,dc_dm,365,79794.9,91697,0.870202,0.916001,60.606,0,0.585737
+gb-2024-2h-perfect_foresight-none,history,2024,,2,perfect_foresight,none,366,39304,39304,1,1.56769,36.1993,0,0
+gb-2024-2h-perfect_foresight-dc,history,2024,,2,perfect_foresight,dc,366,52833.6,54015.1,0.978126,1.0076,41.9046,0,0.481751
+gb-2024-2h-perfect_foresight-dc_dm,history,2024,,2,perfect_foresight,dc_dm,366,55310.7,59024.7,0.937077,1.02026,51.9074,0,0.430858
+gb-2025-2h-perfect_foresight-none,history,2025,,2,perfect_foresight,none,365,44974.2,44974.2,1,1.5691,41.3846,0,0
+gb-2025-2h-perfect_foresight-dc,history,2025,,2,perfect_foresight,dc,365,71046.7,73083.3,0.972132,0.854654,51.198,0,0.608994
+gb-2025-2h-perfect_foresight-dc_dm,history,2025,,2,perfect_foresight,dc_dm,365,82744.9,90707.2,0.91222,0.773394,64.1928,0,0.719807
+holistic_transition_2030-2h-perfect_foresight-none,scenario,2030,Holistic Transition,2,perfect_foresight,none,365,15611.2,15611.2,1,0.557788,40.4103,0,0
+holistic_transition_2035-2h-perfect_foresight-none,scenario,2035,Holistic Transition,2,perfect_foresight,none,365,28592,28592,1,0.655039,63.0234,0,0
+electric_engagement_2030-2h-perfect_foresight-none,scenario,2030,Electric Engagement,2,perfect_foresight,none,365,17797.2,17797.2,1,0.592422,43.3756,0,0
+electric_engagement_2035-2h-perfect_foresight-none,scenario,2035,Electric Engagement,2,perfect_foresight,none,365,30431,30431,1,0.739674,59.4018,0,0
+hydrogen_evolution_2030-2h-perfect_foresight-none,scenario,2030,Hydrogen Evolution,2,perfect_foresight,none,365,19622.4,19622.4,1,0.630966,44.9025,0,0
+hydrogen_evolution_2035-2h-perfect_foresight-none,scenario,2035,Hydrogen Evolution,2,perfect_foresight,none,365,19184.5,19184.5,1,0.699008,39.6272,0,0
+falling_behind_2030-2h-perfect_foresight-none,scenario,2030,Falling Behind,2,perfect_foresight,none,365,15231.6,15231.6,1,0.528366,41.6232,0,0
+falling_behind_2035-2h-perfect_foresight-none,scenario,2035,Falling Behind,2,perfect_foresight,none,365,18133.3,18133.3,1,0.579666,45.1673,0,0
+ten_year_forecast_2030-2h-perfect_foresight-none,scenario,2030,Ten Year Forecast,2,perfect_foresight,none,365,15512.7,15512.7,1,0.538996,41.5554,0,0
+ten_year_forecast_2035-2h-perfect_foresight-none,scenario,2035,Ten Year Forecast,2,perfect_foresight,none,365,14815.1,14815.1,1,0.588033,36.3771,0,0
+ten_year_outlook_2030-2h-perfect_foresight-none,scenario,2030,Ten Year Outlook,2,perfect_foresight,none,365,12812.8,12812.8,1,0.460605,40.1641,0,0
+ten_year_outlook_2035-2h-perfect_foresight-none,scenario,2035,Ten Year Outlook,2,perfect_foresight,none,365,14278.6,14278.6,1,0.544483,37.8639,0,0
+gb-2017-4h-naive_last_week-none,history,2017,,4,naive_last_week,none,365,28315.1,35724.5,0.792595,1.03702,19.7118,5.89707,0
+gb-2018-4h-naive_last_week-none,history,2018,,4,naive_last_week,none,365,25913.8,34842.7,0.743736,1.0483,17.846,6.75474,0
+gb-2019-4h-naive_last_week-none,history,2019,,4,naive_last_week,none,365,20041.2,27925.9,0.717656,0.949261,15.2417,6.14104,0
+gb-2020-4h-naive_last_week-none,history,2020,,4,naive_last_week,none,366,24852.8,32182.8,0.772239,0.858271,20.9048,7.69602,0
+gb-2021-4h-naive_last_week-none,history,2021,,4,naive_last_week,none,365,108610,127944,0.848883,1.27431,61.5302,31.3271,0
+gb-2022-4h-naive_last_week-none,history,2022,,4,naive_last_week,none,365,118980,158515,0.750593,1.45478,59.0437,61.3637,0
+gb-2022-4h-naive_last_week-dc,history,2022,,4,naive_last_week,dc,365,220826,277427,0.795977,0.955554,62.0482,61.3637,0.637523
+gb-2022-4h-naive_last_week-dc_dm,history,2022,,4,naive_last_week,dc_dm,281,242599,301031,0.805892,0.932181,77.8745,60.8985,0.598859
+gb-2023-4h-naive_last_week-none,history,2023,,4,naive_last_week,none,365,55769.3,70662.4,0.789237,1.31599,30.594,20.0288,0
+gb-2023-4h-naive_last_week-dc,history,2023,,4,naive_last_week,dc,365,75195.2,92754.8,0.810688,0.922779,32.8072,20.0288,0.456844
+gb-2023-4h-naive_last_week-dc_dm,history,2023,,4,naive_last_week,dc_dm,365,84017.5,109501,0.767276,0.815569,39.3021,20.0288,0.510359
+gb-2024-4h-naive_last_week-none,history,2024,,4,naive_last_week,none,366,43726.3,59933.5,0.729581,1.19641,26.3851,19.5381,0
+gb-2024-4h-naive_last_week-dc,history,2024,,4,naive_last_week,dc,366,56211.8,71844.1,0.782415,0.864119,27.6994,19.5381,0.430946
+gb-2024-4h-naive_last_week-dc_dm,history,2024,,4,naive_last_week,dc_dm,366,58363.4,76850.8,0.759438,0.86609,31.2787,19.5381,0.411053
+gb-2025-4h-naive_last_week-none,history,2025,,4,naive_last_week,none,365,55409.1,70139.2,0.789987,1.24445,32.1437,21.8099,0
+gb-2025-4h-naive_last_week-dc,history,2025,,4,naive_last_week,dc,365,74872.4,91991.3,0.813907,0.810299,32.5375,21.8099,0.531738
+gb-2025-4h-naive_last_week-dc_dm,history,2025,,4,naive_last_week,dc_dm,365,84574.5,107392,0.78753,0.735787,33.1429,21.8099,0.663971
+holistic_transition_2030-4h-naive_last_week-none,scenario,2030,Holistic Transition,4,naive_last_week,none,358,12145.5,29716.5,0.408713,0.532935,16.4527,30.975,0
+holistic_transition_2035-4h-naive_last_week-none,scenario,2035,Holistic Transition,4,naive_last_week,none,358,35260.3,55325.2,0.637328,0.625191,40.7163,80.2477,0
+electric_engagement_2030-4h-naive_last_week-none,scenario,2030,Electric Engagement,4,naive_last_week,none,358,15466.6,34330.4,0.450521,0.572809,19.493,30.6499,0
+electric_engagement_2035-4h-naive_last_week-none,scenario,2035,Electric Engagement,4,naive_last_week,none,358,42025.2,59558.5,0.705612,0.703262,43.1407,53.833,0
+hydrogen_evolution_2030-4h-naive_last_week-none,scenario,2030,Hydrogen Evolution,4,naive_last_week,none,358,18931.9,37681.3,0.502422,0.612794,22.3035,28.211,0
+hydrogen_evolution_2035-4h-naive_last_week-none,scenario,2035,Hydrogen Evolution,4,naive_last_week,none,358,16562.4,36374.8,0.455326,0.659966,18.1174,34.3477,0
+falling_behind_2030-4h-naive_last_week-none,scenario,2030,Falling Behind,4,naive_last_week,none,358,12229,28894.6,0.423226,0.503983,17.5173,22.8121,0
+falling_behind_2035-4h-naive_last_week-none,scenario,2035,Falling Behind,4,naive_last_week,none,358,12498.3,34596.6,0.361259,0.554363,16.2761,32.6134,0
+ten_year_forecast_2030-4h-naive_last_week-none,scenario,2030,Ten Year Forecast,4,naive_last_week,none,358,11817.7,29551.9,0.399895,0.519745,16.4148,28.3255,0
+ten_year_forecast_2035-4h-naive_last_week-none,scenario,2035,Ten Year Forecast,4,naive_last_week,none,358,11479.3,28388.3,0.404366,0.563763,14.6998,32.2946,0
+ten_year_outlook_2030-4h-naive_last_week-none,scenario,2030,Ten Year Outlook,4,naive_last_week,none,358,10672.5,24704.9,0.432001,0.44666,17.2499,23.1279,0
+ten_year_outlook_2035-4h-naive_last_week-none,scenario,2035,Ten Year Outlook,4,naive_last_week,none,358,12695.8,27659.9,0.458996,0.52899,17.3263,30.4762,0
+gb-2017-4h-perfect_foresight-none,history,2017,,4,perfect_foresight,none,365,35724.5,35724.5,1,1.03818,24.842,0,0
+gb-2018-4h-perfect_foresight-none,history,2018,,4,perfect_foresight,none,365,34842.7,34842.7,1,1.04858,23.9886,0,0
+gb-2019-4h-perfect_foresight-none,history,2019,,4,perfect_foresight,none,365,27925.9,27925.9,1,0.945642,21.3194,0,0
+gb-2020-4h-perfect_foresight-none,history,2020,,4,perfect_foresight,none,366,32182.8,32182.8,1,0.861308,26.9749,0,0
+gb-2021-4h-perfect_foresight-none,history,2021,,4,perfect_foresight,none,365,127944,127944,1,1.28618,71.8148,0,0
+gb-2022-4h-perfect_foresight-none,history,2022,,4,perfect_foresight,none,365,158515,158515,1,1.45034,78.9034,0,0
+gb-2022-4h-perfect_foresight-dc,history,2022,,4,perfect_foresight,dc,365,257483,277427,0.928111,0.955416,93.8257,0,0.529805
+gb-2022-4h-perfect_foresight-dc_dm,history,2022,,4,perfect_foresight,dc_dm,281,274443,301031,0.911676,0.924931,106.064,0,0.521035
+gb-2023-4h-perfect_foresight-none,history,2023,,4,perfect_foresight,none,365,70662.4,70662.4,1,1.31376,38.8298,0,0
+gb-2023-4h-perfect_foresight-dc,history,2023,,4,perfect_foresight,dc,365,88253.9,92754.8,0.951476,0.905827,45.2307,0,0.374219
+gb-2023-4h-perfect_foresight-dc_dm,history,2023,,4,perfect_foresight,dc_dm,365,97380.2,109501,0.889308,0.799812,53.9898,0,0.43391
+gb-2024-4h-perfect_foresight-none,history,2024,,4,perfect_foresight,none,366,59933.5,59933.5,1,1.19194,36.3003,0,0
+gb-2024-4h-perfect_foresight-dc,history,2024,,4,perfect_foresight,dc,366,70728.1,71844.1,0.984467,0.880781,41.4202,0,0.309981
+gb-2024-4h-perfect_foresight-dc_dm,history,2024,,4,perfect_foresight,dc_dm,366,73336.6,76850.8,0.954272,0.881659,46.9768,0,0.280268
+gb-2025-4h-perfect_foresight-none,history,2025,,4,perfect_foresight,none,365,70139.2,70139.2,1,1.23759,40.9147,0,0
+gb-2025-4h-perfect_foresight-dc,history,2025,,4,perfect_foresight,dc,365,89965.4,91991.3,0.977976,0.778828,50.8014,0,0.416406
+gb-2025-4h-perfect_foresight-dc_dm,history,2025,,4,perfect_foresight,dc_dm,365,100250,107392,0.933495,0.702745,58.42,0,0.527032
+holistic_transition_2030-4h-perfect_foresight-none,scenario,2030,Holistic Transition,4,perfect_foresight,none,365,29920.8,29920.8,1,0.529436,40.7995,0,0
+holistic_transition_2035-4h-perfect_foresight-none,scenario,2035,Holistic Transition,4,perfect_foresight,none,365,54839.7,54839.7,1,0.623456,63.5015,0,0
+electric_engagement_2030-4h-perfect_foresight-none,scenario,2030,Electric Engagement,4,perfect_foresight,none,365,34398.7,34398.7,1,0.569335,43.6182,0,0
+electric_engagement_2035-4h-perfect_foresight-none,scenario,2035,Electric Engagement,4,perfect_foresight,none,365,59011.9,59011.9,1,0.697936,61.0406,0,0
+hydrogen_evolution_2030-4h-perfect_foresight-none,scenario,2030,Hydrogen Evolution,4,perfect_foresight,none,365,37839.5,37839.5,1,0.605089,45.1462,0,0
+hydrogen_evolution_2035-4h-perfect_foresight-none,scenario,2035,Hydrogen Evolution,4,perfect_foresight,none,365,36352.1,36352.1,1,0.656773,39.9584,0,0
+falling_behind_2030-4h-perfect_foresight-none,scenario,2030,Falling Behind,4,perfect_foresight,none,365,29147.5,29147.5,1,0.496992,42.3396,0,0
+falling_behind_2035-4h-perfect_foresight-none,scenario,2035,Falling Behind,4,perfect_foresight,none,365,34730.7,34730.7,1,0.551312,45.479,0,0
+ten_year_forecast_2030-4h-perfect_foresight-none,scenario,2030,Ten Year Forecast,4,perfect_foresight,none,365,29796.5,29796.5,1,0.513824,41.8645,0,0
+ten_year_forecast_2035-4h-perfect_foresight-none,scenario,2035,Ten Year Forecast,4,perfect_foresight,none,365,28413.3,28413.3,1,0.562484,36.4676,0,0
+ten_year_outlook_2030-4h-perfect_foresight-none,scenario,2030,Ten Year Outlook,4,perfect_foresight,none,365,24780.2,24780.2,1,0.440117,40.6473,0,0
+ten_year_outlook_2035-4h-perfect_foresight-none,scenario,2035,Ten Year Outlook,4,perfect_foresight,none,365,27683.3,27683.3,1,0.524263,38.1209,0,0

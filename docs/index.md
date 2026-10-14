@@ -116,7 +116,8 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
     year, with GB's interconnectors as price-taking links to six neighbouring markets
     (see [Forward scenarios](guides/forward-scenarios.md)).
 11. **Runs in the browser**: a FastAPI [web app](guides/web-app.md) values a battery on
-    any GB year from 2017 or on a FES pathway, deployable to Vercel.
+    any GB year from 2017 or on a FES pathway; try it at
+    [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/).
 
 See [Concepts](concepts.md) for the equations and [Scenarios](guides/scenarios.md) for
 every setting.
@@ -136,27 +137,17 @@ every setting.
 | v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
 | v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
 | v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value) |
-| v4.0 | Forward scenarios from NESO's Future Energy Scenarios on a historic weather year; GB's interconnectors as price-taking links to six neighbouring markets, checked against actual flows 2019–2025; a web app (FastAPI, Vercel) valuing a battery on history or a FES pathway (current) |
+| v4.0 | Forward scenarios from NESO's Future Energy Scenarios on a historic weather year; GB's interconnectors as price-taking links to six neighbouring markets, checked against actual flows 2019–2025; a web app (FastAPI, Vercel) valuing a battery on history or a FES pathway |
+| v4.1 | A usable [web app](https://open-energy-eight.vercel.app/): the answer first in plain words, instant results for common batteries, value by year and by FES pathway at a glance, side-by-side comparison with shareable links, explanations next to each term, CSV and scenario downloads, and a JSON API; `CITATION.cff` and PyPI release (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v4.1 | GB zones (Scotland, England and Wales) with the boundary between them, and links that respond to neighbours' supply rather than taking their prices |
+| v4.2 | A more credible model: GB zones (Scotland, England and Wales) with the boundary between them; links that respond to neighbours' supply rather than taking their prices; why modelled daily spreads are about 60% of real ones, checked against history without fitting to prices |
+| v5.0 | A React and TypeScript front end on the v4.1 JSON API, with the same Python back end |
 
-Why this order: v3.0's backcast matched average prices but its peaks were too low, so a
-battery earned almost nothing on modelled prices. v3.1's unit commitment restores much of
-the daily shape (2019 perfect-foresight battery value £10k against £22.5k on real prices);
-v3.2 brings the data to 2025, where the model misses the size and timing of the 2021–2022
-price rise. v3.3 measured that, for a battery trading only day-ahead, planning across price
-scenarios adds nothing over one forecast while planning one day ahead adds 5–15% revenue.
-v3.5 found the same for frequency response, which is committed before its price is known,
-and that balancing pays only with an imbalance-price forecast open data does not give; so
-stochastic planning waits for a later market with an open, forecastable price. v4.0's
-links widen the modelled daily spread several-fold but, in six of seven years, import 38–93%
-more than actually flowed, so v4.1 splits GB into zones and makes the links respond to
-neighbours' supply.
-
-Alongside releases: publish to PyPI, add a `CITATION.cff` with a Zenodo DOI, and keep
-versioned docs. Ideas are welcome in
+Alongside releases: a Zenodo DOI and versioned docs; refresh and re-check the bundled data
+every release; keep CI and its actions current; revisit stochastic planning if an open,
+forecastable market price appears. Ideas are welcome in
 [issues](https://github.com/koulakhilesh/OpenEnergy/issues).

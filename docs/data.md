@@ -155,7 +155,9 @@ fuel or carbon prices and no storage efficiencies.
 `data/scenarios/` is model output, not source data: hourly modelled prices for each
 pathway in 2030 and 2035 on 2025's weather (`fes_prices.csv`) and a summary next to FES's
 own figures (`fes_summary.csv`), written by `scripts/build_scenario_prices.py` for the
-[web app](guides/web-app.md).
+[web app](guides/web-app.md). `data/app/` is model output too: per-MW battery results for
+common requests (1, 2 and 4 hours, every year, response option and pathway), written by
+`scripts/build_app_results.py` so the app answers at once.
 
 ## Frequency response
 

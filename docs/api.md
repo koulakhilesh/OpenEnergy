@@ -86,7 +86,11 @@
 
 ## Web app
 
-::: openenergy.app
+::: openenergy.app.runs
+
+::: openenergy.app.results
+
+::: openenergy.app.server
 
 ## Errors
 
