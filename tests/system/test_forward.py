@@ -87,3 +87,23 @@ def test_links_follow_in_service_dates() -> None:
     assert viking.import_mw.iloc[-1] == pytest.approx(1500.0)  # 29 December: 1500 x 2 x 0.5
     assert viking.hurdle == 3.0
     assert built["IFA Interconnector"].price.notna().all()
+
+
+def test_links_use_availability_fitted_from_flows(tmp_path: Path) -> None:
+    index = pd.date_range("2024-06-01", periods=2, freq="1h", tz="UTC")
+    prices = ROOT / "data/prices/europe_day_ahead_ember.csv"
+    built = {link.name: link for link in links(index, ROOT / "data/system", prices)}
+    fitted = pd.read_csv(ROOT / "data/system/interconnector_availability.csv").set_index("link")
+    register = pd.read_csv(ROOT / "data/system/interconnectors.csv").set_index("link")
+    ifa, name = built["IFA Interconnector"], "IFA Interconnector"
+    assert ifa.import_mw.iloc[0] == pytest.approx(
+        register.loc[name, "import_mw"] * fitted.loc[name, "import_availability"]
+    )
+    assert ifa.export_mw.iloc[0] == pytest.approx(
+        register.loc[name, "export_mw"] * fitted.loc[name, "export_availability"]
+    )
+    for file in ("interconnectors.csv", "interconnector_flows.csv"):
+        (tmp_path / file).write_bytes((ROOT / "data/system" / file).read_bytes())
+    with pytest.raises(DataError, match="interconnector_availability"):
+        links(index, tmp_path, prices)
+    assert links(index, tmp_path, prices, availability=1.0)

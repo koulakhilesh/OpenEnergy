@@ -61,7 +61,8 @@ trade at these prices, converted to GBP like the GB price.
 | Ireland | 44.2 | 33.5 | 116.3 | 192.5 | 110.0 | 92.0 | 97.8 |
 
 From 2023 to 2025 GB's mean price was above every neighbour's except Ireland's, which
-helps explain why price-taking links import so much.
+helps explain why price-taking links at full capacity import so much (each link's
+availability is therefore fitted from its flows; see below).
 
 Known issues: Ember publishes one price for Norway and one for Denmark, without saying how
 the bidding zones are combined; GB's links land in southern Norway (NO2) and western
@@ -114,6 +115,7 @@ direction and rough scale, not causal impact.
 | `unit_parameters.csv` | Unit size, minimum stable output and start-up cost for CCGT, coal and peaking plant (unit commitment) | Danish Energy Agency, NREL, ECB |
 | `interconnectors.csv` | GB's ten built interconnectors: neighbour, import and export capacity (MW) | NESO Interconnector Register, 12 October 2026 |
 | `interconnector_flows.csv` | Daily imports and exports per link, MWh, 2016-01-01 to 2026-10-12 | Elexon BMRS FUELHH |
+| `interconnector_availability.csv` | Each link's import and export availability: actual flow over a price taker's trade on actual prices, 2019–2025 | Elexon BMRS FUELHH, Ember, OPSD, ECB |
 
 The model's inputs stop at the latest complete calendar year, 2025 (checked 13 October
 2026): DUKES publishes a year's fleet the following July, so 2026 has none yet, and the
@@ -140,6 +142,13 @@ fifth of its capacity, which skips commissioning tests): Nemo Link 2019-01-30, I
 2025-01-19. The flows also show limits the register does not (Moyle about 300 MW in
 2016–2017, IFA about half its capacity in 2022, BritNed never above about 1,050 of
 1,200 MW), so modelled link capacity is overstated in those periods.
+
+Each link's availability (`scripts/fit_interconnector_availability.py`) is the energy it
+actually moved (Elexon) over what a price taker would have moved at full capacity on
+actual GB and neighbour day-ahead prices, per direction, capped at 1. It uses actual
+prices and flows only. Fitted on 2019–2022 it gives 36.9 TWh of imports in 2024 (actual
+43.9, full capacity 66.0) and 11.8 TWh of exports (actual 10.6); the published file is
+fitted on 2019–2025.
 
 ## Future Energy Scenarios
 

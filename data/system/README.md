@@ -148,3 +148,36 @@ months of commissioning test flows. This gives Nemo Link 2019-01-30, IFA2 2021-0
 Link 2021-09-23, ElecLink 2022-05-23, Viking Link 2023-12-29 and Greenlink 2025-01-19; the
 other four flow from the start of the record. It also checks the modelled flows
 (`examples/interconnector_check.py`). In 2024 GB imported 43.9 TWh and exported 10.6 TWh.
+
+## `interconnector_availability.csv`
+
+The share of a price taker's trade each link actually made, per direction, fitted on
+2019-2025 by `scripts/fit_interconnector_availability.py`. Columns: `link` (as in
+`interconnectors.csv`), `import_availability`, `export_availability` (0 to 1). The
+system model's interconnector links use them as each link's share of its import and export
+capacity (`availability: flows`, the default from v4.2).
+
+Method: on actual GB day-ahead prices (Open Power System Data to September 2020, then
+Ember) and the neighbour's actual day-ahead price (Ember, converted at ECB rates), a
+price taker imports at full register capacity in every hour GB is dearer and exports in
+every hour it is cheaper, from the day the link entered service. Each share is the
+actual energy in `interconnector_flows.csv` over that trade, capped at 1. Greenlink and
+Viking Link have few years of data; a link with no trade in the fitting years would get
+the mean of the others. Only actual prices and flows are used; modelled prices are never
+compared, so nothing is fitted to the prices the model produces.
+
+Out of sample, shares fitted on 2019-2022 give 28.5, 36.9 and 36.1 TWh of imports in
+2023, 2024 and 2025 against 33.5, 43.9 and 43.9 TWh actual (66.0 TWh in 2024 at full
+capacity), and 12.6, 11.8 and 14.4 TWh of exports against 10.1, 10.6 and 14.8 TWh. The
+shortfall is mostly NS Link, which imported less in its first year (2021-2022) than since.
+
+Sources: Elexon BMRS FUELHH (contains BMRS data © Elexon Limited copyright and database
+right 2026); Ember, *European Wholesale Electricity Price Data*
+(<https://ember-energy.org/data/european-wholesale-electricity-price-data/>), CC BY 4.0;
+Open Power System Data, *Time series* (CC BY 4.0); ECB euro reference rates (source: ECB);
+NESO Interconnector Register (NESO Open Data Licence v1.0).
+
+Known issues: one share per link and direction for all years and hours. It folds outages,
+ramp limits, losses, capacity sold ahead and trading on intraday and balancing prices into
+one number, and does not respond to the size of the price gap. Links with capped register
+capacity (see `interconnectors.csv`) get a lower share for that reason too.

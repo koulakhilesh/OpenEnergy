@@ -9,7 +9,11 @@ from pathlib import Path
 import pandas as pd
 
 from openenergy.data.fes import FesSource
-from openenergy.data.interconnectors import NeighbourPriceSource, interconnectors
+from openenergy.data.interconnectors import (
+    AVAILABILITY_FILE,
+    NeighbourPriceSource,
+    interconnectors,
+)
 from openenergy.errors import ConfigError, DataError
 from openenergy.system.model import Link, Storage
 
@@ -36,7 +40,8 @@ FES_NOTE = (
 LINKS_NOTE = (
     "Interconnectors are price-taking links: each imports when GB's price is above the "
     "neighbour's actual day-ahead price in the weather year and exports when below, up to "
-    "its capacity; on 2024 this imports about half as much again as actually flowed."
+    "its capacity times an availability, by default fitted from its actual flows in "
+    "2019-2025 (not from prices); on 2024 this imports 46.4 TWh against 43.9 TWh actual."
 )
 
 
@@ -98,9 +103,18 @@ def links(
     prices_path: str | Path,
     scale: float = 1.0,
     hurdle: float = 0.0,
-    availability: float = 1.0,
+    availability: float | None = None,
 ) -> tuple[Link, ...]:
-    """One price-taking link per GB interconnector in service on each snapshot."""
+    """One price-taking link per GB interconnector in service on each snapshot.
+
+    ``availability`` None uses each link's import and export availability fitted from
+    flows (``interconnector_availability.csv``); a number applies to every link.
+    """
+    if availability is None and not (Path(system_dir) / AVAILABILITY_FILE).is_file():
+        raise DataError(
+            f"{AVAILABILITY_FILE} not found in {system_dir}; run "
+            "scripts/fit_interconnector_availability.py or give a number"
+        )
     source = NeighbourPriceSource(prices_path)
     built = []
     for unit in interconnectors(system_dir):
@@ -111,7 +125,8 @@ def links(
         )
         if not live.any():
             continue
-        factor = live * scale * availability
+        imports = unit.import_availability if availability is None else availability
+        exports = unit.export_availability if availability is None else availability
         try:
             price = source.prices(unit.neighbour, index).prices
         except DataError as exc:
@@ -119,8 +134,8 @@ def links(
         built.append(
             Link(
                 unit.name,
-                (factor * unit.import_mw).rename(None),
-                (factor * unit.export_mw).rename(None),
+                (live * scale * imports * unit.import_mw).rename(None),
+                (live * scale * exports * unit.export_mw).rename(None),
                 price.rename(None),
                 hurdle,
             )

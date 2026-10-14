@@ -1,7 +1,8 @@
 # Forward scenarios
 
 The [system model](system-model.md) rebuilds GB prices from the plants behind them. v4.0
-adds two things that let it look forward:
+adds two things that let it look forward, and v4.2 makes the links behave as they have
+and adds unit commitment to them:
 
 - **Interconnector links** (`system.interconnectors: links`): GB's ten interconnectors
   trade with France, the Netherlands, Belgium, Norway, Denmark and Ireland at those
@@ -19,7 +20,8 @@ name: gb-2035-holistic
 system:
   data: ../data/system
   year: 2025                     # the weather year: weather, demand shape, fuel and carbon prices
-  interconnectors: links         # or {mode: links, hurdle_gbp_per_mwh: 5, availability: 0.85}
+  interconnectors: links         # or {mode: links, hurdle_gbp_per_mwh: 5, availability: 1.0}
+  commitment: true               # start-up costs and minimum stable output (marginal price)
   fes:
     pathway: Holistic Transition # also Electric Engagement, Hydrogen Evolution, Falling Behind,
                                  # Ten Year Forecast (FES 2025) and Ten Year Outlook (2026)
@@ -40,52 +42,89 @@ day-ahead price (Ember, converted at ECB rates) plus a hurdle, and exports when 
 is below the neighbour's minus the hurdle. A link joins the system on the day it entered
 service, read from Elexon's flows (Nemo Link 2019, IFA2 and NS Link 2021, ElecLink 2022,
 Viking Link at the end of 2023, Greenlink 2025). Historic imports are dropped. Irish
-prices start in October 2018, so links need a year from 2019. Unit commitment does not
-support links yet.
+prices start in October 2018, so links need a year from 2019. Links work with the merit
+order, PyPSA (when storage is added) and unit commitment.
 
 | Setting | Default | Meaning |
 |---|---|---|
 | `mode` | `fixed` | `fixed`: historic imports (as before v4.0); `links`: price-taking links |
 | `hurdle_gbp_per_mwh` | 0 | added to import prices and taken off export prices |
-| `availability` | 1 | share of each link's capacity available |
+| `availability` | `flows` | `flows`: each link's import and export share fitted from its actual flows (below); a number from 0 to 1 applies to every link |
 | `prices` | `prices/europe_day_ahead_ember.csv` next to `data` | neighbours' hourly prices |
 
 ### Checked against history
 
-`examples/interconnector_check.py` solves each year both ways and compares with GB's
-actual day-ahead price and the actual flows (Elexon FUELHH). Prices in £/MWh (mean, and
-mean daily highest minus lowest), flows in TWh:
+`examples/interconnector_check.py` solves each year four ways and compares with GB's
+actual day-ahead price and the actual flows (Elexon FUELHH): historic imports (fixed);
+links at full capacity (full, the v4.0 and v4.1 default); links at their fitted
+availability (links, the default from v4.2); and that with unit commitment (UC, marginal
+price). Prices in £/MWh, flows in TWh:
 
-| Year | Actual mean | Fixed | Links | Actual spread | Fixed | Links | Actual imports | Links | Actual exports | Links |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 2019 | 42.9 | 42.3 | 42.4 | 31.8 | 4.2 | 8.5 | 25.0 | 34.6 | 3.7 | 9.9 |
-| 2020 | 35.3 | 37.1 | 36.9 | 39.6 | 3.4 | 9.4 | 22.8 | 34.9 | 4.5 | 10.4 |
-| 2021 | 117.8 | 83.5 | 86.7 | 146.4 | 7.1 | 25.2 | 29.2 | 29.9 | 4.4 | 28.1 |
-| 2022 | 204.8 | 157.7 | 163.1 | 155.6 | 9.5 | 42.5 | 16.2 | 26.0 | 20.4 | 47.2 |
-| 2023 | 94.1 | 121.1 | 110.9 | 70.0 | 7.4 | 45.5 | 33.5 | 64.6 | 10.1 | 11.0 |
-| 2024 | 72.5 | 89.2 | 81.2 | 59.9 | 5.7 | 43.2 | 43.9 | 70.0 | 10.6 | 18.8 |
-| 2025 | 80.7 | 87.5 | 82.4 | 67.5 | 6.2 | 41.1 | 44.0 | 69.1 | 14.8 | 23.4 |
+| Year | Mean: actual / fixed / full / links / UC | Spread: actual / fixed / full / links / UC |
+|---|---:|---:|
+| 2019 | 42.9 / 42.3 / 42.4 / 42.7 / 42.2 | 31.8 / 4.2 / 8.5 / 6.1 / 25.9 |
+| 2020 | 35.3 / 37.1 / 36.9 / 37.5 / 36.6 | 39.6 / 3.4 / 9.4 / 5.0 / 27.5 |
+| 2021 | 117.8 / 83.5 / 86.7 / 85.3 / 85.0 | 146.4 / 7.1 / 25.2 / 14.0 / 40.1 |
+| 2022 | 204.8 / 157.7 / 163.1 / 160.0 / 159.9 | 155.6 / 9.5 / 42.5 / 26.7 / 61.3 |
+| 2023 | 94.1 / 121.1 / 110.9 / 117.2 / 116.8 | 70.0 / 7.4 / 45.5 / 30.1 / 61.8 |
+| 2024 | 72.5 / 89.2 / 81.2 / 87.0 / 86.4 | 59.9 / 5.7 / 43.2 / 26.5 / 56.6 |
+| 2025 | 80.7 / 87.5 / 82.4 / 86.6 / 86.3 | 67.5 / 6.2 / 41.1 / 25.2 / 52.0 |
 
-Links widen the daily spread in every year: from 2021 to between a sixth (2021) and almost
-three-quarters (2024) of the actual spread, where fixed imports leave it at 5% to 13%. They
-bring the mean closer to actual in every year too, by up to £10/MWh (2023). They also
-trade far more than actually happened: imports are 38% to 93% too high in every year but
-2021, and exports are too high in every year, six times too high in 2021. A price taker
-sees every hour's price gap as profit; real flows are limited by losses, trading costs,
-ramping, capacity sold ahead and the neighbours' own supply, none of which the model
-sees.
+| Year | Imports: actual / full / links / UC | Exports: actual / full / links / UC |
+|---|---:|---:|
+| 2019 | 25.0 / 34.6 / 21.5 / 21.7 | 3.7 / 9.9 / 4.5 / 4.2 |
+| 2020 | 22.8 / 34.9 / 21.4 / 21.1 | 4.5 / 10.5 / 4.4 / 4.3 |
+| 2021 | 29.2 / 29.9 / 19.0 / 18.7 | 4.4 / 28.1 / 12.5 / 12.4 |
+| 2022 | 16.2 / 26.1 / 16.7 / 16.4 | 20.4 / 47.2 / 20.2 / 20.3 |
+| 2023 | 33.5 / 64.7 / 42.8 / 43.2 | 10.1 / 11.1 / 4.7 / 4.2 |
+| 2024 | 43.9 / 69.9 / 46.4 / 46.4 | 10.6 / 18.8 / 8.0 / 7.8 |
+| 2025 | 44.0 / 69.0 / 45.4 / 45.4 | 14.8 / 23.4 / 11.2 / 11.1 |
 
-A hurdle and lower availability move flows towards actual but take the spread down with
-them (`--hurdle 5 --availability 0.85`):
+At full capacity links trade far more than happened: imports up to 93% too high (2023)
+and exports up to six times too high (2021). A price taker sees every hour's price gap as
+profit; real flows are limited by outages, losses, ramping, capacity sold ahead, trading
+on later markets and the neighbours' own supply. Each link's availability (below) brings
+imports to within 7% of actual in 2020, 2022, 2024 and 2025; they are 14% low in 2019,
+35% low in 2021 and 28% high in 2023. Exports are within 3% in 2020 and 2022, 22% high in
+2019, almost three times too high in 2021, and a quarter to a half too low in 2023–2025.
 
-| Year | Links mean | Links spread | Imports (actual) | Exports (actual) |
+Matching flows takes spread away: links at full capacity were importing the neighbours'
+daily shape, which partly hid the model's own flat price (2025: 41.1 at full capacity,
+25.2 at fitted availability). Unit commitment restores the shape on GB's own plant: the
+spread is 69% to 94% of actual in 2019–2020 and 2023–2025 (27% and 39% in the 2021–2022
+gas crisis, when quarterly fuel prices miss the market's swings). The mean is within £2 of
+actual in 2019–2020, above it by £6–23 in 2023–2025 and well below it in 2021–2022 (see
+the [system model](system-model.md#after-2020-gas-crisis-and-coal-exit)).
+
+#### Link availability
+
+`scripts/fit_interconnector_availability.py` sets each link's import and export
+availability to the energy it actually moved over what a price taker at full capacity
+would have moved on actual GB and neighbour prices, 2019–2025, capped at 1 (see
+[Data](../data.md)). Fitted only on flows, never on prices. Fitted on 2019–2022 instead,
+it gives 36.9 TWh of imports in 2024 against 43.9 actual (66.0 at full capacity), and
+11.8 TWh of exports against 10.6. It is one number per link and direction, so it does not
+respond to the size of the price gap.
+
+#### Marginal or start price
+
+With links and commitment, the marginal price is closer to history than the start price
+in 2023, 2024 and 2025 on the mean, the daily spread, the hour-to-hour change and battery
+value; the start price holds the night up at a running unit's cost plus its start cost.
+The scenarios below use the marginal price. This is a choice between two un-fitted
+definitions made on history. A 1 MW / 2 MWh battery (95% each way, £5/MWh wear), GBP per
+MW-year, last week's prices / perfect foresight:
+
+| Year | Actual | Links | Links + UC, marginal | Links + UC, start |
 |---|---:|---:|---:|---:|
-| 2022 | 162.7 | 35.9 | 20.7 (16.2) | 38.3 (20.4) |
-| 2024 | 84.2 | 35.8 | 55.9 (43.9) | 11.2 (10.6) |
-| 2025 | 84.6 | 33.3 | 53.4 (44.0) | 13.8 (14.8) |
+| 2023 | 36,075 / 45,748 | 1,765 / 11,838 | 8,660 / 28,350 | 3,974 / 20,397 |
+| 2024 | 29,148 / 39,430 | 1,648 / 10,694 | 9,538 / 26,798 | 5,108 / 17,411 |
+| 2025 | 36,148 / 44,927 | 949 / 10,413 | 11,623 / 26,483 | 4,864 / 16,955 |
 
-Neither is fitted to prices: the defaults stay at no hurdle and full availability, and the
-over-trading is reported rather than tuned away.
+With perfect foresight the model now gives 59% to 68% of the actual value; planning on
+last week's prices, 24% to 33%.
+
+A hurdle (`hurdle_gbp_per_mwh`) is still available but left at 0.
 
 ## FES pathways
 
@@ -118,29 +157,51 @@ same year):
 
 | Pathway | Year | Mean | Spread | Imports | FES | Exports | FES | Curtailed | FES | Unserved GWh |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Holistic Transition | 2030 | 67.2 | 39.0 | 58.8 | 35.7 | 47.3 | 38.9 | 4.6 | 12.4 | 0 |
-| Holistic Transition | 2035 | 77.9 | 71.8 | 79.1 | 27.6 | 97.3 | 108.8 | 17.1 | 41.0 | 40.3 |
-| Electric Engagement | 2030 | 64.3 | 41.4 | 58.6 | 37.0 | 54.3 | 40.1 | 6.3 | 12.2 | 0 |
-| Electric Engagement | 2035 | 75.4 | 59.8 | 98.3 | 41.3 | 88.0 | 89.1 | 7.5 | 27.4 | 10.9 |
-| Hydrogen Evolution | 2030 | 67.2 | 43.0 | 58.9 | 40.1 | 47.0 | 36.2 | 4.7 | 9.2 | 0 |
-| Hydrogen Evolution | 2035 | 64.8 | 43.8 | 83.9 | 31.3 | 78.3 | 93.5 | 10.1 | 34.2 | 0 |
-| Falling Behind | 2030 | 71.6 | 36.3 | 64.5 | 29.5 | 41.3 | 35.4 | 1.7 | 2.3 | 0 |
-| Falling Behind | 2035 | 59.9 | 42.1 | 54.4 | 21.2 | 63.2 | 61.8 | 10.0 | 18.0 | 0 |
-| Ten Year Forecast | 2030 | 68.1 | 38.0 | 59.5 | 22.9 | 46.5 | 46.8 | 3.4 | 7.4 | 0 |
-| Ten Year Forecast | 2035 | 61.4 | 37.5 | 73.6 | 21.2 | 79.9 | 93.1 | 8.5 | 23.7 | 0 |
-| Ten Year Outlook | 2030 | 72.7 | 34.0 | 66.9 | 42.1 | 39.0 | 34.0 | 1.5 | 7.4 | 0 |
-| Ten Year Outlook | 2035 | 62.4 | 36.0 | 74.4 | 35.3 | 74.1 | 69.3 | 7.5 | 49.8 | 0 |
+| Holistic Transition | 2030 | 86.3 | 72.0 | 36.8 | 35.7 | 24.6 | 38.9 | 8.7 | 12.4 | 68.0 |
+| Holistic Transition | 2035 | 211.7 | 163.8 | 47.8 | 27.6 | 51.3 | 108.8 | 34.9 | 41.0 | 723.0 |
+| Electric Engagement | 2030 | 74.3 | 58.0 | 36.3 | 37.0 | 28.4 | 40.1 | 11.6 | 12.2 | 9.7 |
+| Electric Engagement | 2035 | 191.1 | 162.4 | 60.1 | 41.3 | 46.9 | 89.1 | 15.0 | 27.4 | 683.2 |
+| Hydrogen Evolution | 2030 | 65.6 | 44.3 | 36.9 | 40.1 | 24.5 | 36.2 | 7.6 | 9.2 | 0 |
+| Hydrogen Evolution | 2035 | 121.4 | 109.1 | 52.2 | 31.3 | 40.7 | 93.5 | 19.6 | 34.2 | 214.8 |
+| Falling Behind | 2030 | 72.4 | 34.9 | 41.4 | 29.5 | 20.9 | 35.4 | 1.8 | 2.3 | 0 |
+| Falling Behind | 2035 | 56.0 | 43.4 | 33.6 | 21.2 | 32.8 | 61.8 | 18.7 | 18.0 | 0 |
+| Ten Year Forecast | 2030 | 66.3 | 38.6 | 37.2 | 22.9 | 24.2 | 46.8 | 6.2 | 7.4 | 0 |
+| Ten Year Forecast | 2035 | 57.1 | 36.3 | 44.7 | 21.2 | 42.2 | 93.1 | 18.3 | 23.7 | 0 |
+| Ten Year Outlook | 2030 | 73.8 | 32.0 | 43.2 | 42.1 | 19.6 | 34.0 | 1.6 | 7.4 | 0 |
+| Ten Year Outlook | 2035 | 86.4 | 53.1 | 45.7 | 35.3 | 39.1 | 69.3 | 15.3 | 49.8 | 20.0 |
 
-For comparison, the model's own 2025 with links has a mean of £82.4/MWh and a spread of
-£41.1/MWh (actual £80.7 and £67.5).
+Settings since v4.2: links at each link's availability fitted from its flows, and unit
+commitment (marginal price). For comparison, the model's own 2025 with the same settings
+has a mean of £86.3/MWh and a spread of £52.0/MWh (actual £80.7 and £67.5).
 
-Exports land between 16% below and 35% above FES's in every case. Imports are 1.5 to 3.5
-times FES's, the same over-trading seen in the backcast. Curtailment is 15% to 74% of
-FES's: with links, surplus wind can leave through the interconnectors whenever a
-neighbour's price is above zero. Two 2035 cases leave some demand unserved: Holistic
-Transition for 9 hours on 2 days (40 GWh) and Electric Engagement for 2 hours on 1 day
-(11 GWh). In those hours every gas plant and every link is at its limit and storage is
-nearly empty; the price reaches the £6,000/MWh value of lost load.
+Imports in 2030 are within 10% of FES's in four pathways and 40% and 62% above it in
+Falling Behind and the Ten Year Forecast; in 2035 they are 1.3 to 2.1 times FES's (1.5 to
+3.5 times before links were given their fitted availability). Exports are 44% to 71% of
+FES's in every case: FES expects GB to export much more in windy hours than links that
+behave as they did in 2019–2025 do. Curtailment is 22% to 104% of FES's.
+
+Six cases leave demand unserved. The price sits at the £6,000/MWh value of lost load in
+Holistic Transition 2035 for 174 hours on 11 days, Electric Engagement 2035 for 161 hours
+on 10 days, Hydrogen Evolution 2035 for 73 hours on 5 days, and on one or two days in
+Holistic Transition 2030, Electric Engagement 2030 and the Ten Year Outlook 2035.
+Without those hours the means are £56–94/MWh. The cause is link availability, not unit
+commitment. Holistic Transition, mean £/MWh and unserved GWh:
+
+| Year | Full availability | Full + commitment | Fitted | Fitted + commitment |
+|---|---:|---:|---:|---:|
+| 2030 | 67.2, 0 | 67.6, 0 | 86.2, 68.0 | 86.3, 68.0 |
+| 2035 | 77.9, 40.3 | 85.6, 50.5 | 170.8, 679.3 | 211.7, 723.0 |
+
+The fitted availability holds on GB's tightest days in the record: on the 1% of days
+with the highest GB price in 2019–2025, links imported 3% (ElecLink) to 42% (Nemo Link,
+BritNed) of their capacity, below their fitted shares for every link but East West (39%
+against 38%), because neighbours were often short at the same time. So derating links at stress is supported by the flows. What the model
+leaves out is what FES counts on in those hours: demand response, new flexibility and
+neighbours' own 2030s fleets. Read 2035 prices in these pathways as "this fleet is short
+of firm capacity in 2025's weather when links behave as they have", not as a price
+forecast. With every link at full capacity the same pathways shed load only in Holistic
+Transition 2035 (50.5 GWh) and Electric Engagement 2035 (10.9 GWh)
+(`availability: 1.0`).
 
 ### A battery on pathway prices
 
@@ -150,24 +211,29 @@ year, GBP per MW-year:
 | Prices | Last week's prices | Perfect foresight |
 |---|---:|---:|
 | Actual 2025 | 36,148 | 44,927 |
-| Model 2025, links | 7,348 | 20,035 |
-| Holistic Transition 2030 / 2035 | 6,148 / 18,792 | 15,500 / 28,841 |
-| Electric Engagement 2030 / 2035 | 7,769 / 21,679 | 17,756 / 30,695 |
-| Hydrogen Evolution 2030 / 2035 | 9,504 / 8,986 | 19,539 / 19,180 |
-| Falling Behind 2030 / 2035 | 6,302 / 6,391 | 15,110 / 18,044 |
-| Ten Year Forecast 2030 / 2035 | 5,918 / 6,036 | 15,385 / 14,795 |
-| Ten Year Outlook 2030 / 2035 | 5,472 / 6,370 | 12,781 / 14,243 |
+| Model 2025, links + commitment | 11,623 | 26,483 |
+| Holistic Transition 2030 / 2035 | 9,649 / 10,019 | 27,434 / 64,033 |
+| Electric Engagement 2030 / 2035 | 4,853 / 14,261 | 22,640 / 70,217 |
+| Hydrogen Evolution 2030 / 2035 | 6,318 / 12,138 | 18,393 / 47,247 |
+| Falling Behind 2030 / 2035 | 3,892 / 4,311 | 12,106 / 16,368 |
+| Ten Year Forecast 2030 / 2035 | 3,297 / 3,535 | 13,665 / 12,928 |
+| Ten Year Outlook 2030 / 2035 | 2,528 / 4,259 | 9,967 / 19,929 |
 
 Compare pathways with the model's own 2025, not with actual 2025: on modelled 2025 prices
-the battery's perfect-foresight value is under half its actual value, and the model's
-daily spread is about 60% of the real one. Against that baseline every pathway's 2030
-value is lower, by 2% to 36%. Only Holistic Transition and Electric Engagement in 2035
-rise above it, by 44% and 53%, and that rise comes from the scarcity days above: 2 days
-earn £12.0k of Holistic Transition's £28.6k (perfect foresight, full year) and 1 day earns
-£10.9k of Electric Engagement's £30.4k. Without them both would be below the 2025
-baseline. A value that rests on one or two hours of lost load in one weather year is not a
-robust result. Planning on last week's prices keeps under half of the perfect-foresight
-value in 10 of the 12 cases, against 80% on actual 2025 prices.
+the battery's perfect-foresight value is 59% of its actual value, and the model's daily
+spread is 77% of the real one. Against that baseline, perfect-foresight value is 48% to
+62% lower in Falling Behind 2030, the Ten Year Forecast and the Ten Year Outlook 2030,
+15% to 38% lower in Electric Engagement and Hydrogen Evolution 2030, Falling Behind 2035
+and the Ten Year Outlook 2035, and about the same in Holistic Transition 2030. The three
+2035 pathways that rise far above it (Holistic Transition, Electric Engagement and
+Hydrogen Evolution, 1.8 to 2.7 times) get most of that from the lost-load days above:
+with perfect foresight over the full year, those days earn £49.4k of Holistic
+Transition's £63.1k, £54.2k of Electric Engagement's £69.2k and £30.7k of Hydrogen
+Evolution's £46.8k. Without lost-load days every pathway would be below the 2025
+baseline: the six pathways with lost load earn £11.6k to £16.1k on their other days. A value that rests on a few days of lost load in one
+weather year is not a robust result. Planning on last week's prices keeps 16% to 35% of
+the perfect-foresight value, against 80% on actual 2025 prices and 44% on the model's own
+2025.
 
 ## Limits
 
@@ -177,12 +243,16 @@ value in 10 of the 12 cases, against 80% on actual 2025 prices.
   respond to GB, and their 2030s fleets are not modelled. New links are not added as new
   neighbours; FES interconnector growth scales the existing ten.
 - Capacities from the register are today's; earlier limits on Moyle, IFA and BritNed are
-  not modelled (see [Data](../data.md)).
+  not modelled separately, only through each link's fitted availability (see
+  [Data](../data.md)).
+- Each link's availability is one number per direction for every hour and year; it does
+  not grow with the price gap, and new FES capacity gets the existing links' shares.
 - Ember gives one price for Norway and one for Denmark; GB's links land in southern Norway
   and western Denmark.
 - The weather year's fuel and carbon prices are kept; storage efficiencies for FES
   batteries and long-duration storage are stated assumptions.
-- Storage is optimised with perfect foresight over the year.
+- With unit commitment (the published scenarios), storage is planned one day at a time
+  seeing 24 hours ahead; without it, with perfect foresight over the year.
 
 ## Data sources
 

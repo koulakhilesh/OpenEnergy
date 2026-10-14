@@ -1,8 +1,9 @@
 """Precompute hourly GB prices for each NESO FES pathway, for the web app and the docs.
 
 Each pathway's 2030 and 2035 system is solved on 2025's weather with price-taking
-interconnector links (``system.fes`` and ``interconnectors: links``, default assumptions),
-exactly as ``openenergy system run`` would. Writes:
+interconnector links at the availability fitted from their flows and unit commitment
+(``system.fes``, ``interconnectors: links``, ``commitment: true``, marginal price, other
+assumptions default), exactly as ``openenergy system run`` would. Writes:
 
 - data/scenarios/fes_prices.csv: hourly modelled price (GBP/MWh) per pathway and year
 - data/scenarios/fes_summary.csv: one row per run with the model's results next to FES's
@@ -42,6 +43,7 @@ def main() -> None:
                 "data": str(DATA / "system"),
                 "year": WEATHER_YEAR,
                 "interconnectors": "links",
+                "commitment": True,
                 "fes": {"pathway": pathway, "year": year},
             }
             run = run_system_scenario(

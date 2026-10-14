@@ -113,7 +113,8 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
    day-ahead trading in the same plan, with the energy each service moves taken from GB
    frequency data (see [Revenue stacking](guides/revenue-stacking.md)).
 10. **Looks forward**: NESO Future Energy Scenarios pathways to 2035 on a historic weather
-    year, with GB's interconnectors as price-taking links to six neighbouring markets
+    year, with GB's interconnectors as price-taking links to six neighbouring markets at
+    availabilities fitted from their actual flows, and unit commitment
     (see [Forward scenarios](guides/forward-scenarios.md)).
 11. **Runs in the browser**: a FastAPI [web app](guides/web-app.md) values a battery on
     any GB year from 2017 or on a FES pathway; try it at
@@ -138,13 +139,13 @@ every setting.
 | v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
 | v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value) |
 | v4.0 | Forward scenarios from NESO's Future Energy Scenarios on a historic weather year; GB's interconnectors as price-taking links to six neighbouring markets, checked against actual flows 2019–2025; a web app (FastAPI, Vercel) valuing a battery on history or a FES pathway |
-| v4.1 | A usable [web app](https://open-energy-eight.vercel.app/): the answer first in plain words, instant results for common batteries, value by year and by FES pathway at a glance, side-by-side comparison with shareable links, explanations next to each term, CSV and scenario downloads, and a JSON API; `CITATION.cff` and PyPI release (current) |
+| v4.1 | A usable [web app](https://open-energy-eight.vercel.app/): the answer first in plain words, instant results for common batteries, value by year and by FES pathway at a glance, side-by-side comparison with shareable links, explanations next to each term, CSV and scenario downloads, and a JSON API; `CITATION.cff` and PyPI release |
+| v4.2 | A more credible model: unit commitment with interconnector links; each link's availability fitted from its actual flows, never from prices; a measured answer on the missing daily spread (the everyday intraday shape, not negative prices); forward scenarios and the app re-run. GB zones were dropped: GB keeps one national wholesale price ([DESNZ, REMA summer update, July 2025](https://www.gov.uk/government/publications/review-of-electricity-market-arrangements-rema-summer-update-2025)) (current) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v4.2 | A more credible model: GB zones (Scotland, England and Wales) with the boundary between them; links that respond to neighbours' supply rather than taking their prices; why modelled daily spreads are about 60% of real ones, checked against history without fitting to prices |
 | v5.0 | A React and TypeScript front end on the v4.1 JSON API, with the same Python back end |
 
 Alongside releases: a Zenodo DOI and versioned docs; refresh and re-check the bundled data

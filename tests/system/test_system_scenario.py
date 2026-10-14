@@ -101,11 +101,10 @@ def test_detects_system_scenarios(tmp_path: Path) -> None:
 
 
 def test_links_replace_historic_imports(tmp_path: Path) -> None:
-    pytest.importorskip("pypsa")
     path = write(tmp_path, system={"interconnectors": "links", "end": "2020-01-31"})
     run = run_system_scenario(load_system_scenario(path))
     s = run.summary
-    assert s.backend == "pypsa"
+    assert s.backend == "merit"
     assert s.generation_twh["imports"] == 0
     assert s.imports_twh is not None and s.imports_twh > 0
     assert s.exports_twh is not None and s.exports_twh >= 0
@@ -114,6 +113,22 @@ def test_links_replace_historic_imports(tmp_path: Path) -> None:
     summary = json.loads((out / "summary.json").read_text())
     assert any("Interconnector Register" in a for a in summary["attribution"])
     assert "price-taking links" in summary["note"]
+
+
+def test_links_with_commitment_and_flow_availability(tmp_path: Path) -> None:
+    week = {"interconnectors": "links", "end": "2020-01-07"}
+    fitted = run_system_scenario(
+        load_system_scenario(write(tmp_path, system={**week, "commitment": True, "price": "start"}))
+    )
+    assert fitted.summary.backend == "commitment"
+    assert fitted.scenario.system.interconnectors.availability == "flows"
+    full = {**week, "interconnectors": {"mode": "links", "availability": 1.0}}
+    unlimited = run_system_scenario(load_system_scenario(write(tmp_path, system=full)))
+    assert fitted.summary.imports_twh is not None and unlimited.summary.imports_twh is not None
+    assert fitted.summary.imports_twh < unlimited.summary.imports_twh
+    with pytest.raises(ConfigError, match="availability"):
+        bad = {"interconnectors": {"mode": "links", "availability": 0}}
+        load_system_scenario(write(tmp_path, system=bad))
 
 
 def test_fes_scenario_scales_the_weather_year(tmp_path: Path) -> None:
@@ -150,10 +165,6 @@ def test_fes_needs_links_and_a_known_pathway(tmp_path: Path) -> None:
     with pytest.raises(ConfigError, match="unknown pathway"):
         load_system_scenario(
             write(tmp_path, system={"year": 2025, "interconnectors": "links", "fes": bad})
-        )
-    with pytest.raises(ConfigError, match="links"):
-        load_system_scenario(
-            write(tmp_path, system={"interconnectors": "links", "commitment": True})
         )
     with pytest.raises(ConfigError, match="from 2019"):
         load_system_scenario(write(tmp_path, system={"interconnectors": "links", "year": 2018}))
