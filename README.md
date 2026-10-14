@@ -48,7 +48,8 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   historic weather year, with GB's ten interconnectors trading at neighbouring markets'
   actual prices (`system.fes`, `system.interconnectors: links`).
 - **Web app**: value a battery on any GB year from 2017 or on a FES pathway's modelled
-  prices in the browser (`openenergy.app`, FastAPI; deployable to Vercel).
+  prices in the browser at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
+  (`openenergy.app`, FastAPI on Vercel).
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
   and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
   prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
@@ -102,7 +103,8 @@ uv run openenergy system run examples/gb-2019-wind3-storage.yaml
 uv run openenergy system run examples/gb-2035-holistic.yaml   # a FES pathway in 2035
 ```
 
-Run the web app locally:
+Run the web app locally (or use it at
+[open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)):
 
 ```bash
 uv run uvicorn openenergy.app:app

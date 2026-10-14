@@ -63,3 +63,16 @@ def test_inputs_are_bounded(client: TestClient) -> None:
     early = client.get("/battery", params={"year": 2019, "services": "dc"})
     assert early.status_code == 400
     assert "2022" in early.text
+    scenario_response = client.get("/battery", params={"source": "scenario", "services": "dc"})
+    assert scenario_response.status_code == 400
+    assert "historic years only" in scenario_response.text
+
+
+def test_run_errors_do_not_expose_details(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("OPENENERGY_DATA", str(tmp_path))
+    page = client.get("/battery", params={"year": 2024})
+    assert page.status_code == 400
+    assert "could not be completed" in page.text
+    assert str(tmp_path) not in page.text

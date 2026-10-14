@@ -84,7 +84,7 @@ def home() -> str:
 <h1>OpenEnergy battery value</h1>
 <p>What would a grid battery have earned trading GB day-ahead prices, or what might it earn
 on a NESO Future Energy Scenarios pathway? Each run plans every day at noon the day before
-and compares with perfect foresight. About 10 to 30 seconds per run.</p>
+and compares with perfect foresight. A run takes 15 to 45 seconds.</p>
 <form action="/battery" method="get">
 <fieldset><legend>Prices</legend>
 <label><input type="radio" name="source" value="history" checked> Historic GB year
@@ -150,24 +150,33 @@ def battery(
     services: Literal["none", "dc", "dc_dm"] = "none",
 ) -> HTMLResponse:
     spec = BatterySpec(power_mw=power_mw, energy_mwh=power_mw * hours)
+    problem = _problem(source, year, pathway, target, services)
+    if problem is not None:
+        return HTMLResponse(_page("Cannot run", f"<p>{html.escape(problem)}</p>"), 400)
     try:
         if source == "history":
             output = _history(spec, year, forecast, services)
             title = f"{power_mw:g} MW / {hours:g} h battery, GB {year}"
         else:
-            if pathway not in PATHWAYS or target not in SCENARIO_YEARS:
-                raise ConfigError("choose a FES pathway and 2030 or 2035")
-            if services != "none":
-                raise ConfigError("frequency response is available on historic years only")
             output = _scenario(spec, pathway, target, forecast)
             title = f"{power_mw:g} MW / {hours:g} h battery, {pathway} {target}"
-    except (ConfigError, DataError) as exc:
+    except ConfigError, DataError:
         logger.exception("Battery run failed")
-        return HTMLResponse(
-            _page("Cannot run", "<p>The request could not be processed. Please check inputs and try again.</p>"),
-            400,
-        )
+        message = "<p>The run could not be completed. Please check the inputs and try again.</p>"
+        return HTMLResponse(_page("Cannot run", message), 400)
     return HTMLResponse(build_report([output], title=title, cdn=True))
+
+
+def _problem(source: str, year: int, pathway: str, target: int, services: str) -> str | None:
+    """A fixed message for inputs that cannot run, so no exception text reaches the page."""
+    if source == "scenario":
+        if pathway not in PATHWAYS or target not in SCENARIO_YEARS:
+            return f"Choose a FES pathway and {' or '.join(map(str, SCENARIO_YEARS))}."
+        if services != "none":
+            return "Frequency response is available on historic years only."
+    elif services != "none" and year < RESPONSE_FROM:
+        return f"Frequency response needs a year from {RESPONSE_FROM}."
+    return None
 
 
 def _history(spec: BatterySpec, year: int, forecast: str, services: str) -> BatteryOutput:

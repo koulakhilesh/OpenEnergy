@@ -116,7 +116,8 @@ Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes ou
     year, with GB's interconnectors as price-taking links to six neighbouring markets
     (see [Forward scenarios](guides/forward-scenarios.md)).
 11. **Runs in the browser**: a FastAPI [web app](guides/web-app.md) values a battery on
-    any GB year from 2017 or on a FES pathway, deployable to Vercel.
+    any GB year from 2017 or on a FES pathway; try it at
+    [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/).
 
 See [Concepts](concepts.md) for the equations and [Scenarios](guides/scenarios.md) for
 every setting.
