@@ -1,0 +1,50 @@
+name: Publish
+
+# Publishes to PyPI when a GitHub release is published, using trusted publishing (no
+# token): PyPI project "openenergy" trusts this workflow file and the "pypi" environment.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.14"
+      - run: uv build
+      - name: Check the release tag matches the package version
+        run: |
+          wheel="dist/openenergy-${GITHUB_REF_NAME#v}-py3-none-any.whl"
+          if [ ! -f "$wheel" ]; then
+            echo "release tag ${GITHUB_REF_NAME} does not match the built package:" >&2
+            ls dist >&2
+            exit 1
+          fi
+      - run: uvx twine check --strict dist/*
+      - name: Smoke-test the wheel
+        run: uv run --isolated --no-project --with dist/*.whl openenergy --help
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/openenergy/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

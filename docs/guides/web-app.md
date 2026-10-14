@@ -10,7 +10,8 @@ uv sync                        # the app dependency group (FastAPI, plotly, uvic
 uv run uvicorn openenergy.app:app
 ```
 
-Then open <http://127.0.0.1:8000/>.
+Then open <http://127.0.0.1:8000/>. The app reads the repository's `data/` folder, so run it
+from a clone; `pip install openenergy[app]` installs the code and its dependencies only.
 
 | Page | What it does |
 |---|---|
