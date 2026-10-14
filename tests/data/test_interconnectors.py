@@ -1,11 +1,14 @@
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
 from openenergy import DataError
+from openenergy.data.ember import gb_prices
 from openenergy.data.interconnectors import (
     NeighbourPriceSource,
+    availability_from_flows,
     interconnector_flows,
     interconnectors,
 )
@@ -23,6 +26,31 @@ def test_register_links_and_in_service_dates() -> None:
         "2023-12-29", tz="UTC"
     )
     assert links["NS Link"].neighbour == "norway"
+    # Fitted from flows (scripts/fit_interconnector_availability.py).
+    assert all(0 < link.import_availability <= 1 for link in links.values())
+    assert all(0 < link.export_availability <= 1 for link in links.values())
+    assert links["IFA Interconnector"].import_availability == pytest.approx(0.685)
+
+
+def test_availability_is_actual_flow_over_a_price_taker() -> None:
+    prices = gb_prices(
+        [ROOT / "data/prices/gb_day_ahead_ember.csv"], date(2024, 1, 1), date(2024, 3, 31)
+    )
+    table = availability_from_flows(
+        ROOT / "data/system",
+        prices[0].prices,
+        NeighbourPriceSource(ROOT / "data/prices/europe_day_ahead_ember.csv"),
+    )
+    assert len(table) == 10
+    ifa = table.loc["IFA Interconnector"]
+    assert ifa["import_availability"] == pytest.approx(
+        ifa["actual_import_mwh"] / ifa["price_taker_import_mwh"]
+    )
+    shares = table[["import_availability", "export_availability"]]
+    assert shares.notna().all().all() and (shares > 0).all().all() and (shares <= 1).all().all()
+    # Greenlink entered service in 2025, so it gets the mean of the others.
+    others = table.drop("Greenlink")["import_availability"]
+    assert table.loc["Greenlink", "import_availability"] == pytest.approx(others.mean())
 
 
 def test_flows_match_2024_totals() -> None:

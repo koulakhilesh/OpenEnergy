@@ -352,8 +352,8 @@ def scenarios() -> str:
     body = (
         "<h1>FES pathways on 2025's weather</h1>"
         "<p>Prices in GBP/MWh, energy in TWh. FES columns are NESO's own figures for the "
-        "same year; the model's are from one weather year with price-taking links, so the "
-        "gaps are part of the result.</p>"
+        "same year; the model's are from one weather year with price-taking links and unit "
+        "commitment, so the gaps are part of the result.</p>"
         f'<div class="wide"><table>{header}{rows}</table></div>'
         f'<p class="source">{html.escape(SCENARIO_NOTE)}</p>'
         f'<p class="source">{html.escape(FES_ATTRIBUTION)}</p>'

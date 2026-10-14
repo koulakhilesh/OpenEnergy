@@ -47,6 +47,11 @@ identical prices and costs, and a year with storage solves in under two seconds.
 None of these is fitted to prices. Every one can be changed in a scenario's
 `assumptions` section.
 
+Five tranches is enough: with links and unit commitment (2023–2025), the marginal price's
+mean moves by under £1/MWh and its daily spread by under 5% between 5, 10 and 20 CCGT
+tranches, while each step costs several times the solve time. More tranches only split
+ties, so fewer hours repeat the previous hour's price.
+
 ## Backcast: how close is it?
 
 `openenergy system validate` replays April 2015 to September 2020 and compares with the
@@ -354,7 +359,8 @@ Power System Analysis*, Journal of Open Research Software 6(1), 2018,
   start fuel, typical rather than GB-specific unit data, and one day planned at a time.
 - Imports and other fixed profiles cannot respond to price, unless interconnectors are
   `links` ([Forward scenarios](forward-scenarios.md)), which take the neighbours' prices
-  as given.
+  as given and trade up to each link's availability fitted from its flows. Links work with
+  unit commitment from v4.2.
 - Fuel prices are quarterly averages of what power producers paid, which can lag market
   gas prices (most visible in 2021–2024); the ETS is one price per year (from 1 April).
 - Storage optimisation has perfect foresight over the year.

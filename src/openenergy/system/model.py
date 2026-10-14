@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
@@ -195,29 +196,30 @@ def solve(
     """Dispatch ``spec`` at least cost.
 
     Without storage every hour is independent and the merit order is the exact optimum,
-    so ``auto`` uses it; with storage or links ``auto`` uses PyPSA
-    (``pip install openenergy[system]``). With ``commitment``, thermal units have start-up
-    costs and minimum stable output and days are solved in turn with a lookahead (storage
-    included; links are not supported).
+    so ``auto`` uses it; with storage ``auto`` uses PyPSA (``pip install openenergy[system]``).
+    With ``commitment``, thermal units have start-up costs and minimum stable output and days
+    are solved in turn with a lookahead (storage included). The merit order and unit
+    commitment dispatch links as two generators each (see ``_flatten_links``), which gives
+    the same prices as PyPSA's links.
     """
     _check_must_run(spec)
     if commitment is not None:
         if backend != "auto":
             raise ConfigError("unit commitment has its own solver; leave backend as 'auto'")
-        if spec.links:
-            raise ConfigError("unit commitment does not support interconnector links yet")
         from openenergy.system.commitment import commit
 
+        if spec.links:
+            return _restore_links(spec, commit(_flatten_links(spec), commitment))
         return commit(spec, commitment)
     if backend == "auto":
-        backend = "pypsa" if spec.storage or spec.links else "merit"
+        backend = "pypsa" if spec.storage else "merit"
     if backend == "merit":
-        if spec.storage or spec.links:
-            raise ConfigError(
-                "the merit-order backend cannot dispatch storage or links; use 'pypsa'"
-            )
+        if spec.storage:
+            raise ConfigError("the merit-order backend cannot dispatch storage; use 'pypsa'")
         from openenergy.system.merit import merit_order
 
+        if spec.links:
+            return _restore_links(spec, merit_order(_flatten_links(spec)))
         return merit_order(spec)
     if backend == "pypsa":
         from openenergy.system._pypsa import dispatch
@@ -234,6 +236,52 @@ def _check_must_run(spec: SystemSpec) -> None:
             f"must-run output exceeds demand in {int(over.sum())} periods "
             f"(by up to {excess.max():.0f} MW); reduce must-run scaling"
         )
+
+
+_LINK_IN = ":import"
+_LINK_UNUSED = ":export_unused"
+
+
+def _flatten_links(spec: SystemSpec) -> SystemSpec:
+    """Each link as generators: imports at the neighbour's price plus hurdle, and export
+    capacity left unused at the neighbour's price minus hurdle, with demand raised by the
+    export capacity. Minimising cost then maximises export revenue; prices are unchanged.
+    """
+    generators = list(spec.generators)
+    demand = spec.demand
+    for link in spec.links:
+        generators.append(
+            Generator(f"{link.name}{_LINK_IN}", "link", link.import_mw, link.price + link.hurdle)
+        )
+        generators.append(
+            Generator(
+                f"{link.name}{_LINK_UNUSED}", "link", link.export_mw, link.price - link.hurdle
+            )
+        )
+        demand = demand + link.export_mw
+    return SystemSpec(demand.rename(None), tuple(generators), spec.storage, spec.voll)
+
+
+def _restore_links(spec: SystemSpec, flat: SystemResult) -> SystemResult:
+    """Net link flows (positive into GB) and the true cost from a flattened result."""
+    names = [g.name for g in spec.generators]
+    flows = pd.DataFrame(
+        {
+            link.name: flat.generation[f"{link.name}{_LINK_IN}"]
+            - (link.export_mw - flat.generation[f"{link.name}{_LINK_UNUSED}"])
+            for link in spec.links
+        },
+        index=spec.demand.index,
+    )
+    # The flattened objective counts all export capacity at its value; take that back out.
+    offered = sum(float((link.export_mw * (link.price - link.hurdle)).sum()) for link in spec.links)
+    return dataclasses.replace(
+        flat,
+        generation=flat.generation[names],
+        technologies={g.name: g.technology for g in spec.generators},
+        cost=flat.cost - offered * spec.step_hours,
+        links=flows,
+    )
 
 
 def result_frames(

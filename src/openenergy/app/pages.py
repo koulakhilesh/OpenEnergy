@@ -28,7 +28,7 @@ SERVICE_NAMES = {
     "dc": "Dynamic Containment",
     "dc_dm": "Dynamic Containment and Moderation",
 }
-MODEL_SPREAD_SHARE = 0.6  # modelled 2025 daily spread / actual (forward scenarios guide)
+MODEL_SPREAD_SHARE = 0.77  # modelled 2025 daily spread 52.0 / actual 67.5 (forward guide)
 HELP = {
     "power": "The most the battery can charge or discharge at once. Revenue scales with it.",
     "duration": "Hours to fill or empty at full power: a 10 MW, 2-hour battery stores 20 MWh.",
@@ -307,6 +307,7 @@ def scenario_yaml(request: Request, power_mw: float) -> str:
                 "data": "data/system",
                 "year": WEATHER_YEAR,
                 "interconnectors": "links",
+                "commitment": True,
                 "fes": {"pathway": request.pathway, "year": request.year},
             },
             "battery": battery,

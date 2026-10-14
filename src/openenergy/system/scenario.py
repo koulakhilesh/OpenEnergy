@@ -9,7 +9,7 @@ import math
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 import pandas as pd
 import pydantic
@@ -50,7 +50,8 @@ from openenergy.system.validate import (
 SYSTEM_NOTE = (
     "Cost-based dispatch of GB on one bus: plants bid short-run marginal cost; imports, "
     "nuclear, biomass, hydro and pumped storage follow (scaled) historic output; storage "
-    "is optimised with perfect foresight over the year, so results are an idealised "
+    "is optimised with perfect foresight over the year (with unit commitment, a day at a "
+    "time seeing a day ahead), so results are an idealised "
     "benchmark. Scarcity pricing is not modelled, and start-up costs only with unit "
     "commitment, so price spreads are narrower than in the real market."
 )
@@ -78,12 +79,14 @@ class InterconnectorSection(_Strict):
     """``fixed`` keeps historic imports; ``links`` trades at neighbours' actual prices.
 
     ``prices`` defaults to ``prices/europe_day_ahead_ember.csv`` next to the system data.
+    ``availability: flows`` uses each link's availability fitted from its flows; a number
+    from 0 to 1 applies to every link instead.
     """
 
     mode: Literal["fixed", "links"] = "fixed"
     prices: Path | None = None
     hurdle_gbp_per_mwh: float = Field(default=0.0, ge=0)
-    availability: float = Field(default=1.0, gt=0, le=1)
+    availability: Literal["flows"] | Annotated[float, Field(gt=0, le=1)] = "flows"
 
     @pydantic.model_validator(mode="before")
     @classmethod
@@ -152,8 +155,6 @@ class SystemSection(_Strict):
             raise ValueError("price: start needs commitment: true")
         if self.commitment and self.backend != "auto":
             raise ValueError("commitment has its own solver; leave backend as auto")
-        if self.commitment and self.interconnectors.mode == "links":
-            raise ValueError("unit commitment does not support interconnector links yet")
         if self.interconnectors.mode == "links" and self.year < LINKS_FROM:
             raise ValueError(f"interconnector links need a year from {LINKS_FROM}")
         if self.fes is not None:
@@ -295,7 +296,9 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
             section.neighbour_prices(),
             link_scale,
             section.interconnectors.hurdle_gbp_per_mwh,
-            section.interconnectors.availability,
+            None
+            if section.interconnectors.availability == "flows"
+            else section.interconnectors.availability,
         )
     # Explicit scale and capacity entries override the FES and links settings.
     scale.update(section.scale)
