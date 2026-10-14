@@ -38,6 +38,9 @@ SCENARIO_NOTE = (
     f"{WEATHER_YEAR}'s weather and fuel, carbon and neighbouring prices, not a forecast. "
     f"{SYSTEM_NOTE} {FES_NOTE} {LINKS_NOTE}"
 )
+SCENARIO_ATTRIBUTION = " ".join(
+    (MIX_ATTRIBUTION, FLEET_ATTRIBUTION, INTERCONNECTOR_ATTRIBUTION, FES_ATTRIBUTION)
+)
 
 Source = Literal["history", "scenario"]
 ForecastName = Literal["naive_last_week", "perfect_foresight"]
@@ -134,15 +137,12 @@ def _scenario(spec: BatterySpec, request: Request, data: Path) -> BatteryOutput:
         if forecaster is perfect
         else run_backtest(spec, prices, perfect, config, list(result.daily.index))
     )
-    attribution = " ".join(
-        (MIX_ATTRIBUTION, FLEET_ATTRIBUTION, INTERCONNECTOR_ATTRIBUTION, FES_ATTRIBUTION)
-    )
     return BatteryOutput(
         name=column,
         summary={
             "summary": summarise(result, benchmark=benchmark).to_dict(),
             "note": SCENARIO_NOTE,
-            "attribution": attribution,
+            "attribution": SCENARIO_ATTRIBUTION,
         },
         daily=result.daily,
         intervals=result.intervals,

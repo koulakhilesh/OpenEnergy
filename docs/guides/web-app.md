@@ -1,8 +1,8 @@
 # Web app
 
 `openenergy.app` is a small FastAPI app on the Python API. It values a battery on a
-historic GB year or on a NESO FES pathway's modelled prices and shows the same interactive
-report as `openenergy report`. It runs at
+historic GB year or on a NESO FES pathway's modelled prices, answers in one plain
+sentence, and shows the charts, assumptions and sources behind it. It runs at
 [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/), or locally:
 
 ```bash
@@ -15,7 +15,10 @@ Then open <http://127.0.0.1:8000/>.
 | Page | What it does |
 |---|---|
 | `/` | Form: historic GB year (2017–2025, Ember prices) or a FES pathway in 2030 or 2035; power (MW) and duration (0.5–8 hours); forecast (last week's prices or perfect foresight); frequency response (none, Dynamic Containment, or Containment and Moderation; historic years from 2022) |
-| `/battery` | Runs the backtest and its perfect-foresight benchmark and returns the HTML report (plotly from its CDN) |
+| `/result` | The answer: one sentence (revenue for your MW, share of perfect foresight, cycles a day), key numbers, cumulative and monthly revenue charts, what the result assumes, sources, and links to download it. At once for 1, 2 and 4 hour batteries; otherwise a progress counter while it runs |
+| `/download/daily.csv` | Daily revenue and perfect-foresight revenue for your MW, with the data credit on the first line |
+| `/download/scenario.yaml` | The scenario that reproduces the result with `openenergy run` (or `openenergy system run` for a FES pathway) from the repository folder |
+| `/battery` | The full hourly report of `openenergy report` (runs the backtest now) |
 | `/scenarios` | Each FES pathway's modelled results on 2025's weather next to NESO's own figures |
 | `/api/result` | JSON: per-MW summary and daily revenue for the same request (without `power_mw`); see below |
 | `/health` | Status and version |

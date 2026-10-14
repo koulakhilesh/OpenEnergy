@@ -1,6 +1,9 @@
+import io
 from pathlib import Path
 
+import pandas as pd
 import pytest
+import yaml
 
 pytest.importorskip("fastapi")
 pytest.importorskip("plotly")
@@ -10,6 +13,8 @@ from fastapi.testclient import TestClient
 from openenergy.app import app
 from openenergy.app import results as app_results
 from openenergy.app.runs import Request
+from openenergy.scenario import Scenario
+from openenergy.system.scenario import SystemScenario
 
 ROOT = Path(__file__).parents[1]
 DATA = ROOT / "data"
@@ -121,3 +126,73 @@ def test_grid_covers_every_option_once() -> None:
     keys = [request.key for request in app_results.grid()]
     assert len(keys) == len(set(keys)) == 174
     assert app_results.store(Path("/nonexistent")) is None
+
+
+def test_result_page_answers_first(client: TestClient) -> None:
+    page = client.get("/result", params={"year": 2024, "hours": 2, "power_mw": 10})
+    assert page.status_code == 200
+    text = page.text
+    assert "10 MW, 2-hour battery trading GB day-ahead prices in 2024" in text
+    assert "£290,000 a year</strong> (£29,000 per MW)" in text
+    assert "74% of the" in text
+    assert "What this assumes" in text
+    assert "cdn.plot.ly" in text
+    assert 'id="elapsed"' not in text  # precomputed: no waiting
+    for link in ("/download/daily.csv?", "/download/scenario.yaml?", "/battery?"):
+        assert link in text
+    assert "power_mw=10" in text
+
+
+def test_result_page_on_a_pathway_and_with_response(client: TestClient) -> None:
+    pathway = client.get(
+        "/result",
+        params={
+            "source": "scenario",
+            "pathway": "Hydrogen Evolution",
+            "forecast": "perfect_foresight",
+        },
+    ).text
+    assert "would earn about" in pathway
+    assert "with perfect foresight of prices, an upper bound" in pathway
+    assert "not a forecast" in pathway
+    naive = client.get("/result", params={"source": "scenario", "pathway": "Falling Behind"})
+    assert "358 days simulated (the first week has no last week to plan on)" in naive.text
+    moderation = client.get("/result", params={"year": 2022, "services": "dc_dm"}).text
+    assert "281 days simulated (Dynamic Moderation starts on 26 March 2022)" in moderation
+    response = client.get("/result", params={"year": 2023, "services": "dc", "hours": 1}).text
+    assert "selling Dynamic Containment" in response
+    assert "comes from frequency response" in response
+    assert "never penalised" in response
+
+
+def test_other_durations_load_while_running(client: TestClient) -> None:
+    params = {"source": "scenario", "pathway": "Falling Behind", "hours": 3}
+    shell = client.get("/result", params=params).text
+    assert 'id="elapsed"' in shell
+    assert 'data-src="/result/fragment?' in shell
+    fragment = client.get("/result/fragment", params=params)
+    assert fragment.status_code == 200
+    assert "3-hour battery on modelled GB prices" in fragment.text
+    refused = client.get("/result", params={"year": 2019, "services": "dc"})
+    assert refused.status_code == 400
+    assert "2022" in refused.text
+
+
+def test_downloads_reproduce_the_result(client: TestClient) -> None:
+    csv = client.get("/download/daily.csv", params={"year": 2024, "power_mw": 10})
+    assert csv.status_code == 200
+    assert "attachment" in csv.headers["content-disposition"]
+    frame = pd.read_csv(io.StringIO(csv.text), comment="#")
+    assert list(frame.columns) == ["date", "revenue_gbp", "perfect_foresight_revenue_gbp"]
+    assert len(frame) == 366
+    assert frame["revenue_gbp"].sum() * 365 / 366 == pytest.approx(290_392, rel=1e-3)
+
+    history = client.get("/download/scenario.yaml", params={"year": 2023, "services": "dc"})
+    scenario = Scenario.model_validate(yaml.safe_load(history.text), context={"base": ROOT})
+    assert scenario.data.path.is_file()
+    assert scenario.response is not None and scenario.response.services == ["DCL", "DCH"]
+    forward = client.get(
+        "/download/scenario.yaml", params={"source": "scenario", "pathway": "Falling Behind"}
+    )
+    system = SystemScenario.model_validate(yaml.safe_load(forward.text), context={"base": ROOT})
+    assert system.system.fes is not None and system.system.fes.pathway == "Falling Behind"
