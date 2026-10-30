@@ -30,6 +30,12 @@ models
 # Development tools configurations
 .vscode
 
+# Web front end: dependencies, build and test output
+web/node_modules
+web/dist
+web/test-results
+web/playwright-report
+
 # Miscellaneous
 playground
 _posts

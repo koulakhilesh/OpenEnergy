@@ -49,7 +49,7 @@ order, PyPSA (when storage is added) and unit commitment.
 |---|---|---|
 | `mode` | `fixed` | `fixed`: historic imports (as before v4.0); `links`: price-taking links |
 | `hurdle_gbp_per_mwh` | 0 | added to import prices and taken off export prices |
-| `availability` | `flows` | `flows`: each link's import and export share fitted from its actual flows (below); a number from 0 to 1 applies to every link |
+| `availability` | `flows` | `flows`: each link's import and export share fitted from its actual flows (below); `gap`: a share that grows with the price gap, fitted from hourly flows (below); a number from 0 to 1 applies to every link |
 | `prices` | `prices/europe_day_ahead_ember.csv` next to `data` | neighbours' hourly prices |
 
 ### Checked against history
@@ -105,6 +105,34 @@ would have moved on actual GB and neighbour prices, 2019–2025, capped at 1 (se
 it gives 36.9 TWh of imports in 2024 against 43.9 actual (66.0 at full capacity), and
 11.8 TWh of exports against 10.6. It is one number per link and direction, so it does not
 respond to the size of the price gap.
+
+#### Availability by price gap (v5.0)
+
+Real links trade more of a bigger gap. From hourly flows (Elexon, 2019–2025) and actual
+prices, `availability: gap` takes each link's share of capacity in hours whose gap was
+£0–5, £5–10, £10–20, £20–40, £40–80 and over £80/MWh, made non-decreasing so each
+link can be offered as six steps, the k-th at the neighbour's price plus the bin's lower
+edge. Nemo Link, for example, imports 49% of its capacity at gaps under £5 and 90% above
+£80; IFA2 exports 12% and 78%. The Irish links barely respond. The shares are in
+`data/system/interconnector_gap_availability.csv`.
+
+Tested the same way as the flat share (both fitted on 2019–2022 flows and actual prices,
+links in service before 2023), it follows the hour-to-hour flows a little better and the
+yearly energy a little worse:
+
+| Year | Imports: actual / gap / flat | Exports: actual / gap / flat | Hourly correlation with actual flow: gap / flat |
+|---|---:|---:|---:|
+| 2023 | 33.5 / 24.4 / 26.7 | 10.1 / 8.0 / 10.0 | 0.47 / 0.43 |
+| 2024 | 38.9 / 29.1 / 30.2 | 9.2 / 6.0 / 7.1 | 0.41 / 0.37 |
+| 2025 | 38.9 / 28.6 / 29.3 | 9.5 / 6.2 / 7.4 | 0.46 / 0.43 |
+
+In the model (links and unit commitment, 2023–2025) it moves the mean by under £1/MWh,
+lowers the daily spread by 0.3 to 2.0 (2025: 50.0 against 52.0), cuts exports by a
+fifth to a quarter, and changes the battery's perfect-foresight value by −7% to −2%
+(planning on last week's prices it earns 6% to 26% more).
+Because it does not beat the flat share out of sample, `flows` stays the default and
+`gap` is an option. It matters most for the FES pathways below, where links are short at
+scarcity.
 
 #### Marginal or start price
 
@@ -201,7 +229,15 @@ neighbours' own 2030s fleets. Read 2035 prices in these pathways as "this fleet 
 of firm capacity in 2025's weather when links behave as they have", not as a price
 forecast. With every link at full capacity the same pathways shed load only in Holistic
 Transition 2035 (50.5 GWh) and Electric Engagement 2035 (10.9 GWh)
-(`availability: 1.0`).
+(`availability: 1.0`). With `availability: gap`, where links trade more of the very large
+gaps at scarcity, lost load falls by about a third but does not go away:
+
+| Pathway and year | Unserved GWh, hours at £6,000: flows | gap | Mean £/MWh: flows | gap |
+|---|---:|---:|---:|---:|
+| Holistic Transition 2030 | 68.0, 25 | 47.0, 24 | 86.3 | 85.2 |
+| Holistic Transition 2035 | 723.0, 174 | 510.4, 130 | 211.7 | 162.5 |
+| Electric Engagement 2035 | 683.2, 161 | 480.4, 110 | 191.1 | 151.2 |
+| Hydrogen Evolution 2035 | 214.8, 73 | 150.1, 44 | 121.4 | 95.4 |
 
 ### A battery on pathway prices
 
@@ -245,8 +281,9 @@ the perfect-foresight value, against 80% on actual 2025 prices and 44% on the mo
 - Capacities from the register are today's; earlier limits on Moyle, IFA and BritNed are
   not modelled separately, only through each link's fitted availability (see
   [Data](../data.md)).
-- Each link's availability is one number per direction for every hour and year; it does
-  not grow with the price gap, and new FES capacity gets the existing links' shares.
+- Each link's availability is one number per direction for every hour and year (with
+  `availability: gap`, one per price-gap bin); new FES capacity gets the existing links'
+  shares.
 - Ember gives one price for Norway and one for Denmark; GB's links land in southern Norway
   and western Denmark.
 - The weather year's fuel and carbon prices are kept; storage efficiencies for FES
@@ -267,6 +304,7 @@ supported by National Energy SO Open Data. Flows: Elexon BMRS FUELHH, under the
 contains BMRS data © Elexon Limited copyright and database right 2026. Neighbouring prices:
 Ember, [European Wholesale Electricity Price Data](https://ember-energy.org/data/european-wholesale-electricity-price-data/),
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), converted with ECB reference
-rates (source: ECB). All accessed 13 October 2026; see [Data](../data.md) for the rest of
+rates (source: ECB). FES and the register accessed 13 October 2026, flows and prices
+30 October 2026 (daily and hourly flows); see [Data](../data.md) for the rest of
 the system model's sources. OpenEnergy is not affiliated with or endorsed by NESO, Elexon,
 Ember or the ECB.

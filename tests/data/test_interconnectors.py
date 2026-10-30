@@ -1,19 +1,68 @@
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
 from openenergy import DataError
 from openenergy.data.ember import gb_prices
 from openenergy.data.interconnectors import (
+    GAP_EDGES,
     NeighbourPriceSource,
+    _non_decreasing,
+    availability_by_gap,
     availability_from_flows,
+    gap_shares,
     interconnector_flows,
+    interconnector_flows_hourly,
     interconnectors,
 )
 
 ROOT = Path(__file__).parents[2]
+
+
+def test_hourly_flows_agree_with_daily_totals() -> None:
+    hourly = interconnector_flows_hourly(ROOT / "data/system")
+    assert hourly.index[0] == pd.Timestamp("2019-01-01", tz="UTC")
+    daily = interconnector_flows(ROOT / "data/system").loc["2024"]
+    year = hourly.loc["2024"]
+    imports = year.clip(lower=0).sum().sum() / 1e6
+    # Hourly means net out flow reversals within an hour, so they can only be a little lower.
+    assert imports == pytest.approx(daily.filter(like="_import_mwh").sum().sum() / 1e6, rel=0.01)
+
+
+def test_non_decreasing_pools_violations_by_weight() -> None:
+    shares = _non_decreasing(np.array([0.5, 0.3, 0.6, 0.4]), np.array([1.0, 3.0, 1.0, 1.0]))
+    assert list(shares) == pytest.approx([0.35, 0.35, 0.5, 0.5])
+    assert list(_non_decreasing(np.array([0.1, 0.2]), np.array([0.0, 0.0]))) == [0.1, 0.2]
+
+
+def test_availability_by_gap_is_hourly_flow_over_capacity() -> None:
+    prices = gb_prices(
+        [ROOT / "data/prices/gb_day_ahead_ember.csv"], date(2024, 1, 1), date(2024, 12, 31)
+    )
+    table = availability_by_gap(
+        ROOT / "data/system",
+        prices[0].prices,
+        NeighbourPriceSource(ROOT / "data/prices/europe_day_ahead_ember.csv"),
+    )
+    assert set(table["gap_from"]) == set(GAP_EDGES)
+    for (_, _), rows in table.groupby(["link", "direction"]):
+        shares = rows.sort_values("gap_from")["share"].to_numpy()
+        assert (np.diff(shares) >= -1e-12).all() and ((shares >= 0) & (shares <= 1)).all()
+    nemo = table[(table["link"] == "Nemo Link") & (table["direction"] == "import")]
+    assert nemo["share"].iloc[-1] > nemo["share"].iloc[0]  # trades more of a bigger gap
+    assert "Greenlink" not in set(table["link"])  # in service 2025
+
+
+def test_gap_shares_read_the_fitted_file(tmp_path: Path) -> None:
+    shares = gap_shares(ROOT / "data/system")
+    assert len(shares) == 10
+    imports, exports = shares["IFA Interconnector"]
+    assert len(imports) == len(exports) == len(GAP_EDGES)
+    with pytest.raises(DataError, match="fit_interconnector_availability"):
+        gap_shares(tmp_path)
 
 
 def test_register_links_and_in_service_dates() -> None:

@@ -1,4 +1,4 @@
-"""Download GB interconnector flows from Elexon BMRS (FUELHH) as daily import/export totals.
+"""Download GB interconnector flows from Elexon BMRS (FUELHH): daily totals and hourly flows.
 
 Source: Elexon, BMRS Insights API, half-hourly generation by fuel type (dataset FUELHH),
 https://bmrs.elexon.co.uk/, reused under the BMRS data licence,
@@ -7,10 +7,12 @@ Contains BMRS data © Elexon Limited copyright and database right 2026. OpenEner
 affiliated with or endorsed by Elexon.
 
 FUELHH reports each interconnector's flow (MW, positive into GB). This writes, per UTC
-day, the energy imported and exported on each link (MWh), and is used to date when each
-link entered service and to check the system model's interconnector flows.
+day, the energy imported and exported on each link (MWh), used to date when each link
+entered service and to check the system model's flows; and, from 2019 (the first year
+with every neighbour's price), each link's hourly net flow (MW, the mean of its two
+half-hours), used to fit how much of a price gap each link trades.
 
-Run: uv run python scripts/fetch_interconnector_flows.py [--start 2016-01-01] [--end 2026-10-12]
+Run: uv run python scripts/fetch_interconnector_flows.py [--start 2016-01-01] [--end 2026-10-29]
 """
 
 import argparse
@@ -27,12 +29,14 @@ API = (
     "?settlementDateFrom={start}&settlementDateTo={end}"
 )
 OUTPUT = Path(__file__).parents[1] / "data/system/interconnector_flows.csv"
+HOURLY = Path(__file__).parents[1] / "data/system/interconnector_flows_hourly.csv"
+HOURLY_FROM = pd.Timestamp("2019-01-01", tz="UTC")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--start", type=date.fromisoformat, default=date(2016, 1, 1))
-    parser.add_argument("--end", type=date.fromisoformat, default=date(2026, 10, 12))
+    parser.add_argument("--end", type=date.fromisoformat, default=date(2026, 10, 29))
     args = parser.parse_args()
     rows = []
     for first in pd.date_range(args.start, args.end, freq="MS"):
@@ -62,6 +66,15 @@ def main() -> None:
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     daily.to_csv(OUTPUT, index_label="date")
     print(f"wrote {len(daily)} days, {len(daily.columns) // 2} links to {OUTPUT}")
+    links = sorted({c.rsplit("_", 2)[0].upper() for c in daily.columns})
+    recent = frame[frame["start"] >= HOURLY_FROM]
+    hourly = recent.pivot_table(
+        index=recent["start"].dt.floor("h"), columns="fuelType", values="generation"
+    )[links]
+    hourly.columns = [f"{fuel.lower()}_mw" for fuel in hourly.columns]
+    hourly.index = hourly.index.strftime("%Y-%m-%dT%H:%M:%SZ")
+    hourly.round(0).to_csv(HOURLY, index_label="utc_timestamp", float_format="%.0f")
+    print(f"wrote {len(hourly)} hours to {HOURLY}")
 
 
 if __name__ == "__main__":

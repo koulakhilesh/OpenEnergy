@@ -5,13 +5,17 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 
 from openenergy.data.fes import FesSource
 from openenergy.data.interconnectors import (
     AVAILABILITY_FILE,
+    GAP_EDGES,
+    GAP_FILE,
     NeighbourPriceSource,
+    gap_shares,
     interconnectors,
 )
 from openenergy.errors import ConfigError, DataError
@@ -103,21 +107,26 @@ def links(
     prices_path: str | Path,
     scale: float = 1.0,
     hurdle: float = 0.0,
-    availability: float | None = None,
+    availability: float | Literal["flows", "gap"] | None = None,
 ) -> tuple[Link, ...]:
-    """One price-taking link per GB interconnector in service on each snapshot.
+    """Price-taking links for the GB interconnectors in service on each snapshot.
 
-    ``availability`` None uses each link's import and export availability fitted from
-    flows (``interconnector_availability.csv``); a number applies to every link.
+    ``availability``: ``"flows"`` (or None) uses each link's import and export availability
+    fitted from flows (``interconnector_availability.csv``); ``"gap"`` offers each link as
+    steps, one per price-gap bin, so the share of capacity it trades grows with the gap as
+    it did historically (``interconnector_gap_availability.csv``; steps are named
+    ``<link> (gap from £N)``); a number applies to every link.
     """
-    if availability is None and not (Path(system_dir) / AVAILABILITY_FILE).is_file():
+    directory = Path(system_dir)
+    if availability in (None, "flows") and not (directory / AVAILABILITY_FILE).is_file():
         raise DataError(
             f"{AVAILABILITY_FILE} not found in {system_dir}; run "
             "scripts/fit_interconnector_availability.py or give a number"
         )
+    steps = gap_shares(directory) if availability == "gap" else {}
     source = NeighbourPriceSource(prices_path)
     built = []
-    for unit in interconnectors(system_dir):
+    for unit in interconnectors(directory):
         live = (
             pd.Series(1.0, index=index)
             if unit.in_service is None
@@ -125,18 +134,37 @@ def links(
         )
         if not live.any():
             continue
-        imports = unit.import_availability if availability is None else availability
-        exports = unit.export_availability if availability is None else availability
         try:
-            price = source.prices(unit.neighbour, index).prices
+            price = source.prices(unit.neighbour, index).prices.rename(None)
         except DataError as exc:
             raise DataError(f"{unit.name}: {exc}") from exc
+        if availability == "gap":
+            if unit.name not in steps:
+                raise DataError(f"{GAP_FILE} has no shares for {unit.name}")
+            imports, exports = steps[unit.name]
+            previous = (0.0, 0.0)
+            for edge, imp, exp in zip(GAP_EDGES, imports, exports, strict=True):
+                built.append(
+                    Link(
+                        f"{unit.name} (gap from £{edge:g})",
+                        (live * scale * (imp - previous[0]) * unit.import_mw).rename(None),
+                        (live * scale * (exp - previous[1]) * unit.export_mw).rename(None),
+                        price,
+                        hurdle + edge,
+                    )
+                )
+                previous = (imp, exp)
+            continue
+        if availability is None or availability == "flows":
+            share = (unit.import_availability, unit.export_availability)
+        else:
+            share = (float(availability), float(availability))
         built.append(
             Link(
                 unit.name,
-                (live * scale * imports * unit.import_mw).rename(None),
-                (live * scale * exports * unit.export_mw).rename(None),
-                price.rename(None),
+                (live * scale * share[0] * unit.import_mw).rename(None),
+                (live * scale * share[1] * unit.export_mw).rename(None),
+                price,
                 hurdle,
             )
         )

@@ -1,7 +1,7 @@
 # GB national carbon intensity
 
 `gb_national.csv`: half-hourly national carbon intensity of Great Britain's electricity
-system, 2018-01-01 00:00 to 2026-10-12 23:30 UTC (153,936 rows, one per half-hour).
+system, 2018-01-01 00:00 to 2026-10-29 23:30 UTC (154,752 rows, one per half-hour).
 
 | Column | Meaning |
 |--------|---------|
@@ -19,9 +19,11 @@ Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); see th
 [API terms of use](https://github.com/carbon-intensity/terms). OpenEnergy is not affiliated
 with or endorsed by NESO.
 
-First downloaded on 2026-10-10 and extended on 2026-10-13 with
-`scripts/fetch_carbon_intensity.py --end 2026-10-12` (the re-download left every earlier
-value unchanged); values are stored exactly as returned by the API. The 179 half-hours the
+First downloaded on 2026-10-10, extended on 2026-10-13 and again on 2026-10-30 with
+`scripts/fetch_carbon_intensity.py --end 2026-10-29`. The last re-download changed six
+`actual` values in the last hours of 12 October 2026 by 1–2 gCO2/kWh (NESO's estimate had
+been revised) and left every earlier value unchanged; values are stored exactly as
+returned by the API. The 179 half-hours the
 API did not return (the longest run
 about 45 hours, from 2023-10-20 22:00) are written with both values blank. Methodology:
 [national forecast](https://www.neso.energy/data-portal/national-carbon-intensity-forecast/national_carbon_intensity_forecast_methodology).

@@ -1,0 +1,22 @@
+{
+  "title": "OpenEnergy: backtest battery storage and renewables against real power-market data",
+  "upload_type": "software",
+  "description": "Open-source Python toolkit and web app that backtests grid batteries against GB day-ahead prices without lookahead, stacks frequency-response revenue, rebuilds GB prices from plant, fuel and carbon data with unit commitment and interconnector links, and applies NESO Future Energy Scenarios. Bundled data keep their own licences, listed in the repository.",
+  "creators": [{ "name": "Koul, Akhilesh" }],
+  "license": "MIT",
+  "keywords": [
+    "energy storage",
+    "battery",
+    "electricity markets",
+    "backtesting",
+    "power systems",
+    "Great Britain"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://koulakhilesh.github.io/OpenEnergy/",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-softwaredocumentation"
+    }
+  ]
+}

@@ -1,0 +1,1367 @@
+{
+  "components": {
+    "schemas": {
+      "Compare": {
+        "properties": {
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/RequestOut"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ResultOut"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "options",
+          "results"
+        ],
+        "title": "Compare",
+        "type": "object"
+      },
+      "Daily": {
+        "properties": {
+          "benchmark_revenue": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Benchmark Revenue",
+            "type": "array"
+          },
+          "date": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Date",
+            "type": "array"
+          },
+          "revenue": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Revenue",
+            "type": "array"
+          }
+        },
+        "required": [
+          "date",
+          "revenue",
+          "benchmark_revenue"
+        ],
+        "title": "Daily",
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "error": {
+            "title": "Error",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "Explore": {
+        "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "pathways": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "title": "Pathways",
+            "type": "array"
+          }
+        },
+        "required": [
+          "history",
+          "pathways"
+        ],
+        "title": "Explore",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Item": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/RequestOut"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/Summary"
+          }
+        },
+        "required": [
+          "request",
+          "summary"
+        ],
+        "title": "Item",
+        "type": "object"
+      },
+      "Options": {
+        "properties": {
+          "docs_url": {
+            "title": "Docs Url",
+            "type": "string"
+          },
+          "forecasts": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Forecasts",
+            "type": "object"
+          },
+          "help": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Help",
+            "type": "object"
+          },
+          "history_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "History Years",
+            "type": "array"
+          },
+          "hours_range": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Hours Range",
+            "type": "array"
+          },
+          "pathways": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pathways",
+            "type": "array"
+          },
+          "power_range": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Power Range",
+            "type": "array"
+          },
+          "precomputed_hours": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Precomputed Hours",
+            "type": "array"
+          },
+          "response_from": {
+            "title": "Response From",
+            "type": "integer"
+          },
+          "scenario_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Scenario Years",
+            "type": "array"
+          },
+          "services": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Services",
+            "type": "object"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "history_years",
+          "response_from",
+          "pathways",
+          "scenario_years",
+          "precomputed_hours",
+          "hours_range",
+          "power_range",
+          "forecasts",
+          "services",
+          "help",
+          "docs_url"
+        ],
+        "title": "Options",
+        "type": "object"
+      },
+      "PathwayRow": {
+        "properties": {
+          "curtailment_twh": {
+            "title": "Curtailment Twh",
+            "type": "number"
+          },
+          "daily_spread": {
+            "title": "Daily Spread",
+            "type": "number"
+          },
+          "emissions_mt": {
+            "title": "Emissions Mt",
+            "type": "number"
+          },
+          "exports_twh": {
+            "title": "Exports Twh",
+            "type": "number"
+          },
+          "fes_curtailment_twh": {
+            "title": "Fes Curtailment Twh",
+            "type": "number"
+          },
+          "fes_exports_twh": {
+            "title": "Fes Exports Twh",
+            "type": "number"
+          },
+          "fes_imports_twh": {
+            "title": "Fes Imports Twh",
+            "type": "number"
+          },
+          "imports_twh": {
+            "title": "Imports Twh",
+            "type": "number"
+          },
+          "pathway": {
+            "title": "Pathway",
+            "type": "string"
+          },
+          "price_mean": {
+            "title": "Price Mean",
+            "type": "number"
+          },
+          "unserved_gwh": {
+            "title": "Unserved Gwh",
+            "type": "number"
+          },
+          "weather_year": {
+            "title": "Weather Year",
+            "type": "integer"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pathway",
+          "year",
+          "weather_year",
+          "price_mean",
+          "daily_spread",
+          "imports_twh",
+          "exports_twh",
+          "curtailment_twh",
+          "unserved_gwh",
+          "emissions_mt",
+          "fes_imports_twh",
+          "fes_exports_twh",
+          "fes_curtailment_twh"
+        ],
+        "title": "PathwayRow",
+        "type": "object"
+      },
+      "RequestOut": {
+        "properties": {
+          "forecast": {
+            "enum": [
+              "naive_last_week",
+              "perfect_foresight"
+            ],
+            "title": "Forecast",
+            "type": "string"
+          },
+          "hours": {
+            "title": "Hours",
+            "type": "number"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "pathway": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pathway"
+          },
+          "prices": {
+            "title": "Prices",
+            "type": "string"
+          },
+          "services": {
+            "enum": [
+              "none",
+              "dc",
+              "dc_dm"
+            ],
+            "title": "Services",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "history",
+              "scenario"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "where": {
+            "title": "Where",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source",
+          "year",
+          "pathway",
+          "hours",
+          "forecast",
+          "services",
+          "key",
+          "prices",
+          "where",
+          "label"
+        ],
+        "title": "RequestOut",
+        "type": "object"
+      },
+      "ResultOut": {
+        "properties": {
+          "daily": {
+            "$ref": "#/components/schemas/Daily"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "precomputed": {
+            "title": "Precomputed",
+            "type": "boolean"
+          },
+          "request": {
+            "$ref": "#/components/schemas/RequestOut"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/Summary"
+          },
+          "text": {
+            "$ref": "#/components/schemas/Wording"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "precomputed",
+          "request",
+          "summary",
+          "daily",
+          "text"
+        ],
+        "title": "ResultOut",
+        "type": "object"
+      },
+      "Scenarios": {
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/PathwayRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "note",
+          "attribution"
+        ],
+        "title": "Scenarios",
+        "type": "object"
+      },
+      "Summary": {
+        "properties": {
+          "capture_ratio": {
+            "title": "Capture Ratio",
+            "type": "number"
+          },
+          "captured_spread": {
+            "title": "Captured Spread",
+            "type": "number"
+          },
+          "cycles_per_day": {
+            "title": "Cycles Per Day",
+            "type": "number"
+          },
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "forecast_mae": {
+            "title": "Forecast Mae",
+            "type": "number"
+          },
+          "perfect_per_mw_year": {
+            "title": "Perfect Per Mw Year",
+            "type": "number"
+          },
+          "response_share": {
+            "title": "Response Share",
+            "type": "number"
+          },
+          "revenue_per_mw_year": {
+            "title": "Revenue Per Mw Year",
+            "type": "number"
+          }
+        },
+        "required": [
+          "days",
+          "revenue_per_mw_year",
+          "perfect_per_mw_year",
+          "capture_ratio",
+          "cycles_per_day",
+          "captured_spread",
+          "forecast_mae",
+          "response_share"
+        ],
+        "title": "Summary",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "Wording": {
+        "description": "Plain text for ``power_mw``: the answer sentence, assumptions and data sources.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "power_mw": {
+            "title": "Power Mw",
+            "type": "number"
+          },
+          "sources": {
+            "title": "Sources",
+            "type": "string"
+          }
+        },
+        "required": [
+          "power_mw",
+          "answer",
+          "assumptions",
+          "sources"
+        ],
+        "title": "Wording",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "OpenEnergy",
+    "version": "5.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/compare": {
+      "get": {
+        "description": "Up to three precomputed results, named by their ``prices`` token, and every option.",
+        "operationId": "compare_api_compare_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "item",
+            "required": false,
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 3,
+              "title": "Item",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": "2",
+              "enum": [
+                "1",
+                "2",
+                "4"
+              ],
+              "title": "Hours",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forecast",
+            "required": false,
+            "schema": {
+              "default": "naive_last_week",
+              "enum": [
+                "naive_last_week",
+                "perfect_foresight"
+              ],
+              "title": "Forecast",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "power_mw",
+            "required": false,
+            "schema": {
+              "default": 1.0,
+              "maximum": 1000.0,
+              "minimum": 0.1,
+              "title": "Power Mw",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Compare"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Compare"
+      }
+    },
+    "/api/explore": {
+      "get": {
+        "description": "Value by GB year (with ``services``) and by FES pathway, from the precomputed results.",
+        "operationId": "explore_api_explore_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": "2",
+              "enum": [
+                "1",
+                "2",
+                "4"
+              ],
+              "title": "Hours",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forecast",
+            "required": false,
+            "schema": {
+              "default": "naive_last_week",
+              "enum": [
+                "naive_last_week",
+                "perfect_foresight"
+              ],
+              "title": "Forecast",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "services",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "none",
+                "dc",
+                "dc_dm"
+              ],
+              "title": "Services",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Explore"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Explore"
+      }
+    },
+    "/api/options": {
+      "get": {
+        "description": "Everything the front end offers: years, pathways, limits and the \"?\" explanations.",
+        "operationId": "options_api_options_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Options"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Options"
+      }
+    },
+    "/api/result": {
+      "get": {
+        "description": "Per-MW results for one battery: precomputed when available, else run now.",
+        "operationId": "result_api_result_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "power_mw",
+            "required": false,
+            "schema": {
+              "default": 1.0,
+              "maximum": 1000.0,
+              "minimum": 0.1,
+              "title": "Power Mw",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "history",
+              "enum": [
+                "history",
+                "scenario"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "default": 2025,
+              "maximum": 2025,
+              "minimum": 2017,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pathway",
+            "required": false,
+            "schema": {
+              "default": "Holistic Transition",
+              "title": "Pathway",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target",
+            "required": false,
+            "schema": {
+              "default": 2030,
+              "maximum": 2035,
+              "minimum": 2030,
+              "title": "Target",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": 2.0,
+              "maximum": 8.0,
+              "minimum": 0.5,
+              "title": "Hours",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forecast",
+            "required": false,
+            "schema": {
+              "default": "naive_last_week",
+              "enum": [
+                "naive_last_week",
+                "perfect_foresight"
+              ],
+              "title": "Forecast",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "services",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "none",
+                "dc",
+                "dc_dm"
+              ],
+              "title": "Services",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Result"
+      }
+    },
+    "/api/scenarios": {
+      "get": {
+        "description": "Each FES pathway's modelled results on the weather year next to NESO's own figures.",
+        "operationId": "scenarios_api_scenarios_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Scenarios"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Scenarios"
+      }
+    },
+    "/battery": {
+      "get": {
+        "description": "The full hourly report for one battery, run now.",
+        "operationId": "battery_battery_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "power_mw",
+            "required": false,
+            "schema": {
+              "default": 1.0,
+              "exclusiveMinimum": 0,
+              "maximum": 1000,
+              "title": "Power Mw",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "history",
+              "enum": [
+                "history",
+                "scenario"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "default": 2025,
+              "maximum": 2025,
+              "minimum": 2017,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pathway",
+            "required": false,
+            "schema": {
+              "default": "Holistic Transition",
+              "title": "Pathway",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target",
+            "required": false,
+            "schema": {
+              "default": 2030,
+              "maximum": 2035,
+              "minimum": 2030,
+              "title": "Target",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": 2.0,
+              "maximum": 8.0,
+              "minimum": 0.5,
+              "title": "Hours",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forecast",
+            "required": false,
+            "schema": {
+              "default": "naive_last_week",
+              "enum": [
+                "naive_last_week",
+                "perfect_foresight"
+              ],
+              "title": "Forecast",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "services",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "none",
+                "dc",
+                "dc_dm"
+              ],
+              "title": "Services",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Battery"
+      }
+    },
+    "/download/daily.csv": {
+      "get": {
+        "operationId": "download_daily_download_daily_csv_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "power_mw",
+            "required": false,
+            "schema": {
+              "default": 1.0,
+              "maximum": 1000.0,
+              "minimum": 0.1,
+              "title": "Power Mw",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "history",
+              "enum": [
+                "history",
+                "scenario"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "default": 2025,
+              "maximum": 2025,
+              "minimum": 2017,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pathway",
+            "required": false,
+            "schema": {
+              "default": "Holistic Transition",
+              "title": "Pathway",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target",
+            "required": false,
+            "schema": {
+              "default": 2030,
+              "maximum": 2035,
+              "minimum": 2030,
+              "title": "Target",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": 2.0,
+              "maximum": 8.0,
+              "minimum": 0.5,
+              "title": "Hours",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forecast",
+            "required": false,
+            "schema": {
+              "default": "naive_last_week",
+              "enum": [
+                "naive_last_week",
+                "perfect_foresight"
+              ],
+              "title": "Forecast",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "services",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "none",
+                "dc",
+                "dc_dm"
+              ],
+              "title": "Services",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Daily"
+      }
+    },
+    "/download/scenario.yaml": {
+      "get": {
+        "operationId": "download_scenario_download_scenario_yaml_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "power_mw",
+            "required": false,
+            "schema": {
+              "default": 1.0,
+              "maximum": 1000.0,
+              "minimum": 0.1,
+              "title": "Power Mw",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "history",
+              "enum": [
+                "history",
+                "scenario"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "default": 2025,
+              "maximum": 2025,
+              "minimum": 2017,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pathway",
+            "required": false,
+            "schema": {
+              "default": "Holistic Transition",
+              "title": "Pathway",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target",
+            "required": false,
+            "schema": {
+              "default": 2030,
+              "maximum": 2035,
+              "minimum": 2030,
+              "title": "Target",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": 2.0,
+              "maximum": 8.0,
+              "minimum": 0.5,
+              "title": "Hours",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "forecast",
+            "required": false,
+            "schema": {
+              "default": "naive_last_week",
+              "enum": [
+                "naive_last_week",
+                "perfect_foresight"
+              ],
+              "title": "Forecast",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "services",
+            "required": false,
+            "schema": {
+              "default": "none",
+              "enum": [
+                "none",
+                "dc",
+                "dc_dm"
+              ],
+              "title": "Services",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Scenario"
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    }
+  }
+}

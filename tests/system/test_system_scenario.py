@@ -129,6 +129,12 @@ def test_links_with_commitment_and_flow_availability(tmp_path: Path) -> None:
     with pytest.raises(ConfigError, match="availability"):
         bad = {"interconnectors": {"mode": "links", "availability": 0}}
         load_system_scenario(write(tmp_path, system=bad))
+    gap = {**week, "interconnectors": {"mode": "links", "availability": "gap"}}
+    stepped = run_system_scenario(load_system_scenario(write(tmp_path, system=gap)))
+    assert stepped.summary.imports_twh is not None
+    assert 0 < stepped.summary.imports_twh < unlimited.summary.imports_twh
+    assert stepped.result.links is not None
+    assert "IFA Interconnector (gap from £80)" in stepped.result.links.columns
 
 
 def test_fes_scenario_scales_the_weather_year(tmp_path: Path) -> None:

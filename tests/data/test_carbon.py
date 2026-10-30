@@ -101,7 +101,7 @@ def test_attribution_names_neso() -> None:
 def test_bundled_carbon_intensity() -> None:
     source = CarbonIntensitySource(BUNDLED_CARBON)
     actual = source.intensity()
-    assert len(actual.values) == 153936  # 2018 to 12 October 2026, every half-hour
+    assert len(actual.values) == 154752  # 2018 to 29 October 2026, every half-hour
     assert actual.values.isna().sum() == 804
     assert actual.values.loc[:"2020-09-30"].isna().sum() == 438
     assert source.intensity(kind="forecast").rejected == 16

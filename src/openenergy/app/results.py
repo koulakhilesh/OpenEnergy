@@ -6,7 +6,6 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 
@@ -35,19 +34,6 @@ class Result:
     summary: dict[str, float]
     daily: pd.DataFrame
     precomputed: bool
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "key": self.request.key,
-            "label": self.request.label,
-            "precomputed": self.precomputed,
-            "summary": self.summary,
-            "daily": {
-                "date": list(self.daily.index),
-                "revenue": self.daily["revenue"].round(2).tolist(),
-                "benchmark_revenue": self.daily["benchmark_revenue"].round(2).tolist(),
-            },
-        }
 
 
 def grid() -> Iterator[Request]:

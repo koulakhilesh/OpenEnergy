@@ -1,13 +1,13 @@
 # Day-ahead prices after 2020: GB and its neighbours
 
 Written by `scripts/fetch_prices.py` (or `openenergy data update`, which writes the same
-files to a user cache). Downloaded on 2026-10-10; neighbouring prices and ECB rates
-refreshed on 2026-10-13. OpenEnergy is not affiliated with or endorsed by Ember or the
+files to a user cache). Downloaded on 2026-10-10 and refreshed on 2026-10-30.
+OpenEnergy is not affiliated with or endorsed by Ember or the
 European Central Bank.
 
 ## `gb_day_ahead_ember.csv`
 
-Hourly GB day-ahead electricity price, 2016-06-29 23:00 to 2026-10-05 22:00 UTC (90,000
+Hourly GB day-ahead electricity price, 2016-06-29 23:00 to 2026-10-28 23:00 UTC (90,553
 rows, no gaps). Columns: `utc_timestamp` (start of the hour, UTC) and `price_eur_per_mwh`.
 
 Source: Ember, *European Wholesale Electricity Price Data*, hourly file `United
@@ -31,7 +31,7 @@ to €2,576/MWh, in 2021–2022); both are kept. Before 2021 the series is the E
 ## `europe_day_ahead_ember.csv`
 
 Hourly day-ahead prices of the markets GB has interconnectors to, EUR/MWh, 2015-01-01
-00:00 to 2026-10-07 21:00 UTC (103,150 rows, one per hour). Columns: `utc_timestamp`,
+00:00 to 2026-10-30 22:00 UTC (103,703 rows, one per hour). Columns: `utc_timestamp`,
 `france`, `netherlands`, `belgium`, `norway`, `denmark` and `ireland`.
 
 Source: Ember, *European Wholesale Electricity Price Data*, hourly files `France.csv`,
@@ -46,13 +46,13 @@ per country without saying how it is formed; GB's links land in southern Norway 
 North Sea Link) and western Denmark (DK1, Viking Link), whose prices can differ. Ireland
 starts on 2018-10-01, when the Single Electricity Market's I-SEM arrangements began, so the
 system model's interconnector links need a weather year from 2019. Blanks: four hours in
-each column on 31 July and 30 September 2026, Denmark 35 hours on the same days and its
-last 16 hours; none fall in 2015-2025. Negative prices are kept (down to −€500/MWh in
-the Netherlands and Belgium).
+each column on 31 July and 30 September 2026; Denmark 54 hours, on those days, on 26 and
+27 October 2026 and its last 17 hours; none fall in 2015-2025. Negative prices are kept
+(down to −€500/MWh in the Netherlands and Belgium).
 
 ## `ecb_gbp_per_eur.csv`
 
-Daily euro reference rate for the pound, 2016-06-01 to 2026-10-13 (2,655 business days).
+Daily euro reference rate for the pound, 2016-06-01 to 2026-10-29 (2,667 business days).
 Columns: `date` and `gbp_per_eur`.
 
 Source: European Central Bank, euro foreign exchange reference rates, series
