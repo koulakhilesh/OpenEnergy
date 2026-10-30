@@ -95,10 +95,11 @@ for _path in PAGES:
 
 @app.get("/assets/{name:path}", include_in_schema=False, response_model=None)
 def assets(name: str) -> FileResponse | PlainTextResponse:
-    """Hashed build files; anything outside the assets folder is not found."""
-    folder = (web_dir() / "assets").resolve()
-    path = (folder / name).resolve()
-    if not path.is_relative_to(folder) or not path.is_file():
+    """Hashed build files, looked up by name among the files in the assets folder."""
+    folder = web_dir() / "assets"
+    files = {p.name: p for p in folder.iterdir() if p.is_file()} if folder.is_dir() else {}
+    path = files.get(name)
+    if path is None:
         return PlainTextResponse("Not found", 404)
     return FileResponse(path, headers={"Cache-Control": "public, max-age=31536000, immutable"})
 

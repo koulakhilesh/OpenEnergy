@@ -4,7 +4,7 @@
   "functions": {
     "app.py": {
       "maxDuration": 120,
-      "excludeFiles": "{tests/**,docs/**,site/**,outputs/**,models/**,playground/**,examples/**,scripts/**,.github/**,web/node_modules/**,web/src/**,web/e2e/**,data/time_series/**,data/balancing/**,data/carbon_intensity/**,data/fes/**,data/system/**,data/prices/europe_day_ahead_ember.csv}"
+      "excludeFiles": "{{tests,docs,site,outputs,models,playground,examples,scripts,.github,web/node_modules,web/src,web/e2e,data/time_series,data/balancing,data/carbon_intensity,data/fes,data/system}/**,data/prices/europe_day_ahead_ember.csv}"
     }
   }
 }
