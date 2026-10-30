@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/koulakhilesh/OpenEnergy/master/docs/assets/logo.png" alt="OpenEnergy logo" width="80" height="80">
+  <img src="https://raw.githubusercontent.com/koulakhilesh/OpenEnergy/main/docs/assets/logo.png" alt="OpenEnergy logo" width="80" height="80">
 
   <h3>OpenEnergy</h3>
 
@@ -11,8 +11,8 @@
     <a href="https://github.com/koulakhilesh/OpenEnergy/issues">Issues</a>
   </p>
 
-  [![CI](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/ci.yml)
-  [![Docs](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/docs.yml/badge.svg?branch=master)](https://koulakhilesh.github.io/OpenEnergy/)
+  [![CI](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/ci.yml)
+  [![Docs](https://github.com/koulakhilesh/OpenEnergy/actions/workflows/docs.yml/badge.svg?branch=main)](https://koulakhilesh.github.io/OpenEnergy/)
 </div>
 
 ## What it does

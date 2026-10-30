@@ -36,7 +36,7 @@ percentiles of absolute changes, so a single bad reading cannot set them.
 
 **Surplus** is renewable output the system cannot use: how far net load falls below a
 must-run floor $F$ of inflexible generation, $U_t = \max(0, F - N_t)$.
-[`examples/renewables_scaling.py`](https://github.com/koulakhilesh/OpenEnergy/blob/master/examples/renewables_scaling.py)
+[`examples/renewables_scaling.py`](https://github.com/koulakhilesh/OpenEnergy/blob/main/examples/renewables_scaling.py)
 scales 2019 wind and solar with an 8 GW floor:
 
 | Scale | Renewable share | Min net load (GW) | 1 h ramp, p99 (GW) | Surplus (TWh) | Share of renewable output |

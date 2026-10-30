@@ -113,7 +113,7 @@ GB's imbalance price (the system price, one per half-hour since 2015) settles an
 difference between a battery's contracted position and what it delivers. It is the
 obvious "later market": a battery could take a day-ahead position and then deviate when
 the imbalance price looks better.
-[`examples/imbalance_value.py`](https://github.com/koulakhilesh/OpenEnergy/blob/master/examples/imbalance_value.py)
+[`examples/imbalance_value.py`](https://github.com/koulakhilesh/OpenEnergy/blob/main/examples/imbalance_value.py)
 tests this on Elexon's system prices, 2016 to October 2026 (`data/balancing/`), after a £5/MWh wear
 cost:
 

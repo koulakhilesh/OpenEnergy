@@ -3,7 +3,7 @@ site_description: Backtest battery storage against real power-market prices.
 site_url: https://koulakhilesh.github.io/OpenEnergy/
 repo_url: https://github.com/koulakhilesh/OpenEnergy
 repo_name: koulakhilesh/OpenEnergy
-edit_uri: edit/master/docs/
+edit_uri: edit/main/docs/
 copyright: >
   Code: MIT licence. Documentation: CC BY 4.0. Data keeps its own licence: Open Power
   System Data; Ember (CC BY 4.0); NESO Carbon Intensity API (CC BY 4.0); NESO historic

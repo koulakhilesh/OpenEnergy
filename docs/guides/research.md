@@ -5,7 +5,7 @@ are a few lines of Python.
 
 ## How much is a better forecast worth?
 
-[`examples/forecast_error_sweep.py`](https://github.com/koulakhilesh/OpenEnergy/blob/master/examples/forecast_error_sweep.py)
+[`examples/forecast_error_sweep.py`](https://github.com/koulakhilesh/OpenEnergy/blob/main/examples/forecast_error_sweep.py)
 adds Gaussian error of increasing size to the actual 2019 GB prices and measures the
 share of perfect-foresight revenue a 1 MW / 2 MWh battery keeps:
 
@@ -55,7 +55,7 @@ capture rate.
 
 ## How big should a shared connection be?
 
-[`examples/colocation_grid_sweep.py`](https://github.com/koulakhilesh/OpenEnergy/blob/master/examples/colocation_grid_sweep.py)
+[`examples/colocation_grid_sweep.py`](https://github.com/koulakhilesh/OpenEnergy/blob/main/examples/colocation_grid_sweep.py)
 puts 10 MW of solar and a 5 MW / 10 MWh battery behind one connection of increasing size
 and compares each with the same assets on separate connections (15 MW in total), for GB
 2019 with last week's prices:
@@ -76,7 +76,7 @@ these are upper bounds.
 
 ## Is planning under price uncertainty worth it?
 
-[`examples/stochastic_value.py`](https://github.com/koulakhilesh/OpenEnergy/blob/master/examples/stochastic_value.py)
+[`examples/stochastic_value.py`](https://github.com/koulakhilesh/OpenEnergy/blob/main/examples/stochastic_value.py)
 plans each day at noon the day before in four ways and settles every plan at actual GB
 prices (Ember). The scenarios are last week's prices plus each of that forecast's daily
 errors over the last 28 days. Revenue is after a £5/MWh wear cost, for a 1 MW / 2 MWh
