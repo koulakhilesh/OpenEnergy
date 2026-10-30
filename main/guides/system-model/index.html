@@ -1,0 +1,2079 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Backtest battery storage against real power-market prices.">
+      
+      
+      
+        <link rel="canonical" href="https://koulakhilesh.github.io/OpenEnergy/main/guides/system-model/">
+      
+      
+        <link rel="prev" href="../system/">
+      
+      
+        <link rel="next" href="../forward-scenarios/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>System model - OpenEnergy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Franklin:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Libre Franklin";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#system-model" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenEnergy" class="md-header__button md-logo" aria-label="OpenEnergy" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenEnergy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              System model
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/koulakhilesh/OpenEnergy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    koulakhilesh/OpenEnergy
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../scenarios/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../data/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Data
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenEnergy" class="md-nav__button md-logo" aria-label="OpenEnergy" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    OpenEnergy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/koulakhilesh/OpenEnergy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    koulakhilesh/OpenEnergy
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scenarios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../revenue-stacking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Revenue stacking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../research/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research with the Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backcast-how-close-is-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backcast: how close is it?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-commitment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit commitment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unit commitment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backcast-with-unit-commitment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backcast with unit commitment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#after-2020-gas-crisis-and-coal-exit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After 2020: gas crisis and coal exit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-if-more-wind" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What if: more wind
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-if-storage-in-a-windy-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What if: storage in a windy system
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-battery-on-modelled-prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A battery on modelled prices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-if-carbon-price-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What if: carbon price support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scenario-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../forward-scenarios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backcast-how-close-is-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backcast: how close is it?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unit-commitment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit commitment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unit commitment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backcast-with-unit-commitment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backcast with unit commitment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#after-2020-gas-crisis-and-coal-exit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After 2020: gas crisis and coal exit
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-if-more-wind" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What if: more wind
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-if-storage-in-a-windy-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What if: storage in a windy system
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-battery-on-modelled-prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A battery on modelled prices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-if-carbon-price-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What if: carbon price support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scenario-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/koulakhilesh/OpenEnergy/edit/main/docs/guides/system-model.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="system-model">System model<a class="headerlink" href="#system-model" title="Permanent link">&para;</a></h1>
+<p>The system model rebuilds the GB power system hour by hour from public data: which plants
+run, what that costs, and the price it implies. It first replays 2015–2020 and checks the
+result against what happened, then answers what-if questions on that tested base.</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>system<span class="w">   </span><span class="c1"># or: pip install 'openenergy[system]'  (PyPSA, for storage)</span>
+uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>system<span class="w"> </span>validate
+uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>system<span class="w"> </span>run<span class="w"> </span>examples/gb-2019-system.yaml
+</code></pre></div>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<p>GB is one bus. Each hour, demand must equal supply:</p>
+<ul>
+<li><strong>Demand</strong> is NESO's total generation for that hour.</li>
+<li><strong>Fixed at historic output:</strong> nuclear, biomass, hydro, imports, pumped storage and
+  "other". There is no open data to model continental prices or plant-level constraints,
+  so these follow history (scaled in scenarios).</li>
+<li><strong>Wind and solar</strong> are free to run and can be curtailed when supply exceeds demand.</li>
+<li><strong>Thermal plant</strong> (CCGT, coal, and gas turbines with oil engines as "peaking") runs in
+  order of short-run marginal cost. Each group's capacity (DUKES, interpolated between
+  year ends) is derated by availability and split into equal tranches whose efficiencies
+  spread around the fleet average:</li>
+</ul>
+<div class="arithmatex">\[c_{k,t} = \frac{p_{f,q(t)} + s_{f,t} + \lambda_t\, e_f}{\eta_k} + v\]</div>
+<p>with fuel price <span class="arithmatex">\(p\)</span> (quarterly, DESNZ), carbon price support <span class="arithmatex">\(s\)</span> (HMRC), ETS price
+<span class="arithmatex">\(\lambda\)</span> (EU ETS to 2020, UK ETS from 2021; one price per year from 1 April), emission
+factor <span class="arithmatex">\(e_f\)</span> and efficiency
+<span class="arithmatex">\(\eta_k\)</span>. The price is the cost of the last unit needed, or the value of lost load
+(default £6,000/MWh) if capacity runs out.</p>
+<p>Without storage every hour is independent, so the merit order is the exact least-cost
+dispatch. Added storage links hours together; then the model is solved as one linear
+programme per year with <a href="https://pypsa.org">PyPSA</a> and HiGHS. On 2019 data both give
+identical prices and costs, and a year with storage solves in under two seconds.</p>
+<table>
+<thead>
+<tr>
+<th>Assumption (default)</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 tranches per group; CCGT efficiency ±4 points, coal ±2 points around the DUKES average</td>
+<td>Real fleets mix old and new units</td>
+</tr>
+<tr>
+<td>Availability 0.9</td>
+<td>Peak gas output is 80–89% of CCGT plus gas-turbine capacity each year</td>
+</tr>
+<tr>
+<td>Peaking plant costed as gas at 35% efficiency</td>
+<td>Gas turbines and oil engines rarely run</td>
+</tr>
+<tr>
+<td>Variable O&amp;M 0</td>
+<td>No open source; configurable</td>
+</tr>
+</tbody>
+</table>
+<p>None of these is fitted to prices. Every one can be changed in a scenario's
+<code>assumptions</code> section.</p>
+<p>Five tranches is enough: with links and unit commitment (2023–2025), the marginal price's
+mean moves by under £1/MWh and its daily spread by under 5% between 5, 10 and 20 CCGT
+tranches, while each step costs several times the solve time. More tranches only split
+ties, so fewer hours repeat the previous hour's price.</p>
+<h2 id="backcast-how-close-is-it">Backcast: how close is it?<a class="headerlink" href="#backcast-how-close-is-it" title="Permanent link">&para;</a></h2>
+<p><code>openenergy system validate</code> replays April 2015 to September 2020 and compares with the
+OPSD day-ahead price and NESO's actual gas and coal output.</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Model £/MWh</th>
+<th style="text-align: right;">Actual £/MWh</th>
+<th style="text-align: right;">MAE</th>
+<th style="text-align: right;">Corr.</th>
+<th style="text-align: right;">p95 model / actual</th>
+<th style="text-align: right;">Gas TWh model / actual</th>
+<th style="text-align: right;">Coal TWh model / actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2015 (Apr–Dec)</td>
+<td style="text-align: right;">38.7</td>
+<td style="text-align: right;">40.3</td>
+<td style="text-align: right;">6.4</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">41 / 57</td>
+<td style="text-align: right;">51 / 65</td>
+<td style="text-align: right;">59.9 / 45.8</td>
+</tr>
+<tr>
+<td>2016</td>
+<td style="text-align: right;">35.8</td>
+<td style="text-align: right;">40.5</td>
+<td style="text-align: right;">9.6</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">46 / 65</td>
+<td style="text-align: right;">146 / 127</td>
+<td style="text-align: right;">9.6 / 28.0</td>
+</tr>
+<tr>
+<td>2017</td>
+<td style="text-align: right;">40.8</td>
+<td style="text-align: right;">45.3</td>
+<td style="text-align: right;">7.9</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">48 / 68</td>
+<td style="text-align: right;">137 / 119</td>
+<td style="text-align: right;">3.3 / 20.6</td>
+</tr>
+<tr>
+<td>2018</td>
+<td style="text-align: right;">50.0</td>
+<td style="text-align: right;">57.4</td>
+<td style="text-align: right;">9.6</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">58 / 80</td>
+<td style="text-align: right;">123 / 115</td>
+<td style="text-align: right;">7.3 / 15.4</td>
+</tr>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">42.3</td>
+<td style="text-align: right;">42.9</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: right;">0.63</td>
+<td style="text-align: right;">50 / 64</td>
+<td style="text-align: right;">120 / 115</td>
+<td style="text-align: right;">0.8 / 5.9</td>
+</tr>
+<tr>
+<td>2020 (Jan–Sep)</td>
+<td style="text-align: right;">35.2</td>
+<td style="text-align: right;">31.2</td>
+<td style="text-align: right;">9.0</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">44 / 50</td>
+<td style="text-align: right;">72 / 68</td>
+<td style="text-align: right;">0.1 / 3.3</td>
+</tr>
+</tbody>
+</table>
+<p>What the table shows:</p>
+<ul>
+<li><strong>Average prices are close.</strong> The yearly mean is within £0.6–7.4/MWh, usually a little
+  low. Fuel and carbon costs explain most of the price level.</li>
+<li><strong>Peaks are missed every year.</strong> The 95th percentile is £6–22 below actual. A cost-only
+  model has no scarcity pricing, start-up costs or bidding above cost, so its prices are
+  much flatter than the market's (2019 standard deviation £4.5/MWh).</li>
+<li><strong>Coal left the model faster than it left the grid.</strong> From 2016 the model runs less than
+  half the coal that actually ran (2019: 0.8 against 5.9 TWh). Once carbon price support
+  made coal dearer than most gas, a pure cost ranking switches it off; real coal plants
+  kept running for reasons outside a cost-only model. In 2015 the model runs more coal
+  than happened.</li>
+<li><strong>2020 is the only year the model is above actual</strong>, by £4/MWh.</li>
+</ul>
+<p>These are the model's limits, reported rather than tuned away. Use it for direction and
+relative change between scenarios, not to forecast prices. <a href="#unit-commitment">Unit commitment</a>
+addresses the flat prices; the coal gap remains.</p>
+<h2 id="unit-commitment">Unit commitment<a class="headerlink" href="#unit-commitment" title="Permanent link">&para;</a></h2>
+<p>Real plants cannot follow demand freely: starting a unit costs money and wear, and a
+running unit cannot go below a minimum stable output. So plants stay on overnight and sell
+below cost rather than restart, and recover start costs over short peak runs. With
+<code>system.commitment: true</code> (or <code>system validate --commitment</code>) the model includes this:</p>
+<ul>
+<li>Each CCGT, coal and peaking tranche is a number of identical units <span class="arithmatex">\(n_{k,t}\)</span> (whole
+  numbers), each of size <span class="arithmatex">\(U\)</span>, with output between <span class="arithmatex">\(m U n_{k,t}\)</span> and <span class="arithmatex">\(U n_{k,t}\)</span> (and at
+  most the tranche's available capacity).</li>
+<li>Starting units costs <span class="arithmatex">\(C\,U \max(0, n_{k,t} - n_{k,t-1})\)</span>, added to fuel and carbon cost.</li>
+<li>Each day is solved as a mixed-integer programme with HiGHS, seeing 24 hours beyond the
+  day; units online and storage carry over to the next day.</li>
+<li>Load is shed only when available capacity runs out, as in the merit order.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Technology</th>
+<th style="text-align: right;">Unit size <span class="arithmatex">\(U\)</span> (MW)</th>
+<th style="text-align: right;">Minimum stable output <span class="arithmatex">\(m\)</span></th>
+<th style="text-align: right;">Start cost <span class="arithmatex">\(C\)</span> (£/MW)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CCGT</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">40%</td>
+<td style="text-align: right;">34.29</td>
+</tr>
+<tr>
+<td>Coal</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">18%</td>
+<td style="text-align: right;">40.53</td>
+</tr>
+<tr>
+<td>Peaking</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">25%</td>
+<td style="text-align: right;">14.96</td>
+</tr>
+</tbody>
+</table>
+<p>Unit size and minimum output are from the Danish Energy Agency's technology catalogue;
+start costs are NREL's median warm-start costs, converted from 2011 US dollars (see
+<a href="#data-sources">Data sources</a>). They describe typical modern plant, not the GB fleet, and
+none is fitted to prices.</p>
+<p>Two prices come out:</p>
+<ul>
+<li><strong>Marginal</strong> (<code>price: marginal</code>): the cost of one more MWh with the units online fixed.
+  It ignores start costs, so it can sit below what a started unit needs.</li>
+<li><strong>Start</strong> (<code>price: start</code>): each run of a unit spreads its start cost over the energy it
+  produces in that run; the hour's price is the higher of the marginal price and the
+  highest such cost-plus-start of any unit running.</li>
+</ul>
+<h3 id="backcast-with-unit-commitment">Backcast with unit commitment<a class="headerlink" href="#backcast-with-unit-commitment" title="Permanent link">&para;</a></h3>
+<p>April 2015 to September 2020, same data as above. Daily spread is the mean of each day's
+highest minus lowest hourly price.</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Daily spread: merit / UC marginal / UC start / actual</th>
+<th style="text-align: right;">p95: merit / UC start / actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2015 (Apr–Dec)</td>
+<td style="text-align: right;">2.0 / 10.8 / 14.8 / 38.5</td>
+<td style="text-align: right;">41 / 46 / 57</td>
+</tr>
+<tr>
+<td>2016</td>
+<td style="text-align: right;">3.7 / 13.6 / 17.4 / 68.9</td>
+<td style="text-align: right;">46 / 53 / 65</td>
+</tr>
+<tr>
+<td>2017</td>
+<td style="text-align: right;">4.4 / 22.9 / 22.3 / 41.6</td>
+<td style="text-align: right;">48 / 60 / 68</td>
+</tr>
+<tr>
+<td>2018</td>
+<td style="text-align: right;">4.1 / 27.3 / 23.9 / 40.6</td>
+<td style="text-align: right;">58 / 65 / 80</td>
+</tr>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">4.2 / 24.8 / 24.3 / 31.8</td>
+<td style="text-align: right;">50 / 63 / 64</td>
+</tr>
+<tr>
+<td>2020 (Jan–Sep)</td>
+<td style="text-align: right;">2.9 / 19.7 / 21.2 / 30.2</td>
+<td style="text-align: right;">44 / 55 / 50</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Mean: merit / UC marginal / UC start / actual</th>
+<th style="text-align: right;">MAE: merit / UC marginal / UC start</th>
+<th style="text-align: right;">Corr.: merit / UC marginal / UC start</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2015 (Apr–Dec)</td>
+<td style="text-align: right;">38.7 / 38.6 / 41.5 / 40.3</td>
+<td style="text-align: right;">6.4 / 6.0 / 6.9</td>
+<td style="text-align: right;">0.55 / 0.52 / 0.39</td>
+</tr>
+<tr>
+<td>2016</td>
+<td style="text-align: right;">35.8 / 35.4 / 39.3 / 40.5</td>
+<td style="text-align: right;">9.6 / 9.1 / 10.0</td>
+<td style="text-align: right;">0.32 / 0.38 / 0.35</td>
+</tr>
+<tr>
+<td>2017</td>
+<td style="text-align: right;">40.8 / 40.1 / 44.8 / 45.3</td>
+<td style="text-align: right;">7.9 / 7.9 / 7.6</td>
+<td style="text-align: right;">0.60 / 0.59 / 0.57</td>
+</tr>
+<tr>
+<td>2018</td>
+<td style="text-align: right;">50.0 / 49.2 / 54.2 / 57.4</td>
+<td style="text-align: right;">9.6 / 9.8 / 8.8</td>
+<td style="text-align: right;">0.49 / 0.49 / 0.47</td>
+</tr>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">42.3 / 41.6 / 46.0 / 42.9</td>
+<td style="text-align: right;">7.3 / 7.1 / 8.0</td>
+<td style="text-align: right;">0.63 / 0.59 / 0.57</td>
+</tr>
+<tr>
+<td>2020 (Jan–Sep)</td>
+<td style="text-align: right;">35.2 / 34.6 / 38.1 / 31.2</td>
+<td style="text-align: right;">9.0 / 8.8 / 10.6</td>
+<td style="text-align: right;">0.32 / 0.39 / 0.40</td>
+</tr>
+</tbody>
+</table>
+<p>Average 2019 price by hour (UTC), £/MWh:</p>
+<table>
+<thead>
+<tr>
+<th>Hour</th>
+<th style="text-align: right;">Merit order</th>
+<th style="text-align: right;">UC marginal</th>
+<th style="text-align: right;">UC start</th>
+<th style="text-align: right;">Actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>03:00</td>
+<td style="text-align: right;">40.4</td>
+<td style="text-align: right;">36.4</td>
+<td style="text-align: right;">43.5</td>
+<td style="text-align: right;">32.3</td>
+</tr>
+<tr>
+<td>08:00</td>
+<td style="text-align: right;">43.0</td>
+<td style="text-align: right;">43.3</td>
+<td style="text-align: right;">46.2</td>
+<td style="text-align: right;">48.1</td>
+</tr>
+<tr>
+<td>17:00</td>
+<td style="text-align: right;">43.9</td>
+<td style="text-align: right;">47.8</td>
+<td style="text-align: right;">54.6</td>
+<td style="text-align: right;">57.5</td>
+</tr>
+<tr>
+<td>18:00</td>
+<td style="text-align: right;">43.9</td>
+<td style="text-align: right;">47.6</td>
+<td style="text-align: right;">54.6</td>
+<td style="text-align: right;">57.2</td>
+</tr>
+</tbody>
+</table>
+<p>What the tables show:</p>
+<ul>
+<li><strong>Prices now move within the day.</strong> The daily spread rises from £2–4 to £11–27, and
+  the 2019 standard deviation from £4.5 to £8.7 (actual £11.7). Real spreads are still
+  larger every year, most of all in 2016 (£69), whose spikes the model does not produce.</li>
+<li><strong>The two prices bracket the day.</strong> The marginal price falls overnight close to the
+  actual trough (2019 at 03:00: £36 against £32); the start price reaches the evening
+  peak (£55 against £57) but stays high at night. Neither alone has both ends.</li>
+<li><strong>Peaks get closer.</strong> The start price's 95th percentile is within £1 of actual in
+  2019 and £8–15 below in 2015–2018, against £6–22 below for the merit order. In 2020 it
+  is £5 above.</li>
+<li><strong>Fit is about the same.</strong> The start price's mean is £3–4/MWh above the merit order's:
+  to actual in 2015–2018, further in 2019 and 2020. MAE moves by under £2 either way;
+  correlation is similar, except 2015, where the start price's falls to 0.39.</li>
+<li><strong>Coal still leaves too early</strong> (2019: 0.8 TWh against 5.9 actual); start costs do not
+  change the order of coal and gas.</li>
+<li><strong>Cost:</strong> about a minute per year instead of under a second; about 10 unit starts a day
+  in 2019.</li>
+</ul>
+<p>So unit commitment fixes much of the missing daily shape without fitting anything, but
+the model still has no scarcity pricing or bidding above cost. Commitment stays off by
+default so earlier results and quick runs are unchanged.</p>
+<h2 id="after-2020-gas-crisis-and-coal-exit">After 2020: gas crisis and coal exit<a class="headerlink" href="#after-2020-gas-crisis-and-coal-exit" title="Permanent link">&para;</a></h2>
+<p>The system data runs to the end of 2025, and Ember's prices cover the years after OPSD
+stops (see <a href="../../data/#gb-prices-after-2020">Data</a>). The default backcast still ends in
+September 2020, so the tables above do not change; later years are one flag away:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>system<span class="w"> </span>validate<span class="w"> </span>--start<span class="w"> </span><span class="m">2021</span>-01-01<span class="w"> </span>--end<span class="w"> </span><span class="m">2025</span>-12-31<span class="w"> </span><span class="o">[</span>--commitment<span class="w"> </span>--price<span class="w"> </span>start<span class="o">]</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Model £/MWh merit / UC start</th>
+<th style="text-align: right;">Actual £/MWh</th>
+<th style="text-align: right;">MAE merit / UC</th>
+<th style="text-align: right;">Corr. merit / UC</th>
+<th style="text-align: right;">p95 merit / UC / actual</th>
+<th style="text-align: right;">Daily spread merit / UC / actual</th>
+<th style="text-align: right;">Gas TWh model / actual</th>
+<th style="text-align: right;">Coal TWh model / actual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2021</td>
+<td style="text-align: right;">83.5 / 88.0</td>
+<td style="text-align: right;">117.8</td>
+<td style="text-align: right;">38.5 / 35.8</td>
+<td style="text-align: right;">0.58 / 0.59</td>
+<td style="text-align: right;">143 / 152 / 258</td>
+<td style="text-align: right;">7 / 34 / 146</td>
+<td style="text-align: right;">102 / 107</td>
+<td style="text-align: right;">10.2 / 5.0</td>
+</tr>
+<tr>
+<td>2022</td>
+<td style="text-align: right;">157.7 / 163.5</td>
+<td style="text-align: right;">204.8</td>
+<td style="text-align: right;">78.1 / 76.2</td>
+<td style="text-align: right;">0.40 / 0.40</td>
+<td style="text-align: right;">200 / 203 / 415</td>
+<td style="text-align: right;">9 / 39 / 156</td>
+<td style="text-align: right;">106 / 111</td>
+<td style="text-align: right;">9.4 / 4.3</td>
+</tr>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">121.1 / 125.9</td>
+<td style="text-align: right;">94.1</td>
+<td style="text-align: right;">32.9 / 36.1</td>
+<td style="text-align: right;">0.52 / 0.52</td>
+<td style="text-align: right;">140 / 149 / 156</td>
+<td style="text-align: right;">7 / 33 / 70</td>
+<td style="text-align: right;">86 / 87</td>
+<td style="text-align: right;">3.5 / 2.8</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">89.2 / 93.8</td>
+<td style="text-align: right;">72.5</td>
+<td style="text-align: right;">27.7 / 29.0</td>
+<td style="text-align: right;">0.10 / 0.18</td>
+<td style="text-align: right;">126 / 134 / 110</td>
+<td style="text-align: right;">6 / 35 / 60</td>
+<td style="text-align: right;">69 / 73</td>
+<td style="text-align: right;">5.6 / 1.6</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">87.5 / 92.1</td>
+<td style="text-align: right;">80.7</td>
+<td style="text-align: right;">18.7 / 19.8</td>
+<td style="text-align: right;">0.57 / 0.52</td>
+<td style="text-align: right;">106 / 115 / 123</td>
+<td style="text-align: right;">6 / 37 / 67</td>
+<td style="text-align: right;">77 / 77</td>
+<td style="text-align: right;">0.0 / 0.0</td>
+</tr>
+</tbody>
+</table>
+<p>Gas and coal TWh are from the merit order; unit commitment gives gas within 1 TWh of it.
+No hour hit the value of lost load in any year.</p>
+<p>What the table shows:</p>
+<ul>
+<li><strong>Gas volume is right; the gas price timing is not.</strong> Modelled gas output is within
+  5 TWh of actual every year. Prices are not: by quarter, the merit-order model is £42–102
+  too low in four of the five quarters from July 2021 to September 2022, then £22–57 too
+  high from April 2023 to March 2024, and within £12 from April 2024. This pattern is
+  consistent with the fuel input: DESNZ's quarterly series is the price power producers
+  paid, contracts included, which can lag the market (its Q1 2024 gas price, 4.46 p/kWh,
+  is close to Q4 2023's 4.84 while the actual power price fell from £83 to £65). An open
+  daily gas price would test this; none is bundled.</li>
+<li><strong>Spikes are missed.</strong> In 2022 the actual 95th percentile is £415; the model reaches
+  £200. Daily spreads in 2021–2022 averaged £146–156; unit commitment gets £34–39.</li>
+<li><strong>2024 is the weakest year</strong> (correlation 0.10): early 2024 combines the lagging gas
+  price with a coal price DESNZ reported at 1.5 p/kWh, so the model runs 5.6 TWh of coal
+  where 1.6 ran before the last coal plant closed in September 2024.</li>
+<li><strong>2025 is the closest of these years</strong>: mean within £7, correlation 0.57, no coal on
+  either side.</li>
+</ul>
+<p>The cost-based model explains the level of prices when fuel prices are stable and the
+direction of the 2021–2022 rise, but not its size or timing. Read results for those years
+as a lower bound on prices and spreads.</p>
+<h2 id="what-if-more-wind">What if: more wind<a class="headerlink" href="#what-if-more-wind" title="Permanent link">&para;</a></h2>
+<p>The same 2019 weather and demand with wind output scaled (<code>system.scale.wind</code>):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Wind</th>
+<th style="text-align: right;">Price mean</th>
+<th style="text-align: right;">Price std</th>
+<th style="text-align: right;">Curtailed (TWh)</th>
+<th style="text-align: right;">Fossil CO2 (Mt)</th>
+<th style="text-align: right;">System cost (£m)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">×1</td>
+<td style="text-align: right;">42.25</td>
+<td style="text-align: right;">4.52</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">44.3</td>
+<td style="text-align: right;">4,914</td>
+</tr>
+<tr>
+<td style="text-align: right;">×2</td>
+<td style="text-align: right;">31.68</td>
+<td style="text-align: right;">17.57</td>
+<td style="text-align: right;">7.9</td>
+<td style="text-align: right;">25.4</td>
+<td style="text-align: right;">2,822</td>
+</tr>
+<tr>
+<td style="text-align: right;">×3</td>
+<td style="text-align: right;">21.85</td>
+<td style="text-align: right;">20.38</td>
+<td style="text-align: right;">38.7</td>
+<td style="text-align: right;">15.3</td>
+<td style="text-align: right;">1,700</td>
+</tr>
+</tbody>
+</table>
+<p>Prices fall and spread out as more hours are set by free wind. Curtailment rises steeply
+because nuclear, imports and biomass are held at historic output: the fixed floor is the
+binding constraint, as in <a href="../system/">System analysis</a>.</p>
+<h2 id="what-if-storage-in-a-windy-system">What if: storage in a windy system<a class="headerlink" href="#what-if-storage-in-a-windy-system" title="Permanent link">&para;</a></h2>
+<p>At three times 2019 wind, adding 4-hour storage (<code>system.storage.&lt;name&gt;</code>):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Storage</th>
+<th style="text-align: right;">Curtailed (TWh)</th>
+<th style="text-align: right;">Fossil CO2 (Mt)</th>
+<th style="text-align: right;">System cost (£m)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">none</td>
+<td style="text-align: right;">38.7</td>
+<td style="text-align: right;">15.3</td>
+<td style="text-align: right;">1,700</td>
+</tr>
+<tr>
+<td style="text-align: right;">5 GW</td>
+<td style="text-align: right;">36.2</td>
+<td style="text-align: right;">14.5</td>
+<td style="text-align: right;">1,613</td>
+</tr>
+<tr>
+<td style="text-align: right;">10 GW</td>
+<td style="text-align: right;">34.4</td>
+<td style="text-align: right;">13.9</td>
+<td style="text-align: right;">1,550</td>
+</tr>
+<tr>
+<td style="text-align: right;">20 GW</td>
+<td style="text-align: right;">31.8</td>
+<td style="text-align: right;">13.1</td>
+<td style="text-align: right;">1,458</td>
+</tr>
+</tbody>
+</table>
+<p>Each 5 GW recovers less curtailed wind than the one before. Storage here has perfect
+foresight over the year, so these are best cases.</p>
+<h2 id="a-battery-on-modelled-prices">A battery on modelled prices<a class="headerlink" href="#a-battery-on-modelled-prices" title="Permanent link">&para;</a></h2>
+<p>A system scenario can value a battery on its own modelled prices, with the same
+no-lookahead forecasts as on market data. For a 1 MW / 2 MWh battery (95% each way),
+revenue per MW-year:</p>
+<table>
+<thead>
+<tr>
+<th>Prices</th>
+<th style="text-align: right;">Last-week forecast</th>
+<th style="text-align: right;">Perfect foresight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real 2019 market</td>
+<td style="text-align: right;">16,045</td>
+<td style="text-align: right;">22,509</td>
+</tr>
+<tr>
+<td>Model, 2019</td>
+<td style="text-align: right;">−77</td>
+<td style="text-align: right;">406</td>
+</tr>
+<tr>
+<td>Model with unit commitment, 2019, marginal price</td>
+<td style="text-align: right;">3,200</td>
+<td style="text-align: right;">10,844</td>
+</tr>
+<tr>
+<td>Model with unit commitment, 2019, start price</td>
+<td style="text-align: right;">1,792</td>
+<td style="text-align: right;">9,829</td>
+</tr>
+<tr>
+<td>Model, wind ×3</td>
+<td style="text-align: right;">1,565</td>
+<td style="text-align: right;">12,010</td>
+</tr>
+<tr>
+<td>Model, wind ×3 with 10 GW storage</td>
+<td style="text-align: right;">−1,370</td>
+<td style="text-align: right;">5,422</td>
+</tr>
+</tbody>
+</table>
+<p>On the merit-order 2019 prices a battery earns almost nothing: the cost-based price is too
+flat. With unit commitment the daily shape gives it £10–11k with perfect foresight, about
+half the real market's £22.5k; the rest came from spikes and bidding the model leaves
+out. With three times the wind, spreads open up and
+perfect-foresight value reaches £12k; 10 GW of other storage then cuts it by more than
+half. Forecasting on last week's prices fails on these spiky, weather-driven prices.</p>
+<h2 id="what-if-carbon-price-support">What if: carbon price support<a class="headerlink" href="#what-if-carbon-price-support" title="Permanent link">&para;</a></h2>
+<p>2016 with and without the GB carbon price support (<code>system.carbon_price_support</code>), at the
+2016 EU ETS price and at £50/t:</p>
+<table>
+<thead>
+<tr>
+<th>Carbon price support</th>
+<th style="text-align: right;">EU ETS (£/t)</th>
+<th style="text-align: right;">Price mean</th>
+<th style="text-align: right;">Fossil CO2 (Mt)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>on</td>
+<td style="text-align: right;">4.14</td>
+<td style="text-align: right;">35.64</td>
+<td style="text-align: right;">61.5</td>
+</tr>
+<tr>
+<td>off</td>
+<td style="text-align: right;">4.14</td>
+<td style="text-align: right;">25.97</td>
+<td style="text-align: right;">101.1</td>
+</tr>
+<tr>
+<td>on</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">55.96</td>
+<td style="text-align: right;">58.5</td>
+</tr>
+<tr>
+<td>off</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">48.07</td>
+<td style="text-align: right;">58.7</td>
+</tr>
+</tbody>
+</table>
+<p>With a low EU price, the support decides whether coal or gas runs first. In this model it
+cut 2016 emissions by about 40 Mt and raised the average price by about £10/MWh. At £50/t
+the EU price alone puts coal behind gas and the support adds cost without cutting
+emissions. The backcast shows real coal fell more slowly than the model's, so treat the
+size of the effect as an upper bound.</p>
+<h2 id="scenario-reference">Scenario reference<a class="headerlink" href="#scenario-reference" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gb-2019-wind3-storage</span>
+<span class="nt">system</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/system</span><span class="w">                 </span><span class="c1"># written by scripts/fetch_system_data.py</span>
+<span class="w">  </span><span class="nt">prices</span><span class="p">:</span><span class="w">                              </span><span class="c1"># optional: actual prices to compare, earlier files first</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/time_series/time_series_60min_singleindex_filtered.csv</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/prices/gb_day_ahead_ember.csv</span>
+<span class="w">  </span><span class="nt">year</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2019</span><span class="w">                           </span><span class="c1"># 2015 (from April) to 2025</span>
+<span class="w">  </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2019-01-01</span><span class="w">                    </span><span class="c1"># optional: a shorter window within the year</span>
+<span class="w">  </span><span class="nt">end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2019-03-31</span>
+<span class="w">  </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">wind</span><span class="p">:</span><span class="w"> </span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="nt"> solar</span><span class="p">:</span><span class="w"> </span><span class="nv">1.0</span><span class="p p-Indicator">}</span><span class="w">       </span><span class="c1"># also nuclear, biomass, hydro, imports, other, pumped_storage</span>
+<span class="w">  </span><span class="nt">capacity_mw</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">coal</span><span class="p">:</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">}</span><span class="w">               </span><span class="c1"># replace installed ccgt, coal or peaking MW</span>
+<span class="w">  </span><span class="nt">fuel_price_scale</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">gas</span><span class="p">:</span><span class="w"> </span><span class="nv">1.5</span><span class="p p-Indicator">}</span><span class="w">         </span><span class="c1"># multiply gas or coal prices</span>
+<span class="w">  </span><span class="nt">ets_gbp_per_t</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">                    </span><span class="c1"># replace the ETS price (eu_ets_gbp_per_t also accepted)</span>
+<span class="w">  </span><span class="nt">carbon_price_support</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">storage</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">fleet</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">power_mw</span><span class="p">:</span><span class="w"> </span><span class="nv">10000</span><span class="p p-Indicator">,</span><span class="nt"> hours</span><span class="p">:</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="nt"> efficiency</span><span class="p">:</span><span class="w"> </span><span class="nv">0.85</span><span class="p p-Indicator">}</span><span class="w">   </span><span class="c1"># power_mw 0 leaves it out</span>
+<span class="w">  </span><span class="nt">assumptions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">tranches</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="nt"> availability</span><span class="p">:</span><span class="w"> </span><span class="nv">0.9</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="nt">voll</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6000</span>
+<span class="w">  </span><span class="nt">backend</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auto</span><span class="w">                        </span><span class="c1"># auto, merit or pypsa</span>
+<span class="w">  </span><span class="nt">commitment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">                    </span><span class="c1"># true: start-up costs and minimum stable output</span>
+<span class="w">  </span><span class="nt">lookahead_hours</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24</span><span class="w">                  </span><span class="c1"># with commitment: hours seen beyond each day</span>
+<span class="w">  </span><span class="nt">price</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">marginal</span><span class="w">                      </span><span class="c1"># or start (needs commitment)</span>
+<span class="w">  </span><span class="nt">interconnectors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fixed</span><span class="w">               </span><span class="c1"># or links (from 2019; see Forward scenarios)</span>
+<span class="w">  </span><span class="nt">fes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">pathway</span><span class="p">:</span><span class="w"> </span><span class="nv">Holistic Transition</span><span class="p p-Indicator">,</span><span class="nt"> year</span><span class="p">:</span><span class="w"> </span><span class="nv">2035</span><span class="p p-Indicator">}</span><span class="w">   </span><span class="c1"># optional, needs links</span>
+<span class="nt">battery</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">power_mw</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> energy_mwh</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># optional: value a battery on modelled prices</span>
+<span class="nt">forecast</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">naive_last_week</span><span class="w">              </span><span class="c1"># or perfect_foresight</span>
+</code></pre></div>
+<p><code>interconnectors</code> and <code>fes</code> are described in <a href="../forward-scenarios/">Forward scenarios</a>.</p>
+<p>Sweeps work on any setting, in the order given:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>sweep<span class="w"> </span>examples/gb-2019-system.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>system.scale.wind<span class="o">=</span><span class="m">1</span>,2,3<span class="w"> </span>--set<span class="w"> </span>system.storage.fleet.power_mw<span class="o">=</span><span class="m">0</span>,10000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>system.storage.fleet.hours<span class="o">=</span><span class="m">4</span>
+</code></pre></div>
+<p><code>openenergy system run</code> writes <code>dispatch.csv</code> (hourly price, output by technology,
+storage, curtailment, emissions) and <code>summary.json</code> with the data attributions.</p>
+<h2 id="data-sources">Data sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Source</th>
+<th>Licence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generation by fuel, demand</td>
+<td>NESO, <a href="https://www.neso.energy/data-portal/historic-generation-mix">historic generation mix</a>. Supported by National Energy SO Open Data</td>
+<td><a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a></td>
+</tr>
+<tr>
+<td>Plant capacity and efficiency</td>
+<td>DESNZ, <a href="https://www.gov.uk/government/statistics/electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes">DUKES 2026</a> tables 5.8 and 5.10</td>
+<td><a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">OGL v3.0</a></td>
+</tr>
+<tr>
+<td>Fuel prices</td>
+<td>DESNZ, <a href="https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers">Quarterly Energy Prices 3.2.1</a></td>
+<td>OGL v3.0</td>
+</tr>
+<tr>
+<td>Carbon price support</td>
+<td>HMRC, <a href="https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor">Excise Notice CCL1/6</a> and <a href="https://www.gov.uk/guidance/climate-change-levy-rates">Climate Change Levy rates</a></td>
+<td>OGL v3.0</td>
+</tr>
+<tr>
+<td>EU ETS (2015–2020) and UK ETS (2022–2025) price</td>
+<td>World Bank, <a href="https://carbonpricingdashboard.worldbank.org/compliance/price">Carbon Pricing Dashboard</a></td>
+<td><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></td>
+</tr>
+<tr>
+<td>UK ETS price 2021</td>
+<td>DESNZ, <a href="https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price">determination of the UK ETS carbon price</a> (mean 2021 auction price)</td>
+<td>OGL v3.0</td>
+</tr>
+<tr>
+<td>Exchange rates</td>
+<td>Source: European Central Bank, euro reference rates (USD-to-GBP cross rate derived by OpenEnergy)</td>
+<td>ECB reuse terms</td>
+</tr>
+<tr>
+<td>Unit size, minimum load</td>
+<td>Danish Energy Agency, <a href="https://ens.dk/en/analyses-and-statistics/technology-data-generation-electricity-and-district-heating">Technology Data for Generation of Electricity and District Heating</a></td>
+<td><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></td>
+</tr>
+<tr>
+<td>Start-up costs</td>
+<td>N. Kumar et al., <a href="https://www.osti.gov/biblio/1046269">Power Plant Cycling Costs</a>, NREL/SR-5500-55433, 2012, Table 1-1 (2011 US$, converted with ECB 2011 rates)</td>
+<td>US government-sponsored report</td>
+</tr>
+<tr>
+<td>Actual prices (validation)</td>
+<td><a href="https://doi.org/10.25832/time_series/2020-10-06">Open Power System Data</a>, GB day-ahead, to September 2020; then <a href="https://ember-energy.org/data/european-wholesale-electricity-price-data/">Ember</a>, converted at ECB daily rates</td>
+<td>see <a href="../../data/">Data</a>; Ember CC BY 4.0</td>
+</tr>
+</tbody>
+</table>
+<p>All accessed 10 October 2026. Full references, changes and known issues are on the
+<a href="../../data/">Data</a> page and in <code>data/system/README.md</code>; every <code>summary.json</code> repeats the
+attribution for the data a run used. OpenEnergy is not affiliated with or endorsed by any
+of these providers.</p>
+<p>Storage dispatch uses PyPSA: T. Brown, J. Hörsch, D. Schlachtberger, <em>PyPSA: Python for
+Power System Analysis</em>, Journal of Open Research Software 6(1), 2018,
+<a href="https://doi.org/10.5334/jors.188">https://doi.org/10.5334/jors.188</a>.</p>
+<h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
+<ul>
+<li>One bus: no transmission constraints between Scotland and England.</li>
+<li>Unit commitment is optional and simplified: no minimum up or down times, ramp limits or
+  start fuel, typical rather than GB-specific unit data, and one day planned at a time.</li>
+<li>Imports and other fixed profiles cannot respond to price, unless interconnectors are
+  <code>links</code> (<a href="../forward-scenarios/">Forward scenarios</a>), which take the neighbours' prices
+  as given and trade up to each link's availability fitted from its flows. Links work with
+  unit commitment from v4.2.</li>
+<li>Fuel prices are quarterly averages of what power producers paid, which can lag market
+  gas prices (most visible in 2021–2024); the ETS is one price per year (from 1 April).</li>
+<li>Storage optimisation has perfect foresight over the year.</li>
+<li>Emissions cover GB fossil plant only (no imports or biomass).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../system/" class="md-footer__link md-footer__link--prev" aria-label="Previous: System analysis">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                System analysis
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../forward-scenarios/" class="md-footer__link md-footer__link--next" aria-label="Next: Forward scenarios">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Forward scenarios
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Code: MIT licence. Documentation: CC BY 4.0. Data keeps its own licence: Open Power System Data; Ember (CC BY 4.0); NESO Carbon Intensity API (CC BY 4.0); NESO historic generation mix, supported by National Energy SO Open Data; DESNZ and HMRC (Open Government Licence v3.0); World Bank Carbon Pricing Dashboard and Danish Energy Agency (CC BY 4.0); NREL; ECB.
+
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://koulakhilesh.github.io/" target="_blank" rel="noopener" title="Akhilesh Koul" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M277.8 8.6c-12.3-11.4-31.3-11.4-43.5 0l-224 208c-9.6 9-12.8 22.9-8 35.1S18.8 272 32 272h16v176c0 35.3 28.7 64 64 64h288c35.3 0 64-28.7 64-64V272h16c13.2 0 25-8.1 29.8-20.3s1.6-26.2-8-35.1zM240 320h32c26.5 0 48 21.5 48 48v96H192v-96c0-26.5 21.5-48 48-48"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/koulakhilesh/OpenEnergy" target="_blank" rel="noopener" title="OpenEnergy on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://linkedin.com/in/akhilesh-koul" target="_blank" rel="noopener" title="LinkedIn" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.footer", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/katex.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+      
+    
+  </body>
+</html>
