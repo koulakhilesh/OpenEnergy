@@ -5,6 +5,7 @@ import pytest
 
 from openenergy import ConfigError, DataError
 from openenergy.data.fes import FesSource
+from openenergy.data.interconnectors import GAP_EDGES, gap_shares
 from openenergy.system.forward import fes_changes, links
 
 ROOT = Path(__file__).parents[2]
@@ -107,3 +108,22 @@ def test_links_use_availability_fitted_from_flows(tmp_path: Path) -> None:
     with pytest.raises(DataError, match="interconnector_availability"):
         links(index, tmp_path, prices)
     assert links(index, tmp_path, prices, availability=1.0)
+    with pytest.raises(DataError, match="interconnector_gap_availability"):
+        links(index, tmp_path, prices, availability="gap")
+
+
+def test_gap_availability_offers_each_link_in_steps() -> None:
+    index = pd.date_range("2024-06-01", periods=2, freq="1h", tz="UTC")
+    prices = ROOT / "data/prices/europe_day_ahead_ember.csv"
+    steps = links(index, ROOT / "data/system", prices, scale=2.0, hurdle=1.0, availability="gap")
+    ifa = [link for link in steps if link.name.startswith("IFA Interconnector (")]
+    assert [link.name for link in ifa] == [
+        f"IFA Interconnector (gap from £{edge:g})" for edge in GAP_EDGES
+    ]
+    assert [link.hurdle for link in ifa] == [1.0 + edge for edge in GAP_EDGES]
+    imports, exports = gap_shares(ROOT / "data/system")["IFA Interconnector"]
+    assert sum(link.import_mw.iloc[0] for link in ifa) == pytest.approx(2.0 * 1988 * imports[-1])
+    assert ifa[1].import_mw.iloc[0] == pytest.approx(2.0 * 1988 * (imports[1] - imports[0]))
+    assert all((link.export_mw >= 0).all() for link in ifa)
+    assert sum(link.export_mw.iloc[0] for link in ifa) > 0
+    assert exports[-1] >= exports[0]

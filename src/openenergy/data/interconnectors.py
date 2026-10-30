@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from openenergy.data.ember import EmberPriceSource, _read
@@ -27,6 +28,10 @@ REGISTER_FILE = "interconnectors.csv"
 FLOWS_FILE = "interconnector_flows.csv"
 NEIGHBOUR_FILE = "europe_day_ahead_ember.csv"
 AVAILABILITY_FILE = "interconnector_availability.csv"
+HOURLY_FLOWS_FILE = "interconnector_flows_hourly.csv"
+GAP_FILE = "interconnector_gap_availability.csv"
+# Lower edges (GBP/MWh) of the price-gap bins used by availability by gap.
+GAP_EDGES = (0.0, 5.0, 10.0, 20.0, 40.0, 80.0)
 # A link is in service from its first flow in the first 14 days that carry at least a
 # fifth of its capacity, which skips months of commissioning test flows.
 IN_SERVICE_DAYS = 14
@@ -149,6 +154,98 @@ def _availability(directory: Path) -> dict[str, tuple[float, float]]:
         str(row["link"]): (float(row["import_availability"]), float(row["export_availability"]))
         for row in table.to_dict("records")
     }
+
+
+def availability_by_gap(
+    system_dir: str | Path,
+    gb_prices: pd.Series[float],
+    neighbours: NeighbourPriceSource,
+) -> pd.DataFrame:
+    """Per link and direction, the share of capacity used by size of the price gap.
+
+    Hours from the day each link entered service are binned by the gap between
+    ``gb_prices`` (actual hourly GBP/MWh) and the neighbour's actual price, from the
+    lower edges in ``GAP_EDGES``: imports when GB is dearer, exports when cheaper. Each
+    bin's share is the link's mean hourly flow that way (Elexon, hourly) over its
+    capacity, made non-decreasing in the gap (weighted by hours) so that it can be offered
+    as stepped capacity. Bins without hours take their neighbour's share. Modelled prices
+    are never used. Columns: ``link``, ``direction``, ``gap_from``, ``share``, ``hours``.
+    """
+    directory = Path(system_dir)
+    index = pd.DatetimeIndex(gb_prices.index)
+    flows = interconnector_flows_hourly(directory)
+    fuels = pd.read_csv(directory / REGISTER_FILE).set_index("link")["bmrs_fuel_type"].str.lower()
+    edges = np.array(GAP_EDGES, dtype=float)
+    rows = []
+    for unit in interconnectors(directory):
+        live = index >= (unit.in_service if unit.in_service is not None else index[0])
+        if not live.any():
+            continue
+        gap = gb_prices[live] - neighbours.prices(unit.neighbour, index[live]).prices
+        flow = flows[f"{fuels[unit.name]}_mw"].reindex(gap.index)
+        frame = pd.DataFrame({"gap": gap, "flow": flow}).dropna()
+        for direction, sign, capacity in (
+            ("import", 1.0, unit.import_mw),
+            ("export", -1.0, unit.export_mw),
+        ):
+            side = frame[sign * frame["gap"] > 0]
+            bins = np.digitize(sign * side["gap"], edges) - 1
+            used = (sign * side["flow"]).clip(lower=0) / capacity
+            hours = np.array([(bins == k).sum() for k in range(len(edges))], dtype=float)
+            means = pd.Series(
+                [used[bins == k].mean() if hours[k] else np.nan for k in range(len(edges))]
+            )
+            shares = _non_decreasing(means.ffill().bfill().fillna(0.0).to_numpy(), hours)
+            for edge, share, n in zip(edges, shares, hours, strict=True):
+                rows.append(
+                    {
+                        "link": unit.name,
+                        "direction": direction,
+                        "gap_from": float(edge),
+                        "share": float(min(max(share, 0.0), 1.0)),
+                        "hours": int(n),
+                    }
+                )
+    return pd.DataFrame(rows)
+
+
+def gap_shares(system_dir: str | Path) -> dict[str, tuple[list[float], list[float]]]:
+    """Import and export shares per gap bin (``GAP_EDGES``) from ``GAP_FILE``."""
+    path = Path(system_dir) / GAP_FILE
+    if not path.is_file():
+        raise DataError(f"{GAP_FILE} not found; run scripts/fit_interconnector_availability.py")
+    table = pd.read_csv(path).sort_values("gap_from")
+    found = {}
+    for link, rows in table.groupby("link"):
+        imports = rows[rows["direction"] == "import"]["share"].tolist()
+        exports = rows[rows["direction"] == "export"]["share"].tolist()
+        if len(imports) != len(GAP_EDGES) or len(exports) != len(GAP_EDGES):
+            raise DataError(f"{GAP_FILE}: {link} needs one share per gap bin and direction")
+        found[str(link)] = (imports, exports)
+    return found
+
+
+def _non_decreasing(values: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """Weighted pooled adjacent violators: the closest non-decreasing sequence."""
+    blocks: list[list[float]] = []
+    for value, weight in zip(values, weights, strict=True):
+        blocks.append([float(value), float(weight), 1.0])
+        while len(blocks) > 1 and blocks[-2][0] > blocks[-1][0]:
+            v2, w2, n2 = blocks.pop()
+            v1, w1, n1 = blocks.pop()
+            total = w1 + w2
+            blocks.append([(v1 * w1 + v2 * w2) / total if total else (v1 + v2) / 2, total, n1 + n2])
+    return np.concatenate([[v] * int(n) for v, _, n in blocks])
+
+
+def interconnector_flows_hourly(system_dir: str | Path) -> pd.DataFrame:
+    """Hourly net flow per link from 2019, MW (positive into GB), columns ``<fuel type>_mw``."""
+    path = Path(system_dir) / HOURLY_FLOWS_FILE
+    if not path.is_file():
+        raise DataError(f"hourly interconnector flows not found: {path}")
+    frame = pd.read_csv(path, index_col="utc_timestamp")
+    frame.index = pd.DatetimeIndex(pd.to_datetime(frame.index, utc=True, format="ISO8601"))
+    return frame
 
 
 def interconnector_flows(system_dir: str | Path) -> pd.DataFrame:

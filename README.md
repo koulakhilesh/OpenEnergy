@@ -50,7 +50,8 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   (`system.fes`, `system.interconnectors: links`, `system.commitment`).
 - **Web app**: value a battery on any GB year from 2017 or on a FES pathway's modelled
   prices in the browser at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
-  (`openenergy.app`, FastAPI on Vercel).
+  (`web/`, a React and TypeScript front end on the `openenergy.app` FastAPI JSON API, on
+  Vercel).
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
   and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
   prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
@@ -113,6 +114,7 @@ Run the web app locally (or use it at
 [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)):
 
 ```bash
+npm --prefix web ci && npm --prefix web run build   # the React front end (Node 22+)
 uv run uvicorn openenergy.app:app
 ```
 
@@ -125,6 +127,7 @@ every scenario setting and the Python API.
 uv sync --all-extras --group docs
 uv run ruff check && uv run ruff format --check && uv run mypy && uv run pytest
 uv run mkdocs serve
+cd web && npm ci && npm run build && npm test && npx playwright install chromium && npm run e2e
 ```
 
 ## Roadmap
@@ -145,14 +148,15 @@ uv run mkdocs serve
 | v4.0 | Forward scenarios from NESO's Future Energy Scenarios on a historic weather year; GB's interconnectors as price-taking links to six neighbouring markets, checked against actual flows 2019–2025; a web app (FastAPI, Vercel) valuing a battery on history or a FES pathway |
 | v4.1 | A usable [web app](https://open-energy-eight.vercel.app/): the answer first in plain words, instant results for common batteries, value by year and by FES pathway at a glance, side-by-side comparison with shareable links, explanations next to each term, CSV and scenario downloads, and a JSON API; `CITATION.cff` and PyPI release |
 | v4.2 | A more credible model: unit commitment with interconnector links; each link's availability fitted from its actual flows, never from prices; a measured answer on the missing daily spread (the everyday intraday shape, not negative prices); forward scenarios and the app re-run. GB zones were dropped: GB keeps one national wholesale price ([DESNZ, REMA summer update, July 2025](https://www.gov.uk/government/publications/review-of-electricity-market-arrangements-rema-summer-update-2025)) |
+| v5.0 | A React and TypeScript front end on an extended JSON API (options, explore, compare, FES table), typed from the OpenAPI schema and tested end to end; interconnector availability by price gap from hourly flows, tested out of sample (an option: it does not beat the flat share); data refreshed to October 2026; versioned docs and a Zenodo DOI |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v5.0 | A React and TypeScript front end on the v4.1 JSON API, with the same Python back end |
+| v5.1 | Model follow-ups: why the modelled 2021–2022 gas-crisis spread is only 27–39% of actual; constraints between Scotland and England and the curtailment they cause; a better day-ahead plan than last week's prices |
 
-Alongside releases: a Zenodo DOI and versioned docs; refresh and re-check the bundled data
+Alongside releases: refresh and re-check the bundled data
 every release; keep CI and its actions current; revisit stochastic planning if an open,
 forecastable market price appears.
 
@@ -268,7 +272,9 @@ Reuse of any of these requires the attribution given in the folder's `README.md`
 
 If you use OpenEnergy, please cite it with the details in [CITATION.cff](CITATION.cff)
 (GitHub's "Cite this repository" button reads it), and credit the data sources each
-result lists.
+result lists. From v5.0.0 each GitHub release is also archived on
+[Zenodo](https://zenodo.org/) with a DOI (metadata in `.zenodo.json`); cite the DOI of the
+version you used.
 
 ## Contact
 

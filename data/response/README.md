@@ -1,13 +1,13 @@
 # GB dynamic frequency response
 
-Written by `scripts/fetch_response_data.py` on 2026-10-13 (with `--utilisation` for the
-second file). OpenEnergy is not affiliated with or endorsed by NESO.
+Written by `scripts/fetch_response_data.py` on 2026-10-13 and refreshed on 2026-10-30 (with
+`--utilisation` for the second file). OpenEnergy is not affiliated with or endorsed by NESO.
 
 ## `gb_dynamic_response.csv`
 
 Day-ahead auction results for NESO's dynamic response services, one row per delivery
-block (EFA block, normally four hours), 2021-09-15 22:00 to 2026-10-14 22:00 UTC (11,130
-blocks, no gaps; the ten blocks on clock-change days are three or five hours long).
+block (EFA block, normally four hours), 2021-09-15 22:00 to 2026-10-30 19:00 UTC (11,226
+blocks, no gaps; the eleven blocks on clock-change days are three or five hours long).
 Columns: `utc_start`, `utc_end`, then for each service `<service>_gbp_per_mw_h` (clearing
 price, GBP per MW per hour of availability) and `<service>_mw` (cleared volume).
 
@@ -36,12 +36,12 @@ with each service's price and volume side by side; times in UTC.
 
 Known issues: DM and DR start on 2022-03-26 (blank before). A cleared volume of 0 with a
 price of 0 means nothing was bought. Prices can be negative, mostly for the high services
-(DM high 3,008 blocks, DR high 5,506), where providers pay to take part. Dynamic
+(DM high 3,059 blocks, DR high 5,588), where providers pay to take part. Dynamic
 Containment before 16 September 2021 was bought pay-as-bid without a clearing price and is
 not included.
 
 Volume-weighted clearing price, GBP/MW/h (calendar years; 2021 from 15 September, 2026 to
-14 October):
+30 October):
 
 | Year | DC low | DC high | DM low | DM high | DR low | DR high |
 |---|---:|---:|---:|---:|---:|---:|
@@ -50,7 +50,7 @@ Volume-weighted clearing price, GBP/MW/h (calendar years; 2021 from 15 September
 | 2023 | 2.81 | 3.46 | 3.99 | 2.31 | 10.21 | 0.09 |
 | 2024 | 2.25 | 1.97 | 4.22 | 0.49 | 8.10 | −4.92 |
 | 2025 | 3.93 | 2.55 | 6.51 | 2.00 | 13.17 | −2.51 |
-| 2026 | 3.25 | 2.04 | 7.21 | −0.15 | 16.62 | −8.63 |
+| 2026 | 3.33 | 2.08 | 7.35 | −0.11 | 16.72 | −8.81 |
 
 Median cleared volume per block in 2025: DC 1,180–1,221 MW, DM 300 MW, DR 480–500 MW (DR
 low was 9 MW in 2022).

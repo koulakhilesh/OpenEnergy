@@ -8,8 +8,9 @@ The model's files stop at the latest complete calendar year, 2025, and were chec
 on 2026-10-13. DUKES publishes each year's fleet the following July, so 2026 has no fleet
 or efficiency yet; Quarterly Energy Prices for 2026 and the carbon price on 1 April 2026
 exist but are not added until the year is complete, so every model year has the same
-kind of inputs. The interconnector files (below) are written by `scripts/fetch_fes.py` and
-`scripts/fetch_interconnector_flows.py` and run to October 2026.
+kind of inputs. The interconnector files (below) are written by `scripts/fetch_fes.py`,
+`scripts/fetch_interconnector_flows.py` and `scripts/fit_interconnector_availability.py`;
+the flows run to 29 October 2026 (refreshed on 2026-10-30).
 
 ## `generation_mix.csv`
 
@@ -129,7 +130,7 @@ highest daily average flow on Moyle was about 300 MW in 2016-2017 and 450 MW sin
 
 ## `interconnector_flows.csv`
 
-Daily energy imported and exported on each link, MWh, 2016-01-01 to 2026-10-12 (3,938 UTC
+Daily energy imported and exported on each link, MWh, 2016-01-01 to 2026-10-29 (3,955 UTC
 days). Columns: `date` and, per link, `<fuel type>_import_mwh` and `<fuel type>_export_mwh`
 (fuel type lower-cased, for example `intfr_import_mwh`). Blank means no record that day.
 
@@ -148,6 +149,17 @@ months of commissioning test flows. This gives Nemo Link 2019-01-30, IFA2 2021-0
 Link 2021-09-23, ElecLink 2022-05-23, Viking Link 2023-12-29 and Greenlink 2025-01-19; the
 other four flow from the start of the record. It also checks the modelled flows
 (`examples/interconnector_check.py`). In 2024 GB imported 43.9 TWh and exported 10.6 TWh.
+
+## `interconnector_flows_hourly.csv`
+
+Hourly net flow on each link, MW (positive into GB), 2019-01-01 00:00 to 2026-10-29 23:00
+UTC (68,612 hours; FUELHH has no record for four of them). Columns: `utc_timestamp` and,
+per link, `<fuel type>_mw`. Blank before a link first reports. Same source and licence
+as `interconnector_flows.csv`, written by the same script.
+
+Changes: each hour is the mean of its two half-hourly flows, rounded to the MW, so a flow
+that reverses within an hour is netted (in 2024 hourly imports are within 1% of the daily
+file's). Used to fit availability by price gap (below).
 
 ## `interconnector_availability.csv`
 
@@ -181,3 +193,28 @@ Known issues: one share per link and direction for all years and hours. It folds
 ramp limits, losses, capacity sold ahead and trading on intraday and balancing prices into
 one number, and does not respond to the size of the price gap. Links with capped register
 capacity (see `interconnectors.csv`) get a lower share for that reason too.
+
+## `interconnector_gap_availability.csv`
+
+Per link and direction, the share of capacity it used by size of the price gap, fitted on
+2019-2025 by `scripts/fit_interconnector_availability.py` and used by `availability: gap`.
+Columns: `link`, `direction` (`import` or `export`), `gap_from` (lower edge of the gap
+bin, GBP/MWh: 0, 5, 10, 20, 40, 80), `share` (0 to 1) and `hours` (hours in the bin).
+
+Method: from the day each link entered service, every hour is put in a bin by the gap
+between GB's actual day-ahead price and the neighbour's (as above): imports when GB is
+dearer, exports when cheaper. A bin's share is the link's mean hourly flow that way
+(`interconnector_flows_hourly.csv`) over its register capacity. Shares are then made
+non-decreasing in the gap (pooled adjacent violators, weighted by hours), so the model can
+offer each link as six steps, the k-th at the neighbour's price plus the bin's edge; empty
+bins take their neighbour's share. Greenlink (from 2025) has the fewest hours. Only actual
+prices and flows are used.
+
+Out of sample (fitted on 2019-2022, links in service before 2023) it gives 24.4, 29.1 and
+28.6 TWh of imports in 2023-2025 against 33.5, 38.9 and 38.9 actual (the flat share 26.7,
+30.2 and 29.3), and a mean hourly correlation with actual flows of 0.41-0.47 (flat
+0.37-0.43). In daily data several links traded less above about £80/MWh, mostly in 2022,
+when their neighbours were short too; the non-decreasing fit pools such hours with the bins
+below.
+
+Sources: as `interconnector_availability.csv`.

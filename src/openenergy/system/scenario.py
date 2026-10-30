@@ -79,14 +79,15 @@ class InterconnectorSection(_Strict):
     """``fixed`` keeps historic imports; ``links`` trades at neighbours' actual prices.
 
     ``prices`` defaults to ``prices/europe_day_ahead_ember.csv`` next to the system data.
-    ``availability: flows`` uses each link's availability fitted from its flows; a number
+    ``availability: flows`` uses each link's availability fitted from its flows; ``gap``
+    lets each link trade more of a bigger price gap, as fitted from hourly flows; a number
     from 0 to 1 applies to every link instead.
     """
 
     mode: Literal["fixed", "links"] = "fixed"
     prices: Path | None = None
     hurdle_gbp_per_mwh: float = Field(default=0.0, ge=0)
-    availability: Literal["flows"] | Annotated[float, Field(gt=0, le=1)] = "flows"
+    availability: Literal["flows", "gap"] | Annotated[float, Field(gt=0, le=1)] = "flows"
 
     @pydantic.model_validator(mode="before")
     @classmethod
@@ -296,9 +297,7 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
             section.neighbour_prices(),
             link_scale,
             section.interconnectors.hurdle_gbp_per_mwh,
-            None
-            if section.interconnectors.availability == "flows"
-            else section.interconnectors.availability,
+            section.interconnectors.availability,
         )
     # Explicit scale and capacity entries override the FES and links settings.
     scale.update(section.scale)

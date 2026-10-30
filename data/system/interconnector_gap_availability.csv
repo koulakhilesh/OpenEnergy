@@ -1,0 +1,121 @@
+link,direction,gap_from,share,hours
+Auchencrosh (interconnector CCT),import,0.0,0.145,7789
+Auchencrosh (interconnector CCT),import,5.0,0.149,4913
+Auchencrosh (interconnector CCT),import,10.0,0.162,4703
+Auchencrosh (interconnector CCT),import,20.0,0.194,3697
+Auchencrosh (interconnector CCT),import,40.0,0.224,2530
+Auchencrosh (interconnector CCT),import,80.0,0.253,1302
+Auchencrosh (interconnector CCT),export,0.0,0.397,8323
+Auchencrosh (interconnector CCT),export,5.0,0.443,6093
+Auchencrosh (interconnector CCT),export,10.0,0.49,7460
+Auchencrosh (interconnector CCT),export,20.0,0.51,7091
+Auchencrosh (interconnector CCT),export,40.0,0.538,5273
+Auchencrosh (interconnector CCT),export,80.0,0.538,2153
+Britned,import,0.0,0.366,12699
+Britned,import,5.0,0.545,8258
+Britned,import,10.0,0.566,9774
+Britned,import,20.0,0.566,6552
+Britned,import,40.0,0.638,4094
+Britned,import,80.0,0.694,1692
+Britned,export,0.0,0.218,7340
+Britned,export,5.0,0.342,3369
+Britned,export,10.0,0.394,3145
+Britned,export,20.0,0.446,2169
+Britned,export,40.0,0.529,1465
+Britned,export,80.0,0.555,757
+East West Interconnector,import,0.0,0.199,7789
+East West Interconnector,import,5.0,0.205,4913
+East West Interconnector,import,10.0,0.215,4703
+East West Interconnector,import,20.0,0.242,3697
+East West Interconnector,import,40.0,0.249,2530
+East West Interconnector,import,80.0,0.333,1302
+East West Interconnector,export,0.0,0.232,8323
+East West Interconnector,export,5.0,0.29,6093
+East West Interconnector,export,10.0,0.338,7460
+East West Interconnector,export,20.0,0.365,7091
+East West Interconnector,export,40.0,0.405,5273
+East West Interconnector,export,80.0,0.452,2153
+ElecLink,import,0.0,0.443,4358
+ElecLink,import,5.0,0.595,3361
+ElecLink,import,10.0,0.708,3883
+ElecLink,import,20.0,0.778,4273
+ElecLink,import,40.0,0.801,5384
+ElecLink,import,80.0,0.801,751
+ElecLink,export,0.0,0.11,3330
+ElecLink,export,5.0,0.228,1748
+ElecLink,export,10.0,0.463,1194
+ElecLink,export,20.0,0.679,1019
+ElecLink,export,40.0,0.771,1060
+ElecLink,export,80.0,0.771,1285
+Greenlink,import,0.0,0.065,747
+Greenlink,import,5.0,0.068,518
+Greenlink,import,10.0,0.068,446
+Greenlink,import,20.0,0.082,368
+Greenlink,import,40.0,0.111,266
+Greenlink,import,80.0,0.111,29
+Greenlink,export,0.0,0.712,1016
+Greenlink,export,5.0,0.712,916
+Greenlink,export,10.0,0.712,1233
+Greenlink,export,20.0,0.712,1188
+Greenlink,export,40.0,0.712,1086
+Greenlink,export,80.0,0.712,514
+IFA Interconnector,import,0.0,0.548,11890
+IFA Interconnector,import,5.0,0.657,7779
+IFA Interconnector,import,10.0,0.69,9963
+IFA Interconnector,import,20.0,0.69,7816
+IFA Interconnector,import,40.0,0.69,6768
+IFA Interconnector,import,80.0,0.69,1269
+IFA Interconnector,export,0.0,0.201,6526
+IFA Interconnector,export,5.0,0.232,2543
+IFA Interconnector,export,10.0,0.304,2027
+IFA Interconnector,export,20.0,0.321,1695
+IFA Interconnector,export,40.0,0.345,1554
+IFA Interconnector,export,80.0,0.363,1487
+IFA2 Interconnector,import,0.0,0.361,5498
+IFA2 Interconnector,import,5.0,0.471,4549
+IFA2 Interconnector,import,10.0,0.574,5910
+IFA2 Interconnector,import,20.0,0.635,6311
+IFA2 Interconnector,import,40.0,0.677,6627
+IFA2 Interconnector,import,80.0,0.738,1221
+IFA2 Interconnector,export,0.0,0.119,4302
+IFA2 Interconnector,export,5.0,0.235,2298
+IFA2 Interconnector,export,10.0,0.443,1887
+IFA2 Interconnector,export,20.0,0.634,1668
+IFA2 Interconnector,export,40.0,0.754,1548
+IFA2 Interconnector,export,80.0,0.784,1487
+Nemo Link,import,0.0,0.489,13079
+Nemo Link,import,5.0,0.682,8443
+Nemo Link,import,10.0,0.774,10173
+Nemo Link,import,20.0,0.801,7103
+Nemo Link,import,40.0,0.836,4154
+Nemo Link,import,80.0,0.905,1591
+Nemo Link,export,0.0,0.197,6808
+Nemo Link,export,5.0,0.313,2979
+Nemo Link,export,10.0,0.411,2483
+Nemo Link,export,20.0,0.526,1890
+Nemo Link,export,40.0,0.686,1219
+Nemo Link,export,80.0,0.729,705
+NS Link,import,0.0,0.322,913
+NS Link,import,5.0,0.455,1229
+NS Link,import,10.0,0.632,2890
+NS Link,import,20.0,0.72,7277
+NS Link,import,40.0,0.72,14689
+NS Link,import,80.0,0.72,7965
+NS Link,export,0.0,0.224,671
+NS Link,export,5.0,0.295,466
+NS Link,export,10.0,0.398,603
+NS Link,export,20.0,0.526,559
+NS Link,export,40.0,0.556,167
+NS Link,export,80.0,0.556,30
+Viking Link Denmark Interconnector,import,0.0,0.277,2384
+Viking Link Denmark Interconnector,import,5.0,0.451,1745
+Viking Link Denmark Interconnector,import,10.0,0.577,2000
+Viking Link Denmark Interconnector,import,20.0,0.66,2326
+Viking Link Denmark Interconnector,import,40.0,0.683,2513
+Viking Link Denmark Interconnector,import,80.0,0.683,386
+Viking Link Denmark Interconnector,export,0.0,0.193,2406
+Viking Link Denmark Interconnector,export,5.0,0.332,1434
+Viking Link Denmark Interconnector,export,10.0,0.448,1180
+Viking Link Denmark Interconnector,export,20.0,0.511,718
+Viking Link Denmark Interconnector,export,40.0,0.554,368
+Viking Link Denmark Interconnector,export,80.0,0.554,152

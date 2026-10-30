@@ -71,6 +71,9 @@ hooks:
 
 extra:
   generator: false
+  version:
+    provider: mike
+    default: latest
   social:
     - icon: fontawesome/solid/house
       link: https://koulakhilesh.github.io/

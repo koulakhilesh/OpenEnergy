@@ -20,7 +20,7 @@ they are kept.
 ## GB prices after 2020
 
 OPSD's GB prices stop in September 2020. `data/prices/gb_day_ahead_ember.csv` carries the
-GB hourly day-ahead price from 30 June 2016 to 5 October 2026 (90,000 hours, no gaps),
+GB hourly day-ahead price from 30 June 2016 to 28 October 2026 (90,553 hours, no gaps),
 from Ember's European wholesale price data (CC BY 4.0), stored in EUR/MWh as published.
 OpenEnergy converts each hour to GBP at the ECB reference rate for its day
 (`data/prices/ecb_gbp_per_eur.csv`; the latest earlier rate on weekends and holidays).
@@ -47,7 +47,7 @@ relies on Ember's CC BY 4.0 publication and cites both.
 `data/prices/europe_day_ahead_ember.csv` holds the hourly day-ahead prices of the six
 markets GB's interconnectors reach (France, the Netherlands, Belgium, Norway, Denmark and
 Ireland), EUR/MWh as published by Ember, from 1 January 2015 (Ireland from 1 October
-2018) to 7 October 2026. The system model's [interconnector links](guides/forward-scenarios.md)
+2018) to 30 October 2026. The system model's [interconnector links](guides/forward-scenarios.md)
 trade at these prices, converted to GBP like the GB price.
 
 | Mean £/MWh (ECB rates) | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 |
@@ -87,7 +87,7 @@ EUR; OpenEnergy labels the currency accordingly.
 ## Carbon intensity
 
 `data/carbon_intensity/gb_national.csv` holds GB national carbon intensity for every
-half-hour from 1 January 2018 to 12 October 2026: NESO's forecast and its estimated
+half-hour from 1 January 2018 to 29 October 2026: NESO's forecast and its estimated
 actual, in gCO2/kWh. It was downloaded with `scripts/fetch_carbon_intensity.py` and is
 stored exactly as published; 179 half-hours the API did not return are left blank.
 
@@ -114,8 +114,10 @@ direction and rough scale, not causal impact.
 | `carbon_prices.csv` | EU ETS (2015–2020) and UK ETS (2021–2025) price on 1 April with ECB exchange rates, and carbon price support rates | World Bank, DESNZ (2021), ECB, HMRC |
 | `unit_parameters.csv` | Unit size, minimum stable output and start-up cost for CCGT, coal and peaking plant (unit commitment) | Danish Energy Agency, NREL, ECB |
 | `interconnectors.csv` | GB's ten built interconnectors: neighbour, import and export capacity (MW) | NESO Interconnector Register, 12 October 2026 |
-| `interconnector_flows.csv` | Daily imports and exports per link, MWh, 2016-01-01 to 2026-10-12 | Elexon BMRS FUELHH |
+| `interconnector_flows.csv` | Daily imports and exports per link, MWh, 2016-01-01 to 2026-10-29 | Elexon BMRS FUELHH |
+| `interconnector_flows_hourly.csv` | Hourly net flow per link, MW, 2019-01-01 to 2026-10-29 | Elexon BMRS FUELHH |
 | `interconnector_availability.csv` | Each link's import and export availability: actual flow over a price taker's trade on actual prices, 2019–2025 | Elexon BMRS FUELHH, Ember, OPSD, ECB |
+| `interconnector_gap_availability.csv` | Each link's share of capacity used by size of the price gap (option `availability: gap`), 2019–2025 | Elexon BMRS FUELHH, Ember, OPSD, ECB |
 
 The model's inputs stop at the latest complete calendar year, 2025 (checked 13 October
 2026): DUKES publishes a year's fleet the following July, so 2026 has none yet, and the
@@ -175,7 +177,7 @@ common requests (1, 2 and 4 hours, every year, response option and pathway), wri
 
 - `gb_dynamic_response.csv`: the clearing price (GBP/MW/h) and cleared volume (MW) of
   each dynamic response service (DC, DM, DR; low and high) for every four-hour EFA block
-  from 15 September 2021 22:00 to 14 October 2026 22:00 UTC (11,130 blocks, no gaps). DM
+  from 15 September 2021 22:00 to 30 October 2026 19:00 UTC (11,226 blocks, no gaps). DM
   and DR start on 26 March 2022.
 - `gb_response_utilisation.csv`: for each month from September 2021 to September 2026, the
   average share of contracted MW each service delivers (MWh per MW per hour), from NESO's
@@ -189,8 +191,8 @@ delivery of a unit following the envelope exactly. See `data/response/README.md`
 ## Imbalance prices
 
 `data/balancing/gb_system_prices.csv`, written by `scripts/fetch_system_prices.py`, holds
-the GB system (imbalance) price for every half-hour from 2016 to 12 October 2026 (189,024
-periods, 22
+the GB system (imbalance) price for every half-hour from 2016 to 29 October 2026 (189,840
+periods, 20
 blank where Elexon's API returned nothing). GB has a single imbalance price, so the sell
 and buy prices are equal; it is used by `examples/imbalance_value.py`.
 
@@ -266,7 +268,7 @@ The four UK government sources contain public sector information licensed under 
 
 > Ember. European Wholesale Electricity Price Data, hourly, United Kingdom.
 > <https://ember-energy.org/data/european-wholesale-electricity-price-data/> (accessed
-> 10 October 2026). Licensed under
+> 30 October 2026). Licensed under
 > [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Primary sources: ENTSO-E
 > Transparency Platform and EMR Settlement.
 
@@ -277,7 +279,7 @@ OpenEnergy keeps Ember's EUR prices unchanged and converts them to GBP with ECB 
 > Ember. European Wholesale Electricity Price Data, hourly, France, Netherlands, Belgium,
 > Norway, Denmark and Ireland.
 > <https://ember-energy.org/data/european-wholesale-electricity-price-data/> (accessed
-> 13 October 2026). Licensed under
+> 30 October 2026). Licensed under
 > [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Primary sources: ENTSO-E
 > Transparency Platform and SEMOpx (Ireland).
 
@@ -290,7 +292,7 @@ OpenEnergy keeps Ember's EUR prices unchanged and converts them to GBP with ECB 
 > Supported by National Energy SO Open Data.
 
 > Elexon. BMRS Insights API, generation by fuel type (FUELHH), interconnector flows,
-> <https://bmrs.elexon.co.uk/> (accessed 13 October 2026). Reused under the
+> <https://bmrs.elexon.co.uk/> (accessed 30 October 2026). Reused under the
 > [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
 > Contains BMRS data © Elexon Limited copyright and database right 2026.
 
@@ -308,7 +310,8 @@ OpenEnergy keeps Ember's EUR prices unchanged and converts them to GBP with ECB 
 **Exchange rates**
 
 > Source: European Central Bank, euro foreign exchange reference rates for GBP and USD.
-> <https://data.ecb.europa.eu/> (accessed 10 October 2026).
+> <https://data.ecb.europa.eu/> (accessed 10 October 2026; daily GBP rates refreshed
+> 30 October 2026).
 
 OpenEnergy derives a USD-to-GBP cross rate from the two ECB rates to convert the World
 Bank's US$ prices, and uses the daily GBP rate to convert Ember's EUR prices; the stored
@@ -320,7 +323,7 @@ rates are unchanged.
 > auction results, <https://www.neso.energy/data-portal/dynamic-containment-data>; Enduring
 > Auction Capability (EAC) auction results,
 > <https://www.neso.energy/data-portal/eac-auction-results>; System frequency data,
-> <https://www.neso.energy/data-portal/system-frequency-data> (all accessed 13 October
+> <https://www.neso.energy/data-portal/system-frequency-data> (all accessed 30 October
 > 2026). Licensed under the
 > [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
 > Supported by National Energy SO Open Data.
@@ -334,7 +337,7 @@ unchanged, converts delivery times to UTC and reduces frequency to monthly avera
 **Imbalance prices**
 
 > Elexon. BMRS Insights API, settlement system prices (DISEBSP),
-> <https://bmrs.elexon.co.uk/> (accessed 13 October 2026). Reused under the
+> <https://bmrs.elexon.co.uk/> (accessed 30 October 2026). Reused under the
 > [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
 > Contains BMRS data © Elexon Limited copyright and database right 2026.
 
