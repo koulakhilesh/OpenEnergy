@@ -80,7 +80,7 @@ def test_mix_filters_whole_days(tmp_path: Path) -> None:
 def test_bundled_mix_covers_period() -> None:
     mix = GenerationMixSource(BUNDLED / "generation_mix.csv").mix(step=pd.Timedelta(hours=1))
     assert mix.index[0] == pd.Timestamp("2015-01-01", tz="UTC")
-    assert mix.index[-1] == pd.Timestamp("2025-12-31 23:00", tz="UTC")
+    assert mix.index[-1] == pd.Timestamp("2026-10-29 23:00", tz="UTC")
     assert not mix.isna().any().any()
     june = mix.loc["2019-06"]
     assert june["solar"].groupby(june.index.hour).mean().idxmax() in (11, 12)

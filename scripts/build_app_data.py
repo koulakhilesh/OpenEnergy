@@ -1,13 +1,13 @@
 """Write the static data the web app's in-browser pages use, into web/public/data/.
 
-Model output and reshaped copies of bundled data, so the Battery Lab, Grid replay, 2035 and
-Beat the battery pages need no server:
+Model output and reshaped copies of bundled data, so the simulator, Play and 2035 pages
+need no server:
 
 - prices-YYYY.json (2019 to the last price year): hourly GB day-ahead price (Ember) and the
   fundamentals forecast for every UTC hour of the year, with the last week of the year
   before so last week's prices can be read from the first day;
-- mix-YYYY.json (2019-2025): hourly generation by fuel (NESO historic generation mix) and
-  carbon intensity (NESO Carbon Intensity API);
+- mix-YYYY.json (2019 to the last mix year): hourly generation by fuel (NESO historic
+  generation mix) and carbon intensity (NESO Carbon Intensity API);
 - saturation.json: the storage saturation study (data/scenarios/saturation.csv);
 - engine-parity.json (in web/src/engine/): one month of prices and forecasts with what the
   Python backtest earns each day, for the TypeScript engine's parity test.
@@ -39,12 +39,11 @@ OUT = ROOT / "web/public/data"
 PRICES = DATA / "prices/gb_day_ahead_ember.csv"
 FORECAST = DATA / "forecasts/gb_fundamentals_day_ahead.csv"
 FIRST_YEAR = 2019
-MIX_LAST_YEAR = 2025
 FORECAST_NOTE = (
     "Fundamentals forecast: OpenEnergy model output (data/forecasts), made at noon UTC the "
     "day before from what was known then. " + FUNDAMENTALS_ATTRIBUTION
 )
-# Fuels shown in the replay, in stacking order; embedded wind joins wind.
+# Fuels shown in the simulator; embedded wind joins wind.
 FUELS = ("nuclear", "biomass", "hydro", "wind", "solar", "imports", "storage", "gas", "coal")
 PARITY_MONTH = (date(2025, 1, 1), date(2025, 1, 31))
 
@@ -89,13 +88,13 @@ def price_files(actual: pd.Series, forecast: pd.Series) -> None:
 def mix_files() -> None:
     source = GenerationMixSource(DATA / "system/generation_mix.csv")
     carbon = CarbonIntensitySource(DATA / "carbon_intensity/gb_national.csv")
-    for year in range(FIRST_YEAR, MIX_LAST_YEAR + 1):
+    last_day = pd.DatetimeIndex(source.mix().index)[-1].date()
+    for year in range(FIRST_YEAR, last_day.year + 1):
         index = hours(year)
-        mix = source.mix(date(year, 1, 1), date(year, 12, 31), step=pd.Timedelta(hours=1))
+        end = min(date(year, 12, 31), last_day)
+        mix = source.mix(date(year, 1, 1), end, step=pd.Timedelta(hours=1))
         mix["wind"] = mix["wind"] + mix["wind_emb"]
-        intensity = carbon.intensity(
-            "actual", date(year, 1, 1), date(year, 12, 31), pd.Timedelta(hours=1)
-        )
+        intensity = carbon.intensity("actual", date(year, 1, 1), end, pd.Timedelta(hours=1))
         write(
             f"mix-{year}.json",
             {

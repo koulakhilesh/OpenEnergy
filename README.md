@@ -55,16 +55,16 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   availability fitted from its flows, and unit commitment (`system.fes`,
   `system.interconnectors: links`, `system.commitment`); `openenergy system saturation`
   measures how a battery's value falls as the storage fleet grows.
-- **Web app**: watch a battery trade a real day, run the optimiser in your browser on any
-  day since 2019 (Battery Lab), replay a week of the grid, explore the 2035 saturation
-  study, plan a day yourself against the optimiser, or value a battery on any GB year from
-  2017 or a FES pathway, at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
+- **Web app**: a simulator of Britain's grid hour by hour from 2019, with power flowing in
+  by fuel and a battery trading on a plan the optimiser makes in your browser; play a day
+  against the optimiser, explore the 2035 saturation study, or value a battery on any GB
+  year from 2017 or a FES pathway, at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
   (`web/`, a React and TypeScript front end with HiGHS in WebAssembly, on the
   `openenergy.app` FastAPI JSON API, on Vercel).
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
   and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
   prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
-  2018 to October 2026 and generation by fuel for 2015–2025 from NESO; GB frequency-response auction
+  2018 to October 2026 and generation by fuel for 2015 to October 2026 from NESO; GB frequency-response auction
   prices from September 2021 and monthly response utilisation from NESO; GB imbalance
   prices for 2016 to October 2026 from Elexon; and GB fleet, fuel and carbon prices from DESNZ, HMRC,
   the World Bank and the ECB, are bundled. So are NESO's Future Energy Scenarios tables,
@@ -162,12 +162,13 @@ cd web && npm ci && npm run build && npm test && npx playwright install chromium
 | v4.2 | A more credible model: unit commitment with interconnector links; each link's availability fitted from its actual flows, never from prices; a measured answer on the missing daily spread (the everyday intraday shape, not negative prices); forward scenarios and the app re-run. GB zones were dropped: GB keeps one national wholesale price ([DESNZ, REMA summer update, July 2025](https://www.gov.uk/government/publications/review-of-electricity-market-arrangements-rema-summer-update-2025)) |
 | v5.0 | A React and TypeScript front end on an extended JSON API (options, explore, compare, FES table), typed from the OpenAPI schema and tested end to end; interconnector availability by price gap from hourly flows, tested out of sample (an option: it does not beat the flat share); data refreshed to October 2026; versioned docs and a Zenodo DOI |
 | v6.0 | The daily gas price in the system model; a day-ahead forecast from NESO's demand and Elexon's wind forecasts, the gas price and auction prices (`forecast: fundamentals`); FES systems made secure to the reliability standard and a storage saturation study (`openenergy system saturation`); the battery optimiser in the browser (Battery Lab, Grid replay, 2035, Beat the battery); a Gymnasium environment; constraint evidence; an end-of-day energy target that is now exact ([What's new](https://koulakhilesh.github.io/OpenEnergy/whats-new/)) |
+| v6.1 | The web app as a simulator: Britain's grid hour by hour with power flowing in by fuel and a battery trading on the in-browser optimiser, play controls, keys and a year strip; Play, 2035 and Research tabs; revenue after wear in the browser, so perfect foresight is a true ceiling; NESO's generation mix to October 2026 |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v6.1 | Scotland and England as two zones with the Balancing Mechanism, to value where a battery relieves constraints; historic capacity by technology so the saturation study can use every weather year from 2019; the evening peak premium the cost-based model misses |
+| v6.2 | Scotland and England as two zones with the Balancing Mechanism, to value where a battery relieves constraints; historic capacity by technology so the saturation study can use every weather year from 2019; the evening peak premium the cost-based model misses |
 
 Alongside releases: refresh and re-check the bundled data
 every release; keep CI and its actions current; revisit stochastic planning if an open,

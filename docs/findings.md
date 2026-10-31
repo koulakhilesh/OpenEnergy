@@ -2,7 +2,7 @@
 
 What OpenEnergy's runs show so far, each with the page that has the method, the numbers
 and the limits. Every number here comes from a command or script in the repository and
-was re-run for v6.0.
+was re-run for v6.0 (v6.1 changed only the web app).
 
 ## A battery on GB day-ahead prices
 
@@ -10,7 +10,7 @@ A 1 MW / 2 MWh battery planning on last week's prices earned £13,943 per MW-yea
 £76,948 in the 2022 gas crisis and £35,861 in 2025, keeping 71–83% of what perfect
 foresight allows every year from 2017 ([Home](index.md)). Try any day:
 
-<iframe src="https://open-energy-eight.vercel.app/lab?embed=1&year=2025&day=2025-01-21" title="Battery Lab" loading="lazy" style="width:100%;height:980px;border:0"></iframe>
+<iframe src="https://open-energy-eight.vercel.app/?embed=1&day=2025-01-21&hour=16" title="OpenEnergy simulator" loading="lazy" style="width:100%;height:760px;border:0"></iframe>
 
 ## A better forecast pays, less than its error suggests
 

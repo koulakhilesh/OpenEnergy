@@ -22,10 +22,12 @@ logger = logging.getLogger(__name__)
 # Front-end routes; each serves the same page and the browser reads the query string.
 PAGES = (
     "/",
+    "/play",
+    "/2035",
+    "/research",
+    # v6.0 addresses: the front end shows the simulator and keeps their query.
     "/lab",
     "/replay",
-    "/2035",
-    "/play",
     "/run",
     "/result",
     "/explore",

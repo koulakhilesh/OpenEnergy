@@ -37,6 +37,9 @@ export interface SaturationRow {
   revenue_per_mw_year: number;
   scarcity_revenue: number;
   equivalent_firm: number | null;
+  /** Full cycles a year: the whole fleet's, and one more battery's. */
+  fleet_cycles: number;
+  battery_cycles: number;
 }
 
 export interface Saturation {
@@ -46,7 +49,7 @@ export interface Saturation {
 }
 
 export const PRICE_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
-export const MIX_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
+export const MIX_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 export type ForecastName = "perfect" | "fundamentals" | "naive";
 export const FORECASTS: Record<ForecastName, { label: string; colour: string }> = {
   perfect: { label: "Perfect foresight", colour: "--ink" },

@@ -108,7 +108,7 @@ direction and rough scale, not causal impact.
 
 | File | Contents | Source |
 |---|---|---|
-| `generation_mix.csv` | Half-hourly GB generation by fuel, MW, 2015-01-01 to 2025-12-31 (192,864 rows, no gaps) | NESO historic generation mix |
+| `generation_mix.csv` | Half-hourly GB generation by fuel, MW, 2015-01-01 to 2026-10-29 (207,360 rows, no gaps) | NESO historic generation mix |
 | `fleet.csv` | GB capacity at each year end 2014–2025 (CCGT, coal, gas turbines, oil engines, nuclear, pumped storage) and CCGT and coal efficiency | DUKES 5.8 and 5.10 |
 | `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2025; the model's gas price before 2018 and with `gas_price: quarterly` | DESNZ QEP 3.2.1 |
 | `carbon_prices.csv` | EU ETS (2015–2020) and UK ETS (2021–2025) price on 1 April with ECB exchange rates, and carbon price support rates | World Bank, DESNZ (2021), ECB, HMRC |

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 
@@ -36,17 +36,31 @@ const PRICES = {
   attribution: ["GB day-ahead prices: Ember, CC BY 4.0."],
 };
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe("App", () => {
-  it("opens on a live day without needing the API", async () => {
+  it("opens the simulator without needing the API", async () => {
     serve({ "/data/prices-2025.json": { status: 200, body: PRICES } });
     render(<App path="/" search="" />);
-    expect(
-      screen.getByRole("heading", { name: "Watch a battery trade a real day on Britain's grid." }),
-    ).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /20 January 2025 · 00:00/ })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Simulator" }).getAttribute("aria-current")).toBe("page");
     expect(await screen.findByText(/Ember, CC BY 4\.0/)).toBeTruthy();
-    expect(screen.getAllByRole("link", { name: /Battery Lab/ }).length).toBeGreaterThan(1);
+  });
+
+  it("keeps the Battery Lab's address working", () => {
+    serve({ "/data/prices-2025.json": { status: 200, body: PRICES } });
+    render(<App path="/lab" search="?year=2025&day=2025-01-21" />);
+    expect(screen.getByRole("heading", { name: /21 January 2025/ })).toBeTruthy();
+  });
+
+  it("marks Research for the analyst pages", async () => {
+    serve({ "/api/options": { status: 200, body: OPTIONS } });
+    render(<App path="/run" search="" />);
+    expect(await screen.findByRole("heading", { name: "Value a battery" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Research" }).getAttribute("aria-current")).toBe("page");
   });
 
   it("offers the API's years and pathways on the year form", async () => {

@@ -1,11 +1,42 @@
-# What's new in 6.0
+# What's new
+
+## 6.1: the web app becomes a simulator
+
+OpenEnergy 6.1 changes only the [web app](guides/web-app.md) and its data; the library,
+the API and every model result are as in 6.0.
+
+- **One simulator instead of pages.** [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
+  opens on Britain's grid hour by hour: each fuel flows into the GB node with a band as
+  wide as its output, the node shows the day-ahead price, and your battery charges and
+  discharges on a plan the optimiser makes in the browser. Play at 1, 4 or 24 hours a
+  second, step with the arrow keys, or click a day on the year strip (each day coloured by
+  its price spread). A side panel sets the battery, the forecast it plans with and the day,
+  and shows the day and the whole year for all three forecasts.
+- **Four tabs**: Simulator, Play, 2035 and Research. Play lets you paint a day's plan,
+  then run the day and watch actual prices and the scores come in; it keeps the engine's
+  rule that the battery starts and ends the day half full. 2035 counts the saturation
+  study's value up and down as you add batteries. Research holds the analyst pages
+  (`/run`, `/result`, `/explore`, `/compare`, `/scenarios`), unchanged.
+- **Revenue after wear in the browser.** The 6.0 Battery Lab compared revenue before wear,
+  so on days when a forecast's plan traded more it could show more than perfect foresight
+  (on 20 October 2026 a 1 MW / 2 MWh battery on OpenEnergy's forecast showed 113%). The
+  simulator now compares revenue less wear, the quantity the optimiser maximises, so
+  perfect foresight is the most any plan earns (90% that day). The Python backtest and the
+  API's year results are unchanged.
+- **2026 on the grid.** NESO's generation mix now runs to 29 October 2026; the rows to
+  2025 are unchanged, and the system model still uses 2015–2025.
+- **Addresses.** `/lab` and `/replay` open the simulator with their day and battery, so
+  6.0 links keep working; sources are one click away under each view. The app and the
+  docs use the README's logo.
+
+## 6.0
 
 OpenEnergy 6.0 makes the model more accurate, answers a research question, and puts the
 battery optimiser in the browser. Three defaults changed, and one bug was fixed that moves
-results; this page lists each with what it does to the numbers, measured by re-running
+results; this section lists each with what it does to the numbers, measured by re-running
 every result in these docs.
 
-## New
+### New
 
 - **A day-ahead forecast built on fundamentals** (`forecast: fundamentals`): NESO's
   day-ahead demand forecast, Elexon's day-ahead wind forecast, the daily gas price and
@@ -33,7 +64,7 @@ every result in these docs.
   and Elexon's day-ahead wind forecast, each with issue times (`data/fundamentals/`,
   `openenergy data update --fundamentals`; [Data](data.md#what-is-known-the-day-before)).
 
-## Changed defaults
+### Changed defaults
 
 | Setting | Before | 6.0 | To keep the old behaviour |
 |---|---|---|---|
@@ -58,7 +89,7 @@ to 7–13 GWh. Their mean prices fall from £120–211/MWh to £73–76/MWh, and
 perfect-foresight value on them from 1.8–2.7 times the model's own 2025 to about it or
 below ([Forward scenarios](guides/forward-scenarios.md#a-secure-system-first)).
 
-## Fixed: the end-of-day energy target
+### Fixed: the end-of-day energy target
 
 The daily plan required the battery to end each day with *at least* the energy it began
 with. When the last hour was cheap, a plan could end fuller, and the next day's target was
@@ -77,14 +108,14 @@ The effect depends on how often the last hour is cheap on the forecast:
 - The fundamentals forecast in its design stage: a 2024 capture ratio of 73.7% became
   85.3%.
 
-## The web app
+### The web app
 
 The year form moved from `/` to `/run`; `/result`, `/explore`, `/compare` and
 `/scenarios` keep their addresses, so shared links still work. The app offers the
 fundamentals forecast for historic years from 2019, and the FES table shows the firm
 capacity each pathway needed.
 
-## Numbers re-run
+### Numbers re-run
 
 Every table and number in these docs was re-run for 6.0 with the commands and scripts
 named next to it. The ones that moved by more than rounding are on the pages linked above;

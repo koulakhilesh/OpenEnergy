@@ -3,7 +3,7 @@ import { Axes, Chart, frame, gapPath, HOUR_TICKS, nice, pounds } from "../compon
 import { planDay, revenue } from "../engine/battery";
 import { complete, day, loadPrices, money } from "../engine/data";
 import { useHighs } from "../engine/hooks";
-import { battery } from "./Lab";
+import { battery } from "../sim/plans";
 
 const B = battery(1, 2, 0.95, 5);
 const LO = -50;
