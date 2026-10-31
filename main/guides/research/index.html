@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts/" class="md-nav__link">
         
   
@@ -449,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -470,8 +562,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -643,6 +735,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-good-is-openenergys-forecast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How good is OpenEnergy's forecast?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#can-reinforcement-learning-do-better" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Can reinforcement learning do better?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#do-solar-and-wind-earn-the-average-price" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -766,6 +880,34 @@
     
   
     Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
   
 
     
@@ -934,6 +1076,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-good-is-openenergys-forecast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How good is OpenEnergy's forecast?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#can-reinforcement-learning-do-better" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Can reinforcement learning do better?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#do-solar-and-wind-earn-the-average-price" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1064,6 +1228,154 @@ share of perfect-foresight revenue a 1 MW / 2 MWh battery keeps:</p>
 <p>Beyond about £5/MWh of error the optimiser starts trading noise: cycles double and revenue
 collapses. The noise here is independent hour to hour, which is harsher than real forecast
 errors; a correlated error model is a natural next experiment.</p>
+<h2 id="how-good-is-openenergys-forecast">How good is OpenEnergy's forecast?<a class="headerlink" href="#how-good-is-openenergys-forecast" title="Permanent link">&para;</a></h2>
+<p>The <code>fundamentals</code> forecaster (v6.0, <a href="../../concepts/#forecasters">Concepts</a>) plans each
+day at noon the day before on what was published by then: NESO's day-ahead demand
+forecast, Elexon's day-ahead wind forecast, the daily gas price and the prices of every
+auction that had cleared. A new model is trained each month on everything known before
+the month began.
+<a href="https://github.com/koulakhilesh/OpenEnergy/blob/main/examples/fundamentals_forecast.py"><code>examples/fundamentals_forecast.py</code></a>
+backtests a 1 MW / 2 MWh battery (95% each way, £5/MWh wear in the plan) on Ember's GB
+prices with it and with last week's prices (2026 to 28 October):</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Perfect foresight (£)</th>
+<th style="text-align: right;">Last week's prices (£)</th>
+<th style="text-align: right;">Capture</th>
+<th style="text-align: right;">MAE (£/MWh)</th>
+<th style="text-align: right;">OpenEnergy forecast (£)</th>
+<th style="text-align: right;">Capture</th>
+<th style="text-align: right;">MAE (£/MWh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">19,702</td>
+<td style="text-align: right;">14,074</td>
+<td style="text-align: right;">71.4%</td>
+<td style="text-align: right;">6.1</td>
+<td style="text-align: right;">15,281</td>
+<td style="text-align: right;">77.6%</td>
+<td style="text-align: right;">3.9</td>
+</tr>
+<tr>
+<td>2020</td>
+<td style="text-align: right;">22,623</td>
+<td style="text-align: right;">17,362</td>
+<td style="text-align: right;">76.7%</td>
+<td style="text-align: right;">7.7</td>
+<td style="text-align: right;">18,607</td>
+<td style="text-align: right;">82.2%</td>
+<td style="text-align: right;">4.6</td>
+</tr>
+<tr>
+<td>2021</td>
+<td style="text-align: right;">90,264</td>
+<td style="text-align: right;">75,065</td>
+<td style="text-align: right;">83.2%</td>
+<td style="text-align: right;">31.3</td>
+<td style="text-align: right;">71,665</td>
+<td style="text-align: right;">79.4%</td>
+<td style="text-align: right;">26.3</td>
+</tr>
+<tr>
+<td>2022</td>
+<td style="text-align: right;">103,705</td>
+<td style="text-align: right;">77,954</td>
+<td style="text-align: right;">75.2%</td>
+<td style="text-align: right;">61.4</td>
+<td style="text-align: right;">81,135</td>
+<td style="text-align: right;">78.2%</td>
+<td style="text-align: right;">33.9</td>
+</tr>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">46,440</td>
+<td style="text-align: right;">36,362</td>
+<td style="text-align: right;">78.3%</td>
+<td style="text-align: right;">20.0</td>
+<td style="text-align: right;">39,840</td>
+<td style="text-align: right;">85.8%</td>
+<td style="text-align: right;">11.8</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">39,412</td>
+<td style="text-align: right;">29,128</td>
+<td style="text-align: right;">73.9%</td>
+<td style="text-align: right;">19.5</td>
+<td style="text-align: right;">33,894</td>
+<td style="text-align: right;">86.0%</td>
+<td style="text-align: right;">9.3</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">44,974</td>
+<td style="text-align: right;">36,208</td>
+<td style="text-align: right;">80.5%</td>
+<td style="text-align: right;">21.8</td>
+<td style="text-align: right;">39,745</td>
+<td style="text-align: right;">88.4%</td>
+<td style="text-align: right;">10.6</td>
+</tr>
+<tr>
+<td>2026</td>
+<td style="text-align: right;">41,424</td>
+<td style="text-align: right;">32,838</td>
+<td style="text-align: right;">79.3%</td>
+<td style="text-align: right;">27.7</td>
+<td style="text-align: right;">36,827</td>
+<td style="text-align: right;">88.9%</td>
+<td style="text-align: right;">14.3</td>
+</tr>
+</tbody>
+</table>
+<p>What this shows:</p>
+<ul>
+<li><strong>The error roughly halves, the revenue gap closes by a third to a half.</strong> From 2023
+  the forecast's mean absolute error is 48–59% of last week's, and the battery keeps 86–89%
+  of the perfect-foresight revenue instead of 74–81%. A battery is paid for the day's
+  shape, not its level, so a smaller error buys less revenue than it seems to.</li>
+<li><strong>2021 is the exception.</strong> Gas prices rose through 2021 faster than a model trained on
+  the calmer years before each month could follow; last week's prices carried the new
+  level with them and kept 83.2% against 79.4%. By 2022 the forecast was ahead again.</li>
+<li><strong>A plain model forecasts too flat a day.</strong> Each month the forecast's shape around its
+  mean is stretched by 1, 1.25, 1.5, 1.75 or 2, whichever would have earned a reference
+  battery most over the previous 90 days (past data only). It chose 1 in 64 of the 94
+  months, 1.25 in 24 and 1.5 in 6.</li>
+<li><strong>Planning one day ahead still pays.</strong> With <code>dispatch.lookahead_days: 1</code> on
+  <code>examples/gb-2022-naive.yaml</code>'s battery, the forecast earns 5.0% (2021) to 13.4% (2019)
+  more.</li>
+</ul>
+<p>The bundled forecast (<code>data/forecasts/</code>) is exactly what a backtest with
+<code>forecast: fundamentals</code> computes, so <code>forecast: {method: fundamentals, path: ...}</code> gives
+the same results without training (a test checks a week of it against a live run). What
+the forecast may know is tested too: a later wind forecast or a price after the decision
+time changes nothing.</p>
+<h2 id="can-reinforcement-learning-do-better">Can reinforcement learning do better?<a class="headerlink" href="#can-reinforcement-learning-do-better" title="Permanent link">&para;</a></h2>
+<p>A reinforcement-learning agent can learn to trade directly, without a forecast and an
+optimiser. In the v6.0 design work an agent (PPO, Stable-Baselines3, 0.4 and 3 million
+steps) saw exactly what the optimiser sees at noon the day before: an earlier version of
+OpenEnergy's forecast for the day, the hour and the energy stored. Trained on 2021–2023
+and tested on 2024–2026, it kept 27–38% of the perfect-foresight revenue; the optimiser
+planning on the same forecast kept 78–83%. More training did not close the gap. The
+optimiser solves the day exactly; the agent has to rediscover that, from noisy rewards.</p>
+<p>So OpenEnergy keeps "forecast, then optimise", and ships the test as an environment for
+anyone who wants to try (<code>pip install 'openenergy[rl]'</code>, Gymnasium):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openenergy.rl</span><span class="w"> </span><span class="kn">import</span> <span class="n">BatteryTradingEnv</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">optimiser_baseline</span><span class="p">,</span> <span class="n">policy_revenue</span>
+
+<span class="n">days</span> <span class="o">=</span> <span class="n">episodes</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span> <span class="n">NaiveLastWeek</span><span class="p">(),</span> <span class="n">dates</span><span class="p">)</span>  <span class="c1"># forecasts as the backtest makes them</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">BatteryTradingEnv</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">BatterySpec</span><span class="p">(</span><span class="n">power_mw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">energy_mwh</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">wear</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="n">baseline</span> <span class="o">=</span> <span class="n">optimiser_baseline</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">battery</span><span class="p">)</span>  <span class="c1"># GBP per day, the bar to beat</span>
+<span class="n">mine</span> <span class="o">=</span> <span class="n">policy_revenue</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">observation</span><span class="p">:</span> <span class="n">agent</span><span class="p">(</span><span class="n">observation</span><span class="p">))</span>
+</code></pre></div>
+<p>Each episode is a day: the action is the share of power to sell (positive) or buy, the
+reward is the hour's revenue at the actual price less wear, and ending the day away from
+the starting energy is settled at the day's mean price plus £20/MWh. A policy that replays
+the optimiser's plan earns exactly the baseline (tested).</p>
 <h2 id="do-solar-and-wind-earn-the-average-price">Do solar and wind earn the average price?<a class="headerlink" href="#do-solar-and-wind-earn-the-average-price" title="Permanent link">&para;</a></h2>
 <p><code>openenergy capture</code> compares what each technology earned per MWh with the plain average
 price, per year:</p>
@@ -1126,38 +1438,39 @@ and compares each with the same assets on separate connections (15 MW in total),
 <tbody>
 <tr>
 <td style="text-align: right;">5.0</td>
-<td style="text-align: right;">590,250</td>
-<td style="text-align: right;">618,231</td>
-<td style="text-align: right;">−27,981</td>
+<td style="text-align: right;">590,314</td>
+<td style="text-align: right;">618,256</td>
+<td style="text-align: right;">−27,942</td>
 </tr>
 <tr>
 <td style="text-align: right;">7.0</td>
-<td style="text-align: right;">615,736</td>
-<td style="text-align: right;">618,231</td>
-<td style="text-align: right;">−2,494</td>
+<td style="text-align: right;">615,787</td>
+<td style="text-align: right;">618,256</td>
+<td style="text-align: right;">−2,469</td>
 </tr>
 <tr>
 <td style="text-align: right;">10.0</td>
-<td style="text-align: right;">618,208</td>
-<td style="text-align: right;">618,231</td>
-<td style="text-align: right;">−23</td>
+<td style="text-align: right;">618,093</td>
+<td style="text-align: right;">618,256</td>
+<td style="text-align: right;">−163</td>
 </tr>
 <tr>
 <td style="text-align: right;">12.5</td>
-<td style="text-align: right;">618,236</td>
-<td style="text-align: right;">618,231</td>
-<td style="text-align: right;">5</td>
+<td style="text-align: right;">618,243</td>
+<td style="text-align: right;">618,256</td>
+<td style="text-align: right;">−13</td>
 </tr>
 <tr>
 <td style="text-align: right;">15.0</td>
-<td style="text-align: right;">618,249</td>
-<td style="text-align: right;">618,231</td>
-<td style="text-align: right;">18</td>
+<td style="text-align: right;">618,244</td>
+<td style="text-align: right;">618,256</td>
+<td style="text-align: right;">−12</td>
 </tr>
 </tbody>
 </table>
-<p>A battery added behind the solar farm's own 10 MW connection gives up only £23 a year:
-solar output and battery discharge rarely need the connection at the same time. Shrinking
+<p>A battery added behind the solar farm's own 10 MW connection gives up only £163 a year:
+solar output and battery discharge rarely need the connection at the same time. From
+12.5 MW the gap (£12–13, two parts in 100,000) is within the solver's tolerance. Shrinking
 the shared connection below the plant's capacity starts to cost real money, so the saving
 on connection capacity has to exceed these figures. Plans use actual solar output, so
 these are upper bounds.</p>
@@ -1181,22 +1494,22 @@ battery:</p>
 <tr>
 <td>2019</td>
 <td>One forecast (last week)</td>
-<td style="text-align: right;">4,635</td>
+<td style="text-align: right;">4,640</td>
 <td style="text-align: right;"></td>
-<td style="text-align: right;">83</td>
+<td style="text-align: right;">82</td>
 </tr>
 <tr>
 <td>2019</td>
 <td>Scenario mean (risk-neutral)</td>
 <td style="text-align: right;">4,315</td>
-<td style="text-align: right;">−6.9%</td>
+<td style="text-align: right;">−7.0%</td>
 <td style="text-align: right;">90</td>
 </tr>
 <tr>
 <td>2019</td>
 <td>Half CVaR (worst 10%)</td>
 <td style="text-align: right;">3,412</td>
-<td style="text-align: right;">−26.4%</td>
+<td style="text-align: right;">−26.5%</td>
 <td style="text-align: right;">78</td>
 </tr>
 <tr>
@@ -1209,14 +1522,14 @@ battery:</p>
 <tr>
 <td>2019</td>
 <td>One forecast, one day lookahead</td>
-<td style="text-align: right;">6,400</td>
-<td style="text-align: right;">+38.1%</td>
+<td style="text-align: right;">6,391</td>
+<td style="text-align: right;">+37.7%</td>
 <td style="text-align: right;">83</td>
 </tr>
 <tr>
 <td>2022</td>
 <td>One forecast</td>
-<td style="text-align: right;">64,602</td>
+<td style="text-align: right;">64,610</td>
 <td style="text-align: right;"></td>
 <td style="text-align: right;">9</td>
 </tr>
@@ -1251,7 +1564,7 @@ battery:</p>
 <tr>
 <td>2024</td>
 <td>One forecast</td>
-<td style="text-align: right;">17,633</td>
+<td style="text-align: right;">17,642</td>
 <td style="text-align: right;"></td>
 <td style="text-align: right;">34</td>
 </tr>
@@ -1259,14 +1572,14 @@ battery:</p>
 <td>2024</td>
 <td>Scenario mean</td>
 <td style="text-align: right;">16,927</td>
-<td style="text-align: right;">−4.0%</td>
+<td style="text-align: right;">−4.1%</td>
 <td style="text-align: right;">45</td>
 </tr>
 <tr>
 <td>2024</td>
 <td>Half CVaR</td>
 <td style="text-align: right;">12,163</td>
-<td style="text-align: right;">−31.0%</td>
+<td style="text-align: right;">−31.1%</td>
 <td style="text-align: right;">43</td>
 </tr>
 <tr>
@@ -1322,19 +1635,19 @@ wear cost, perfect foresight with the same lookahead:</p>
 <tbody>
 <tr>
 <td>2017</td>
-<td style="text-align: right;">20,682</td>
-<td style="text-align: right;">22,356</td>
-<td style="text-align: right;">+8.1%</td>
-<td style="text-align: right;">78.8%</td>
-<td style="text-align: right;">80.6%</td>
+<td style="text-align: right;">20,633</td>
+<td style="text-align: right;">22,326</td>
+<td style="text-align: right;">+8.2%</td>
+<td style="text-align: right;">78.6%</td>
+<td style="text-align: right;">80.5%</td>
 <td style="text-align: right;">526</td>
 <td style="text-align: right;">524</td>
 </tr>
 <tr>
 <td>2018</td>
-<td style="text-align: right;">18,889</td>
-<td style="text-align: right;">20,567</td>
-<td style="text-align: right;">+8.9%</td>
+<td style="text-align: right;">18,887</td>
+<td style="text-align: right;">20,557</td>
+<td style="text-align: right;">+8.8%</td>
 <td style="text-align: right;">74.4%</td>
 <td style="text-align: right;">76.5%</td>
 <td style="text-align: right;">529</td>
@@ -1342,19 +1655,19 @@ wear cost, perfect foresight with the same lookahead:</p>
 </tr>
 <tr>
 <td>2019</td>
-<td style="text-align: right;">13,936</td>
-<td style="text-align: right;">15,827</td>
-<td style="text-align: right;">+13.6%</td>
-<td style="text-align: right;">71.3%</td>
+<td style="text-align: right;">13,943</td>
+<td style="text-align: right;">15,818</td>
+<td style="text-align: right;">+13.4%</td>
+<td style="text-align: right;">71.4%</td>
 <td style="text-align: right;">74.7%</td>
 <td style="text-align: right;">468</td>
 <td style="text-align: right;">474</td>
 </tr>
 <tr>
 <td>2020</td>
-<td style="text-align: right;">17,155</td>
-<td style="text-align: right;">19,661</td>
-<td style="text-align: right;">+14.6%</td>
+<td style="text-align: right;">17,144</td>
+<td style="text-align: right;">19,669</td>
+<td style="text-align: right;">+14.7%</td>
 <td style="text-align: right;">76.7%</td>
 <td style="text-align: right;">80.5%</td>
 <td style="text-align: right;">419</td>
@@ -1362,8 +1675,8 @@ wear cost, perfect foresight with the same lookahead:</p>
 </tr>
 <tr>
 <td>2021</td>
-<td style="text-align: right;">74,172</td>
-<td style="text-align: right;">78,277</td>
+<td style="text-align: right;">74,169</td>
+<td style="text-align: right;">78,259</td>
 <td style="text-align: right;">+5.5%</td>
 <td style="text-align: right;">83.1%</td>
 <td style="text-align: right;">84.8%</td>
@@ -1372,7 +1685,7 @@ wear cost, perfect foresight with the same lookahead:</p>
 </tr>
 <tr>
 <td>2022</td>
-<td style="text-align: right;">76,940</td>
+<td style="text-align: right;">76,948</td>
 <td style="text-align: right;">82,938</td>
 <td style="text-align: right;">+7.8%</td>
 <td style="text-align: right;">75.0%</td>
@@ -1382,8 +1695,8 @@ wear cost, perfect foresight with the same lookahead:</p>
 </tr>
 <tr>
 <td>2023</td>
-<td style="text-align: right;">35,964</td>
-<td style="text-align: right;">40,091</td>
+<td style="text-align: right;">35,957</td>
+<td style="text-align: right;">40,093</td>
 <td style="text-align: right;">+11.5%</td>
 <td style="text-align: right;">78.2%</td>
 <td style="text-align: right;">81.5%</td>
@@ -1392,18 +1705,18 @@ wear cost, perfect foresight with the same lookahead:</p>
 </tr>
 <tr>
 <td>2024</td>
-<td style="text-align: right;">28,677</td>
-<td style="text-align: right;">31,864</td>
-<td style="text-align: right;">+11.1%</td>
+<td style="text-align: right;">28,690</td>
+<td style="text-align: right;">31,860</td>
+<td style="text-align: right;">+11.0%</td>
 <td style="text-align: right;">73.8%</td>
-<td style="text-align: right;">76.9%</td>
+<td style="text-align: right;">76.8%</td>
 <td style="text-align: right;">569</td>
 <td style="text-align: right;">551</td>
 </tr>
 <tr>
 <td>2025</td>
 <td style="text-align: right;">35,861</td>
-<td style="text-align: right;">38,936</td>
+<td style="text-align: right;">38,937</td>
 <td style="text-align: right;">+8.6%</td>
 <td style="text-align: right;">80.5%</td>
 <td style="text-align: right;">82.7%</td>
@@ -1412,14 +1725,14 @@ wear cost, perfect foresight with the same lookahead:</p>
 </tr>
 </tbody>
 </table>
-<p>One day of lookahead adds 5.5–14.6% revenue every year, and from 2021 does so with fewer
+<p>One day of lookahead adds 5.5–14.7% revenue every year, and from 2021 does so with fewer
 cycles. Two or three days change revenue by under £20 a year: last week's prices say little
 about the day after tomorrow.</p>
 <p>Uncertainty could matter when a later decision can react to prices, such as balancing or
 frequency response. <a href="../revenue-stacking/">Revenue stacking</a> checks both: response
 availability is also committed before its price is known, so the same argument applies;
-balancing does give the battery a later decision, but it pays only with an imbalance-price
-forecast that open data does not provide. The lookahead is a scenario setting,
+balancing does give the battery a later decision, but without an imbalance-price forecast,
+which open data does not provide, it gains in some years and loses in others. The lookahead is a scenario setting,
 <code>dispatch.lookahead_days</code>.</p>
 <h2 id="building-blocks">Building blocks<a class="headerlink" href="#building-blocks" title="Permanent link">&para;</a></h2>
 <table>

@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts/" class="md-nav__link">
         
   
@@ -449,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -470,8 +562,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -832,6 +924,34 @@
     
   
     Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
   
 
     
@@ -1268,8 +1388,16 @@ Co-located <code>assets</code> need OPSD's capacity-factor profiles, so they req
 <td><code>gradient_boosting</code></td>
 <td><code>train_start</code>, <code>train_end</code> (required, before <code>data.start</code>), <code>seed</code></td>
 </tr>
+<tr>
+<td><code>fundamentals</code></td>
+<td><code>path</code> (the bundled precomputed forecast, <code>data/forecasts/gb_fundamentals_day_ahead.csv</code>; no training), or train live: <code>fundamentals</code> (folder, default the <code>fundamentals</code> folder beside the price file's folder), <code>stretch</code> (<code>auto</code>, or a fixed factor), <code>seed</code>. GB from 2019 (its inputs start in January 2018). See <a href="../../concepts/#forecasters">Concepts</a></td>
+</tr>
 </tbody>
 </table>
+<div class="highlight"><pre><span></span><code><span class="nt">forecast</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fundamentals</span>
+<span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/forecasts/gb_fundamentals_day_ahead.csv</span>
+</code></pre></div>
 <h2 id="dispatch"><code>dispatch</code><a class="headerlink" href="#dispatch" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1321,6 +1449,11 @@ Co-located <code>assets</code> need OPSD's capacity-factor profiles, so they req
 <td><code>lead_hours</code></td>
 <td><code>12</code></td>
 <td>Hours before each UTC day that the plan is fixed</td>
+</tr>
+<tr>
+<td><code>information</code></td>
+<td><code>auction</code></td>
+<td>What the forecaster knows at the decision time: <code>auction</code>, every day whose day-ahead auction had cleared (at noon on D−1, all of D−1); <code>decision</code>, only hours before the decision time (the rule before v6.0)</td>
 </tr>
 </tbody>
 </table>

@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts/" class="md-nav__link">
         
   
@@ -449,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -470,8 +562,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -707,6 +799,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Backcast: how close is it?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#daily-or-quarterly-gas-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Daily or quarterly gas price
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -849,6 +958,34 @@
     
   
     Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
   
 
     
@@ -1025,6 +1162,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Backcast: how close is it?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#daily-or-quarterly-gas-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Daily or quarterly gas price
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1190,9 +1344,10 @@ uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> 
   spread around the fleet average:</li>
 </ul>
 <div class="arithmatex">\[c_{k,t} = \frac{p_{f,q(t)} + s_{f,t} + \lambda_t\, e_f}{\eta_k} + v\]</div>
-<p>with fuel price <span class="arithmatex">\(p\)</span> (quarterly, DESNZ), carbon price support <span class="arithmatex">\(s\)</span> (HMRC), ETS price
-<span class="arithmatex">\(\lambda\)</span> (EU ETS to 2020, UK ETS from 2021; one price per year from 1 April), emission
-factor <span class="arithmatex">\(e_f\)</span> and efficiency
+<p>with fuel price <span class="arithmatex">\(p\)</span> (gas: the daily System Average Price from 2018, DESNZ's quarterly price
+paid by power producers before; coal and oil: quarterly, DESNZ), carbon price support <span class="arithmatex">\(s\)</span>
+(HMRC), ETS price <span class="arithmatex">\(\lambda\)</span> (EU ETS to 2020, UK ETS from 2021; one price per year from
+1 April), emission factor <span class="arithmatex">\(e_f\)</span> and efficiency
 <span class="arithmatex">\(\eta_k\)</span>. The price is the cost of the last unit needed, or the value of lost load
 (default £6,000/MWh) if capacity runs out.</p>
 <p>Without storage every hour is independent, so the merit order is the exact least-cost
@@ -1280,53 +1435,138 @@ OPSD day-ahead price and NESO's actual gas and coal output.</p>
 </tr>
 <tr>
 <td>2018</td>
-<td style="text-align: right;">50.0</td>
+<td style="text-align: right;">52.8</td>
 <td style="text-align: right;">57.4</td>
-<td style="text-align: right;">9.6</td>
-<td style="text-align: right;">0.49</td>
-<td style="text-align: right;">58 / 80</td>
-<td style="text-align: right;">123 / 115</td>
-<td style="text-align: right;">7.3 / 15.4</td>
+<td style="text-align: right;">9.1</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">61 / 80</td>
+<td style="text-align: right;">115 / 115</td>
+<td style="text-align: right;">15.8 / 15.4</td>
 </tr>
 <tr>
 <td>2019</td>
-<td style="text-align: right;">42.3</td>
+<td style="text-align: right;">38.1</td>
 <td style="text-align: right;">42.9</td>
 <td style="text-align: right;">7.3</td>
-<td style="text-align: right;">0.63</td>
-<td style="text-align: right;">50 / 64</td>
-<td style="text-align: right;">120 / 115</td>
-<td style="text-align: right;">0.8 / 5.9</td>
+<td style="text-align: right;">0.69</td>
+<td style="text-align: right;">54 / 64</td>
+<td style="text-align: right;">119 / 115</td>
+<td style="text-align: right;">1.7 / 5.9</td>
 </tr>
 <tr>
 <td>2020 (Jan–Sep)</td>
-<td style="text-align: right;">35.2</td>
+<td style="text-align: right;">26.7</td>
 <td style="text-align: right;">31.2</td>
-<td style="text-align: right;">9.0</td>
-<td style="text-align: right;">0.32</td>
-<td style="text-align: right;">44 / 50</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">35 / 50</td>
 <td style="text-align: right;">72 / 68</td>
-<td style="text-align: right;">0.1 / 3.3</td>
+<td style="text-align: right;">0.0 / 3.3</td>
 </tr>
 </tbody>
 </table>
 <p>What the table shows:</p>
 <ul>
-<li><strong>Average prices are close.</strong> The yearly mean is within £0.6–7.4/MWh, usually a little
-  low. Fuel and carbon costs explain most of the price level.</li>
-<li><strong>Peaks are missed every year.</strong> The 95th percentile is £6–22 below actual. A cost-only
-  model has no scarcity pricing, start-up costs or bidding above cost, so its prices are
-  much flatter than the market's (2019 standard deviation £4.5/MWh).</li>
-<li><strong>Coal left the model faster than it left the grid.</strong> From 2016 the model runs less than
-  half the coal that actually ran (2019: 0.8 against 5.9 TWh). Once carbon price support
-  made coal dearer than most gas, a pure cost ranking switches it off; real coal plants
-  kept running for reasons outside a cost-only model. In 2015 the model runs more coal
-  than happened.</li>
-<li><strong>2020 is the only year the model is above actual</strong>, by £4/MWh.</li>
+<li><strong>Average prices are a little low every year.</strong> The yearly mean is £1.6–4.8/MWh below
+  actual, and £4.5–4.8 below in each year from 2016. Fuel and carbon costs explain most
+  of the price level. From 2018 the gas price is the daily wholesale price, which leaves
+  out the network charges power stations pay; DESNZ's quarterly price paid includes them
+  and contracts struck earlier, and put 2019 within £0.6 (below).</li>
+<li><strong>Peaks are missed every year.</strong> The 95th percentile is £10–20 below actual. A
+  cost-only model has no scarcity pricing, start-up costs or bidding above cost, so its
+  prices are much flatter than the market's (2019 standard deviation £6.9/MWh).</li>
+<li><strong>Coal left the model faster than it left the grid</strong>, except in 2018. In 2016, 2017,
+  2019 and 2020 the model runs about a third or less of the coal that actually ran (2019:
+  1.7 against 5.9 TWh). Once carbon price support made coal dearer than most gas, a pure cost
+  ranking switches it off; real coal plants kept running for reasons outside a cost-only
+  model. In 2015 the model runs more coal than happened.</li>
 </ul>
 <p>These are the model's limits, reported rather than tuned away. Use it for direction and
 relative change between scenarios, not to forecast prices. <a href="#unit-commitment">Unit commitment</a>
 addresses the flat prices; the coal gap remains.</p>
+<h3 id="daily-or-quarterly-gas-price">Daily or quarterly gas price<a class="headerlink" href="#daily-or-quarterly-gas-price" title="Permanent link">&para;</a></h3>
+<p>Until v6.0 the model priced gas with DESNZ's quarterly average of what power producers
+paid. Since v6.0 it uses the daily System Average Price of gas (ONS, from National Gas
+Transmission) from 2018, when the series begins; <code>system.gas_price: quarterly</code> (or
+<code>system validate --gas-price quarterly</code>) restores the old input. Merit order, GB price
+in £/MWh, daily / quarterly:</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Mean (actual)</th>
+<th style="text-align: right;">MAE</th>
+<th style="text-align: right;">Correlation</th>
+<th style="text-align: right;">p95 (actual)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2018</td>
+<td style="text-align: right;">52.8 / 50.0 (57.4)</td>
+<td style="text-align: right;">9.1 / 9.6</td>
+<td style="text-align: right;">0.37 / 0.49</td>
+<td style="text-align: right;">61 / 58 (80)</td>
+</tr>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">38.1 / 42.3 (42.9)</td>
+<td style="text-align: right;">7.3 / 7.3</td>
+<td style="text-align: right;">0.69 / 0.63</td>
+<td style="text-align: right;">54 / 50 (64)</td>
+</tr>
+<tr>
+<td>2020 (Jan–Sep)</td>
+<td style="text-align: right;">26.7 / 35.2 (31.2)</td>
+<td style="text-align: right;">8.4 / 9.0</td>
+<td style="text-align: right;">0.54 / 0.32</td>
+<td style="text-align: right;">35 / 44 (50)</td>
+</tr>
+<tr>
+<td>2021</td>
+<td style="text-align: right;">98.2 / 83.5 (117.8)</td>
+<td style="text-align: right;">26.6 / 38.5</td>
+<td style="text-align: right;">0.65 / 0.58</td>
+<td style="text-align: right;">192 / 143 (258)</td>
+</tr>
+<tr>
+<td>2022</td>
+<td style="text-align: right;">172.8 / 157.7 (204.8)</td>
+<td style="text-align: right;">46.4 / 78.1</td>
+<td style="text-align: right;">0.81 / 0.40</td>
+<td style="text-align: right;">298 / 200 (415)</td>
+</tr>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">101.8 / 121.1 (94.1)</td>
+<td style="text-align: right;">19.1 / 32.9</td>
+<td style="text-align: right;">0.67 / 0.52</td>
+<td style="text-align: right;">141 / 140 (156)</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">79.7 / 89.2 (72.5)</td>
+<td style="text-align: right;">17.3 / 27.7</td>
+<td style="text-align: right;">0.53 / 0.10</td>
+<td style="text-align: right;">102 / 126 (110)</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">83.8 / 87.5 (80.7)</td>
+<td style="text-align: right;">17.3 / 18.7</td>
+<td style="text-align: right;">0.55 / 0.57</td>
+<td style="text-align: right;">115 / 106 (123)</td>
+</tr>
+</tbody>
+</table>
+<p>The daily price fixes the timing: through the gas crisis and its aftermath the error
+falls by 31–42% (2021–2024) and the correlation with actual prices rises, most in 2022
+(0.40 to 0.81) and 2024 (0.10 to 0.53). It does not fix the size of the swings: the
+model's daily spread stays a small fraction of the market's (below). Before the crisis it
+is mixed: the modelled mean is £4.2 lower than with the quarterly price in 2019 and £8.5
+lower in 2020 (£2.8 higher in 2018), so the quarterly price is closer on the 2019 mean
+and has the better 2018 correlation. Both inputs are published statistics; neither is
+adjusted to fit prices.</p>
 <h2 id="unit-commitment">Unit commitment<a class="headerlink" href="#unit-commitment" title="Permanent link">&para;</a></h2>
 <p>Real plants cannot follow demand freely: starting a unit costs money and wear, and a
 running unit cannot go below a minimum stable output. So plants stay on overnight and sell
@@ -1384,8 +1624,9 @@ none is fitted to prices.</p>
   highest such cost-plus-start of any unit running.</li>
 </ul>
 <h3 id="backcast-with-unit-commitment">Backcast with unit commitment<a class="headerlink" href="#backcast-with-unit-commitment" title="Permanent link">&para;</a></h3>
-<p>April 2015 to September 2020, same data as above. Daily spread is the mean of each day's
-highest minus lowest hourly price.</p>
+<p>April 2015 to September 2020, same data as above (<code>system validate --commitment</code>, with
+<code>--price start</code> for the start price). Daily spread is the mean of each day's highest minus
+lowest hourly price, £/MWh.</p>
 <table>
 <thead>
 <tr>
@@ -1397,33 +1638,33 @@ highest minus lowest hourly price.</p>
 <tbody>
 <tr>
 <td>2015 (Apr–Dec)</td>
-<td style="text-align: right;">2.0 / 10.8 / 14.8 / 38.5</td>
+<td style="text-align: right;">2 / 11 / 15 / 38</td>
 <td style="text-align: right;">41 / 46 / 57</td>
 </tr>
 <tr>
 <td>2016</td>
-<td style="text-align: right;">3.7 / 13.6 / 17.4 / 68.9</td>
+<td style="text-align: right;">4 / 14 / 17 / 69</td>
 <td style="text-align: right;">46 / 53 / 65</td>
 </tr>
 <tr>
 <td>2017</td>
-<td style="text-align: right;">4.4 / 22.9 / 22.3 / 41.6</td>
+<td style="text-align: right;">4 / 23 / 22 / 42</td>
 <td style="text-align: right;">48 / 60 / 68</td>
 </tr>
 <tr>
 <td>2018</td>
-<td style="text-align: right;">4.1 / 27.3 / 23.9 / 40.6</td>
-<td style="text-align: right;">58 / 65 / 80</td>
+<td style="text-align: right;">4 / 25 / 23 / 41</td>
+<td style="text-align: right;">61 / 69 / 80</td>
 </tr>
 <tr>
 <td>2019</td>
-<td style="text-align: right;">4.2 / 24.8 / 24.3 / 31.8</td>
-<td style="text-align: right;">50 / 63 / 64</td>
+<td style="text-align: right;">4 / 22 / 21 / 32</td>
+<td style="text-align: right;">54 / 60 / 64</td>
 </tr>
 <tr>
 <td>2020 (Jan–Sep)</td>
-<td style="text-align: right;">2.9 / 19.7 / 21.2 / 30.2</td>
-<td style="text-align: right;">44 / 55 / 50</td>
+<td style="text-align: right;">2 / 16 / 17 / 30</td>
+<td style="text-align: right;">35 / 44 / 50</td>
 </tr>
 </tbody>
 </table>
@@ -1452,30 +1693,31 @@ highest minus lowest hourly price.</p>
 <tr>
 <td>2017</td>
 <td style="text-align: right;">40.8 / 40.1 / 44.8 / 45.3</td>
-<td style="text-align: right;">7.9 / 7.9 / 7.6</td>
+<td style="text-align: right;">7.9 / 7.8 / 7.6</td>
 <td style="text-align: right;">0.60 / 0.59 / 0.57</td>
 </tr>
 <tr>
 <td>2018</td>
-<td style="text-align: right;">50.0 / 49.2 / 54.2 / 57.4</td>
-<td style="text-align: right;">9.6 / 9.8 / 8.8</td>
-<td style="text-align: right;">0.49 / 0.49 / 0.47</td>
+<td style="text-align: right;">52.8 / 52.1 / 56.8 / 57.4</td>
+<td style="text-align: right;">9.1 / 9.0 / 8.9</td>
+<td style="text-align: right;">0.37 / 0.46 / 0.43</td>
 </tr>
 <tr>
 <td>2019</td>
-<td style="text-align: right;">42.3 / 41.6 / 46.0 / 42.9</td>
-<td style="text-align: right;">7.3 / 7.1 / 8.0</td>
-<td style="text-align: right;">0.63 / 0.59 / 0.57</td>
+<td style="text-align: right;">38.1 / 37.4 / 41.5 / 42.9</td>
+<td style="text-align: right;">7.3 / 7.3 / 6.8</td>
+<td style="text-align: right;">0.69 / 0.70 / 0.68</td>
 </tr>
 <tr>
 <td>2020 (Jan–Sep)</td>
-<td style="text-align: right;">35.2 / 34.6 / 38.1 / 31.2</td>
-<td style="text-align: right;">9.0 / 8.8 / 10.6</td>
-<td style="text-align: right;">0.32 / 0.39 / 0.40</td>
+<td style="text-align: right;">26.7 / 26.2 / 29.3 / 31.2</td>
+<td style="text-align: right;">8.4 / 8.3 / 7.7</td>
+<td style="text-align: right;">0.54 / 0.58 / 0.57</td>
 </tr>
 </tbody>
 </table>
-<p>Average 2019 price by hour (UTC), £/MWh:</p>
+<p>Average 2019 price by hour (UTC), £/MWh (<code>system validate --start 2019-01-01 --end
+2019-12-31 --out DIR</code>, <code>hourly.csv</code>):</p>
 <table>
 <thead>
 <tr>
@@ -1489,52 +1731,51 @@ highest minus lowest hourly price.</p>
 <tbody>
 <tr>
 <td>03:00</td>
-<td style="text-align: right;">40.4</td>
 <td style="text-align: right;">36.4</td>
-<td style="text-align: right;">43.5</td>
+<td style="text-align: right;">32.4</td>
+<td style="text-align: right;">39.4</td>
 <td style="text-align: right;">32.3</td>
 </tr>
 <tr>
 <td>08:00</td>
-<td style="text-align: right;">43.0</td>
-<td style="text-align: right;">43.3</td>
-<td style="text-align: right;">46.2</td>
+<td style="text-align: right;">38.6</td>
+<td style="text-align: right;">39.0</td>
+<td style="text-align: right;">41.8</td>
 <td style="text-align: right;">48.1</td>
 </tr>
 <tr>
 <td>17:00</td>
-<td style="text-align: right;">43.9</td>
-<td style="text-align: right;">47.8</td>
-<td style="text-align: right;">54.6</td>
+<td style="text-align: right;">39.4</td>
+<td style="text-align: right;">42.9</td>
+<td style="text-align: right;">49.4</td>
 <td style="text-align: right;">57.5</td>
 </tr>
 <tr>
 <td>18:00</td>
-<td style="text-align: right;">43.9</td>
-<td style="text-align: right;">47.6</td>
-<td style="text-align: right;">54.6</td>
+<td style="text-align: right;">39.5</td>
+<td style="text-align: right;">42.6</td>
+<td style="text-align: right;">48.5</td>
 <td style="text-align: right;">57.2</td>
 </tr>
 </tbody>
 </table>
 <p>What the tables show:</p>
 <ul>
-<li><strong>Prices now move within the day.</strong> The daily spread rises from £2–4 to £11–27, and
-  the 2019 standard deviation from £4.5 to £8.7 (actual £11.7). Real spreads are still
-  larger every year, most of all in 2016 (£69), whose spikes the model does not produce.</li>
-<li><strong>The two prices bracket the day.</strong> The marginal price falls overnight close to the
-  actual trough (2019 at 03:00: £36 against £32); the start price reaches the evening
-  peak (£55 against £57) but stays high at night. Neither alone has both ends.</li>
-<li><strong>Peaks get closer.</strong> The start price's 95th percentile is within £1 of actual in
-  2019 and £8–15 below in 2015–2018, against £6–22 below for the merit order. In 2020 it
-  is £5 above.</li>
-<li><strong>Fit is about the same.</strong> The start price's mean is £3–4/MWh above the merit order's:
-  to actual in 2015–2018, further in 2019 and 2020. MAE moves by under £2 either way;
+<li><strong>Prices now move within the day.</strong> The daily spread rises from £2–4 to £11–25, and
+  the 2019 standard deviation from £6.9 to £9.2 with the marginal price and £9.7 with the
+  start price (actual £11.7). Real spreads are still larger every year, most of all in
+  2016 (£69), whose spikes the model does not produce.</li>
+<li><strong>The two prices bracket the day.</strong> The marginal price matches the overnight trough
+  (2019 at 03:00: £32.4 against £32.3); the start price comes closest at the evening peak
+  (17:00: £49 against £58) but stays high at night (£39). Neither alone has both ends.</li>
+<li><strong>Peaks get closer.</strong> The start price's 95th percentile is £4–12 below actual, against
+  £10–20 below for the merit order.</li>
+<li><strong>The start price fits the level better.</strong> It is £2.6–4.0/MWh above the merit order,
+  which brings its mean within £2 of actual every year. MAE moves by under £1 either way;
   correlation is similar, except 2015, where the start price's falls to 0.39.</li>
-<li><strong>Coal still leaves too early</strong> (2019: 0.8 TWh against 5.9 actual); start costs do not
+<li><strong>Coal still leaves too early</strong> (2019: 1.8 TWh against 5.9 actual); start costs do not
   change the order of coal and gas.</li>
-<li><strong>Cost:</strong> about a minute per year instead of under a second; about 10 unit starts a day
-  in 2019.</li>
+<li><strong>Cost:</strong> about a minute per year instead of under a second.</li>
 </ul>
 <p>So unit commitment fixes much of the missing daily shape without fitting anything, but
 the model still has no scarcity pricing or bidding above cost. Commitment stays off by
@@ -1562,84 +1803,79 @@ September 2020, so the tables above do not change; later years are one flag away
 <tbody>
 <tr>
 <td>2021</td>
-<td style="text-align: right;">83.5 / 88.0</td>
+<td style="text-align: right;">98.2 / 103.0</td>
 <td style="text-align: right;">117.8</td>
-<td style="text-align: right;">38.5 / 35.8</td>
-<td style="text-align: right;">0.58 / 0.59</td>
-<td style="text-align: right;">143 / 152 / 258</td>
-<td style="text-align: right;">7 / 34 / 146</td>
-<td style="text-align: right;">102 / 107</td>
-<td style="text-align: right;">10.2 / 5.0</td>
+<td style="text-align: right;">26.6 / 25.2</td>
+<td style="text-align: right;">0.65 / 0.66</td>
+<td style="text-align: right;">192 / 201 / 258</td>
+<td style="text-align: right;">13 / 41 / 146</td>
+<td style="text-align: right;">97 / 107</td>
+<td style="text-align: right;">15.2 / 5.0</td>
 </tr>
 <tr>
 <td>2022</td>
-<td style="text-align: right;">157.7 / 163.5</td>
+<td style="text-align: right;">172.8 / 178.2</td>
 <td style="text-align: right;">204.8</td>
-<td style="text-align: right;">78.1 / 76.2</td>
-<td style="text-align: right;">0.40 / 0.40</td>
-<td style="text-align: right;">200 / 203 / 415</td>
-<td style="text-align: right;">9 / 39 / 156</td>
-<td style="text-align: right;">106 / 111</td>
-<td style="text-align: right;">9.4 / 4.3</td>
+<td style="text-align: right;">46.4 / 44.2</td>
+<td style="text-align: right;">0.81 / 0.81</td>
+<td style="text-align: right;">298 / 307 / 415</td>
+<td style="text-align: right;">17 / 51 / 156</td>
+<td style="text-align: right;">96 / 111</td>
+<td style="text-align: right;">19.8 / 4.3</td>
 </tr>
 <tr>
 <td>2023</td>
-<td style="text-align: right;">121.1 / 125.9</td>
+<td style="text-align: right;">101.8 / 106.2</td>
 <td style="text-align: right;">94.1</td>
-<td style="text-align: right;">32.9 / 36.1</td>
-<td style="text-align: right;">0.52 / 0.52</td>
-<td style="text-align: right;">140 / 149 / 156</td>
-<td style="text-align: right;">7 / 33 / 70</td>
-<td style="text-align: right;">86 / 87</td>
-<td style="text-align: right;">3.5 / 2.8</td>
+<td style="text-align: right;">19.1 / 20.5</td>
+<td style="text-align: right;">0.67 / 0.67</td>
+<td style="text-align: right;">141 / 150 / 156</td>
+<td style="text-align: right;">7 / 30 / 70</td>
+<td style="text-align: right;">89 / 87</td>
+<td style="text-align: right;">0.9 / 2.8</td>
 </tr>
 <tr>
 <td>2024</td>
-<td style="text-align: right;">89.2 / 93.8</td>
+<td style="text-align: right;">79.7 / 84.2</td>
 <td style="text-align: right;">72.5</td>
-<td style="text-align: right;">27.7 / 29.0</td>
-<td style="text-align: right;">0.10 / 0.18</td>
-<td style="text-align: right;">126 / 134 / 110</td>
-<td style="text-align: right;">6 / 35 / 60</td>
-<td style="text-align: right;">69 / 73</td>
-<td style="text-align: right;">5.6 / 1.6</td>
+<td style="text-align: right;">17.3 / 18.4</td>
+<td style="text-align: right;">0.53 / 0.54</td>
+<td style="text-align: right;">102 / 109 / 110</td>
+<td style="text-align: right;">5 / 32 / 60</td>
+<td style="text-align: right;">72 / 73</td>
+<td style="text-align: right;">2.2 / 1.6</td>
 </tr>
 <tr>
 <td>2025</td>
-<td style="text-align: right;">87.5 / 92.1</td>
+<td style="text-align: right;">83.8 / 88.3</td>
 <td style="text-align: right;">80.7</td>
-<td style="text-align: right;">18.7 / 19.8</td>
-<td style="text-align: right;">0.57 / 0.52</td>
-<td style="text-align: right;">106 / 115 / 123</td>
-<td style="text-align: right;">6 / 37 / 67</td>
+<td style="text-align: right;">17.3 / 17.4</td>
+<td style="text-align: right;">0.55 / 0.56</td>
+<td style="text-align: right;">115 / 123 / 123</td>
+<td style="text-align: right;">6 / 36 / 67</td>
 <td style="text-align: right;">77 / 77</td>
 <td style="text-align: right;">0.0 / 0.0</td>
 </tr>
 </tbody>
 </table>
-<p>Gas and coal TWh are from the merit order; unit commitment gives gas within 1 TWh of it.
-No hour hit the value of lost load in any year.</p>
+<p>Gas and coal TWh are from the merit order; unit commitment gives gas within 1 TWh of it.</p>
 <p>What the table shows:</p>
 <ul>
-<li><strong>Gas volume is right; the gas price timing is not.</strong> Modelled gas output is within
-  5 TWh of actual every year. Prices are not: by quarter, the merit-order model is £42–102
-  too low in four of the five quarters from July 2021 to September 2022, then £22–57 too
-  high from April 2023 to March 2024, and within £12 from April 2024. This pattern is
-  consistent with the fuel input: DESNZ's quarterly series is the price power producers
-  paid, contracts included, which can lag the market (its Q1 2024 gas price, 4.46 p/kWh,
-  is close to Q4 2023's 4.84 while the actual power price fell from £83 to £65). An open
-  daily gas price would test this; none is bundled.</li>
+<li><strong>With the daily gas price the timing is right; the coal is not.</strong> The model's prices
+  now follow the crisis (correlation 0.81 in 2022; 0.40 with quarterly gas, see
+  <a href="#daily-or-quarterly-gas-price">above</a>). At crisis gas prices the model's remaining coal
+  plant is cheaper than gas, so in 2021 and 2022 it burns 15.2 and 19.8 TWh of coal where
+  5.0 and 4.3 ran, and 10–15 TWh less gas than actual. From 2023 gas output is within
+  2 TWh of actual.</li>
 <li><strong>Spikes are missed.</strong> In 2022 the actual 95th percentile is £415; the model reaches
-  £200. Daily spreads in 2021–2022 averaged £146–156; unit commitment gets £34–39.</li>
-<li><strong>2024 is the weakest year</strong> (correlation 0.10): early 2024 combines the lagging gas
-  price with a coal price DESNZ reported at 1.5 p/kWh, so the model runs 5.6 TWh of coal
-  where 1.6 ran before the last coal plant closed in September 2024.</li>
-<li><strong>2025 is the closest of these years</strong>: mean within £7, correlation 0.57, no coal on
-  either side.</li>
+  £298, or £307 with unit commitment. Daily spreads in 2021–2022 averaged £146–156; unit
+  commitment gets £41–51.</li>
+<li><strong>From 2023 the mean is £3–12 above actual</strong> (merit order £3–8, start price £8–12),
+  with correlation 0.53–0.67 and the 95th percentile within £15 of actual.</li>
 </ul>
-<p>The cost-based model explains the level of prices when fuel prices are stable and the
-direction of the 2021–2022 rise, but not its size or timing. Read results for those years
-as a lower bound on prices and spreads.</p>
+<p>The cost-based model now explains the level and timing of prices through the gas crisis
+from fuel prices alone, but not the size of their daily swings. Read results for 2021–2022
+as a lower bound on spreads.</p>
 <h2 id="what-if-more-wind">What if: more wind<a class="headerlink" href="#what-if-more-wind" title="Permanent link">&para;</a></h2>
 <p>The same 2019 weather and demand with wind output scaled (<code>system.scale.wind</code>):</p>
 <table>
@@ -1656,27 +1892,27 @@ as a lower bound on prices and spreads.</p>
 <tbody>
 <tr>
 <td style="text-align: right;">×1</td>
-<td style="text-align: right;">42.25</td>
-<td style="text-align: right;">4.52</td>
+<td style="text-align: right;">38.04</td>
+<td style="text-align: right;">6.92</td>
 <td style="text-align: right;">0.0</td>
-<td style="text-align: right;">44.3</td>
-<td style="text-align: right;">4,914</td>
+<td style="text-align: right;">44.8</td>
+<td style="text-align: right;">4,518</td>
 </tr>
 <tr>
 <td style="text-align: right;">×2</td>
-<td style="text-align: right;">31.68</td>
-<td style="text-align: right;">17.57</td>
+<td style="text-align: right;">28.87</td>
+<td style="text-align: right;">16.71</td>
 <td style="text-align: right;">7.9</td>
-<td style="text-align: right;">25.4</td>
-<td style="text-align: right;">2,822</td>
+<td style="text-align: right;">25.8</td>
+<td style="text-align: right;">2,638</td>
 </tr>
 <tr>
 <td style="text-align: right;">×3</td>
-<td style="text-align: right;">21.85</td>
-<td style="text-align: right;">20.38</td>
+<td style="text-align: right;">20.11</td>
+<td style="text-align: right;">19.20</td>
 <td style="text-align: right;">38.7</td>
-<td style="text-align: right;">15.3</td>
-<td style="text-align: right;">1,700</td>
+<td style="text-align: right;">15.6</td>
+<td style="text-align: right;">1,614</td>
 </tr>
 </tbody>
 </table>
@@ -1698,26 +1934,26 @@ binding constraint, as in <a href="../system/">System analysis</a>.</p>
 <tr>
 <td style="text-align: right;">none</td>
 <td style="text-align: right;">38.7</td>
-<td style="text-align: right;">15.3</td>
-<td style="text-align: right;">1,700</td>
+<td style="text-align: right;">15.6</td>
+<td style="text-align: right;">1,614</td>
 </tr>
 <tr>
 <td style="text-align: right;">5 GW</td>
 <td style="text-align: right;">36.2</td>
-<td style="text-align: right;">14.5</td>
-<td style="text-align: right;">1,613</td>
+<td style="text-align: right;">14.8</td>
+<td style="text-align: right;">1,535</td>
 </tr>
 <tr>
 <td style="text-align: right;">10 GW</td>
 <td style="text-align: right;">34.4</td>
-<td style="text-align: right;">13.9</td>
-<td style="text-align: right;">1,550</td>
+<td style="text-align: right;">14.2</td>
+<td style="text-align: right;">1,478</td>
 </tr>
 <tr>
 <td style="text-align: right;">20 GW</td>
 <td style="text-align: right;">31.8</td>
-<td style="text-align: right;">13.1</td>
-<td style="text-align: right;">1,458</td>
+<td style="text-align: right;">13.4</td>
+<td style="text-align: right;">1,393</td>
 </tr>
 </tbody>
 </table>
@@ -1738,38 +1974,38 @@ revenue per MW-year:</p>
 <tbody>
 <tr>
 <td>Real 2019 market</td>
-<td style="text-align: right;">16,045</td>
+<td style="text-align: right;">16,055</td>
 <td style="text-align: right;">22,509</td>
 </tr>
 <tr>
 <td>Model, 2019</td>
-<td style="text-align: right;">−77</td>
-<td style="text-align: right;">406</td>
+<td style="text-align: right;">−129</td>
+<td style="text-align: right;">322</td>
 </tr>
 <tr>
 <td>Model with unit commitment, 2019, marginal price</td>
-<td style="text-align: right;">3,200</td>
-<td style="text-align: right;">10,844</td>
+<td style="text-align: right;">2,730</td>
+<td style="text-align: right;">10,043</td>
 </tr>
 <tr>
 <td>Model with unit commitment, 2019, start price</td>
-<td style="text-align: right;">1,792</td>
-<td style="text-align: right;">9,829</td>
+<td style="text-align: right;">1,334</td>
+<td style="text-align: right;">8,772</td>
 </tr>
 <tr>
 <td>Model, wind ×3</td>
-<td style="text-align: right;">1,565</td>
-<td style="text-align: right;">12,010</td>
+<td style="text-align: right;">1,137</td>
+<td style="text-align: right;">11,943</td>
 </tr>
 <tr>
 <td>Model, wind ×3 with 10 GW storage</td>
-<td style="text-align: right;">−1,370</td>
-<td style="text-align: right;">5,422</td>
+<td style="text-align: right;">−505</td>
+<td style="text-align: right;">5,331</td>
 </tr>
 </tbody>
 </table>
 <p>On the merit-order 2019 prices a battery earns almost nothing: the cost-based price is too
-flat. With unit commitment the daily shape gives it £10–11k with perfect foresight, about
+flat. With unit commitment the daily shape gives it £9–10k with perfect foresight, under
 half the real market's £22.5k; the rest came from spikes and bidding the model leaves
 out. With three times the wind, spreads open up and
 perfect-foresight value reaches £12k; 10 GW of other storage then cuts it by more than
@@ -1790,13 +2026,13 @@ half. Forecasting on last week's prices fails on these spiky, weather-driven pri
 <tr>
 <td>on</td>
 <td style="text-align: right;">4.14</td>
-<td style="text-align: right;">35.64</td>
+<td style="text-align: right;">35.77</td>
 <td style="text-align: right;">61.5</td>
 </tr>
 <tr>
 <td>off</td>
 <td style="text-align: right;">4.14</td>
-<td style="text-align: right;">25.97</td>
+<td style="text-align: right;">26.11</td>
 <td style="text-align: right;">101.1</td>
 </tr>
 <tr>
@@ -1880,6 +2116,11 @@ storage, curtailment, emissions) and <code>summary.json</code> with the data att
 <td>OGL v3.0</td>
 </tr>
 <tr>
+<td>Daily gas price (from 2018)</td>
+<td>ONS, <a href="https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/systemaveragepricesapofgas">System Average Price (SAP) of gas</a>, from National Gas Transmission (accessed 30 October 2026)</td>
+<td>OGL v3.0</td>
+</tr>
+<tr>
 <td>Carbon price support</td>
 <td>HMRC, <a href="https://www.gov.uk/government/publications/excise-notice-ccl16-a-guide-to-carbon-price-floor">Excise Notice CCL1/6</a> and <a href="https://www.gov.uk/guidance/climate-change-levy-rates">Climate Change Levy rates</a></td>
 <td>OGL v3.0</td>
@@ -1932,8 +2173,9 @@ Power System Analysis</em>, Journal of Open Research Software 6(1), 2018,
   <code>links</code> (<a href="../forward-scenarios/">Forward scenarios</a>), which take the neighbours' prices
   as given and trade up to each link's availability fitted from its flows. Links work with
   unit commitment from v4.2.</li>
-<li>Fuel prices are quarterly averages of what power producers paid, which can lag market
-  gas prices (most visible in 2021–2024); the ETS is one price per year (from 1 April).</li>
+<li>Gas is priced at the daily wholesale price from 2018 (without the network charges power
+  stations pay) and the quarterly price paid before; coal and oil are quarterly; the ETS
+  is one price per year (from 1 April).</li>
 <li>Storage optimisation has perfect foresight over the year.</li>
 <li>Emissions cover GB fossil plant only (no imports or biomass).</li>
 </ul>

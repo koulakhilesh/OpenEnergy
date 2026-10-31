@@ -14,7 +14,7 @@
       
       
       
-        <link rel="next" href="concepts/">
+        <link rel="next" href="whats-new/">
       
       
         
@@ -241,6 +241,44 @@
     
   
   Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
 
       </a>
     </li>
@@ -482,6 +520,60 @@
   
   
     <li class="md-nav__item">
+      <a href="whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="concepts/" class="md-nav__link">
         
   
@@ -522,10 +614,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -543,8 +635,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -737,6 +829,34 @@
     
   
     Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
   
 
     
@@ -980,12 +1100,13 @@ uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> 
 <div class="highlight"><pre><span></span><code>scenario         forecast             days       revenue   per MW-yr   capture   cycles
 gb-2019-perfect  perfect_foresight     363        19,075      19,180    100.0%      464
 gb-2019-ml       gradient_boosting     363        14,086      14,164     73.8%      400
-gb-2019-naive    naive_last_week       363        13,918      13,995     73.0%      465
+gb-2019-naive    naive_last_week       363        13,920      13,996     73.0%      465
 </code></pre></div>
 <p>A 1 MW / 2 MWh battery trading GB day-ahead prices in 2019 would have earned about
 £14k per MW-year planning on last week's prices, or 73% of what perfect foresight allows.</p>
 <p>The same battery on every year of the bundled prices (<code>examples/gb-2022-naive.yaml</code> with
-other dates; Ember prices, GBP per MW-year):</p>
+other dates, and with <code>forecast: {method: fundamentals, path: ...}</code>; Ember prices, GBP per
+MW-year):</p>
 <table>
 <thead>
 <tr>
@@ -1004,15 +1125,27 @@ other dates; Ember prices, GBP per MW-year):</p>
 <tbody>
 <tr>
 <td>Last week's prices</td>
-<td style="text-align: right;">20,682</td>
-<td style="text-align: right;">18,889</td>
-<td style="text-align: right;">13,936</td>
-<td style="text-align: right;">17,155</td>
-<td style="text-align: right;">74,172</td>
-<td style="text-align: right;">76,940</td>
-<td style="text-align: right;">35,964</td>
-<td style="text-align: right;">28,677</td>
+<td style="text-align: right;">20,633</td>
+<td style="text-align: right;">18,887</td>
+<td style="text-align: right;">13,943</td>
+<td style="text-align: right;">17,144</td>
+<td style="text-align: right;">74,169</td>
+<td style="text-align: right;">76,948</td>
+<td style="text-align: right;">35,957</td>
+<td style="text-align: right;">28,690</td>
 <td style="text-align: right;">35,861</td>
+</tr>
+<tr>
+<td>OpenEnergy forecast</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">15,148</td>
+<td style="text-align: right;">18,382</td>
+<td style="text-align: right;">70,771</td>
+<td style="text-align: right;">80,150</td>
+<td style="text-align: right;">39,415</td>
+<td style="text-align: right;">33,410</td>
+<td style="text-align: right;">39,361</td>
 </tr>
 <tr>
 <td>Perfect foresight</td>
@@ -1027,7 +1160,7 @@ other dates; Ember prices, GBP per MW-year):</p>
 <td style="text-align: right;">44,564</td>
 </tr>
 <tr>
-<td>Capture</td>
+<td>Capture, last week's prices</td>
 <td style="text-align: right;">79%</td>
 <td style="text-align: right;">74%</td>
 <td style="text-align: right;">71%</td>
@@ -1038,11 +1171,26 @@ other dates; Ember prices, GBP per MW-year):</p>
 <td style="text-align: right;">74%</td>
 <td style="text-align: right;">80%</td>
 </tr>
+<tr>
+<td>Capture, OpenEnergy forecast</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">78%</td>
+<td style="text-align: right;">82%</td>
+<td style="text-align: right;">79%</td>
+<td style="text-align: right;">78%</td>
+<td style="text-align: right;">86%</td>
+<td style="text-align: right;">86%</td>
+<td style="text-align: right;">88%</td>
+</tr>
 </tbody>
 </table>
-<p>Revenue followed the gas crisis: over five times the 2019 level in 2021–2022, and two to
-two and a half times it in 2023–2025, while a simple forecast kept 71–83% of the
-perfect-foresight value every year.</p>
+<p>Revenue followed the gas crisis: over five times the 2019 level in 2021–2022, and 2.1 to
+2.6 times it in 2023–2025. Last week's prices kept 71–83% of the
+perfect-foresight value every year; OpenEnergy's forecast (NESO's demand forecast,
+Elexon's wind forecast, the daily gas price and recent prices, as known the day before)
+kept 78–88% and did better every year except 2021, when gas prices rose faster than a
+model trained on calmer years could follow (see <a href="guides/research/">Research</a>).</p>
 <p>Renewables are one command away:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>capture<span class="w"> </span>data/time_series/time_series_60min_singleindex_filtered.csv<span class="w"> </span>-t<span class="w"> </span>solar
 </code></pre></div>
@@ -1060,9 +1208,10 @@ a 10 GW / 24 h storage fleet absorbs about three-quarters of it
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>system<span class="w"> </span>validate
 </code></pre></div>
 <p>Rebuilt from fuel, carbon and fleet data alone, GB's 2019 average price comes out at
-£42.3/MWh against £42.9 actual, but its peaks are far too low: a battery that earned
-£16k per MW-year on real 2019 prices earns almost nothing on the modelled ones
-(see <a href="guides/system-model/">System model</a>).</p>
+£38.1/MWh against £42.9 actual, with a correlation of 0.69, but its peaks are far too low:
+a battery that earned £16k per MW-year on real 2019 prices earns almost nothing on the
+modelled ones. With the daily gas price (v6.0), the model follows the 2022 gas crisis with
+a correlation of 0.81 (0.40 with quarterly prices) (see <a href="guides/system-model/">System model</a>).</p>
 <h2 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Loads prices, capacity factors, demand and carbon intensity</strong> from the bundled
@@ -1070,7 +1219,8 @@ a 10 GW / 24 h storage fleet absorbs about three-quarters of it
    and checks them: UTC timestamps, a regular grid, reported gaps and filtered telemetry
    glitches.</li>
 <li><strong>Forecasts</strong> each day using only data available at the decision time (noon the day
-   before by default).</li>
+   before by default), from last week's prices to OpenEnergy's forecast built on NESO's
+   demand and Elexon's wind forecasts and the daily gas price.</li>
 <li><strong>Plans</strong> the day with a mixed-integer optimisation that respects power and energy
    limits, efficiencies, an end-of-day state of charge and, for co-located sites, a shared
    grid connection; an optional carbon price steers dispatch.</li>
@@ -1092,12 +1242,13 @@ a 10 GW / 24 h storage fleet absorbs about three-quarters of it
    day-ahead trading in the same plan, with the energy each service moves taken from GB
    frequency data (see <a href="guides/revenue-stacking/">Revenue stacking</a>).</li>
 <li><strong>Looks forward</strong>: NESO Future Energy Scenarios pathways to 2035 on a historic weather
-    year, with GB's interconnectors as price-taking links to six neighbouring markets at
-    availabilities fitted from their actual flows, and unit commitment
-    (see <a href="guides/forward-scenarios/">Forward scenarios</a>).</li>
-<li><strong>Runs in the browser</strong>: a <a href="guides/web-app/">web app</a> (React front end on a FastAPI
-    JSON API) values a battery on
-    any GB year from 2017 or on a FES pathway; try it at
+    year, made secure to GB's reliability standard, with GB's interconnectors as
+    price-taking links to six neighbouring markets at availabilities fitted from their
+    actual flows, and unit commitment; and how much storage GB can use before a battery
+    stops paying (see <a href="guides/forward-scenarios/">Forward scenarios</a>).</li>
+<li><strong>Runs in the browser</strong>: a <a href="guides/web-app/">web app</a> plays a real day, runs the
+    battery optimiser on any day since 2019 in your browser, replays the grid week by
+    week, and values a battery on any GB year from 2017 or on a FES pathway; try it at
     <a href="https://open-energy-eight.vercel.app/">open-energy-eight.vercel.app</a>.</li>
 </ol>
 <p>See <a href="concepts/">Concepts</a> for the equations and <a href="guides/scenarios/">Scenarios</a> for
@@ -1146,7 +1297,7 @@ every setting.</p>
 </tr>
 <tr>
 <td>v3.5</td>
-<td>Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value)</td>
+<td>Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give; revised in v6.0) and on stochastic planning (still no value)</td>
 </tr>
 <tr>
 <td>v4.0</td>
@@ -1162,7 +1313,11 @@ every setting.</p>
 </tr>
 <tr>
 <td>v5.0</td>
-<td>A React and TypeScript front end on an extended JSON API (options, explore, compare, FES table), typed from the OpenAPI schema and tested end to end; interconnector availability by price gap from hourly flows, tested out of sample (an option: it does not beat the flat share); data refreshed to October 2026; versioned docs and a Zenodo DOI (current)</td>
+<td>A React and TypeScript front end on an extended JSON API (options, explore, compare, FES table), typed from the OpenAPI schema and tested end to end; interconnector availability by price gap from hourly flows, tested out of sample (an option: it does not beat the flat share); data refreshed to October 2026; versioned docs and a Zenodo DOI</td>
+</tr>
+<tr>
+<td>v6.0</td>
+<td>The daily gas price in the system model; a day-ahead forecast from NESO's demand and Elexon's wind forecasts, the gas price and auction prices (<code>forecast: fundamentals</code>); FES systems made secure to the reliability standard and a storage saturation study (<code>openenergy system saturation</code>); the battery optimiser in the browser (Battery Lab, Grid replay, 2035, Beat the battery); a Gymnasium environment; constraint evidence; an end-of-day energy target that is now exact (<a href="whats-new/">What's new</a>; current)</td>
 </tr>
 </tbody>
 </table>
@@ -1176,8 +1331,8 @@ every setting.</p>
 </thead>
 <tbody>
 <tr>
-<td>v5.1</td>
-<td>Model follow-ups: why the modelled 2021–2022 gas-crisis spread is only 27–39% of actual; constraints between Scotland and England and the curtailment they cause; a better day-ahead plan than last week's prices</td>
+<td>v6.1</td>
+<td>Scotland and England as two zones with the Balancing Mechanism, to value where a battery relieves constraints; historic capacity by technology so the saturation study can use every weather year from 2019; the evening peak premium the cost-based model misses</td>
 </tr>
 </tbody>
 </table>
@@ -1221,13 +1376,13 @@ forecastable market price appears. Ideas are welcome in
         
         
           
-          <a href="concepts/" class="md-footer__link md-footer__link--next" aria-label="Next: Concepts">
+          <a href="whats-new/" class="md-footer__link md-footer__link--next" aria-label="Next: What&#39;s new in 6.0">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Concepts
+                What's new in 6.0
               </div>
             </div>
             <div class="md-footer__button md-icon">

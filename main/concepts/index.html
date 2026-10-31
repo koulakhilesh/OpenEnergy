@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://koulakhilesh.github.io/OpenEnergy/main/concepts/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../findings/">
       
       
         <link rel="next" href="../guides/scenarios/">
@@ -251,6 +251,44 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -385,6 +423,60 @@
     
   
     Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
   
 
     
@@ -590,10 +682,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -611,8 +703,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -805,6 +897,34 @@
     
   
     Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
   
 
     
@@ -1116,15 +1236,27 @@ revenue stays at market prices; see <a href="../guides/system/#emissions">System
   battery never charges and discharges at once (an LP would, to burn energy at negative
   prices);</li>
 <li><span class="arithmatex">\(SOC_{min}\, E_{usable} \le E_t \le SOC_{max}\, E_{usable}\)</span>;</li>
-<li><span class="arithmatex">\(E_T \ge E_{target}\)</span>, by default the energy the day started with;</li>
+<li><span class="arithmatex">\(E_T = E_{target}\)</span>, by default the energy the day started with;</li>
 <li>optionally, <span class="arithmatex">\(\sum_t (c_t + d_t)\, \Delta t \le 2 N_{max}\, E_{usable}\)</span>.</li>
 </ul>
 <p>The model is solved with <a href="https://highs.dev">HiGHS</a>; a day takes a few milliseconds.</p>
+<p>Try it: drag the prices and watch the plan change. Flatten them and the battery stops,
+because no gap covers its losses and wear; pull one evening hour up and it charges in the
+cheapest hours to sell into it. (The widget runs the same programme in your browser, from
+the <a href="../guides/web-app/">web app</a>; a 1 MW / 2 MWh battery, 95% each way, £5/MWh wear.)</p>
+<iframe src="https://open-energy-eight.vercel.app/embed/arbitrage" title="Drag the prices: the battery's optimal plan" loading="lazy" style="width:100%;height:400px;border:0"></iframe>
+
+<p>If the widget does not load, open it at
+<a href="https://open-energy-eight.vercel.app/embed/arbitrage">open-energy-eight.vercel.app/embed/arbitrage</a>.</p>
 <h2 id="backtest-timing">Backtest timing<a class="headerlink" href="#backtest-timing" title="Permanent link">&para;</a></h2>
 <p>For each day <span class="arithmatex">\(D\)</span>:</p>
 <ol>
-<li>The forecaster receives prices strictly before the decision time, <code>lead_hours</code> before
-   the start of <span class="arithmatex">\(D\)</span> (default 12, i.e. noon on <span class="arithmatex">\(D-1\)</span>).</li>
+<li>The forecaster receives the prices known at the decision time, <code>lead_hours</code> before
+   the start of <span class="arithmatex">\(D\)</span> (default 12, i.e. noon on <span class="arithmatex">\(D-1\)</span>). With <code>information: auction</code> (the
+   default since v6.0) that is every day whose day-ahead auction had cleared: GB's auction
+   for a day runs in the late morning of the day before, so at noon on <span class="arithmatex">\(D-1\)</span> all of
+   <span class="arithmatex">\(D-1\)</span>'s prices are known. <code>information: decision</code> keeps only prices for hours before
+   the decision time, as before v6.0.</li>
 <li>The optimiser plans <span class="arithmatex">\(D\)</span> on the forecast, together with the next <code>lookahead_days</code> days
    of forecasts if set (all made at the same decision time); the end-energy target then
    applies at the end of the last planned day.</li>
@@ -1162,6 +1294,10 @@ perfect-foresight benchmark on the same days.</p>
 <tr>
 <td><code>gradient_boosting</code></td>
 <td>Gradient-boosted trees on calendar features and 1/2/7/14-day lags (needs the <code>forecast</code> extra).</td>
+</tr>
+<tr>
+<td><code>fundamentals</code></td>
+<td>OpenEnergy's day-ahead forecast (v6.0): gradient-boosted trees retrained each month on what was known at the decision time (recent prices, NESO's day-ahead demand forecast, Elexon's day-ahead wind forecast, the daily gas price, the calendar), predicting each hour relative to the last day's mean price; each month's shape is stretched by the factor that earned a reference battery most over the previous 90 days. Needs the <code>forecast</code> extra, or <code>path</code> to the bundled precomputed forecast (<code>data/forecasts/</code>).</td>
 </tr>
 </tbody>
 </table>
@@ -1276,7 +1412,7 @@ Co-location results are therefore an upper bound.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home">
+          <a href="../findings/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Findings">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1286,7 +1422,7 @@ Co-location results are therefore an upper bound.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Home
+                Findings
               </div>
             </div>
           </a>

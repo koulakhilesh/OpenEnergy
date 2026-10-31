@@ -16,7 +16,7 @@
         <link rel="prev" href="../system-model/">
       
       
-        <link rel="next" href="../web-app/">
+        <link rel="next" href="../constraints/">
       
       
         
@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts/" class="md-nav__link">
         
   
@@ -449,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -470,8 +562,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -806,6 +898,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-secure-system-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A secure system first
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-battery-on-pathway-prices" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -818,6 +921,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-much-storage-can-gb-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much storage can GB use?
+      
+    </span>
+  </a>
   
 </li>
       
@@ -847,6 +961,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1086,6 +1228,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-secure-system-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A secure system first
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-battery-on-pathway-prices" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1098,6 +1251,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-much-storage-can-gb-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much storage can GB use?
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1159,6 +1323,8 @@ and adds unit commitment to them:</p>
 <li><strong>NESO Future Energy Scenarios</strong> (<code>system.fes</code>): a FES pathway's capacities and demand
   for a year from 2025 to 2035, applied to a historic weather year.</li>
 </ul>
+<p>v6.0 makes each FES system secure to GB's reliability standard before valuing anything on
+it, and asks how much storage GB can use (<a href="#how-much-storage-can-gb-use">below</a>).</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>system
 uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>system<span class="w"> </span>run<span class="w"> </span>examples/gb-2035-holistic.yaml
 </code></pre></div>
@@ -1174,6 +1340,10 @@ uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> 
 <span class="w">    </span><span class="nt">year</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2035</span><span class="w">                   </span><span class="c1"># 2025 to 2035, not before the weather year</span>
 <span class="w">    </span><span class="nt">battery_efficiency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.85</span><span class="w">     </span><span class="c1"># round trip; FES publishes none (stated assumption)</span>
 <span class="w">    </span><span class="nt">ldes_efficiency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.75</span><span class="w">        </span><span class="c1"># round trip for new long-duration storage (stated assumption)</span>
+<span class="w">    </span><span class="nt">adequacy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secure</span><span class="w">             </span><span class="c1"># add the least firm capacity meeting lole_hours (v6.0); or as_modelled</span>
+<span class="w">    </span><span class="nt">lole_hours</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                </span><span class="c1"># GB's reliability standard: hours a year with unserved energy</span>
+<span class="w">    </span><span class="c1"># firm_mw: 8000              # or add exactly this much firm capacity, no search</span>
+<span class="w">    </span><span class="nt">battery_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">           </span><span class="c1"># multiply the FES battery fleet's power</span>
 <span class="nt">battery</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">power_mw</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> energy_mwh</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <p>Results are "this fleet and demand in 2025's weather and markets", not price forecasts:
@@ -1223,7 +1393,7 @@ order, PyPSA (when storage is added) and unit commitment.</p>
 actual day-ahead price and the actual flows (Elexon FUELHH): historic imports (fixed);
 links at full capacity (full, the v4.0 and v4.1 default); links at their fitted
 availability (links, the default from v4.2); and that with unit commitment (UC, marginal
-price). Prices in £/MWh, flows in TWh:</p>
+price). Prices in £/MWh, flows in TWh, with the daily gas price (v6.0):</p>
 <table>
 <thead>
 <tr>
@@ -1235,38 +1405,38 @@ price). Prices in £/MWh, flows in TWh:</p>
 <tbody>
 <tr>
 <td>2019</td>
-<td style="text-align: right;">42.9 / 42.3 / 42.4 / 42.7 / 42.2</td>
-<td style="text-align: right;">31.8 / 4.2 / 8.5 / 6.1 / 25.9</td>
+<td style="text-align: right;">42.9 / 38.0 / 38.8 / 38.7 / 38.4</td>
+<td style="text-align: right;">31.8 / 3.6 / 8.6 / 6.1 / 23.8</td>
 </tr>
 <tr>
 <td>2020</td>
-<td style="text-align: right;">35.3 / 37.1 / 36.9 / 37.5 / 36.6</td>
-<td style="text-align: right;">39.6 / 3.4 / 9.4 / 5.0 / 27.5</td>
+<td style="text-align: right;">35.3 / 30.3 / 30.9 / 30.9 / 30.4</td>
+<td style="text-align: right;">39.6 / 3.0 / 8.4 / 4.9 / 24.9</td>
 </tr>
 <tr>
 <td>2021</td>
-<td style="text-align: right;">117.8 / 83.5 / 86.7 / 85.3 / 85.0</td>
-<td style="text-align: right;">146.4 / 7.1 / 25.2 / 14.0 / 40.1</td>
+<td style="text-align: right;">117.8 / 98.2 / 99.3 / 99.4 / 99.1</td>
+<td style="text-align: right;">146.4 / 12.5 / 27.9 / 18.3 / 44.5</td>
 </tr>
 <tr>
 <td>2022</td>
-<td style="text-align: right;">204.8 / 157.7 / 163.1 / 160.0 / 159.9</td>
-<td style="text-align: right;">155.6 / 9.5 / 42.5 / 26.7 / 61.3</td>
+<td style="text-align: right;">204.8 / 172.8 / 179.3 / 176.2 / 176.2</td>
+<td style="text-align: right;">155.6 / 16.6 / 41.8 / 28.1 / 59.9</td>
 </tr>
 <tr>
 <td>2023</td>
-<td style="text-align: right;">94.1 / 121.1 / 110.9 / 117.2 / 116.8</td>
-<td style="text-align: right;">70.0 / 7.4 / 45.5 / 30.1 / 61.8</td>
+<td style="text-align: right;">94.1 / 101.8 / 97.0 / 100.1 / 99.9</td>
+<td style="text-align: right;">70.0 / 6.6 / 40.6 / 26.7 / 53.6</td>
 </tr>
 <tr>
 <td>2024</td>
-<td style="text-align: right;">72.5 / 89.2 / 81.2 / 87.0 / 86.4</td>
-<td style="text-align: right;">59.9 / 5.7 / 43.2 / 26.5 / 56.6</td>
+<td style="text-align: right;">72.5 / 79.7 / 74.1 / 78.2 / 77.8</td>
+<td style="text-align: right;">59.9 / 5.3 / 37.4 / 23.4 / 52.5</td>
 </tr>
 <tr>
 <td>2025</td>
-<td style="text-align: right;">80.7 / 87.5 / 82.4 / 86.6 / 86.3</td>
-<td style="text-align: right;">67.5 / 6.2 / 41.1 / 25.2 / 52.0</td>
+<td style="text-align: right;">80.7 / 83.8 / 79.9 / 83.3 / 83.0</td>
+<td style="text-align: right;">67.5 / 6.0 / 39.1 / 23.8 / 51.0</td>
 </tr>
 </tbody>
 </table>
@@ -1281,55 +1451,56 @@ price). Prices in £/MWh, flows in TWh:</p>
 <tbody>
 <tr>
 <td>2019</td>
-<td style="text-align: right;">25.0 / 34.6 / 21.5 / 21.7</td>
-<td style="text-align: right;">3.7 / 9.9 / 4.5 / 4.2</td>
+<td style="text-align: right;">25.0 / 28.5 / 17.8 / 17.5</td>
+<td style="text-align: right;">3.7 / 15.9 / 7.2 / 7.1</td>
 </tr>
 <tr>
 <td>2020</td>
-<td style="text-align: right;">22.8 / 34.9 / 21.4 / 21.1</td>
-<td style="text-align: right;">4.5 / 10.5 / 4.4 / 4.3</td>
+<td style="text-align: right;">22.8 / 26.3 / 16.4 / 15.7</td>
+<td style="text-align: right;">4.5 / 19.2 / 8.2 / 8.3</td>
 </tr>
 <tr>
 <td>2021</td>
-<td style="text-align: right;">29.2 / 29.9 / 19.0 / 18.7</td>
-<td style="text-align: right;">4.4 / 28.1 / 12.5 / 12.4</td>
+<td style="text-align: right;">29.2 / 37.9 / 24.1 / 24.1</td>
+<td style="text-align: right;">4.4 / 19.8 / 8.9 / 8.7</td>
 </tr>
 <tr>
 <td>2022</td>
-<td style="text-align: right;">16.2 / 26.1 / 16.7 / 16.4</td>
-<td style="text-align: right;">20.4 / 47.2 / 20.2 / 20.3</td>
+<td style="text-align: right;">16.2 / 26.3 / 16.6 / 16.0</td>
+<td style="text-align: right;">20.4 / 46.8 / 19.9 / 20.1</td>
 </tr>
 <tr>
 <td>2023</td>
-<td style="text-align: right;">33.5 / 64.7 / 42.8 / 43.2</td>
-<td style="text-align: right;">10.1 / 11.1 / 4.7 / 4.2</td>
+<td style="text-align: right;">33.5 / 54.9 / 36.7 / 37.0</td>
+<td style="text-align: right;">10.1 / 20.7 / 9.1 / 8.6</td>
 </tr>
 <tr>
 <td>2024</td>
-<td style="text-align: right;">43.9 / 69.9 / 46.4 / 46.4</td>
-<td style="text-align: right;">10.6 / 18.8 / 8.0 / 7.8</td>
+<td style="text-align: right;">43.9 / 69.4 / 46.3 / 46.5</td>
+<td style="text-align: right;">10.6 / 19.3 / 8.3 / 7.9</td>
 </tr>
 <tr>
 <td>2025</td>
-<td style="text-align: right;">44.0 / 69.0 / 45.4 / 45.4</td>
-<td style="text-align: right;">14.8 / 23.4 / 11.2 / 11.1</td>
+<td style="text-align: right;">44.0 / 65.5 / 43.2 / 42.9</td>
+<td style="text-align: right;">14.8 / 27.2 / 13.2 / 13.2</td>
 </tr>
 </tbody>
 </table>
-<p>At full capacity links trade far more than happened: imports up to 93% too high (2023)
-and exports up to six times too high (2021). A price taker sees every hour's price gap as
+<p>At full capacity links trade far more than happened: imports up to 64% too high (2023)
+and exports up to 4.5 times too high (2021). A price taker sees every hour's price gap as
 profit; real flows are limited by outages, losses, ramping, capacity sold ahead, trading
 on later markets and the neighbours' own supply. Each link's availability (below) brings
-imports to within 7% of actual in 2020, 2022, 2024 and 2025; they are 14% low in 2019,
-35% low in 2021 and 28% high in 2023. Exports are within 3% in 2020 and 2022, 22% high in
-2019, almost three times too high in 2021, and a quarter to a half too low in 2023–2025.</p>
+imports to within 5% of actual in 2022, 2024 and 2025; they are 10% high in 2023 and
+17–29% low in 2019–2021. Exports are within 2% in 2022 and 10–22% low in 2023–2025, but
+about twice actual in 2019–2021: with the daily gas price the modelled GB price in those
+years is lower than actual, so the links export more and import less than they did.</p>
 <p>Matching flows takes spread away: links at full capacity were importing the neighbours'
-daily shape, which partly hid the model's own flat price (2025: 41.1 at full capacity,
-25.2 at fitted availability). Unit commitment restores the shape on GB's own plant: the
-spread is 69% to 94% of actual in 2019–2020 and 2023–2025 (27% and 39% in the 2021–2022
-gas crisis, when quarterly fuel prices miss the market's swings). The mean is within £2 of
-actual in 2019–2020, above it by £6–23 in 2023–2025 and well below it in 2021–2022 (see
-the <a href="../system-model/#after-2020-gas-crisis-and-coal-exit">system model</a>).</p>
+daily shape, which partly hid the model's own flat price (2025: 39.1 at full capacity,
+23.8 at fitted availability). Unit commitment restores the shape on GB's own plant: the
+spread is 63% to 88% of actual in 2019–2020 and 2023–2025 (30% and 38% in the 2021–2022
+gas crisis, even with the daily gas price). The mean is £4.5–4.9 below actual in
+2019–2020, £2–6 above it in 2023–2025 and £19–29 below it in 2021–2022 (see the
+<a href="../system-model/#after-2020-gas-crisis-and-coal-exit">system model</a>).</p>
 <h4 id="link-availability">Link availability<a class="headerlink" href="#link-availability" title="Permanent link">&para;</a></h4>
 <p><code>scripts/fit_interconnector_availability.py</code> sets each link's import and export
 availability to the energy it actually moved over what a price taker at full capacity
@@ -1380,19 +1551,19 @@ yearly energy a little worse:</p>
 </tbody>
 </table>
 <p>In the model (links and unit commitment, 2023–2025) it moves the mean by under £1/MWh,
-lowers the daily spread by 0.3 to 2.0 (2025: 50.0 against 52.0), cuts exports by a
-fifth to a quarter, and changes the battery's perfect-foresight value by −7% to −2%
-(planning on last week's prices it earns 6% to 26% more).
+lowers the daily spread by 2.1 to 3.4 (2025: 47.9 against 51.0), cuts exports by about a
+quarter, and changes the battery's perfect-foresight value by −10% to −7% (planning on
+last week's prices it earns 6% to 23% more).
 Because it does not beat the flat share out of sample, <code>flows</code> stays the default and
 <code>gap</code> is an option. It matters most for the FES pathways below, where links are short at
 scarcity.</p>
 <h4 id="marginal-or-start-price">Marginal or start price<a class="headerlink" href="#marginal-or-start-price" title="Permanent link">&para;</a></h4>
 <p>With links and commitment, the marginal price is closer to history than the start price
-in 2023, 2024 and 2025 on the mean, the daily spread, the hour-to-hour change and battery
-value; the start price holds the night up at a running unit's cost plus its start cost.
+in 2023, 2024 and 2025 on the mean, the daily spread and battery value; the start price holds the night up at a running unit's cost plus its start cost.
 The scenarios below use the marginal price. This is a choice between two un-fitted
 definitions made on history. A 1 MW / 2 MWh battery (95% each way, £5/MWh wear), GBP per
-MW-year, last week's prices / perfect foresight:</p>
+MW-year, last week's prices / perfect foresight (actual: the whole year; model: 358 or 359
+days, from the second week):</p>
 <table>
 <thead>
 <tr>
@@ -1406,29 +1577,29 @@ MW-year, last week's prices / perfect foresight:</p>
 <tbody>
 <tr>
 <td>2023</td>
-<td style="text-align: right;">36,075 / 45,748</td>
-<td style="text-align: right;">1,765 / 11,838</td>
-<td style="text-align: right;">8,660 / 28,350</td>
-<td style="text-align: right;">3,974 / 20,397</td>
+<td style="text-align: right;">36,362 / 46,440</td>
+<td style="text-align: right;">1,604 / 9,275</td>
+<td style="text-align: right;">10,982 / 25,701</td>
+<td style="text-align: right;">4,228 / 15,228</td>
 </tr>
 <tr>
 <td>2024</td>
-<td style="text-align: right;">29,148 / 39,430</td>
-<td style="text-align: right;">1,648 / 10,694</td>
-<td style="text-align: right;">9,538 / 26,798</td>
-<td style="text-align: right;">5,108 / 17,411</td>
+<td style="text-align: right;">29,048 / 39,304</td>
+<td style="text-align: right;">1,643 / 9,234</td>
+<td style="text-align: right;">9,282 / 25,553</td>
+<td style="text-align: right;">4,425 / 15,308</td>
 </tr>
 <tr>
 <td>2025</td>
-<td style="text-align: right;">36,148 / 44,927</td>
-<td style="text-align: right;">949 / 10,413</td>
-<td style="text-align: right;">11,623 / 26,483</td>
-<td style="text-align: right;">4,864 / 16,955</td>
+<td style="text-align: right;">36,208 / 44,974</td>
+<td style="text-align: right;">648 / 9,728</td>
+<td style="text-align: right;">11,293 / 26,038</td>
+<td style="text-align: right;">4,384 / 15,723</td>
 </tr>
 </tbody>
 </table>
-<p>With perfect foresight the model now gives 59% to 68% of the actual value; planning on
-last week's prices, 24% to 33%.</p>
+<p>With perfect foresight the model gives 55% to 65% of the actual value; planning on
+last week's prices, 30% to 32%.</p>
 <p>A hurdle (<code>hurdle_gbp_per_mwh</code>) is still available but left at 0.</p>
 <h2 id="fes-pathways">FES pathways<a class="headerlink" href="#fes-pathways" title="Permanent link">&para;</a></h2>
 <p><code>system.fes</code> scales the weather year's system by the ratio of the FES year to the weather
@@ -1490,7 +1661,7 @@ edition covers: from 2024 for FES 2025, from 2025 for the Ten Year Outlook. Any 
 <h3 id="results-on-2025s-weather">Results on 2025's weather<a class="headerlink" href="#results-on-2025s-weather" title="Permanent link">&para;</a></h3>
 <p><code>scripts/build_scenario_prices.py</code> runs every pathway in 2030 and 2035 with default
 settings (prices in £/MWh, energy in TWh, <code>fes</code> columns are NESO's own figures for the
-same year):</p>
+same year; firm capacity is what the secure top-up added, below):</p>
 <table>
 <thead>
 <tr>
@@ -1504,6 +1675,7 @@ same year):</p>
 <th style="text-align: right;">FES</th>
 <th style="text-align: right;">Curtailed</th>
 <th style="text-align: right;">FES</th>
+<th style="text-align: right;">Firm added (GW)</th>
 <th style="text-align: right;">Unserved GWh</th>
 </tr>
 </thead>
@@ -1511,257 +1683,256 @@ same year):</p>
 <tr>
 <td>Holistic Transition</td>
 <td>2030</td>
-<td style="text-align: right;">86.3</td>
-<td style="text-align: right;">72.0</td>
-<td style="text-align: right;">36.8</td>
+<td style="text-align: right;">76.6</td>
+<td style="text-align: right;">53.2</td>
+<td style="text-align: right;">35.1</td>
 <td style="text-align: right;">35.7</td>
-<td style="text-align: right;">24.6</td>
+<td style="text-align: right;">26.1</td>
 <td style="text-align: right;">38.9</td>
 <td style="text-align: right;">8.7</td>
 <td style="text-align: right;">12.4</td>
-<td style="text-align: right;">68.0</td>
+<td style="text-align: right;">2.5</td>
+<td style="text-align: right;">12.2</td>
 </tr>
 <tr>
 <td>Holistic Transition</td>
 <td>2035</td>
-<td style="text-align: right;">211.7</td>
-<td style="text-align: right;">163.8</td>
-<td style="text-align: right;">47.8</td>
+<td style="text-align: right;">75.5</td>
+<td style="text-align: right;">67.6</td>
+<td style="text-align: right;">46.1</td>
 <td style="text-align: right;">27.6</td>
-<td style="text-align: right;">51.3</td>
+<td style="text-align: right;">52.8</td>
 <td style="text-align: right;">108.8</td>
 <td style="text-align: right;">34.9</td>
 <td style="text-align: right;">41.0</td>
-<td style="text-align: right;">723.0</td>
+<td style="text-align: right;">9.25</td>
+<td style="text-align: right;">6.8</td>
 </tr>
 <tr>
 <td>Electric Engagement</td>
 <td>2030</td>
-<td style="text-align: right;">74.3</td>
-<td style="text-align: right;">58.0</td>
-<td style="text-align: right;">36.3</td>
+<td style="text-align: right;">69.8</td>
+<td style="text-align: right;">56.6</td>
+<td style="text-align: right;">34.6</td>
 <td style="text-align: right;">37.0</td>
-<td style="text-align: right;">28.4</td>
+<td style="text-align: right;">29.8</td>
 <td style="text-align: right;">40.1</td>
 <td style="text-align: right;">11.6</td>
 <td style="text-align: right;">12.2</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">9.7</td>
 </tr>
 <tr>
 <td>Electric Engagement</td>
 <td>2035</td>
-<td style="text-align: right;">191.1</td>
-<td style="text-align: right;">162.4</td>
-<td style="text-align: right;">60.1</td>
+<td style="text-align: right;">73.6</td>
+<td style="text-align: right;">54.7</td>
+<td style="text-align: right;">57.7</td>
 <td style="text-align: right;">41.3</td>
-<td style="text-align: right;">46.9</td>
+<td style="text-align: right;">48.9</td>
 <td style="text-align: right;">89.1</td>
 <td style="text-align: right;">15.0</td>
 <td style="text-align: right;">27.4</td>
-<td style="text-align: right;">683.2</td>
+<td style="text-align: right;">8.25</td>
+<td style="text-align: right;">13.1</td>
 </tr>
 <tr>
 <td>Hydrogen Evolution</td>
 <td>2030</td>
-<td style="text-align: right;">65.6</td>
-<td style="text-align: right;">44.3</td>
-<td style="text-align: right;">36.9</td>
+<td style="text-align: right;">64.0</td>
+<td style="text-align: right;">42.4</td>
+<td style="text-align: right;">35.1</td>
 <td style="text-align: right;">40.1</td>
-<td style="text-align: right;">24.5</td>
+<td style="text-align: right;">26.0</td>
 <td style="text-align: right;">36.2</td>
 <td style="text-align: right;">7.6</td>
 <td style="text-align: right;">9.2</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
 <td>Hydrogen Evolution</td>
 <td>2035</td>
-<td style="text-align: right;">121.4</td>
-<td style="text-align: right;">109.1</td>
-<td style="text-align: right;">52.2</td>
+<td style="text-align: right;">72.6</td>
+<td style="text-align: right;">55.8</td>
+<td style="text-align: right;">49.7</td>
 <td style="text-align: right;">31.3</td>
-<td style="text-align: right;">40.7</td>
+<td style="text-align: right;">42.8</td>
 <td style="text-align: right;">93.5</td>
 <td style="text-align: right;">19.6</td>
 <td style="text-align: right;">34.2</td>
-<td style="text-align: right;">214.8</td>
+<td style="text-align: right;">6.25</td>
+<td style="text-align: right;">12.1</td>
 </tr>
 <tr>
 <td>Falling Behind</td>
 <td>2030</td>
-<td style="text-align: right;">72.4</td>
-<td style="text-align: right;">34.9</td>
-<td style="text-align: right;">41.4</td>
+<td style="text-align: right;">70.4</td>
+<td style="text-align: right;">33.4</td>
+<td style="text-align: right;">39.2</td>
 <td style="text-align: right;">29.5</td>
-<td style="text-align: right;">20.9</td>
+<td style="text-align: right;">22.8</td>
 <td style="text-align: right;">35.4</td>
 <td style="text-align: right;">1.8</td>
 <td style="text-align: right;">2.3</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
 <td>Falling Behind</td>
 <td>2035</td>
-<td style="text-align: right;">56.0</td>
-<td style="text-align: right;">43.4</td>
-<td style="text-align: right;">33.6</td>
+<td style="text-align: right;">54.7</td>
+<td style="text-align: right;">42.0</td>
+<td style="text-align: right;">31.7</td>
 <td style="text-align: right;">21.2</td>
-<td style="text-align: right;">32.8</td>
+<td style="text-align: right;">34.3</td>
 <td style="text-align: right;">61.8</td>
 <td style="text-align: right;">18.7</td>
 <td style="text-align: right;">18.0</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
 <td>Ten Year Forecast</td>
 <td>2030</td>
-<td style="text-align: right;">66.3</td>
-<td style="text-align: right;">38.6</td>
-<td style="text-align: right;">37.2</td>
+<td style="text-align: right;">64.5</td>
+<td style="text-align: right;">37.0</td>
+<td style="text-align: right;">35.4</td>
 <td style="text-align: right;">22.9</td>
-<td style="text-align: right;">24.2</td>
+<td style="text-align: right;">25.7</td>
 <td style="text-align: right;">46.8</td>
 <td style="text-align: right;">6.2</td>
 <td style="text-align: right;">7.4</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
 <td>Ten Year Forecast</td>
 <td>2035</td>
-<td style="text-align: right;">57.1</td>
-<td style="text-align: right;">36.3</td>
-<td style="text-align: right;">44.7</td>
+<td style="text-align: right;">56.0</td>
+<td style="text-align: right;">35.2</td>
+<td style="text-align: right;">42.9</td>
 <td style="text-align: right;">21.2</td>
-<td style="text-align: right;">42.2</td>
+<td style="text-align: right;">43.7</td>
 <td style="text-align: right;">93.1</td>
 <td style="text-align: right;">18.3</td>
 <td style="text-align: right;">23.7</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
 <td>Ten Year Outlook</td>
 <td>2030</td>
-<td style="text-align: right;">73.8</td>
-<td style="text-align: right;">32.0</td>
-<td style="text-align: right;">43.2</td>
+<td style="text-align: right;">71.7</td>
+<td style="text-align: right;">30.5</td>
+<td style="text-align: right;">41.1</td>
 <td style="text-align: right;">42.1</td>
-<td style="text-align: right;">19.6</td>
+<td style="text-align: right;">21.4</td>
 <td style="text-align: right;">34.0</td>
 <td style="text-align: right;">1.6</td>
 <td style="text-align: right;">7.4</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 </tr>
 <tr>
 <td>Ten Year Outlook</td>
 <td>2035</td>
-<td style="text-align: right;">86.4</td>
-<td style="text-align: right;">53.1</td>
-<td style="text-align: right;">45.7</td>
+<td style="text-align: right;">85.0</td>
+<td style="text-align: right;">52.1</td>
+<td style="text-align: right;">43.9</td>
 <td style="text-align: right;">35.3</td>
-<td style="text-align: right;">39.1</td>
+<td style="text-align: right;">40.6</td>
 <td style="text-align: right;">69.3</td>
 <td style="text-align: right;">15.3</td>
 <td style="text-align: right;">49.8</td>
-<td style="text-align: right;">20.0</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">7.9</td>
 </tr>
 </tbody>
 </table>
-<p>Settings since v4.2: links at each link's availability fitted from its flows, and unit
-commitment (marginal price). For comparison, the model's own 2025 with the same settings
-has a mean of £86.3/MWh and a spread of £52.0/MWh (actual £80.7 and £67.5).</p>
-<p>Imports in 2030 are within 10% of FES's in four pathways and 40% and 62% above it in
-Falling Behind and the Ten Year Forecast; in 2035 they are 1.3 to 2.1 times FES's (1.5 to
-3.5 times before links were given their fitted availability). Exports are 44% to 71% of
-FES's in every case: FES expects GB to export much more in windy hours than links that
-behave as they did in 2019–2025 do. Curtailment is 22% to 104% of FES's.</p>
-<p>Six cases leave demand unserved. The price sits at the £6,000/MWh value of lost load in
-Holistic Transition 2035 for 174 hours on 11 days, Electric Engagement 2035 for 161 hours
-on 10 days, Hydrogen Evolution 2035 for 73 hours on 5 days, and on one or two days in
-Holistic Transition 2030, Electric Engagement 2030 and the Ten Year Outlook 2035.
-Without those hours the means are £56–94/MWh. The cause is link availability, not unit
-commitment. Holistic Transition, mean £/MWh and unserved GWh:</p>
-<table>
-<thead>
-<tr>
-<th>Year</th>
-<th style="text-align: right;">Full availability</th>
-<th style="text-align: right;">Full + commitment</th>
-<th style="text-align: right;">Fitted</th>
-<th style="text-align: right;">Fitted + commitment</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>2030</td>
-<td style="text-align: right;">67.2, 0</td>
-<td style="text-align: right;">67.6, 0</td>
-<td style="text-align: right;">86.2, 68.0</td>
-<td style="text-align: right;">86.3, 68.0</td>
-</tr>
-<tr>
-<td>2035</td>
-<td style="text-align: right;">77.9, 40.3</td>
-<td style="text-align: right;">85.6, 50.5</td>
-<td style="text-align: right;">170.8, 679.3</td>
-<td style="text-align: right;">211.7, 723.0</td>
-</tr>
-</tbody>
-</table>
-<p>The fitted availability holds on GB's tightest days in the record: on the 1% of days
-with the highest GB price in 2019–2025, links imported 3% (ElecLink) to 42% (Nemo Link,
-BritNed) of their capacity, below their fitted shares for every link but East West (39%
-against 38%), because neighbours were often short at the same time. So derating links at stress is supported by the flows. What the model
-leaves out is what FES counts on in those hours: demand response, new flexibility and
-neighbours' own 2030s fleets. Read 2035 prices in these pathways as "this fleet is short
-of firm capacity in 2025's weather when links behave as they have", not as a price
-forecast. With every link at full capacity the same pathways shed load only in Holistic
-Transition 2035 (50.5 GWh) and Electric Engagement 2035 (10.9 GWh)
-(<code>availability: 1.0</code>). With <code>availability: gap</code>, where links trade more of the very large
-gaps at scarcity, lost load falls by about a third but does not go away:</p>
+<p>Settings since v6.0: links at each link's availability fitted from its flows, unit
+commitment (marginal price), the daily gas price of the weather year, and a secure system.
+For comparison, the model's own 2025 with the same settings has a mean of £83.0/MWh and a
+spread of £51.0/MWh (actual £80.7 and £67.5).</p>
+<p>Imports in 2030 are within 7% of FES's in three pathways, 12% below in Hydrogen
+Evolution, and 33% and 55% above in Falling Behind and the Ten Year Forecast; in 2035 they
+are 1.2 to 2.0 times FES's. Exports are 46% to 74% of FES's in every case: FES expects GB
+to export much more in windy hours than links that behave as they did in 2019–2025 do.
+Curtailment is 22% to 104% of FES's.</p>
+<h3 id="a-secure-system-first">A secure system first<a class="headerlink" href="#a-secure-system-first" title="Permanent link">&para;</a></h3>
+<p>As FES's fleets stand, several pathways cannot meet demand through 2025's cold, still
+spell in January. GB buys capacity through the Capacity Market to a reliability standard
+of 3 hours' loss of load expectation a year (DESNZ), so since v6.0 a FES system is made
+secure first (<code>fes.adequacy: secure</code>, the default): the least firm peaking capacity, in
+250 MW steps and costed as gas peaking plant, is added until hours with unserved energy
+are within <code>fes.lole_hours</code> (3). That is the "Firm added" column: 2.5 GW in Holistic
+Transition 2030; 6.25 to 9.25 GW in Holistic Transition, Electric Engagement and Hydrogen
+Evolution 2035; 0.25 GW in the Ten Year Outlook 2035; none elsewhere. A single weather year
+is one draw, not an expectation; the saturation study below averages two.</p>
+<p><code>fes.adequacy: as_modelled</code> keeps the fleet as FES gives it, as before v6.0. Then six
+cases leave demand unserved, and the price sits at the £6,000/MWh value of lost load for
+much of it. Mean £/MWh and unserved GWh (hours with unserved energy), as modelled:</p>
 <table>
 <thead>
 <tr>
 <th>Pathway and year</th>
-<th style="text-align: right;">Unserved GWh, hours at £6,000: flows</th>
-<th style="text-align: right;">gap</th>
-<th style="text-align: right;">Mean £/MWh: flows</th>
-<th style="text-align: right;">gap</th>
+<th style="text-align: right;">Links as fitted (default)</th>
+<th style="text-align: right;"><code>availability: gap</code></th>
+<th style="text-align: right;">Every link at full capacity</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Holistic Transition 2030</td>
-<td style="text-align: right;">68.0, 25</td>
-<td style="text-align: right;">47.0, 24</td>
-<td style="text-align: right;">86.3</td>
-<td style="text-align: right;">85.2</td>
+<td style="text-align: right;">85.0, 68.0 (16)</td>
+<td style="text-align: right;">80.2, 47.0 (14)</td>
+<td style="text-align: right;">66.2, 0</td>
 </tr>
 <tr>
 <td>Holistic Transition 2035</td>
-<td style="text-align: right;">723.0, 174</td>
-<td style="text-align: right;">510.4, 130</td>
-<td style="text-align: right;">211.7</td>
-<td style="text-align: right;">162.5</td>
+<td style="text-align: right;">210.5, 715.2 (81)</td>
+<td style="text-align: right;">161.6, 508.0 (60)</td>
+<td style="text-align: right;">84.9, 50.5 (8)</td>
+</tr>
+<tr>
+<td>Electric Engagement 2030</td>
+<td style="text-align: right;">69.8, 9.7 (2)</td>
+<td style="text-align: right;">60.1, 0</td>
+<td style="text-align: right;">63.4, 0</td>
 </tr>
 <tr>
 <td>Electric Engagement 2035</td>
-<td style="text-align: right;">683.2, 161</td>
-<td style="text-align: right;">480.4, 110</td>
-<td style="text-align: right;">191.1</td>
-<td style="text-align: right;">151.2</td>
+<td style="text-align: right;">186.9, 683.2 (81)</td>
+<td style="text-align: right;">150.5, 480.4 (60)</td>
+<td style="text-align: right;">77.6, 10.9 (3)</td>
 </tr>
 <tr>
 <td>Hydrogen Evolution 2035</td>
-<td style="text-align: right;">214.8, 73</td>
-<td style="text-align: right;">150.1, 44</td>
-<td style="text-align: right;">121.4</td>
-<td style="text-align: right;">95.4</td>
+<td style="text-align: right;">119.9, 214.8 (30)</td>
+<td style="text-align: right;">93.9, 150.1 (22)</td>
+<td style="text-align: right;">64.1, 0</td>
+</tr>
+<tr>
+<td>Ten Year Outlook 2035</td>
+<td style="text-align: right;">85.6, 17.1 (5)</td>
+<td style="text-align: right;">58.5, 0</td>
+<td style="text-align: right;">62.0, 0</td>
 </tr>
 </tbody>
 </table>
+<p>The cause is link availability. The fitted availability holds on GB's tightest days in
+the record: on the 1% of days with the highest GB price in 2019–2025, links imported 3%
+(ElecLink) to 42% (Nemo Link, BritNed) of their capacity, below their fitted shares for
+every link but East West (39% against 38%), because neighbours were often short at the
+same time. So derating links at stress is supported by the flows. What the model leaves
+out is what FES counts on in those hours: demand response, new flexibility and neighbours'
+own 2030s fleets. The secure top-up stands in for all of that with the cheapest firm
+capacity, so read it as "this much firm capacity, or its equivalent", not as a forecast of
+new gas plant.</p>
 <h3 id="a-battery-on-pathway-prices">A battery on pathway prices<a class="headerlink" href="#a-battery-on-pathway-prices" title="Permanent link">&para;</a></h3>
 <p>The same 1 MW / 2 MWh battery (95% each way, £5/MWh wear) on 358 days of each modelled
-year, GBP per MW-year:</p>
+year (the first week has no last week to plan on), from the app's precomputed results
+(<code>data/app/</code>), GBP per MW-year:</p>
 <table>
 <thead>
 <tr>
@@ -1773,61 +1944,183 @@ year, GBP per MW-year:</p>
 <tbody>
 <tr>
 <td>Actual 2025</td>
-<td style="text-align: right;">36,148</td>
-<td style="text-align: right;">44,927</td>
+<td style="text-align: right;">36,208</td>
+<td style="text-align: right;">44,974</td>
 </tr>
 <tr>
 <td>Model 2025, links + commitment</td>
-<td style="text-align: right;">11,623</td>
-<td style="text-align: right;">26,483</td>
+<td style="text-align: right;">11,293</td>
+<td style="text-align: right;">26,038</td>
 </tr>
 <tr>
 <td>Holistic Transition 2030 / 2035</td>
-<td style="text-align: right;">9,649 / 10,019</td>
-<td style="text-align: right;">27,434 / 64,033</td>
+<td style="text-align: right;">3,448 / 8,440</td>
+<td style="text-align: right;">19,657 / 25,450</td>
 </tr>
 <tr>
 <td>Electric Engagement 2030 / 2035</td>
-<td style="text-align: right;">4,853 / 14,261</td>
-<td style="text-align: right;">22,640 / 70,217</td>
+<td style="text-align: right;">4,025 / 11,010</td>
+<td style="text-align: right;">26,685 / 20,663</td>
 </tr>
 <tr>
 <td>Hydrogen Evolution 2030 / 2035</td>
-<td style="text-align: right;">6,318 / 12,138</td>
-<td style="text-align: right;">18,393 / 47,247</td>
+<td style="text-align: right;">5,860 / 5,145</td>
+<td style="text-align: right;">17,514 / 22,031</td>
 </tr>
 <tr>
 <td>Falling Behind 2030 / 2035</td>
-<td style="text-align: right;">3,892 / 4,311</td>
-<td style="text-align: right;">12,106 / 16,368</td>
+<td style="text-align: right;">3,646 / 4,098</td>
+<td style="text-align: right;">11,514 / 15,822</td>
 </tr>
 <tr>
 <td>Ten Year Forecast 2030 / 2035</td>
-<td style="text-align: right;">3,297 / 3,535</td>
-<td style="text-align: right;">13,665 / 12,928</td>
+<td style="text-align: right;">3,157 / 3,078</td>
+<td style="text-align: right;">12,940 / 12,421</td>
 </tr>
 <tr>
 <td>Ten Year Outlook 2030 / 2035</td>
-<td style="text-align: right;">2,528 / 4,259</td>
-<td style="text-align: right;">9,967 / 19,929</td>
+<td style="text-align: right;">2,166 / 3,937</td>
+<td style="text-align: right;">9,288 / 19,400</td>
 </tr>
 </tbody>
 </table>
 <p>Compare pathways with the model's own 2025, not with actual 2025: on modelled 2025 prices
-the battery's perfect-foresight value is 59% of its actual value, and the model's daily
-spread is 77% of the real one. Against that baseline, perfect-foresight value is 48% to
-62% lower in Falling Behind 2030, the Ten Year Forecast and the Ten Year Outlook 2030,
-15% to 38% lower in Electric Engagement and Hydrogen Evolution 2030, Falling Behind 2035
-and the Ten Year Outlook 2035, and about the same in Holistic Transition 2030. The three
-2035 pathways that rise far above it (Holistic Transition, Electric Engagement and
-Hydrogen Evolution, 1.8 to 2.7 times) get most of that from the lost-load days above:
-with perfect foresight over the full year, those days earn £49.4k of Holistic
-Transition's £63.1k, £54.2k of Electric Engagement's £69.2k and £30.7k of Hydrogen
-Evolution's £46.8k. Without lost-load days every pathway would be below the 2025
-baseline: the six pathways with lost load earn £11.6k to £16.1k on their other days. A value that rests on a few days of lost load in one
-weather year is not a robust result. Planning on last week's prices keeps 16% to 35% of
-the perfect-foresight value, against 80% on actual 2025 prices and 44% on the model's own
+the battery's perfect-foresight value is 58% of its actual value, and the model's daily
+spread is 76% of the real one. Against that baseline, every pathway's perfect-foresight
+value is about the same or lower: 2% lower in Holistic Transition 2035 and 2% higher in
+Electric Engagement 2030, 15% to 33% lower in Holistic Transition 2030, Electric
+Engagement and Hydrogen Evolution 2035, Hydrogen Evolution 2030 and the Ten Year Outlook
+2035, and 39% to 64% lower in Falling Behind, the Ten Year Forecast and the Ten Year
+Outlook 2030. With secure systems the 2035 pathways no longer rise far above the baseline
+on days of lost load (before v6.0 they reached 1.8 to 2.7 times it), but scarcity still
+matters: with perfect foresight over the full year, the one or two days with an hour at
+£1,000/MWh or more earn 29% to 49% of the value in the six cases that have them (49% of
+Holistic Transition 2035's). Planning on last week's prices keeps 15% to 53% of the
+perfect-foresight value, against 81% on actual 2025 prices and 43% on the model's own
 2025.</p>
+<h2 id="how-much-storage-can-gb-use">How much storage can GB use?<a class="headerlink" href="#how-much-storage-can-gb-use" title="Permanent link">&para;</a></h2>
+<p>The batteries above join a fleet that FES has already sized: 23 to 33 GW of batteries in
+2035 in FES 2025's pathways, storing 1.3 to 1.5 hours on average. What happens to the
+value of one more battery as that fleet grows, once the system is secure? <code>openenergy system saturation</code> scales each pathway's
+2035 battery fleet from none to three times FES's figure (same duration), and for each fleet
+adds the least firm capacity that keeps loss of load, averaged over the 2024 and 2025
+weather years, within the 3-hour standard. A 1 MW / 2 MWh battery (95% each way, £5/MWh
+wear) is then valued with perfect foresight on each year's modelled prices
+(<code>data/scenarios/saturation.csv</code>; try it in the <a href="https://open-energy-eight.vercel.app/2035">web app</a>).
+FES 2025 publishes figures from 2024, so these two weather years are all a FES system can
+be scaled from today; the Ten Year Outlook, which has no 2024 wind, is left out.</p>
+<p>The pathways with no shortfall first. GBP per MW-year, mean of the two weather years:</p>
+<table>
+<thead>
+<tr>
+<th>Battery fleet (× FES 2035)</th>
+<th style="text-align: right;">0</th>
+<th style="text-align: right;">0.5</th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Falling Behind: fleet GW</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11.3</td>
+<td style="text-align: right;">22.7</td>
+<td style="text-align: right;">45.3</td>
+<td style="text-align: right;">68.0</td>
+</tr>
+<tr>
+<td>Falling Behind: one more battery earns</td>
+<td style="text-align: right;">43,609</td>
+<td style="text-align: right;">21,840</td>
+<td style="text-align: right;">15,551</td>
+<td style="text-align: right;">10,362</td>
+<td style="text-align: right;">8,017</td>
+</tr>
+<tr>
+<td>Falling Behind: daily spread (£/MWh)</td>
+<td style="text-align: right;">72.2</td>
+<td style="text-align: right;">47.9</td>
+<td style="text-align: right;">40.6</td>
+<td style="text-align: right;">32.6</td>
+<td style="text-align: right;">28.2</td>
+</tr>
+<tr>
+<td>Ten Year Forecast: fleet GW</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15.0</td>
+<td style="text-align: right;">29.9</td>
+<td style="text-align: right;">59.9</td>
+<td style="text-align: right;">89.8</td>
+</tr>
+<tr>
+<td>Ten Year Forecast: one more battery earns</td>
+<td style="text-align: right;">40,897</td>
+<td style="text-align: right;">17,196</td>
+<td style="text-align: right;">12,057</td>
+<td style="text-align: right;">8,130</td>
+<td style="text-align: right;">6,296</td>
+</tr>
+<tr>
+<td>Ten Year Forecast: daily spread (£/MWh)</td>
+<td style="text-align: right;">71.9</td>
+<td style="text-align: right;">41.0</td>
+<td style="text-align: right;">34.3</td>
+<td style="text-align: right;">28.1</td>
+<td style="text-align: right;">24.3</td>
+</tr>
+</tbody>
+</table>
+<p>The first half of the FES fleet takes half or more of a battery's value away; the next two
+and a half fleets take nearly two thirds of what is left. Batteries earn by flattening the
+daily spread, so each one leaves less spread for the next. The two weather years agree: in
+Falling Behind a battery joining the FES fleet earns £14,927 on 2024's weather and
+£16,176 on 2025's.</p>
+<p>The other three pathways are short of firm capacity in a cold, still spell, and the
+batteries do little about it:</p>
+<table>
+<thead>
+<tr>
+<th>Pathway</th>
+<th style="text-align: right;">Firm capacity added (GW) for a fleet of × 0 / 0.5 / 1 / 2 / 3</th>
+<th style="text-align: right;">Firm capacity each MW of the FES fleet replaces (MW)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Holistic Transition</td>
+<td style="text-align: right;">11.25 / 9.25 / 8.25 / 8.0 / 8.25</td>
+<td style="text-align: right;">0.10</td>
+</tr>
+<tr>
+<td>Electric Engagement</td>
+<td style="text-align: right;">11.25 / 8.75 / 8.25 / 7.25 / 7.25</td>
+<td style="text-align: right;">0.09</td>
+</tr>
+<tr>
+<td>Hydrogen Evolution</td>
+<td style="text-align: right;">8.75 / 6.75 / 4.75 / 4.0 / 3.0</td>
+<td style="text-align: right;">0.16</td>
+</tr>
+</tbody>
+</table>
+<p>The FES fleets store under an hour and a half on average, and the shortfalls they would
+cover last longer: the first half of the fleet saves 2.0 to 2.5 GW of firm capacity, and
+the next two and a half fleets 1.0 to 3.75 GW more. In 250 MW steps the search is not
+perfectly monotonic (Holistic Transition needs 8.0 GW at twice the fleet and 8.25 GW at
+three times). In these pathways a battery's value also rests on a handful of scarcity
+days: a 1 MW battery with the FES fleet earns £16,591 in Holistic Transition, £17,441 in
+Electric Engagement and £26,961 in Hydrogen Evolution, of which 23%, 17% and 45% comes on
+the days with an hour priced at £1,000/MWh or more (one to three across the two weather
+years). Holistic Transition's and Electric Engagement's are all in 2025's weather; a value
+resting on them is a statement about one cold week, not about the pathway.</p>
+<p>What this says, with its limits: in a GB system that has enough firm capacity, battery
+value halves or more as the first 11 to 15 GW of FES's fleet arrives, and falls to 15–18% of the
+first battery's value at three times the fleet. It is the perfect-foresight value of a
+2-hour battery on a model whose daily spread is 76% of the real one in 2025, so the levels
+are lower bounds on what the spread allows and upper bounds on what a forecast captures;
+the shape of the curve is the result.</p>
 <h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
 <ul>
 <li>One GB bus: no constraint between Scotland and England, which is where much FES
@@ -1916,13 +2209,13 @@ Ember or the ECB.</p>
         
         
           
-          <a href="../web-app/" class="md-footer__link md-footer__link--next" aria-label="Next: Web app">
+          <a href="../constraints/" class="md-footer__link md-footer__link--next" aria-label="Next: Constraints">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Web app
+                Constraints
               </div>
             </div>
             <div class="md-footer__button md-icon">

@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://koulakhilesh.github.io/OpenEnergy/main/guides/web-app/">
       
       
-        <link rel="prev" href="../forward-scenarios/">
+        <link rel="prev" href="../constraints/">
       
       
         <link rel="next" href="../reports/">
@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts/" class="md-nav__link">
         
   
@@ -449,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -470,8 +562,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -681,6 +773,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -742,6 +862,45 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In the browser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-the-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From the API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#json-api" class="md-nav__link">
@@ -901,6 +1060,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In the browser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-the-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From the API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#json-api" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -959,10 +1157,11 @@
 
 
 <h1 id="web-app">Web app<a class="headerlink" href="#web-app" title="Permanent link">&para;</a></h1>
-<p>The web app values a battery on a historic GB year or on a NESO FES pathway's modelled
-prices, answers in one plain sentence, and shows the charts, assumptions and sources behind
-it. Since v5.0 the pages are a React and TypeScript front end (<code>web/</code>) on a FastAPI JSON
-API (<code>openenergy.app</code>). It runs at
+<p>The web app shows a battery trading Britain's grid and values one on any GB day or year or
+on a NESO FES pathway's modelled prices. It answers in plain sentences and shows the
+charts, assumptions and sources behind each answer. The pages are a React and TypeScript
+front end (<code>web/</code>); the year-long results come from a FastAPI JSON API (<code>openenergy.app</code>),
+and since v6.0 the day-by-day pages run the battery optimiser in the browser. It runs at
 <a href="https://open-energy-eight.vercel.app/">open-energy-eight.vercel.app</a>, or locally:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w">                        </span><span class="c1"># the app dependency group (FastAPI, plotly, uvicorn) is a default</span>
 npm<span class="w"> </span>--prefix<span class="w"> </span>web<span class="w"> </span>ci<span class="w">            </span><span class="c1"># Node 22 or later</span>
@@ -974,6 +1173,8 @@ uv<span class="w"> </span>run<span class="w"> </span>uvicorn<span class="w"> </s
 from a clone; <code>pip install openenergy[app]</code> installs the API and its dependencies only. To
 work on the pages, run the API as above and <code>npm --prefix web run dev</code> (Vite on port 5173,
 passing API calls to port 8000).</p>
+<h2 id="pages">Pages<a class="headerlink" href="#pages" title="Permanent link">&para;</a></h2>
+<h3 id="in-the-browser">In the browser<a class="headerlink" href="#in-the-browser" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -984,7 +1185,50 @@ passing API calls to port 8000).</p>
 <tbody>
 <tr>
 <td><code>/</code></td>
-<td>Form: historic GB year (2017–2025, Ember prices) or a FES pathway in 2030 or 2035; power (MW) and duration (0.5–8 hours); forecast (last week's prices or perfect foresight); frequency response (none, Dynamic Containment, or Containment and Moderation; historic years from 2022)</td>
+<td>A real day plays itself: a 1 MW battery plans on OpenEnergy's forecast, the price line draws, the battery fills and empties and a counter adds up what it earns; then the ways in</td>
+</tr>
+<tr>
+<td><code>/lab</code></td>
+<td><strong>Battery Lab.</strong> Any day from 2019, any power, duration, efficiency and wear cost; plan with perfect foresight, OpenEnergy's forecast and last week's prices at once and see each plan's trades; the whole year below as a strip, solved in the background a month at a time (click a day to open it); "best day" and "the forecast's worst miss" jump to them</td>
+</tr>
+<tr>
+<td><code>/replay</code></td>
+<td><strong>Grid replay.</strong> Any week from 2019 to 2025: generation by fuel, price and carbon intensity hour by hour; play, scrub or jump to the year's dearest, windiest, stillest or cleanest week</td>
+</tr>
+<tr>
+<td><code>/2035</code></td>
+<td>The <a href="../forward-scenarios/#how-much-storage-can-gb-use">storage saturation study</a>: pick a pathway and drag the battery fleet to see what one more battery earns and how much firm capacity is still needed</td>
+</tr>
+<tr>
+<td><code>/play</code></td>
+<td><strong>Beat the battery.</strong> Plan a day yourself from OpenEnergy's forecast, then see actual prices and your result against the optimiser on the same forecast and against perfect foresight; the same day for everyone each day, and any day by link (<code>/play?d=2024-03-12</code>)</td>
+</tr>
+<tr>
+<td><code>/embed/arbitrage</code></td>
+<td>Draggable prices with the optimal plan, for the docs (<a href="../../concepts/">Concepts</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>These pages read static files (<code>web/public/data/</code>, written by
+<code>scripts/build_app_data.py</code> and served at <code>/data/&lt;file&gt;</code>): hourly prices and the fundamentals forecast for each year,
+the generation mix and carbon intensity, and the saturation study, each with its
+attribution. The optimiser is the same daily mixed-integer programme as
+<code>openenergy.dispatch.optimise_dispatch</code>, built in TypeScript (<code>web/src/engine/</code>) and
+solved by <a href="https://github.com/lovasoa/highs-js">HiGHS compiled to WebAssembly</a> (MIT,
+about 3.5 MB, loaded on first use). <code>npm test</code> checks it against the Python backtest on a
+month of 2025 for all three forecasts, day by day (<code>engine-parity.json</code>).</p>
+<h3 id="from-the-api">From the API<a class="headerlink" href="#from-the-api" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/run</code></td>
+<td>Form: historic GB year (2017–2025, Ember prices) or a FES pathway in 2030 or 2035; power (MW) and duration (0.5–8 hours); forecast (last week's prices, OpenEnergy's forecast from 2019, or perfect foresight); frequency response (none, Dynamic Containment, or Containment and Moderation; historic years from 2022)</td>
 </tr>
 <tr>
 <td><code>/result</code></td>
@@ -1020,9 +1264,11 @@ passing API calls to port 8000).</p>
 </tr>
 </tbody>
 </table>
-<p>Page addresses and their query parameters are the same as before v5.0, so shared links keep
-working. Every input and key number has a "?" next to it that explains it in a sentence
-(hover, tab to it, or tap). The battery uses 95% efficiency each way and a £5/MWh wear cost.
+<p>Page addresses and their query parameters are the same as before v5.0 (the form moved from
+<code>/</code> to <code>/run</code> in v6.0), so shared results keep working. Every input and key number has a
+"?" next to it that explains it in a sentence (hover, tab to it, or tap). The battery uses
+95% efficiency each way and a £5/MWh wear cost. Light and dark themes follow the system
+setting, and the button in the header switches them.
 On Vercel a run took 18 seconds for GB 2024, 14 seconds for a FES pathway and 44 seconds
 with Dynamic Containment (measured 14 October 2026). Pathway prices are precomputed in
 <code>data/scenarios/</code> by <code>scripts/build_scenario_prices.py</code> (see
@@ -1068,8 +1314,8 @@ at a fixed duration:</p>
 <span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2 h battery, GB 2024"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"precomputed"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"request"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"history"</span><span class="p">,</span><span class="w"> </span><span class="nt">"year"</span><span class="p">:</span><span class="w"> </span><span class="mi">2024</span><span class="p">,</span><span class="w"> </span><span class="nt">"hours"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="nt">"prices"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gb-2024"</span><span class="p">,</span><span class="w"> </span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"days"</span><span class="p">:</span><span class="w"> </span><span class="mi">366</span><span class="p">,</span><span class="w"> </span><span class="nt">"revenue_per_mw_year"</span><span class="p">:</span><span class="w"> </span><span class="mf">29039.2</span><span class="p">,</span><span class="w"> </span><span class="nt">"perfect_per_mw_year"</span><span class="p">:</span><span class="w"> </span><span class="mf">39304.0</span><span class="p">,</span>
-<span class="w">              </span><span class="nt">"capture_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.739</span><span class="p">,</span><span class="w"> </span><span class="nt">"cycles_per_day"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.57</span><span class="p">,</span><span class="w"> </span><span class="nt">"captured_spread"</span><span class="p">:</span><span class="w"> </span><span class="mf">26.72</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"days"</span><span class="p">:</span><span class="w"> </span><span class="mi">366</span><span class="p">,</span><span class="w"> </span><span class="nt">"revenue_per_mw_year"</span><span class="p">:</span><span class="w"> </span><span class="mf">29048.5</span><span class="p">,</span><span class="w"> </span><span class="nt">"perfect_per_mw_year"</span><span class="p">:</span><span class="w"> </span><span class="mf">39304.0</span><span class="p">,</span>
+<span class="w">              </span><span class="nt">"capture_ratio"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.739</span><span class="p">,</span><span class="w"> </span><span class="nt">"cycles_per_day"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.57</span><span class="p">,</span><span class="w"> </span><span class="nt">"captured_spread"</span><span class="p">:</span><span class="w"> </span><span class="mf">26.73</span><span class="p">,</span>
 <span class="w">              </span><span class="nt">"forecast_mae"</span><span class="p">:</span><span class="w"> </span><span class="mf">19.54</span><span class="p">,</span><span class="w"> </span><span class="nt">"response_share"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
 <span class="w">  </span><span class="nt">"daily"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"2024-01-01"</span><span class="p">,</span><span class="w"> </span><span class="s2">"..."</span><span class="p">],</span><span class="w"> </span><span class="nt">"revenue"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">111.27</span><span class="p">,</span><span class="w"> </span><span class="s2">"..."</span><span class="p">],</span>
 <span class="w">            </span><span class="nt">"benchmark_revenue"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">241.64</span><span class="p">,</span><span class="w"> </span><span class="s2">"..."</span><span class="p">]},</span>
@@ -1132,7 +1378,7 @@ app does not read.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../forward-scenarios/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Forward scenarios">
+          <a href="../constraints/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Constraints">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1142,7 +1388,7 @@ app does not read.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Forward scenarios
+                Constraints
               </div>
             </div>
           </a>

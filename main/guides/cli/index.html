@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../concepts/" class="md-nav__link">
         
   
@@ -449,10 +541,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -470,8 +562,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -863,6 +955,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../web-app/" class="md-nav__link">
         
   
@@ -1165,8 +1285,8 @@ prefix commands with <code>uv run</code>.</p>
 <p>Runs one scenario, prints a summary and writes <a href="../scenarios/#outputs">outputs</a>.</p>
 <div class="highlight"><pre><span></span><code>gb-2019-naive (naive_last_week, GBP)
   days simulated        363 (2 skipped)
-  revenue               13,918.48 GBP
-  revenue per MW-year   13,995.16 GBP
+  revenue               13,919.64 GBP
+  revenue per MW-year   13,996.34 GBP
   captured spread       15.79 GBP/MWh
   equivalent cycles     464.7
   final SOH             0.9807
@@ -1179,7 +1299,7 @@ prefix commands with <code>uv run</code>.</p>
 and the co-location comparison:</p>
 <div class="highlight"><pre><span></span><code>gb-2019-pv-colocated (naive_last_week, GBP)
   days simulated        361 (2 skipped)
-  revenue               614,474.47 GBP
+  revenue               614,536.53 GBP
   premium               0.00 GBP
   plant output          13,265 MWh (0.3% curtailed)
   equivalent cycles     462.5
@@ -1187,8 +1307,8 @@ and the co-location comparison:</p>
   forecast MAE / RMSE   6.02 / 8.14 GBP/MWh
   capture ratio         96.2%
   plant captured price  41.24 GBP/MWh (96.1% of baseload)
-  separate assets       616,873.99 GBP (plant 546,977 + battery 69,897)
-  co-location value     -2,399.52 GBP (upper bound: plant output known)
+  separate assets       616,899.61 GBP (plant 546,977 + battery 69,922)
+  co-location value     -2,363.08 GBP (upper bound: plant output known)
 </code></pre></div>
 <h2 id="openenergy-report"><code>openenergy report</code><a class="headerlink" href="#openenergy-report" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>report<span class="w"> </span>DIR<span class="w"> </span><span class="o">[</span>DIR<span class="w"> </span>...<span class="o">]</span><span class="w"> </span><span class="o">[</span>-o<span class="w"> </span>report.html<span class="o">]</span><span class="w"> </span><span class="o">[</span>--title<span class="w"> </span>TEXT<span class="o">]</span><span class="w"> </span><span class="o">[</span>--cdn<span class="o">]</span>

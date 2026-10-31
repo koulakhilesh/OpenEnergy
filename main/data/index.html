@@ -253,6 +253,44 @@
   
   
     <li class="md-tabs__item">
+      <a href="../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../concepts/" class="md-tabs__link">
         
   
@@ -404,6 +442,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../concepts/" class="md-nav__link">
         
   
@@ -444,10 +536,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -465,8 +557,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -679,6 +771,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../guides/constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guides/web-app/" class="md-nav__link">
         
   
@@ -868,6 +988,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-is-known-the-day-before" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is known the day before
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#future-energy-scenarios" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -894,6 +1025,17 @@
     <span class="md-ellipsis">
       
         Imbalance prices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transmission-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transmission constraints
       
     </span>
   </a>
@@ -1050,6 +1192,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-is-known-the-day-before" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is known the day before
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#future-energy-scenarios" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1076,6 +1229,17 @@
     <span class="md-ellipsis">
       
         Imbalance prices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transmission-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transmission constraints
       
     </span>
   </a>
@@ -1348,7 +1512,7 @@ direction and rough scale, not causal impact.</p>
 </tr>
 <tr>
 <td><code>fuel_prices.csv</code></td>
-<td>Quarterly coal, oil and gas prices paid by major power producers, 2014–2025</td>
+<td>Quarterly coal, oil and gas prices paid by major power producers, 2014–2025; the model's gas price before 2018 and with <code>gas_price: quarterly</code></td>
 <td>DESNZ QEP 3.2.1</td>
 </tr>
 <tr>
@@ -1399,9 +1563,10 @@ within the year (EU ETS 2018 rose from about €10 to €25; UK ETS 2021–2023 
 World Bank dashboard has no UK ETS price on 1 April 2021, before the first auction, so
 2021 uses DESNZ's 2021 carbon price (mean auction price, £47.96/t). DESNZ suppresses some
 coal prices from 2023 (carried forward) and gives no coal efficiency for 2025 (latest
-earlier value used). Fuel prices are what power producers paid, including contracts
-agreed earlier, so they lag market gas prices: see the
-<a href="../guides/system-model/#after-2020-gas-crisis-and-coal-exit">system model</a>. Emission
+earlier value used). Quarterly fuel prices are what power producers paid, including
+contracts agreed earlier, so they lag market gas prices; since v6.0 the model uses the
+daily wholesale gas price from 2018 instead (below, and the
+<a href="../guides/system-model/#after-2020-gas-crisis-and-coal-exit">system model</a>). Emission
 factors (gas 0.1839, coal 0.3096 tCO2 per MWh of fuel) follow from the carbon price support
 rates, which are set at £18/tCO2.</p>
 <p>The interconnector register holds today's capacities only. Each link's first day in
@@ -1417,6 +1582,47 @@ actual GB and neighbour day-ahead prices, per direction, capped at 1. It uses ac
 prices and flows only. Fitted on 2019–2022 it gives 36.9 TWh of imports in 2024 (actual
 43.9, full capacity 66.0) and 11.8 TWh of exports (actual 10.6); the published file is
 fitted on 2019–2025.</p>
+<h2 id="what-is-known-the-day-before">What is known the day before<a class="headerlink" href="#what-is-known-the-day-before" title="Permanent link">&para;</a></h2>
+<p><code>data/fundamentals/</code>, written by <code>scripts/fetch_fundamentals.py</code> (or
+<code>openenergy data update --fundamentals</code>), holds what is published before the day-ahead
+auction, each with the time it was issued so a backtest uses only what existed at its
+decision time:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Contents</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gas_sap_daily.csv</code></td>
+<td>Daily System Average Price of gas, p/kWh, 2018-01-01 to 2026-10-25 (3,220 days, no gaps)</td>
+<td>ONS, from National Gas Transmission</td>
+</tr>
+<tr>
+<td><code>neso_demand_day_ahead.csv</code></td>
+<td>NESO's day-ahead national demand forecast at its cardinal points, with issue times, 2018-01-02 to 2026-11-01 (58,792 points)</td>
+<td>NESO Day Ahead Demand Forecast</td>
+</tr>
+<tr>
+<td><code>elexon_wind_day_ahead.csv</code></td>
+<td>Elexon's hourly wind forecast, the latest issued by noon UTC the day before, 2018-01-02 to 2026-11-01 (76,970 hours)</td>
+<td>Elexon BMRS WINDFOR</td>
+</tr>
+</tbody>
+</table>
+<p>The system model uses the daily gas price from its first day (quarterly DESNZ prices
+before); the <code>fundamentals</code> forecast uses all three. Known issues: SAP is a wholesale price
+without the network charges power stations pay; NESO's demand forecast covers transmission
+demand and its published times fit best an hour earlier (used as published); NESO's own
+wind forecast archive keeps only the latest issue for each half-hour, often made on the
+day, so Elexon's is used. Details in <code>data/fundamentals/README.md</code>.</p>
+<p><code>data/forecasts/gb_fundamentals_day_ahead.csv</code> is model output, not source data: the
+<code>fundamentals</code> forecast for every hour from 2019 to 28 October 2026, exactly as a backtest
+would make it, so scenarios and the web app can use it without training
+(<code>data/forecasts/README.md</code>; built by <code>scripts/build_fundamentals_forecast.py</code>).</p>
 <h2 id="future-energy-scenarios">Future Energy Scenarios<a class="headerlink" href="#future-energy-scenarios" title="Permanent link">&para;</a></h2>
 <p><code>data/fes/</code> holds NESO's Future Energy Scenarios tables unchanged, written by
 <code>scripts/fetch_fes.py</code>: the electricity supply (ES1) and demand summary (ED1) tables of
@@ -1429,9 +1635,14 @@ fuel or carbon prices and no storage efficiencies.</p>
 <p><code>data/scenarios/</code> is model output, not source data: hourly modelled prices for each
 pathway in 2030 and 2035 on 2025's weather (<code>fes_prices.csv</code>) and a summary next to FES's
 own figures (<code>fes_summary.csv</code>), written by <code>scripts/build_scenario_prices.py</code> for the
-<a href="../guides/web-app/">web app</a>. <code>data/app/</code> is model output too: per-MW battery results for
-common requests (1, 2 and 4 hours, every year, response option and pathway), written by
-<code>scripts/build_app_results.py</code> so the app answers at once.</p>
+<a href="../guides/web-app/">web app</a>, and the storage saturation study (<code>saturation.csv</code>,
+<code>saturation_years.csv</code>, from <code>openenergy system saturation</code>; see
+<a href="../guides/forward-scenarios/#how-much-storage-can-gb-use">forward scenarios</a>).
+<code>data/app/</code> is model output too: per-MW battery results for common requests (1, 2 and 4
+hours, every year, forecast, response option and pathway), written by
+<code>scripts/build_app_results.py</code> so the app answers at once. <code>web/public/data/</code> reshapes
+bundled data and these results into the static files the app's in-browser pages read
+(<code>scripts/build_app_data.py</code>), each carrying its attribution.</p>
 <h2 id="frequency-response">Frequency response<a class="headerlink" href="#frequency-response" title="Permanent link">&para;</a></h2>
 <p><code>data/response/</code>, written by <code>scripts/fetch_response_data.py</code>, feeds
 <a href="../guides/revenue-stacking/">revenue stacking</a>:</p>
@@ -1454,6 +1665,13 @@ the GB system (imbalance) price for every half-hour from 2016 to 29 October 2026
 periods, 20
 blank where Elexon's API returned nothing). GB has a single imbalance price, so the sell
 and buy prices are equal; it is used by <code>examples/imbalance_value.py</code>.</p>
+<h2 id="transmission-constraints">Transmission constraints<a class="headerlink" href="#transmission-constraints" title="Permanent link">&para;</a></h2>
+<p><code>data/constraints/</code>, written by <code>scripts/fetch_constraints.py</code>, holds the evidence on the
+<a href="../guides/constraints/">constraints page</a>; no model uses it yet:
+<code>constraint_breakdown_daily.csv</code>, NESO's daily constraint costs and volumes from April
+2021 (values unchanged), and <code>day_ahead_boundaries_monthly.csv</code>, a monthly summary of
+NESO's half-hourly day-ahead limits and flows by boundary group from January 2023. Known
+issues are in <code>data/constraints/README.md</code>.</p>
 <h2 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h2>
 <p><strong>Prices, load and renewables</strong></p>
 <blockquote>
@@ -1494,6 +1712,13 @@ average prices of fuels purchased by the major UK power producers.
 <a href="https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers">https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers</a>
 (accessed 10 October 2026).</p>
 </blockquote>
+<p><strong>Daily gas price</strong></p>
+<blockquote>
+<p>Office for National Statistics. System Average Price (SAP) of gas, table 1 (daily), from
+National Gas Transmission.
+<a href="https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/systemaveragepricesapofgas">https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/systemaveragepricesapofgas</a>
+(accessed 30 October 2026). Official statistics in development.</p>
+</blockquote>
 <p><strong>Carbon price support</strong></p>
 <blockquote>
 <p>HM Revenue &amp; Customs. Excise Notice CCL1/6: a guide to carbon price floor, section 2.3,
@@ -1508,7 +1733,7 @@ use in civil penalties, 2021 and 2022.
 <a href="https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price">https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price</a>
 (accessed 10 October 2026).</p>
 </blockquote>
-<p>The four UK government sources contain public sector information licensed under the
+<p>The five UK government sources contain public sector information licensed under the
 <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.</p>
 <p><strong>EU ETS and UK ETS prices</strong></p>
 <blockquote>
@@ -1591,6 +1816,27 @@ unchanged, converts delivery times to UTC and reduces frequency to monthly avera
 <a href="https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/">BMRS data licence</a>.
 Contains BMRS data © Elexon Limited copyright and database right 2026.</p>
 </blockquote>
+<p><strong>Day-ahead demand and wind forecasts</strong></p>
+<blockquote>
+<p>National Energy System Operator (NESO). Day Ahead Demand Forecast, Historic Day Ahead
+Demand Forecasts. <a href="https://www.neso.energy/data-portal/1-day-ahead-demand-forecast">https://www.neso.energy/data-portal/1-day-ahead-demand-forecast</a>
+(accessed 30 October 2026). Licensed under the
+<a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a>.
+Supported by National Energy SO Open Data.</p>
+<p>Elexon. BMRS Insights API, wind generation forecast (WINDFOR),
+<a href="https://bmrs.elexon.co.uk/">https://bmrs.elexon.co.uk/</a> (accessed 30 October 2026). Reused under the
+<a href="https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/">BMRS data licence</a>.
+Contains BMRS data © Elexon Limited copyright and database right 2026.</p>
+</blockquote>
+<p><strong>Transmission constraints</strong></p>
+<blockquote>
+<p>National Energy System Operator (NESO). Constraint Breakdown Costs and Volume,
+<a href="https://www.neso.energy/data-portal/constraint-breakdown">https://www.neso.energy/data-portal/constraint-breakdown</a>, and Day Ahead Constraint
+Flows and Limits, <a href="https://www.neso.energy/data-portal/day-ahead-constraint-flows-and-limits">https://www.neso.energy/data-portal/day-ahead-constraint-flows-and-limits</a>
+(accessed 31 October 2026). Licensed under the
+<a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a>.
+Supported by National Energy SO Open Data.</p>
+</blockquote>
 <p><strong>Unit sizes and minimum loads</strong></p>
 <blockquote>
 <p>Danish Energy Agency. Technology Data for Generation of Electricity and District
@@ -1611,15 +1857,17 @@ typical plant, not GB-specific.</p>
 <p>The system files keep source values unchanged apart from dropped rows and columns, GB
 totals (England and Wales plus Scotland), integer MW and the start-cost conversion;
 changes are listed in <code>data/system/README.md</code>. OpenEnergy is not affiliated with or
-endorsed by Open Power System Data, NESO, Elexon, DESNZ, HMRC, the World Bank, the ECB,
-the Danish Energy Agency, NREL or Ember.</p>
+endorsed by Open Power System Data, NESO, Elexon, DESNZ, ONS, National Gas Transmission,
+HMRC, the World Bank, the ECB, the Danish Energy Agency, NREL or Ember.</p>
 <h2 id="software">Software<a class="headerlink" href="#software" title="Permanent link">&para;</a></h2>
 <p>The system model's storage dispatch uses PyPSA:</p>
 <blockquote>
 <p>T. Brown, J. Hörsch, D. Schlachtberger. PyPSA: Python for Power System Analysis.
 Journal of Open Research Software 6(1), 2018. <a href="https://doi.org/10.5334/jors.188">https://doi.org/10.5334/jors.188</a>.</p>
 </blockquote>
-<p>Optimisation problems are solved with <a href="https://highs.dev">HiGHS</a> (MIT licence).</p>
+<p>Optimisation problems are solved with <a href="https://highs.dev">HiGHS</a> (MIT licence); the web
+app's in-browser optimiser uses <a href="https://github.com/lovasoa/highs-js">highs-js</a>, HiGHS
+compiled to WebAssembly (MIT licence).</p>
 <p>Each data folder has a <code>README.md</code> with the full source, licence and known issues, and
 every <code>summary.json</code> repeats the attribution for the data a run used.</p>
 
