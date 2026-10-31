@@ -6,6 +6,7 @@ import dataclasses
 import itertools
 import json
 import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -39,7 +40,7 @@ from openenergy.system.forward import (
     fes_changes,
     links,
 )
-from openenergy.system.model import Link, PriceKind, Storage, SystemResult, solve
+from openenergy.system.model import Link, PriceKind, Storage, SystemResult, SystemSpec, solve
 from openenergy.system.validate import (
     BACKCAST_START,
     COMMITMENT_NOTE,
@@ -56,6 +57,16 @@ SYSTEM_NOTE = (
     "commitment, so price spreads are narrower than in the real market."
 )
 _HOUR = pd.Timedelta(hours=1)
+# GB reliability standard: 3 hours' loss of load expectation a year (DESNZ, Capacity Market).
+RELIABILITY_STANDARD_HOURS = 3.0
+FIRM_STEP_MW = 250.0
+FIRM_LIMIT_MW = 64000.0
+ADEQUACY_NOTE = (
+    "Secure system: the least firm peaking capacity (in 250 MW steps, costed as gas peaking "
+    "plant) that keeps hours with unserved energy within GB's reliability standard of 3 "
+    "hours' loss of load expectation a year is added, as the Capacity Market would buy it; "
+    "in one weather year this is a single draw, not an expectation."
+)
 
 
 class StorageSection(_Strict):
@@ -104,7 +115,12 @@ class FesSection(_Strict):
     """A NESO FES pathway and year applied to the weather year (``system.year``).
 
     Storage efficiencies are stated assumptions; FES does not publish them.
-    ``data`` defaults to ``fes/`` next to the system data.
+    ``data`` defaults to ``fes/`` next to the system data. ``adequacy: secure`` adds the
+    least firm peaking capacity (to 250 MW) that keeps hours with unserved energy within
+    ``lole_hours``, GB's reliability standard of 3 hours' loss of load expectation;
+    ``as_modelled`` adds none; ``firm_mw`` adds that much instead of searching (the saturation
+    study searches across weather years). ``battery_scale`` multiplies the FES battery
+    fleet's power (same duration).
     """
 
     pathway: str
@@ -112,6 +128,10 @@ class FesSection(_Strict):
     data: Path | None = None
     battery_efficiency: float = Field(default=0.85, gt=0, le=1)
     ldes_efficiency: float = Field(default=0.75, gt=0, le=1)
+    adequacy: Literal["secure", "as_modelled"] = "secure"
+    lole_hours: float = Field(default=RELIABILITY_STANDARD_HOURS, ge=0)
+    firm_mw: float | None = Field(default=None, ge=0)
+    battery_scale: float = Field(default=1.0, ge=0)
 
     @pydantic.field_validator("pathway")
     @classmethod
@@ -135,6 +155,7 @@ class SystemSection(_Strict):
     scale: dict[str, float] = Field(default_factory=dict)
     capacity_mw: dict[str, float] = Field(default_factory=dict)
     fuel_price_scale: dict[str, float] = Field(default_factory=dict)
+    gas_price: Literal["daily", "quarterly"] = "daily"
     # eu_ets_gbp_per_t is the v3.1 name, kept so older scenarios still load.
     ets_gbp_per_t: float | None = Field(
         default=None, ge=0, validation_alias=AliasChoices("ets_gbp_per_t", "eu_ets_gbp_per_t")
@@ -229,6 +250,9 @@ class SystemSummary:
     backend: str
     imports_twh: float | None = None
     exports_twh: float | None = None
+    unserved_hours: int = 0
+    firm_added_mw: float | None = None
+    storage_mw: dict[str, float] = dataclasses.field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
@@ -260,7 +284,7 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
     section = scenario.system
     first, last = section.window()
     mix = GenerationMixSource(section.data / "generation_mix.csv").mix(first, last, step=_HOUR)
-    inputs = SystemInputs(section.data)
+    inputs = SystemInputs(section.data, section.gas_price)
     index = pd.DatetimeIndex(mix.index)
     scale: dict[str, float] = {}
     capacity: dict[str, float] = {}
@@ -286,7 +310,14 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
         )
         scale.update(changes.scale)
         capacity.update(changes.capacity_mw)
-        storage = [*changes.storage, *storage]
+        fes_storage = [
+            dataclasses.replace(unit, power_mw=unit.power_mw * section.fes.battery_scale)
+            if unit.name == "fes_battery"
+            else unit
+            for unit in changes.storage
+            if unit.name != "fes_battery" or section.fes.battery_scale > 0
+        ]
+        storage = [*fes_storage, *storage]
         link_scale = changes.link_scale
     trade: tuple[Link, ...] = ()
     if section.interconnectors.mode == "links":
@@ -302,29 +333,56 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
     # Explicit scale and capacity entries override the FES and links settings.
     scale.update(section.scale)
     capacity.update(section.capacity_mw)
-    spec = build_system(
-        mix,
-        inputs,
-        FleetAssumptions(**section.assumptions.model_dump()),
-        Adjustments(
-            scale=scale,
-            capacity_mw=capacity,
-            fuel_price_scale=section.fuel_price_scale,
-            ets_gbp_per_t=section.ets_gbp_per_t,
-            carbon_price_support=section.carbon_price_support,
-        ),
-        storage,
-        section.voll,
-        trade,
-    )
     commitment = (
         Commitment.from_inputs(inputs, section.lookahead_hours) if section.commitment else None
     )
-    result = solve(spec, section.backend, commitment)
+    assumptions = FleetAssumptions(**section.assumptions.model_dump())
+    peaking = capacity.get("peaking")
+
+    def solved(firm_mw: float) -> tuple[SystemSpec, SystemResult]:
+        extra = dict(capacity)
+        if firm_mw > 0:
+            base = peaking if peaking is not None else _installed_peaking(inputs, index)
+            # Availability derates thermal plant, so the added capacity is grossed up.
+            extra["peaking"] = base + firm_mw / assumptions.availability
+        spec = build_system(
+            mix,
+            inputs,
+            assumptions,
+            Adjustments(
+                scale=scale,
+                capacity_mw=extra,
+                fuel_price_scale=section.fuel_price_scale,
+                ets_gbp_per_t=section.ets_gbp_per_t,
+                carbon_price_support=section.carbon_price_support,
+            ),
+            storage,
+            section.voll,
+            trade,
+        )
+        return spec, solve(spec, section.backend, commitment)
+
+    firm = None
+    fes = section.fes
+    if fes is not None and fes.firm_mw is not None:
+        firm = fes.firm_mw
+        spec, result = solved(firm)
+    elif fes is not None and fes.adequacy == "secure":
+        # Each trial is a full solve; keep them so the chosen one is not solved twice.
+        runs: dict[float, tuple[SystemSpec, SystemResult]] = {}
+
+        def meets(firm_mw: float) -> bool:
+            runs[firm_mw] = runs.get(firm_mw) or solved(firm_mw)
+            return unserved_hours(runs[firm_mw][1]) <= fes.lole_hours
+
+        firm = least_firm(meets)
+        spec, result = runs[firm]
+    else:
+        spec, result = solved(0.0)
     actual = None
     if section.prices:
         actual = gb_prices(section.prices, first, last)[0].prices.mean()
-    summary = _summarise(section.year, spec.storage, result, actual, section.price)
+    summary = _summarise(section.year, spec.storage, result, actual, section.price, firm)
     if scenario.battery is None:
         return SystemRun(scenario, result, summary, None)
     prices = PriceSeries(result.price_of(section.price), currency="GBP", zone="GB_GBN")
@@ -342,6 +400,38 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
         summarise(run, benchmark=benchmark),
         summarise(benchmark, benchmark=benchmark),
     )
+
+
+def unserved_hours(result: SystemResult) -> int:
+    """Hours (periods) with more than 1 MW of demand not met."""
+    return int((result.unserved > 1.0).sum())
+
+
+def _installed_peaking(inputs: SystemInputs, index: pd.DatetimeIndex) -> float:
+    installed = inputs.capacity(index)
+    return float((installed["gas_turbine_mw"] + installed["oil_engine_mw"]).mean())
+
+
+def least_firm(meets: Callable[[float], bool]) -> float:
+    """The least firm capacity, in ``FIRM_STEP_MW`` steps, for which ``meets`` holds.
+
+    ``meets`` must hold for all capacities above one where it holds. Doubles from one step
+    until it holds, then halves the interval; each call is usually a full solve.
+    """
+    if meets(0.0):
+        return 0.0
+    low, high = 0.0, FIRM_STEP_MW
+    while not meets(high):
+        low, high = high, high * 2
+        if high > FIRM_LIMIT_MW:
+            raise ConfigError(f"no secure system within {FIRM_LIMIT_MW:,.0f} MW of firm capacity")
+    while high - low > FIRM_STEP_MW:
+        middle = round((low + high) / 2 / FIRM_STEP_MW) * FIRM_STEP_MW
+        if meets(middle):
+            high = middle
+        else:
+            low = middle
+    return high
 
 
 def write_system_outputs(run: SystemRun, directory: str | Path) -> Path:
@@ -373,6 +463,10 @@ def write_system_outputs(run: SystemRun, directory: str | Path) -> Path:
         note += " " + LINKS_NOTE
     if section.fes is not None:
         note += " " + FES_NOTE
+        if section.fes.firm_mw is not None:
+            note += f" {section.fes.firm_mw:,.0f} MW of firm peaking capacity is added."
+        elif section.fes.adequacy == "secure":
+            note += " " + ADEQUACY_NOTE
     payload: dict[str, Any] = {
         "scenario": run.scenario.name,
         "openenergy_version": openenergy.__version__,
@@ -436,6 +530,7 @@ def _summarise(
     result: SystemResult,
     actual: float | None,
     kind: PriceKind,
+    firm_added_mw: float | None = None,
 ) -> SystemSummary:
     price = result.price_of(kind)
     hours = float(pd.Timedelta(price.index[1] - price.index[0]) / _HOUR)
@@ -474,4 +569,7 @@ def _summarise(
         backend=result.backend,
         imports_twh=imports,
         exports_twh=exports,
+        unserved_hours=unserved_hours(result),
+        firm_added_mw=firm_added_mw,
+        storage_mw={unit.name: unit.power_mw for unit in storage},
     )

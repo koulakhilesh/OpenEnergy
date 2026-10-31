@@ -5,6 +5,13 @@ from openenergy.forecast.baseline import (
     NaiveLastWeek,
     NoisyForesight,
     PerfectForesight,
+    PrecomputedForecast,
 )
 
-__all__ = ["Forecaster", "NaiveLastWeek", "NoisyForesight", "PerfectForesight"]
+__all__ = [
+    "Forecaster",
+    "NaiveLastWeek",
+    "NoisyForesight",
+    "PerfectForesight",
+    "PrecomputedForecast",
+]

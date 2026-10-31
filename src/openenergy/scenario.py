@@ -33,6 +33,11 @@ from openenergy.backtest.engine import (
 from openenergy.backtest.response import Response
 from openenergy.data.carbon import CARBON_ATTRIBUTION, CarbonIntensitySource
 from openenergy.data.ember import EMBER_ATTRIBUTION, EmberPriceSource
+from openenergy.data.fundamentals import (
+    FUNDAMENTALS_ATTRIBUTION,
+    FUNDAMENTALS_FROM,
+    FundamentalsSource,
+)
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.response import RESPONSE_ATTRIBUTION, ResponseSource
 from openenergy.data.series import PriceSeries, fill_gaps
@@ -44,12 +49,13 @@ from openenergy.forecast.baseline import (
     NaiveLastWeek,
     NoisyForesight,
     PerfectForesight,
+    PrecomputedForecast,
 )
 from openenergy.metrics.capture import CaptureMetrics, capture_metrics
 from openenergy.metrics.summary import Summary, summarise
 
 ForecastMethod = Literal[
-    "perfect_foresight", "naive_last_week", "noisy_foresight", "gradient_boosting"
+    "perfect_foresight", "naive_last_week", "noisy_foresight", "gradient_boosting", "fundamentals"
 ]
 ServiceName = Literal["DCL", "DCH", "DML", "DMH", "DRL", "DRH"]
 # Prices loaded before data.start as forecaster history only; covers the 14-day lag.
@@ -90,6 +96,16 @@ class ForecastSection(_Strict):
     seed: int = 0
     train_start: date | None = None
     train_end: date | None = None
+    # fundamentals: input folder (default: the fundamentals folder beside the price file's
+    # folder), a fixed stretch or "auto", and optionally forecasts built in advance.
+    fundamentals: Path | None = None
+    stretch: float | Literal["auto"] = "auto"
+    path: Path | None = None
+
+    @pydantic.field_validator("fundamentals", "path")
+    @classmethod
+    def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
+        return None if value is None else _resolve(value, info)
 
     @pydantic.model_validator(mode="after")
     def _method_requirements(self) -> ForecastSection:
@@ -99,6 +115,10 @@ class ForecastSection(_Strict):
             raise ValueError("train_end is required for gradient_boosting")
         if self.train_start and self.train_end and self.train_start > self.train_end:
             raise ValueError("train_start must not be after train_end")
+        if self.method != "fundamentals" and (self.path or self.fundamentals):
+            raise ValueError("path and fundamentals apply only to the fundamentals forecast")
+        if isinstance(self.stretch, float) and self.stretch <= 0:
+            raise ValueError("stretch must be positive or auto")
         return self
 
 
@@ -182,6 +202,7 @@ class Scenario(_Strict):
     forecast: ForecastSection = ForecastSection()
     dispatch: DispatchConfig = DispatchConfig()
     lead_hours: float = Field(default=12.0, ge=0)
+    information: Literal["auction", "decision"] = "auction"
     assets: AssetsSection | None = None
     grid: GridSection | None = None
     carbon: CarbonSection | None = None
@@ -340,9 +361,16 @@ def run_scenario(scenario: Scenario) -> ScenarioRun:
     data = scenario.data
     source = EmberPriceSource(data.path) if data.source == "ember" else OPSDCsvSource(data.path)
     load_start = data.start - timedelta(days=WARMUP_DAYS) if data.start else None
+    if scenario.forecast.method == "fundamentals" and scenario.forecast.path is None:
+        # The forecast trains each month on every price known since its inputs begin.
+        load_start = min(load_start or FUNDAMENTALS_FROM.date(), FUNDAMENTALS_FROM.date())
     raw = source.prices(data.zone, load_start, data.end)
     prices, filled = fill_gaps(raw, data.max_gap_hours)
-    config = BacktestConfig(lead_hours=scenario.lead_hours, dispatch=scenario.dispatch)
+    config = BacktestConfig(
+        lead_hours=scenario.lead_hours,
+        dispatch=scenario.dispatch,
+        information=scenario.information,
+    )
     days = None
     if data.start is not None:
         last = data.end or pd.DatetimeIndex(prices.prices.index)[-1].date()
@@ -428,6 +456,8 @@ def write_outputs(run: ScenarioRun, directory: str | Path) -> Path:
         "config": run.scenario.model_dump(mode="json"),
         "attribution": run.attribution,
     }
+    if run.scenario.forecast.method == "fundamentals":
+        payload["forecast_attribution"] = FUNDAMENTALS_ATTRIBUTION
     if run.colocation is not None and run.plant_capture is not None:
         payload["colocation"] = run.colocation.to_dict()
         payload["plant_capture"] = run.plant_capture.to_dict()
@@ -537,4 +567,21 @@ def _forecaster(
         training, _ = fill_gaps(training, scenario.data.max_gap_hours)
         model = GradientBoostingForecaster(lead_hours=scenario.lead_hours, seed=section.seed)
         return model.fit(training.prices)
+    if section.method == "fundamentals":
+        if section.path is not None:
+            return PrecomputedForecast(section.path, name="fundamentals")
+        try:
+            from openenergy.forecast.fundamentals import FundamentalsForecaster
+        except ImportError as exc:
+            raise ConfigError(
+                "fundamentals needs the forecast extra: pip install 'openenergy[forecast]'"
+            ) from exc
+        folder = section.fundamentals or scenario.data.path.parent.parent / "fundamentals"
+        return FundamentalsForecaster(
+            FundamentalsSource(folder),
+            lead_hours=scenario.lead_hours,
+            information=scenario.information,
+            stretch=section.stretch,
+            seed=section.seed,
+        )
     return NaiveLastWeek()

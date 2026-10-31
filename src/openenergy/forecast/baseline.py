@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Protocol
 
 import numpy as np
@@ -75,3 +76,26 @@ class NoisyForesight:
         window = int(index[0].timestamp()) % 2**63
         rng = np.random.default_rng([self._seed, window])
         return values + rng.normal(0.0, self._error_std, size=values.size)
+
+
+class PrecomputedForecast:
+    """Forecasts read from a CSV of ``utc_timestamp`` and ``forecast_gbp_per_mwh``.
+
+    For forecasts made in advance with the same information, such as the fundamentals
+    forecast built by ``scripts/build_fundamentals_forecast.py``.
+    """
+
+    def __init__(self, path: str | Path, name: str = "precomputed") -> None:
+        frame = pd.read_csv(path)
+        missing = {"utc_timestamp", "forecast_gbp_per_mwh"} - set(frame.columns)
+        if missing:
+            raise DataError(f"{path} is missing columns: {', '.join(sorted(missing))}")
+        index = pd.DatetimeIndex(pd.to_datetime(frame["utc_timestamp"], utc=True))
+        self._values = pd.Series(frame["forecast_gbp_per_mwh"].to_numpy(dtype=np.float64), index)
+        self.name = name
+
+    def forecast(self, history: pd.Series[float], index: pd.DatetimeIndex) -> FloatArray:
+        values = np.asarray(self._values.reindex(index), dtype=np.float64)
+        if np.isnan(values).any():
+            raise DataError(f"no {self.name} forecast for {index[0].date()}")
+        return values

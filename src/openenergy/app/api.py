@@ -17,6 +17,7 @@ import openenergy
 from openenergy.app import results, text
 from openenergy.app.results import PRECOMPUTED_HOURS, Result
 from openenergy.app.runs import (
+    FUNDAMENTALS_FROM,
     HISTORY_YEARS,
     RESPONSE_FROM,
     SCENARIO_NOTE,
@@ -155,6 +156,8 @@ class PathwayRow(BaseModel):
     exports_twh: float
     curtailment_twh: float
     unserved_gwh: float
+    unserved_hours: int
+    firm_added_mw: float
     emissions_mt: float
     fes_imports_twh: float
     fes_exports_twh: float
@@ -184,6 +187,7 @@ def options() -> Options:
         power_range=POWER_MW,
         forecasts={
             "naive_last_week": "last week's prices",
+            "fundamentals": f"OpenEnergy forecast (from {FUNDAMENTALS_FROM})",
             "perfect_foresight": "perfect foresight",
         },
         services={"none": "none", **text.SERVICE_NAMES},

@@ -21,19 +21,38 @@ function serve(routes: Record<string, { status: number; body: unknown }>) {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string) => {
-      const route = routes[url.split("?")[0]];
+      const route = routes[String(url).split("?")[0]] ?? { status: 404, body: {} };
       return new Response(JSON.stringify(route.body), { status: route.status });
     }),
   );
 }
 
+const PRICES = {
+  year: 2025,
+  start: "2025-01-01T00:00:00Z",
+  price: Array.from({ length: 365 * 24 }, (_, i) => 50 + 30 * Math.sin((i % 24) / 3)),
+  fundamentals: Array.from({ length: 365 * 24 }, (_, i) => 50 + 25 * Math.sin((i % 24) / 3)),
+  before: new Array(168).fill(50),
+  attribution: ["GB day-ahead prices: Ember, CC BY 4.0."],
+};
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe("App", () => {
-  it("offers the API's years and pathways on the home page", async () => {
-    serve({ "/api/options": { status: 200, body: OPTIONS } });
+  it("opens on a live day without needing the API", async () => {
+    serve({ "/data/prices-2025.json": { status: 200, body: PRICES } });
     render(<App path="/" search="" />);
-    expect(await screen.findByRole("heading", { name: "OpenEnergy battery value" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "Watch a battery trade a real day on Britain's grid." }),
+    ).toBeTruthy();
+    expect(await screen.findByText(/Ember, CC BY 4\.0/)).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: /Battery Lab/ }).length).toBeGreaterThan(1);
+  });
+
+  it("offers the API's years and pathways on the year form", async () => {
+    serve({ "/api/options": { status: 200, body: OPTIONS } });
+    render(<App path="/run" search="" />);
+    expect(await screen.findByRole("heading", { name: "Value a battery" })).toBeTruthy();
     expect(screen.getByRole("option", { name: "Falling Behind" })).toBeTruthy();
     expect(screen.getByText(/OpenEnergy 5\.0\.0/)).toBeTruthy();
   });

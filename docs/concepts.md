@@ -45,17 +45,31 @@ subject to the energy balance above for $t = 0 \dots T-1$ with $E_0$ fixed, and:
   battery never charges and discharges at once (an LP would, to burn energy at negative
   prices);
 - $SOC_{min}\, E_{usable} \le E_t \le SOC_{max}\, E_{usable}$;
-- $E_T \ge E_{target}$, by default the energy the day started with;
+- $E_T = E_{target}$, by default the energy the day started with;
 - optionally, $\sum_t (c_t + d_t)\, \Delta t \le 2 N_{max}\, E_{usable}$.
 
 The model is solved with [HiGHS](https://highs.dev); a day takes a few milliseconds.
+
+Try it: drag the prices and watch the plan change. Flatten them and the battery stops,
+because no gap covers its losses and wear; pull one evening hour up and it charges in the
+cheapest hours to sell into it. (The widget runs the same programme in your browser, from
+the [web app](guides/web-app.md); a 1 MW / 2 MWh battery, 95% each way, £5/MWh wear.)
+
+<iframe src="https://open-energy-eight.vercel.app/embed/arbitrage" title="Drag the prices: the battery's optimal plan" loading="lazy" style="width:100%;height:400px;border:0"></iframe>
+
+If the widget does not load, open it at
+[open-energy-eight.vercel.app/embed/arbitrage](https://open-energy-eight.vercel.app/embed/arbitrage).
 
 ## Backtest timing
 
 For each day $D$:
 
-1. The forecaster receives prices strictly before the decision time, `lead_hours` before
-   the start of $D$ (default 12, i.e. noon on $D-1$).
+1. The forecaster receives the prices known at the decision time, `lead_hours` before
+   the start of $D$ (default 12, i.e. noon on $D-1$). With `information: auction` (the
+   default since v6.0) that is every day whose day-ahead auction had cleared: GB's auction
+   for a day runs in the late morning of the day before, so at noon on $D-1$ all of
+   $D-1$'s prices are known. `information: decision` keeps only prices for hours before
+   the decision time, as before v6.0.
 2. The optimiser plans $D$ on the forecast, together with the next `lookahead_days` days
    of forecasts if set (all made at the same decision time); the end-energy target then
    applies at the end of the last planned day.
@@ -79,6 +93,7 @@ perfect-foresight benchmark on the same days.
 | `naive_last_week` | The same interval seven days earlier, falling back to fourteen. |
 | `noisy_foresight` | Actual prices plus seeded Gaussian error of a chosen spread. |
 | `gradient_boosting` | Gradient-boosted trees on calendar features and 1/2/7/14-day lags (needs the `forecast` extra). |
+| `fundamentals` | OpenEnergy's day-ahead forecast (v6.0): gradient-boosted trees retrained each month on what was known at the decision time (recent prices, NESO's day-ahead demand forecast, Elexon's day-ahead wind forecast, the daily gas price, the calendar), predicting each hour relative to the last day's mean price; each month's shape is stretched by the factor that earned a reference battery most over the previous 90 days. Needs the `forecast` extra, or `path` to the bundled precomputed forecast (`data/forecasts/`). |
 
 The gradient-boosting model masks any lag at or after the decision time in exactly the
 same way during training and forecasting, and is trained only on a window that ends

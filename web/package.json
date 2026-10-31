@@ -1,7 +1,7 @@
 {
   "name": "openenergy-web",
   "private": true,
-  "version": "5.0.0",
+  "version": "6.0.0",
   "type": "module",
   "description": "React front end for the OpenEnergy web app; talks to the FastAPI JSON API.",
   "license": "MIT",
@@ -17,6 +17,7 @@
     "api-types": "openapi-typescript src/api/openapi.json -o src/api/schema.d.ts"
   },
   "dependencies": {
+    "highs": "1.15.4",
     "plotly.js-basic-dist-min": "4.2.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"

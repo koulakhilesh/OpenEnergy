@@ -45,7 +45,7 @@ LINKS_NOTE = (
     "Interconnectors are price-taking links: each imports when GB's price is above the "
     "neighbour's actual day-ahead price in the weather year and exports when below, up to "
     "its capacity times an availability, by default fitted from its actual flows in "
-    "2019-2025 (not from prices); on 2024 this imports 46.4 TWh against 43.9 TWh actual."
+    "2019-2025 (not from prices); on 2024 this imports 46.3 TWh against 43.9 TWh actual."
 )
 
 

@@ -3,18 +3,25 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 import pandas as pd
 
+from openenergy.data.fundamentals import FundamentalsSource
 from openenergy.errors import DataError
+
+GasPrice = Literal["daily", "quarterly"]
 
 FLEET_ATTRIBUTION = (
     "Fleet and fuel data: Department for Energy Security and Net Zero, Digest of UK Energy "
     "Statistics 2026, tables 5.8 and 5.10 (https://www.gov.uk/government/statistics/"
     "electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes), and Quarterly "
     "Energy Prices table 3.2.1 (https://www.gov.uk/government/statistical-data-sets/"
-    "prices-of-fuels-purchased-by-major-power-producers); HM Revenue & Customs, carbon price "
+    "prices-of-fuels-purchased-by-major-power-producers); Office for National Statistics, "
+    "System Average Price (SAP) of gas, daily, from National Gas Transmission "
+    "(https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/"
+    "systemaveragepricesapofgas); HM Revenue & Customs, carbon price "
     "support rates (Excise Notice CCL1/6, Climate Change Levy rates); DESNZ, UK ETS carbon "
     "price for 2021 (https://www.gov.uk/government/publications/determinations-of-the-uk-"
     "ets-carbon-price). Contains public sector information licensed under the Open "
@@ -55,10 +62,24 @@ _GJ_PER_MWH = 3.6
 
 
 class SystemInputs:
-    """Reads the system CSVs written by ``scripts/fetch_system_data.py`` from one directory."""
+    """Reads the system CSVs written by ``scripts/fetch_system_data.py`` from one directory.
 
-    def __init__(self, directory: str | Path) -> None:
+    ``gas_price`` ``daily`` uses the System Average Price of gas from ``fundamentals``
+    (default: the ``fundamentals`` folder next to ``directory``) from its first day, and
+    DESNZ's quarterly price before; ``quarterly`` uses DESNZ's quarterly price throughout.
+    """
+
+    def __init__(
+        self,
+        directory: str | Path,
+        gas_price: GasPrice = "daily",
+        fundamentals: str | Path | None = None,
+    ) -> None:
         self.directory = Path(directory)
+        self.gas_price: GasPrice = gas_price
+        self.fundamentals = (
+            Path(fundamentals) if fundamentals else self.directory.parent / "fundamentals"
+        )
 
     def unit_parameters(self) -> pd.DataFrame:
         """Unit size (MW), minimum stable output (share) and start cost (GBP/MW) by technology."""
@@ -98,9 +119,11 @@ class SystemInputs:
         return result
 
     def fuel_prices(self, index: pd.DatetimeIndex) -> pd.DataFrame:
-        """GBP per MWh of fuel at each timestamp, from the quarter it falls in.
+        """GBP per MWh of fuel at each timestamp.
 
-        Blank (suppressed) prices carry forward from the latest earlier quarter.
+        Coal and oil (and gas with ``gas_price: quarterly``) come from the quarter the
+        timestamp falls in; blank (suppressed) prices carry forward from the latest earlier
+        quarter. Daily gas applies the gas day's price, carried forward over missing days.
         """
         prices = self._read("fuel_prices.csv", ["year", "quarter", *FUEL_COLUMNS.values()])
         keys = pd.MultiIndex.from_arrays([index.year, index.quarter])
@@ -110,13 +133,20 @@ class SystemInputs:
             first = index[~found][0]
             raise DataError(f"no fuel prices for {first.year} Q{first.quarter}")
         rows = table.loc[keys]
-        return pd.DataFrame(
+        out = pd.DataFrame(
             {
                 fuel: rows[column].to_numpy(dtype=np.float64) * 10
                 for fuel, column in FUEL_COLUMNS.items()
             },
             index=index,
         )
+        if self.gas_price == "daily":
+            daily = FundamentalsSource(self.fundamentals).gas_daily()
+            days = index.normalize()
+            from_daily = np.asarray(days >= daily.index[0])
+            values = daily.reindex(days, method="ffill").to_numpy(dtype=np.float64)
+            out["gas"] = np.where(from_daily, values, out["gas"].to_numpy())
+        return out
 
     def carbon_prices(self, index: pd.DatetimeIndex) -> pd.DataFrame:
         """ETS price (GBP/t) and carbon price support (GBP/MWh of fuel) at each timestamp.

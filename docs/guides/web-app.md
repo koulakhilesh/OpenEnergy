@@ -1,9 +1,10 @@
 # Web app
 
-The web app values a battery on a historic GB year or on a NESO FES pathway's modelled
-prices, answers in one plain sentence, and shows the charts, assumptions and sources behind
-it. Since v5.0 the pages are a React and TypeScript front end (`web/`) on a FastAPI JSON
-API (`openenergy.app`). It runs at
+The web app shows a battery trading Britain's grid and values one on any GB day or year or
+on a NESO FES pathway's modelled prices. It answers in plain sentences and shows the
+charts, assumptions and sources behind each answer. The pages are a React and TypeScript
+front end (`web/`); the year-long results come from a FastAPI JSON API (`openenergy.app`),
+and since v6.0 the day-by-day pages run the battery optimiser in the browser. It runs at
 [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/), or locally:
 
 ```bash
@@ -19,9 +20,33 @@ from a clone; `pip install openenergy[app]` installs the API and its dependencie
 work on the pages, run the API as above and `npm --prefix web run dev` (Vite on port 5173,
 passing API calls to port 8000).
 
+## Pages
+
+### In the browser
+
 | Page | What it does |
 |---|---|
-| `/` | Form: historic GB year (2017–2025, Ember prices) or a FES pathway in 2030 or 2035; power (MW) and duration (0.5–8 hours); forecast (last week's prices or perfect foresight); frequency response (none, Dynamic Containment, or Containment and Moderation; historic years from 2022) |
+| `/` | A real day plays itself: a 1 MW battery plans on OpenEnergy's forecast, the price line draws, the battery fills and empties and a counter adds up what it earns; then the ways in |
+| `/lab` | **Battery Lab.** Any day from 2019, any power, duration, efficiency and wear cost; plan with perfect foresight, OpenEnergy's forecast and last week's prices at once and see each plan's trades; the whole year below as a strip, solved in the background a month at a time (click a day to open it); "best day" and "the forecast's worst miss" jump to them |
+| `/replay` | **Grid replay.** Any week from 2019 to 2025: generation by fuel, price and carbon intensity hour by hour; play, scrub or jump to the year's dearest, windiest, stillest or cleanest week |
+| `/2035` | The [storage saturation study](forward-scenarios.md#how-much-storage-can-gb-use): pick a pathway and drag the battery fleet to see what one more battery earns and how much firm capacity is still needed |
+| `/play` | **Beat the battery.** Plan a day yourself from OpenEnergy's forecast, then see actual prices and your result against the optimiser on the same forecast and against perfect foresight; the same day for everyone each day, and any day by link (`/play?d=2024-03-12`) |
+| `/embed/arbitrage` | Draggable prices with the optimal plan, for the docs ([Concepts](../concepts.md)) |
+
+These pages read static files (`web/public/data/`, written by
+`scripts/build_app_data.py` and served at `/data/<file>`): hourly prices and the fundamentals forecast for each year,
+the generation mix and carbon intensity, and the saturation study, each with its
+attribution. The optimiser is the same daily mixed-integer programme as
+`openenergy.dispatch.optimise_dispatch`, built in TypeScript (`web/src/engine/`) and
+solved by [HiGHS compiled to WebAssembly](https://github.com/lovasoa/highs-js) (MIT,
+about 3.5 MB, loaded on first use). `npm test` checks it against the Python backtest on a
+month of 2025 for all three forecasts, day by day (`engine-parity.json`).
+
+### From the API
+
+| Page | What it does |
+|---|---|
+| `/run` | Form: historic GB year (2017–2025, Ember prices) or a FES pathway in 2030 or 2035; power (MW) and duration (0.5–8 hours); forecast (last week's prices, OpenEnergy's forecast from 2019, or perfect foresight); frequency response (none, Dynamic Containment, or Containment and Moderation; historic years from 2022) |
 | `/result` | The answer: one sentence (revenue for your MW, share of perfect foresight, cycles a day), key numbers, cumulative and monthly revenue charts, what the result assumes, sources, and links to download it. At once for 1, 2 and 4 hour batteries; otherwise a progress counter while it runs |
 | `/explore` | Battery value by GB year (2017–2025) and by FES pathway (2030, 2035) for one duration, forecast and response option, as bar charts and tables; click a bar to open its result |
 | `/compare` | Up to three results side by side (table, revenue through the year, and each answer); the page address holds the comparison, so it can be shared, e.g. `/compare?item=gb-2019&item=gb-2022&item=falling_behind_2030` |
@@ -31,9 +56,11 @@ passing API calls to port 8000).
 | `/battery` | The full hourly report of `openenergy report` (runs the backtest now) |
 | `/health` | Status and version |
 
-Page addresses and their query parameters are the same as before v5.0, so shared links keep
-working. Every input and key number has a "?" next to it that explains it in a sentence
-(hover, tab to it, or tap). The battery uses 95% efficiency each way and a £5/MWh wear cost.
+Page addresses and their query parameters are the same as before v5.0 (the form moved from
+`/` to `/run` in v6.0), so shared results keep working. Every input and key number has a
+"?" next to it that explains it in a sentence (hover, tab to it, or tap). The battery uses
+95% efficiency each way and a £5/MWh wear cost. Light and dark themes follow the system
+setting, and the button in the header switches them.
 On Vercel a run took 18 seconds for GB 2024, 14 seconds for a FES pathway and 44 seconds
 with Dynamic Containment (measured 14 October 2026). Pathway prices are precomputed in
 `data/scenarios/` by `scripts/build_scenario_prices.py` (see
@@ -62,8 +89,8 @@ at a fixed duration:
   "label": "2 h battery, GB 2024",
   "precomputed": true,
   "request": {"source": "history", "year": 2024, "hours": 2.0, "prices": "gb-2024", "...": "..."},
-  "summary": {"days": 366, "revenue_per_mw_year": 29039.2, "perfect_per_mw_year": 39304.0,
-              "capture_ratio": 0.739, "cycles_per_day": 1.57, "captured_spread": 26.72,
+  "summary": {"days": 366, "revenue_per_mw_year": 29048.5, "perfect_per_mw_year": 39304.0,
+              "capture_ratio": 0.739, "cycles_per_day": 1.57, "captured_spread": 26.73,
               "forecast_mae": 19.54, "response_share": 0.0},
   "daily": {"date": ["2024-01-01", "..."], "revenue": [111.27, "..."],
             "benchmark_revenue": [241.64, "..."]},

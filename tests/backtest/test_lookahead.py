@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import date
 
 import numpy as np
@@ -62,7 +63,7 @@ def test_lookahead_forecasts_never_see_prices_after_the_decision_time() -> None:
     index = pd.date_range("2019-01-01", periods=21 * PERIODS, freq="h", tz="UTC")
     prices = PriceSeries(pd.Series(np.arange(index.size, dtype=float), index=index), "GBP", "GB")
     recorder = Recording(NaiveLastWeek())
-    cfg = config(3)
+    cfg = dataclasses.replace(config(3), information="decision")
     run_backtest(spec(), prices, recorder, cfg)
     assert recorder.calls
     for seen, horizon in recorder.calls:

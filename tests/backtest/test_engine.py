@@ -7,6 +7,7 @@ import pytest
 from openenergy import ConfigError, DataError, InfeasibleDispatchError
 from openenergy.assets import BatterySpec
 from openenergy.backtest import BacktestConfig, run_backtest
+from openenergy.backtest.engine import known_until
 from openenergy.data import PriceSeries
 from openenergy.dispatch import DispatchConfig, optimise_dispatch
 from openenergy.forecast import NaiveLastWeek, PerfectForesight
@@ -72,10 +73,43 @@ def test_interval_frame_is_consistent() -> None:
 def test_forecaster_never_sees_prices_after_decision_time() -> None:
     actual = prices()
     forecaster = RecordingForecaster(actual)
-    run_backtest(battery(), actual, forecaster, BacktestConfig(lead_hours=12))
+    run_backtest(
+        battery(), actual, forecaster, BacktestConfig(lead_hours=12, information="decision")
+    )
     assert forecaster.calls
     for latest_seen, day_start in forecaster.calls[1:]:
         assert latest_seen < day_start - pd.Timedelta(hours=12)
+
+
+def test_auction_information_sees_every_published_day() -> None:
+    actual = prices()
+    forecaster = RecordingForecaster(actual)
+    run_backtest(battery(), actual, forecaster, BacktestConfig(lead_hours=12))
+    assert forecaster.calls
+    for latest_seen, day_start in forecaster.calls[1:]:
+        # The day before was published at 11:00 UTC two days before; the day itself never is.
+        assert latest_seen == day_start - pd.Timedelta(hours=1)
+
+
+@pytest.mark.parametrize(
+    ("lead", "information", "known"),
+    [
+        (12, "auction", "2019-01-03 00:00"),
+        (12, "decision", "2019-01-02 12:00"),
+        (24, "auction", "2019-01-03 00:00"),  # published at 11:00 on the 1st
+        (36, "auction", "2019-01-03 00:00"),  # decision at 12:00 on the 1st, after 11:00
+        (38, "auction", "2019-01-02 00:00"),  # decision at 10:00 on the 1st, before 11:00
+        (0, "auction", "2019-01-03 00:00"),
+    ],
+)
+def test_known_until(lead: float, information: str, known: str) -> None:
+    day = pd.Timestamp("2019-01-03", tz="UTC")
+    assert known_until(day, lead, information) == pd.Timestamp(known, tz="UTC")  # type: ignore[arg-type]
+
+
+def test_information_must_be_known() -> None:
+    with pytest.raises(ConfigError, match="information"):
+        BacktestConfig(information="oracle")  # type: ignore[arg-type]
 
 
 def test_naive_skips_days_without_history_and_settles_at_actual() -> None:

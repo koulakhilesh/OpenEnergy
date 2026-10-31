@@ -173,7 +173,8 @@ def test_api_rejects_requests_that_cannot_run(client: TestClient) -> None:
 
 def test_grid_covers_every_option_once() -> None:
     keys = [request.key for request in app_results.grid()]
-    assert len(keys) == len(set(keys)) == 174
+    assert len(keys) == len(set(keys)) == 219
+    assert not any("fundamentals" in key for key in keys if not key.startswith("gb-"))
     assert app_results.store(Path("/nonexistent")) is None
 
 

@@ -3,7 +3,9 @@
 Each pathway's 2030 and 2035 system is solved on 2025's weather with price-taking
 interconnector links at the availability fitted from their flows and unit commitment
 (``system.fes``, ``interconnectors: links``, ``commitment: true``, marginal price, other
-assumptions default), exactly as ``openenergy system run`` would. Writes:
+assumptions default, so the daily gas price and a secure system: the least firm peaking
+capacity that keeps hours with unserved energy within GB's 3-hour reliability standard),
+exactly as ``openenergy system run`` would. Writes:
 
 - data/scenarios/fes_prices.csv: hourly modelled price (GBP/MWh) per pathway and year
 - data/scenarios/fes_summary.csv: one row per run with the model's results next to FES's
@@ -63,6 +65,8 @@ def main() -> None:
                     "exports_twh": round(s.exports_twh or 0.0, 1),
                     "curtailment_twh": round(s.curtailment_twh, 1),
                     "unserved_gwh": round(s.unserved_mwh / 1000, 1),
+                    "unserved_hours": s.unserved_hours,
+                    "firm_added_mw": s.firm_added_mw,
                     "emissions_mt": round(s.emissions_mt, 1),
                     "fes_imports_twh": round(
                         fes.supply(pathway, year, "Import (TWh)").get("Interconnectors", 0.0), 1

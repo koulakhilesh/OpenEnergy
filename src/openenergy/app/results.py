@@ -11,9 +11,10 @@ import pandas as pd
 
 from openenergy.app.runs import (
     HISTORY_YEARS,
-    RESPONSE_FROM,
     SCENARIO_YEARS,
+    ForecastName,
     Request,
+    Services,
     run,
 )
 from openenergy.data.fes import PATHWAYS
@@ -22,6 +23,8 @@ from openenergy.metrics.summary import DAYS_PER_YEAR
 from openenergy.report.load import BatteryOutput
 
 PRECOMPUTED_HOURS = (1.0, 2.0, 4.0)
+FORECASTS: tuple[ForecastName, ...] = ("naive_last_week", "fundamentals", "perfect_foresight")
+SERVICE_CHOICES: tuple[Services, ...] = ("none", "dc", "dc_dm")
 SUMMARY_FILE = "app/summary.csv"
 DAILY_FILE = "app/daily.csv"
 
@@ -39,15 +42,17 @@ class Result:
 def grid() -> Iterator[Request]:
     """Every request the app precomputes."""
     for hours in PRECOMPUTED_HOURS:
-        for forecast in ("naive_last_week", "perfect_foresight"):
+        for forecast in FORECASTS:
             for year in range(HISTORY_YEARS[0], HISTORY_YEARS[1] + 1):
-                yield Request("history", year, hours, forecast)
-                if year >= RESPONSE_FROM:
-                    yield Request("history", year, hours, forecast, "dc")
-                    yield Request("history", year, hours, forecast, "dc_dm")
+                for services in SERVICE_CHOICES:
+                    request = Request("history", year, hours, forecast, services)
+                    if request.problem() is None:
+                        yield request
             for pathway in PATHWAYS:
                 for target in SCENARIO_YEARS:
-                    yield Request("scenario", target, hours, forecast, pathway=pathway)
+                    request = Request("scenario", target, hours, forecast, pathway=pathway)
+                    if request.problem() is None:
+                        yield request
 
 
 def from_output(request: Request, output: BatteryOutput, precomputed: bool) -> Result:

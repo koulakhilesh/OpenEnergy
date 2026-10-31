@@ -156,7 +156,8 @@ def optimise_dispatch(
     col_lower[e : e + n + 1] = lower
     col_upper[e : e + n + 1] = upper
     col_lower[e] = col_upper[e] = state.energy_mwh
-    col_lower[e + n] = target
+    # Exactly, not at least: ending fuller would raise every later day's target.
+    col_lower[e + n] = col_upper[e + n] = target
     col_upper[u : u + n] = 1.0
 
     rows: list[Row] = []

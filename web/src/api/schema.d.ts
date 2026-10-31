@@ -272,6 +272,8 @@ export interface components {
             fes_exports_twh: number;
             /** Fes Imports Twh */
             fes_imports_twh: number;
+            /** Firm Added Mw */
+            firm_added_mw: number;
             /** Imports Twh */
             imports_twh: number;
             /** Pathway */
@@ -280,6 +282,8 @@ export interface components {
             price_mean: number;
             /** Unserved Gwh */
             unserved_gwh: number;
+            /** Unserved Hours */
+            unserved_hours: number;
             /** Weather Year */
             weather_year: number;
             /** Year */
@@ -291,7 +295,7 @@ export interface components {
              * Forecast
              * @enum {string}
              */
-            forecast: "naive_last_week" | "perfect_foresight";
+            forecast: "naive_last_week" | "fundamentals" | "perfect_foresight";
             /** Hours */
             hours: number;
             /** Key */
@@ -399,7 +403,7 @@ export interface operations {
             query?: {
                 item?: string[];
                 hours?: "1" | "2" | "4";
-                forecast?: "naive_last_week" | "perfect_foresight";
+                forecast?: "naive_last_week" | "fundamentals" | "perfect_foresight";
                 power_mw?: number;
             };
             header?: never;
@@ -450,7 +454,7 @@ export interface operations {
         parameters: {
             query?: {
                 hours?: "1" | "2" | "4";
-                forecast?: "naive_last_week" | "perfect_foresight";
+                forecast?: "naive_last_week" | "fundamentals" | "perfect_foresight";
                 services?: "none" | "dc" | "dc_dm";
             };
             header?: never;
@@ -517,7 +521,7 @@ export interface operations {
                 pathway?: string;
                 target?: number;
                 hours?: number;
-                forecast?: "naive_last_week" | "perfect_foresight";
+                forecast?: "naive_last_week" | "fundamentals" | "perfect_foresight";
                 services?: "none" | "dc" | "dc_dm";
             };
             header?: never;
@@ -584,7 +588,7 @@ export interface operations {
                 pathway?: string;
                 target?: number;
                 hours?: number;
-                forecast?: "naive_last_week" | "perfect_foresight";
+                forecast?: "naive_last_week" | "fundamentals" | "perfect_foresight";
                 services?: "none" | "dc" | "dc_dm";
             };
             header?: never;
@@ -622,7 +626,7 @@ export interface operations {
                 pathway?: string;
                 target?: number;
                 hours?: number;
-                forecast?: "naive_last_week" | "perfect_foresight";
+                forecast?: "naive_last_week" | "fundamentals" | "perfect_foresight";
                 services?: "none" | "dc" | "dc_dm";
             };
             header?: never;
@@ -660,7 +664,7 @@ export interface operations {
                 pathway?: string;
                 target?: number;
                 hours?: number;
-                forecast?: "naive_last_week" | "perfect_foresight";
+                forecast?: "naive_last_week" | "fundamentals" | "perfect_foresight";
                 services?: "none" | "dc" | "dc_dm";
             };
             header?: never;

@@ -139,7 +139,7 @@ def test_capacity_interpolates_between_year_ends(tmp_path: Path) -> None:
 
 
 def test_efficiency_and_fuel_prices(tmp_path: Path) -> None:
-    inputs = SystemInputs(write_inputs(tmp_path))
+    inputs = SystemInputs(write_inputs(tmp_path), "quarterly")
     assert inputs.efficiency(2019) == {"ccgt": 0.49, "coal": 0.33}
     with pytest.raises(DataError, match="2030"):
         inputs.efficiency(2030)
@@ -149,6 +149,24 @@ def test_efficiency_and_fuel_prices(tmp_path: Path) -> None:
     assert prices["coal"].tolist() == pytest.approx([9.0, 7.0])
     with pytest.raises(DataError, match="2020 Q1"):
         inputs.fuel_prices(pd.DatetimeIndex(["2020-01-01"], tz="UTC"))
+
+
+def test_daily_gas_price_from_its_first_day(tmp_path: Path) -> None:
+    fundamentals = tmp_path / "fundamentals"
+    fundamentals.mkdir()
+    pd.DataFrame({"date": ["2019-04-01", "2019-04-03"], "sap_p_per_kwh": [2.0, 3.0]}).to_csv(
+        fundamentals / "gas_sap_daily.csv", index=False
+    )
+    inputs = SystemInputs(write_inputs(tmp_path), fundamentals=fundamentals)
+    index = pd.DatetimeIndex(
+        ["2019-03-31 23:00", "2019-04-01 05:00", "2019-04-02 12:00", "2019-04-03"], tz="UTC"
+    )
+    prices = inputs.fuel_prices(index)
+    # Quarterly before the daily series starts, then each gas day's price carried forward.
+    assert prices["gas"].tolist() == pytest.approx([17.0, 20.0, 20.0, 30.0])
+    assert prices["coal"].tolist() == pytest.approx([9.0, 7.0, 7.0, 7.0])
+    with pytest.raises(DataError, match="fundamentals file not found"):
+        SystemInputs(tmp_path, fundamentals=tmp_path / "none").fuel_prices(index)
 
 
 def test_carbon_prices_change_on_1_april(tmp_path: Path) -> None:
@@ -190,7 +208,7 @@ def test_carbon_prices_in_any_currency(tmp_path: Path) -> None:
 
 
 def test_blank_values_fall_back_to_earlier_ones(tmp_path: Path) -> None:
-    inputs = SystemInputs(write_inputs(tmp_path))
+    inputs = SystemInputs(write_inputs(tmp_path), "quarterly")
     fleet = pd.read_csv(tmp_path / "fleet.csv")
     fleet.loc[1, "coal_efficiency"] = None
     fleet.to_csv(tmp_path / "fleet.csv", index=False)
@@ -236,3 +254,4 @@ def test_attributions_name_sources_and_licences() -> None:
     assert "not affiliated" in MIX_ATTRIBUTION
     for text in ("Open Government Licence", "World Bank", "CC BY 4.0", "European Central Bank"):
         assert text in FLEET_ATTRIBUTION
+    assert "System Average Price" in FLEET_ATTRIBUTION

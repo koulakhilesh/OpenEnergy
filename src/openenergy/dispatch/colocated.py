@@ -94,7 +94,7 @@ def optimise_colocated(
     col_lower[e : e + n + 1] = lower
     col_upper[e : e + n + 1] = upper
     col_lower[e] = col_upper[e] = state.energy_mwh
-    col_lower[e + n] = target
+    col_lower[e + n] = col_upper[e + n] = target
     col_upper[u : u + n] = 1.0
 
     eta_c, eta_d = spec.eta_charge, spec.eta_discharge

@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use OpenEnergy, please cite it as below, and credit the data sources each result lists."
 type: software
 title: "OpenEnergy: backtest battery storage and renewables against real power-market data"
-version: 5.0.1
-date-released: 2026-10-30
+version: 6.0.0
+date-released: 2026-10-31
 license: MIT
 authors:
   - family-names: Koul
@@ -12,9 +12,10 @@ repository-code: "https://github.com/koulakhilesh/OpenEnergy"
 url: "https://koulakhilesh.github.io/OpenEnergy/"
 abstract: >-
   Open-source Python toolkit and web app that backtests grid batteries against GB
-  day-ahead prices without lookahead, stacks frequency-response revenue, rebuilds GB
-  prices from plant, fuel and carbon data, and applies NESO Future Energy Scenarios with
-  price-taking interconnectors.
+  day-ahead prices without lookahead, forecasts prices from what is known the day before,
+  stacks frequency-response revenue, rebuilds GB prices from plant, fuel and carbon data,
+  and applies NESO Future Energy Scenarios, made secure to the reliability standard, with
+  price-taking interconnectors, to measure how battery value saturates.
 keywords:
   - energy storage
   - battery

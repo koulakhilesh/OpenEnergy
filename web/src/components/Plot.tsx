@@ -6,12 +6,21 @@ const LAYOUT: Partial<Layout> = {
   legend: { orientation: "h", y: -0.2 },
   margin: { l: 60, r: 20, t: 50, b: 40 },
   height: 380,
-  paper_bgcolor: "#fff",
-  plot_bgcolor: "#fff",
-  xaxis: { gridcolor: "#ebf0f8", zeroline: false },
-  yaxis: { gridcolor: "#ebf0f8", zerolinecolor: "#ebf0f8" },
-  font: { family: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif", color: "#1f2933" },
+  paper_bgcolor: "rgba(0,0,0,0)",
+  plot_bgcolor: "rgba(0,0,0,0)",
 };
+
+/** Colours from the page's theme tokens, read when a chart is drawn. */
+function themed(): Partial<Layout> {
+  const css = getComputedStyle(document.documentElement);
+  const token = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
+  const grid = token("--line", "#ebf0f8");
+  return {
+    xaxis: { gridcolor: grid, zeroline: false },
+    yaxis: { gridcolor: grid, zerolinecolor: grid },
+    font: { family: token("--sans", "system-ui, sans-serif"), color: token("--ink", "#171410") },
+  };
+}
 
 interface Props {
   data: Data[];
@@ -31,11 +40,13 @@ export function Plot({ data, title, xTitle, yTitle, layout, onClick }: Props) {
     const node = box.current;
     import("plotly.js-basic-dist-min").then(({ default: Plotly }) => {
       if (cancelled || !node) return;
+      const theme = themed();
       const full: Partial<Layout> = {
         ...LAYOUT,
+        ...theme,
         title: { text: title },
-        xaxis: { ...LAYOUT.xaxis, title: { text: xTitle ?? "" } },
-        yaxis: { ...LAYOUT.yaxis, title: { text: yTitle } },
+        xaxis: { ...theme.xaxis, title: { text: xTitle ?? "" } },
+        yaxis: { ...theme.yaxis, title: { text: yTitle } },
         ...layout,
       };
       Plotly.react(node, data, full, { displaylogo: false, responsive: true }).then(() => {

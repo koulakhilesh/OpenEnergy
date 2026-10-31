@@ -47,6 +47,8 @@ theme:
 
 nav:
   - Home: index.md
+  - What's new in 6.0: whats-new.md
+  - Findings: findings.md
   - Concepts: concepts.md
   - Guides:
       - Scenarios: guides/scenarios.md
@@ -56,6 +58,7 @@ nav:
       - System analysis: guides/system.md
       - System model: guides/system-model.md
       - Forward scenarios: guides/forward-scenarios.md
+      - Constraints: guides/constraints.md
       - Web app: guides/web-app.md
       - Reports: guides/reports.md
   - Data: data.md

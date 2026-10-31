@@ -72,29 +72,29 @@ before wear cost, as `openenergy run` reports it:
 
 | Year | Day-ahead only | + DC | + DC, DM | + DC, DM, DR |
 |---|---:|---:|---:|---:|
-| 2022 | 76,940 | 195,927 | 217,004 | 395,148 |
-| 2023 | 35,964 | 61,907 | 72,391 | 112,437 |
-| 2024 | 28,677 | 45,232 | 47,437 | 51,210 |
-| 2025 | 35,861 | 63,872 | 75,766 | 89,807 |
+| 2022 | 76,948 | 197,081 | 217,004 | 395,148 |
+| 2023 | 35,957 | 61,907 | 72,392 | 112,437 |
+| 2024 | 28,690 | 45,226 | 47,443 | 51,210 |
+| 2025 | 35,861 | 63,872 | 75,766 | 90,766 |
 
 With utilisation energy bought and sold at the day-ahead price (`energy: day_ahead`):
 
 | Year | + DC | + DC, DM | + DC, DM, DR |
 |---|---:|---:|---:|
-| 2022 | 197,160 | 202,931 | 267,469 |
+| 2022 | 198,119 | 202,931 | 267,469 |
 | 2023 | 61,787 | 68,775 | 112,425 |
-| 2024 | 45,032 | 56,820 | 79,949 |
-| 2025 | 63,788 | 83,106 | 127,976 |
+| 2024 | 45,026 | 56,826 | 79,948 |
+| 2025 | 63,788 | 83,106 | 125,634 |
 
 DM and DR start on 26 March 2022, so their 2022 columns cover 281 days, scaled to a year.
 
 What this shows:
 
-- **Dynamic Containment is the robust gain.** Adding DC raises revenue by 58–155% every
+- **Dynamic Containment is the robust gain.** Adding DC raises revenue by 58–156% every
   year, and the answer barely moves with how utilisation energy is settled (DC is rarely
-  called). DC availability is 60–78% of the stacked revenue.
+  called). DC availability is 60–77% of the stacked revenue.
 - **The battery works less for more.** With DC, equivalent cycles fall from 569–661 a year
-  to 319–389: holding power for DC pays more than the marginal arbitrage it displaces.
+  to 319–393: holding power for DC pays more than the marginal arbitrage it displaces.
 - **DM and DR depend on an assumption.** DR moves 0.13–0.14 MWh per MW per hour, so who
   pays for that energy decides its value: in 2024 adding DR to DC and DM adds 8% when the
   energy is free and 41% when it is bought and sold at the day-ahead price. The default
@@ -119,10 +119,10 @@ cost:
 
 | Year | Days | Follow day-ahead | Perfect imbalance foresight | Re-plan each half-hour (t−2 price) | Re-plan on known day-ahead | Imbalance only |
 |---|---:|---:|---:|---:|---:|---:|
-| 2019 | 355 | 4,417 | 52,791 | 2,682 | 9,152 | −2,169 |
-| 2022 | 361 | 64,267 | 324,412 | 60,243 | 82,276 | 22,555 |
-| 2024 | 366 | 17,633 | 94,200 | 12,579 | 23,390 | 5,223 |
-| 2025 | 365 | 24,693 | 103,850 | 15,916 | 30,993 | 6,018 |
+| 2019 | 355 | 4,421 | 53,609 | 5,216 | 9,210 | −373 |
+| 2022 | 361 | 64,275 | 328,633 | 75,099 | 83,074 | 37,981 |
+| 2024 | 366 | 17,642 | 101,567 | 17,816 | 23,548 | 11,277 |
+| 2025 | 365 | 24,693 | 106,912 | 21,652 | 31,091 | 10,486 |
 
 Days with a missing price in either market are left out.
 
@@ -130,25 +130,28 @@ What this shows:
 
 - **The upside is large.** Knowing the day's imbalance prices would earn 4–12 times the
   day-ahead revenue: the price is far more volatile than day-ahead.
-- **A simple real-time strategy loses money.** Re-planning before each half-hour on the
-  latest published price (two periods back) earns 6–39% less than just delivering the
-  day-ahead position, and trading imbalance alone on the same information earns at most 35%
-  of day-ahead, and lost money in 2019. The value is all in forecasting the
-  imbalance price, which open data does not give.
-- **Re-planning on known day-ahead prices gains 25–107%**, but that is the value of knowing
+- **A simple real-time strategy is a gamble.** Re-planning before each half-hour on the
+  latest published price (two periods back) earns 18% and 17% more than just delivering
+  the day-ahead position in 2019 and 2022, 1% more in 2024 and 12% less in 2025. Trading
+  imbalance alone on the same information earns 42–64% of day-ahead from 2022 and lost
+  money in 2019. The value is in forecasting the imbalance price, which open data does not
+  give.
+- **Re-planning on known day-ahead prices gains 26–108%**, but that is the value of knowing
   the day-ahead price (a battery bidding a curve into the auction captures much of it), not
   of balancing.
 
-So OpenEnergy does not offer a balancing mode: with the information available, it would
-mislead.
+Before v6.0 a re-plan could end each horizon fuller than it began, which pushed every
+later target up; with that fixed, the half-hourly re-plan went from losing 6–39% to the
+mixed result above. OpenEnergy still does not offer a balancing mode: a strategy that
+gains in some years and loses in others on the information available would mislead.
 
 ## Planning under uncertainty
 
 v3.3 showed that for day-ahead trading a plan over price scenarios equals a plan on their
 mean. The same holds for frequency response: MW is committed before the auction clears
 and paid the clearing price, so revenue is linear in price and the value of a stochastic
-solution is zero. Balancing is the one market with a genuine later decision, and above it
-pays only with a forecast that open data does not support. Stochastic planning therefore
+solution is zero. Balancing is the one market with a genuine later decision, and above,
+without a forecast of the imbalance price, it gains in some years and loses in others. Stochastic planning therefore
 stays out of OpenEnergy until a later market with an open, forecastable price is added.
 
 ## Sources

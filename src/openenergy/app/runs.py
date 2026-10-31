@@ -25,10 +25,13 @@ from openenergy.metrics.summary import summarise
 from openenergy.report.load import BatteryOutput, load_output
 from openenergy.scenario import Scenario, run_scenario, write_outputs
 from openenergy.system.forward import FES_NOTE, LINKS_NOTE, price_column
-from openenergy.system.scenario import SYSTEM_NOTE
+from openenergy.system.scenario import ADEQUACY_NOTE, SYSTEM_NOTE
 
 HISTORY_YEARS = (2017, 2025)
 RESPONSE_FROM = 2022
+# The bundled fundamentals forecast (data/forecasts) starts in 2019.
+FUNDAMENTALS_FROM = 2019
+FORECAST_FILE = "forecasts/gb_fundamentals_day_ahead.csv"
 SCENARIO_YEARS = (2030, 2035)
 WEATHER_YEAR = 2025
 SERVICES = {"none": [], "dc": ["DCL", "DCH"], "dc_dm": ["DCL", "DCH", "DML", "DMH"]}
@@ -36,14 +39,14 @@ DEGRADATION_COST = 5.0
 SCENARIO_NOTE = (
     f"Prices are OpenEnergy's model of GB with this pathway's fleet and demand on "
     f"{WEATHER_YEAR}'s weather and fuel, carbon and neighbouring prices, not a forecast. "
-    f"{SYSTEM_NOTE} {FES_NOTE} {LINKS_NOTE}"
+    f"{SYSTEM_NOTE} {FES_NOTE} {ADEQUACY_NOTE} {LINKS_NOTE}"
 )
 SCENARIO_ATTRIBUTION = " ".join(
     (MIX_ATTRIBUTION, FLEET_ATTRIBUTION, INTERCONNECTOR_ATTRIBUTION, FES_ATTRIBUTION)
 )
 
 Source = Literal["history", "scenario"]
-ForecastName = Literal["naive_last_week", "perfect_foresight"]
+ForecastName = Literal["naive_last_week", "fundamentals", "perfect_foresight"]
 Services = Literal["none", "dc", "dc_dm"]
 
 
@@ -96,11 +99,15 @@ class Request:
                 return f"Choose a FES pathway and {' or '.join(map(str, SCENARIO_YEARS))}."
             if self.services != "none":
                 return "Frequency response is available on historic years only."
+            if self.forecast == "fundamentals":
+                return "The OpenEnergy forecast is available on historic years only."
         else:
             if not HISTORY_YEARS[0] <= self.year <= HISTORY_YEARS[1]:
                 return f"Choose a year from {HISTORY_YEARS[0]} to {HISTORY_YEARS[1]}."
             if self.services != "none" and self.year < RESPONSE_FROM:
                 return f"Frequency response needs a year from {RESPONSE_FROM}."
+            if self.forecast == "fundamentals" and self.year < FUNDAMENTALS_FROM:
+                return f"The OpenEnergy forecast starts in {FUNDAMENTALS_FROM}."
         return None
 
 
@@ -116,7 +123,8 @@ def from_prices(prices: str, hours: float, forecast: ForecastName) -> Request | 
     for pathway in PATHWAYS:
         for target in SCENARIO_YEARS:
             if prices == price_column(pathway, target):
-                return Request("scenario", target, hours, forecast, pathway=pathway)
+                request = Request("scenario", target, hours, forecast, pathway=pathway)
+                return request if request.problem() is None else None
     return None
 
 
@@ -139,7 +147,11 @@ def _history(spec: BatterySpec, request: Request, data: Path) -> BatteryOutput:
             "end": date(request.year, 12, 31),
         },
         "battery": {"power_mw": spec.power_mw, "energy_mwh": spec.energy_mwh},
-        "forecast": request.forecast,
+        "forecast": (
+            {"method": "fundamentals", "path": str(data / FORECAST_FILE)}
+            if request.forecast == "fundamentals"
+            else request.forecast
+        ),
         "dispatch": {"degradation_cost": DEGRADATION_COST},
     }
     if request.services != "none":

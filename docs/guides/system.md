@@ -94,13 +94,13 @@ price. For the GB 2019 battery (`examples/gb-2019-carbon.yaml` at £50/t):
 
 | Carbon price | Revenue | Net emissions |
 |-------------:|--------:|--------------:|
-| £0/t | £13,444 | −19.4 tCO2 |
-| £50/t | £13,293 | −21.2 tCO2 |
-| £200/t | £12,619 | −23.3 tCO2 |
+| £0/t | £13,447 | −19.4 tCO2 |
+| £50/t | £13,291 | −21.2 tCO2 |
+| £200/t | £12,616 | −23.3 tCO2 |
 
 Even without a carbon price, price arbitrage avoids emissions, because GB prices and
 carbon intensity move together (correlation 0.62). Each further tonne costs more: about
-£84 per tonne at £50/t and £211 at £200/t.
+£89 per tonne at £50/t and £212 at £200/t.
 
 !!! warning "Average, not marginal"
     These use NESO's average grid intensity. Storage changes the marginal plant, whose

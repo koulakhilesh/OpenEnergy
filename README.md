@@ -29,9 +29,13 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   time; plans settle at actual prices.
 - **Revenue stacking**: GB Dynamic Containment, Moderation and Regulation co-optimised with
   day-ahead trading (`response` in a scenario). Adding Dynamic Containment raised a 2-hour
-  battery's revenue by 58–155% a year in 2022–2025 (`examples/gb-2025-stacked.yaml`).
-- **Forecasters**: perfect foresight, last week's prices, noisy foresight and a
-  gradient-boosting model.
+  battery's revenue by 58–156% a year in 2022–2025 (`examples/gb-2025-stacked.yaml`).
+- **Forecasters**: perfect foresight, last week's prices, noisy foresight, a
+  gradient-boosting model, and OpenEnergy's day-ahead forecast from NESO's demand and
+  Elexon's wind forecasts, the daily gas price and recent prices, as known the day before
+  (`forecast: fundamentals`; it keeps 86–89% of perfect-foresight revenue from 2023, last
+  week's prices 74–81%). A Gymnasium environment (`openenergy.rl`) lets you test a
+  reinforcement-learning agent against the optimiser.
 - **Renewables**: solar and wind plants from capacity-factor profiles, captured price and
   capture rate by year (`openenergy capture`).
 - **Co-located sites**: a plant and a battery behind one grid connection with export and
@@ -41,17 +45,22 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
 - **Emissions**: net emissions from GB carbon intensity and an optional carbon price that
   steers dispatch, planned without lookahead.
 - **GB system model**: CCGT, coal and peaking plant dispatched in merit order (optionally
-  with unit commitment) from fleet, fuel and carbon data, checked against 2015–2025 prices
-  and fuel use (`openenergy system validate`), with scenarios for renewables, storage,
-  fleet and carbon policy (`openenergy system run`); storage uses the optional PyPSA backend.
+  with unit commitment) from fleet, fuel (the daily gas price from 2018) and carbon data,
+  checked against 2015–2025 prices and fuel use (`openenergy system validate`), with
+  scenarios for renewables, storage, fleet and carbon policy (`openenergy system run`);
+  storage uses the optional PyPSA backend.
 - **Forward scenarios**: NESO's Future Energy Scenarios pathways (2025–2035) applied to a
-  historic weather year, with GB's ten interconnectors trading at neighbouring markets'
-  actual prices up to each link's availability fitted from its flows, and unit commitment
-  (`system.fes`, `system.interconnectors: links`, `system.commitment`).
-- **Web app**: value a battery on any GB year from 2017 or on a FES pathway's modelled
-  prices in the browser at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
-  (`web/`, a React and TypeScript front end on the `openenergy.app` FastAPI JSON API, on
-  Vercel).
+  historic weather year and made secure to GB's reliability standard, with GB's ten
+  interconnectors trading at neighbouring markets' actual prices up to each link's
+  availability fitted from its flows, and unit commitment (`system.fes`,
+  `system.interconnectors: links`, `system.commitment`); `openenergy system saturation`
+  measures how a battery's value falls as the storage fleet grows.
+- **Web app**: watch a battery trade a real day, run the optimiser in your browser on any
+  day since 2019 (Battery Lab), replay a week of the grid, explore the 2035 saturation
+  study, plan a day yourself against the optimiser, or value a battery on any GB year from
+  2017 or a FES pathway, at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
+  (`web/`, a React and TypeScript front end with HiGHS in WebAssembly, on the
+  `openenergy.app` FastAPI JSON API, on Vercel).
 - **Data**: hourly GB day-ahead prices, demand and wind and solar output for 2015–2020
   and capacity factors for 2015–2019 from Open Power System Data; GB hourly day-ahead
   prices for mid-2016 to October 2026 from Ember; half-hourly GB carbon intensity for
@@ -60,8 +69,11 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   prices for 2016 to October 2026 from Elexon; and GB fleet, fuel and carbon prices from DESNZ, HMRC,
   the World Bank and the ECB, are bundled. So are NESO's Future Energy Scenarios tables,
   its interconnector register, daily interconnector flows from Elexon and hourly
-  day-ahead prices in the six neighbouring markets from Ember.
-  `openenergy data update` downloads the latest prices.
+  day-ahead prices in the six neighbouring markets from Ember; the daily gas price (ONS),
+  NESO's day-ahead demand forecast and Elexon's day-ahead wind forecast from 2018 with
+  their issue times; and NESO's constraint costs and day-ahead boundary flows.
+  `openenergy data update` downloads the latest prices (`--fundamentals` the forecasts and
+  gas price).
 - **Reports**: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps
   into one interactive HTML file of charts and tables (optional `report` extra, plotly).
 
@@ -78,14 +90,14 @@ uv run openenergy compare examples/gb-2019-{naive,ml,perfect}.yaml
 ```
 
 The library and command line are also on PyPI (`pip install openenergy`, with extras
-`forecast`, `system`, `report` and `app`); the package carries no data, and
+`forecast`, `system`, `report`, `app` and `rl`); the package carries no data, and
 `openenergy data update` downloads the latest GB prices.
 
 ```text
 scenario         forecast             days       revenue   per MW-yr   capture   cycles
 gb-2019-perfect  perfect_foresight     363        19,075      19,180    100.0%      464
 gb-2019-ml       gradient_boosting     363        14,086      14,164     73.8%      400
-gb-2019-naive    naive_last_week       363        13,918      13,995     73.0%      465
+gb-2019-naive    naive_last_week       363        13,920      13,996     73.0%      465
 ```
 
 A 1 MW / 2 MWh battery trading GB day-ahead prices in 2019 would have earned about £14k
@@ -144,17 +156,18 @@ cd web && npm ci && npm run build && npm test && npx playwright install chromium
 | v3.2 | Data to 2025: GB prices from Ember, NESO generation and carbon intensity, DUKES and fuel prices, UK ETS; `openenergy data update`; backcast of the gas crisis and coal exit |
 | v3.3 | Multi-day planning horizon (`dispatch.lookahead_days`), and a measured answer on planning under price uncertainty: for day-ahead-only trading a scenario plan equals one forecast, and risk aversion costs revenue |
 | v3.4 | Reports: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps into one interactive HTML file; chart functions reusable from Python |
-| v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give) and on stochastic planning (still no value) |
+| v3.5 | Revenue stacking: GB Dynamic Containment, Moderation and Regulation co-optimised with day-ahead trading; a measured answer on balancing (imbalance prices are valuable only with a forecast open data does not give; revised in v6.0) and on stochastic planning (still no value) |
 | v4.0 | Forward scenarios from NESO's Future Energy Scenarios on a historic weather year; GB's interconnectors as price-taking links to six neighbouring markets, checked against actual flows 2019–2025; a web app (FastAPI, Vercel) valuing a battery on history or a FES pathway |
 | v4.1 | A usable [web app](https://open-energy-eight.vercel.app/): the answer first in plain words, instant results for common batteries, value by year and by FES pathway at a glance, side-by-side comparison with shareable links, explanations next to each term, CSV and scenario downloads, and a JSON API; `CITATION.cff` and PyPI release |
 | v4.2 | A more credible model: unit commitment with interconnector links; each link's availability fitted from its actual flows, never from prices; a measured answer on the missing daily spread (the everyday intraday shape, not negative prices); forward scenarios and the app re-run. GB zones were dropped: GB keeps one national wholesale price ([DESNZ, REMA summer update, July 2025](https://www.gov.uk/government/publications/review-of-electricity-market-arrangements-rema-summer-update-2025)) |
 | v5.0 | A React and TypeScript front end on an extended JSON API (options, explore, compare, FES table), typed from the OpenAPI schema and tested end to end; interconnector availability by price gap from hourly flows, tested out of sample (an option: it does not beat the flat share); data refreshed to October 2026; versioned docs and a Zenodo DOI |
+| v6.0 | The daily gas price in the system model; a day-ahead forecast from NESO's demand and Elexon's wind forecasts, the gas price and auction prices (`forecast: fundamentals`); FES systems made secure to the reliability standard and a storage saturation study (`openenergy system saturation`); the battery optimiser in the browser (Battery Lab, Grid replay, 2035, Beat the battery); a Gymnasium environment; constraint evidence; an end-of-day energy target that is now exact ([What's new](https://koulakhilesh.github.io/OpenEnergy/whats-new/)) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v5.1 | Model follow-ups: why the modelled 2021–2022 gas-crisis spread is only 27–39% of actual; constraints between Scotland and England and the curtailment they cause; a better day-ahead plan than last week's prices |
+| v6.1 | Scotland and England as two zones with the Balancing Mechanism, to value where a battery relieves constraints; historic capacity by technology so the saturation study can use every weather year from 2019; the evening peak premium the cost-based model misses |
 
 Alongside releases: refresh and re-check the bundled data
 every release; keep CI and its actions current; revisit stochastic planning if an open,

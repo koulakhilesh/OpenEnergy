@@ -14,8 +14,8 @@ Runs one scenario, prints a summary and writes [outputs](scenarios.md#outputs).
 ```text
 gb-2019-naive (naive_last_week, GBP)
   days simulated        363 (2 skipped)
-  revenue               13,918.48 GBP
-  revenue per MW-year   13,995.16 GBP
+  revenue               13,919.64 GBP
+  revenue per MW-year   13,996.34 GBP
   captured spread       15.79 GBP/MWh
   equivalent cycles     464.7
   final SOH             0.9807
@@ -32,7 +32,7 @@ and the co-location comparison:
 ```text
 gb-2019-pv-colocated (naive_last_week, GBP)
   days simulated        361 (2 skipped)
-  revenue               614,474.47 GBP
+  revenue               614,536.53 GBP
   premium               0.00 GBP
   plant output          13,265 MWh (0.3% curtailed)
   equivalent cycles     462.5
@@ -40,8 +40,8 @@ gb-2019-pv-colocated (naive_last_week, GBP)
   forecast MAE / RMSE   6.02 / 8.14 GBP/MWh
   capture ratio         96.2%
   plant captured price  41.24 GBP/MWh (96.1% of baseload)
-  separate assets       616,873.99 GBP (plant 546,977 + battery 69,897)
-  co-location value     -2,399.52 GBP (upper bound: plant output known)
+  separate assets       616,899.61 GBP (plant 546,977 + battery 69,922)
+  co-location value     -2,363.08 GBP (upper bound: plant output known)
 ```
 
 ## `openenergy report`

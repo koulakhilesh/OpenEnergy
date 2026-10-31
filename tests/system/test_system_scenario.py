@@ -9,6 +9,7 @@ from openenergy import ConfigError
 from openenergy.cli import app
 from openenergy.system.scenario import (
     is_system_scenario,
+    least_firm,
     load_system_scenario,
     run_system_scenario,
     system_sweep,
@@ -161,6 +162,59 @@ def test_fes_scenario_scales_the_weather_year(tmp_path: Path) -> None:
     assert run.summary.generation_twh["nuclear"] == pytest.approx(
         fixed.summary.generation_twh["nuclear"] / 2
     )
+
+
+def test_secure_fes_adds_the_least_firm_capacity_that_meets_the_standard(tmp_path: Path) -> None:
+    pytest.importorskip("pypsa")
+    # 20-23 January 2025, a cold still spell; 2035 Holistic Transition runs short on it.
+    stress = {
+        "year": 2025,
+        "start": "2025-01-20",
+        "end": "2025-01-23",
+        "interconnectors": "links",
+        "prices": str(EMBER),
+    }
+    fes = {"pathway": "Holistic Transition", "year": 2035}
+    short = run_system_scenario(
+        load_system_scenario(
+            write(tmp_path, system={**stress, "fes": {**fes, "adequacy": "as_modelled"}})
+        )
+    )
+    assert short.summary.unserved_hours > 3 and short.summary.firm_added_mw is None
+    secure = run_system_scenario(
+        load_system_scenario(write(tmp_path, system={**stress, "fes": fes}))
+    )
+    firm = secure.summary.firm_added_mw
+    assert firm is not None and firm > 0 and firm % 250 == 0
+    assert secure.summary.unserved_hours <= 3
+    fixed = {**fes, "firm_mw": firm - 250}
+    one_less = run_system_scenario(
+        load_system_scenario(write(tmp_path, system={**stress, "fes": fixed}))
+    )
+    assert one_less.summary.firm_added_mw == firm - 250
+    assert one_less.summary.unserved_hours > 3
+    out = write_system_outputs(secure, tmp_path / "out")
+    assert "reliability standard" in json.loads((out / "summary.json").read_text())["note"]
+    no_batteries = {**fes, "adequacy": "as_modelled", "battery_scale": 0}
+    without = run_system_scenario(
+        load_system_scenario(write(tmp_path, system={**stress, "fes": no_batteries}))
+    )
+    assert "fes_battery" not in without.summary.storage_cycles
+    assert without.summary.unserved_mwh > short.summary.unserved_mwh
+
+
+def test_least_firm_finds_the_smallest_step() -> None:
+    tried: list[float] = []
+
+    def meets(firm: float) -> bool:
+        tried.append(firm)
+        return firm >= 1600
+
+    assert least_firm(meets) == 1750
+    assert tried[:5] == [0, 250, 500, 1000, 2000]
+    assert least_firm(lambda firm: True) == 0
+    with pytest.raises(ConfigError, match="no secure system"):
+        least_firm(lambda firm: False)
 
 
 def test_fes_needs_links_and_a_known_pathway(tmp_path: Path) -> None:
