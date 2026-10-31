@@ -1,0 +1,2299 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Backtest battery storage against real power-market prices.">
+      
+      
+      
+        <link rel="canonical" href="https://koulakhilesh.github.io/OpenEnergy/6.1/guides/forward-scenarios/">
+      
+      
+        <link rel="prev" href="../system-model/">
+      
+      
+        <link rel="next" href="../constraints/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Forward scenarios - OpenEnergy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Franklin:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Libre Franklin";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#forward-scenarios" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenEnergy" class="md-header__button md-logo" aria-label="OpenEnergy" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenEnergy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Forward scenarios
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/koulakhilesh/OpenEnergy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    koulakhilesh/OpenEnergy
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../whats-new/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  What's new in 6.0
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../findings/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Findings
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../concepts/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Concepts
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../scenarios/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../data/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Data
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenEnergy" class="md-nav__button md-logo" aria-label="OpenEnergy" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    OpenEnergy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/koulakhilesh/OpenEnergy" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    koulakhilesh/OpenEnergy
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../whats-new/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What's new in 6.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scenarios/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../revenue-stacking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Revenue stacking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../research/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research with the Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Forward scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#interconnector-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interconnector links
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interconnector links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checked-against-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checked against history
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Checked against history">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-availability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Link availability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#availability-by-price-gap-v50" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Availability by price gap (v5.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#marginal-or-start-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Marginal or start price
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fes-pathways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FES pathways
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FES pathways">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#results-on-2025s-weather" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results on 2025's weather
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-secure-system-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A secure system first
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-battery-on-pathway-prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A battery on pathway prices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-much-storage-can-gb-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much storage can GB use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constraints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Constraints
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#interconnector-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interconnector links
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interconnector links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checked-against-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Checked against history
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Checked against history">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-availability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Link availability
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#availability-by-price-gap-v50" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Availability by price gap (v5.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#marginal-or-start-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Marginal or start price
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fes-pathways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FES pathways
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FES pathways">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#results-on-2025s-weather" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results on 2025's weather
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-secure-system-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A secure system first
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-battery-on-pathway-prices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A battery on pathway prices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-much-storage-can-gb-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much storage can GB use?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/koulakhilesh/OpenEnergy/edit/main/docs/guides/forward-scenarios.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="forward-scenarios">Forward scenarios<a class="headerlink" href="#forward-scenarios" title="Permanent link">&para;</a></h1>
+<p>The <a href="../system-model/">system model</a> rebuilds GB prices from the plants behind them. v4.0
+adds two things that let it look forward, and v4.2 makes the links behave as they have
+and adds unit commitment to them:</p>
+<ul>
+<li><strong>Interconnector links</strong> (<code>system.interconnectors: links</code>): GB's ten interconnectors
+  trade with France, the Netherlands, Belgium, Norway, Denmark and Ireland at those
+  markets' actual day-ahead prices, instead of holding imports at their historic output.</li>
+<li><strong>NESO Future Energy Scenarios</strong> (<code>system.fes</code>): a FES pathway's capacities and demand
+  for a year from 2025 to 2035, applied to a historic weather year.</li>
+</ul>
+<p>v6.0 makes each FES system secure to GB's reliability standard before valuing anything on
+it, and asks how much storage GB can use (<a href="#how-much-storage-can-gb-use">below</a>).</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--extra<span class="w"> </span>system
+uv<span class="w"> </span>run<span class="w"> </span>openenergy<span class="w"> </span>system<span class="w"> </span>run<span class="w"> </span>examples/gb-2035-holistic.yaml
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gb-2035-holistic</span>
+<span class="nt">system</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/system</span>
+<span class="w">  </span><span class="nt">year</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2025</span><span class="w">                     </span><span class="c1"># the weather year: weather, demand shape, fuel and carbon prices</span>
+<span class="w">  </span><span class="nt">interconnectors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">links</span><span class="w">         </span><span class="c1"># or {mode: links, hurdle_gbp_per_mwh: 5, availability: 1.0}</span>
+<span class="w">  </span><span class="nt">commitment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">               </span><span class="c1"># start-up costs and minimum stable output (marginal price)</span>
+<span class="w">  </span><span class="nt">fes</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">pathway</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Holistic Transition</span><span class="w"> </span><span class="c1"># also Electric Engagement, Hydrogen Evolution, Falling Behind,</span>
+<span class="w">                                 </span><span class="c1"># Ten Year Forecast (FES 2025) and Ten Year Outlook (2026)</span>
+<span class="w">    </span><span class="nt">year</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2035</span><span class="w">                   </span><span class="c1"># 2025 to 2035, not before the weather year</span>
+<span class="w">    </span><span class="nt">battery_efficiency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.85</span><span class="w">     </span><span class="c1"># round trip; FES publishes none (stated assumption)</span>
+<span class="w">    </span><span class="nt">ldes_efficiency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.75</span><span class="w">        </span><span class="c1"># round trip for new long-duration storage (stated assumption)</span>
+<span class="w">    </span><span class="nt">adequacy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secure</span><span class="w">             </span><span class="c1"># add the least firm capacity meeting lole_hours (v6.0); or as_modelled</span>
+<span class="w">    </span><span class="nt">lole_hours</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                </span><span class="c1"># GB's reliability standard: hours a year with unserved energy</span>
+<span class="w">    </span><span class="c1"># firm_mw: 8000              # or add exactly this much firm capacity, no search</span>
+<span class="w">    </span><span class="nt">battery_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span><span class="w">           </span><span class="c1"># multiply the FES battery fleet's power</span>
+<span class="nt">battery</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">power_mw</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> energy_mwh</span><span class="p">:</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<p>Results are "this fleet and demand in 2025's weather and markets", not price forecasts:
+FES publishes no fuel or carbon price paths, so the weather year keeps its own.</p>
+<h2 id="interconnector-links">Interconnector links<a class="headerlink" href="#interconnector-links" title="Permanent link">&para;</a></h2>
+<p>Each built link in NESO's Interconnector Register is a price taker on GB's single bus: it
+imports up to its import capacity whenever GB's price is above the neighbour's actual
+day-ahead price (Ember, converted at ECB rates) plus a hurdle, and exports when GB's price
+is below the neighbour's minus the hurdle. A link joins the system on the day it entered
+service, read from Elexon's flows (Nemo Link 2019, IFA2 and NS Link 2021, ElecLink 2022,
+Viking Link at the end of 2023, Greenlink 2025). Historic imports are dropped. Irish
+prices start in October 2018, so links need a year from 2019. Links work with the merit
+order, PyPSA (when storage is added) and unit commitment.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mode</code></td>
+<td><code>fixed</code></td>
+<td><code>fixed</code>: historic imports (as before v4.0); <code>links</code>: price-taking links</td>
+</tr>
+<tr>
+<td><code>hurdle_gbp_per_mwh</code></td>
+<td>0</td>
+<td>added to import prices and taken off export prices</td>
+</tr>
+<tr>
+<td><code>availability</code></td>
+<td><code>flows</code></td>
+<td><code>flows</code>: each link's import and export share fitted from its actual flows (below); <code>gap</code>: a share that grows with the price gap, fitted from hourly flows (below); a number from 0 to 1 applies to every link</td>
+</tr>
+<tr>
+<td><code>prices</code></td>
+<td><code>prices/europe_day_ahead_ember.csv</code> next to <code>data</code></td>
+<td>neighbours' hourly prices</td>
+</tr>
+</tbody>
+</table>
+<h3 id="checked-against-history">Checked against history<a class="headerlink" href="#checked-against-history" title="Permanent link">&para;</a></h3>
+<p><code>examples/interconnector_check.py</code> solves each year four ways and compares with GB's
+actual day-ahead price and the actual flows (Elexon FUELHH): historic imports (fixed);
+links at full capacity (full, the v4.0 and v4.1 default); links at their fitted
+availability (links, the default from v4.2); and that with unit commitment (UC, marginal
+price). Prices in £/MWh, flows in TWh, with the daily gas price (v6.0):</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Mean: actual / fixed / full / links / UC</th>
+<th style="text-align: right;">Spread: actual / fixed / full / links / UC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">42.9 / 38.0 / 38.8 / 38.7 / 38.4</td>
+<td style="text-align: right;">31.8 / 3.6 / 8.6 / 6.1 / 23.8</td>
+</tr>
+<tr>
+<td>2020</td>
+<td style="text-align: right;">35.3 / 30.3 / 30.9 / 30.9 / 30.4</td>
+<td style="text-align: right;">39.6 / 3.0 / 8.4 / 4.9 / 24.9</td>
+</tr>
+<tr>
+<td>2021</td>
+<td style="text-align: right;">117.8 / 98.2 / 99.3 / 99.4 / 99.1</td>
+<td style="text-align: right;">146.4 / 12.5 / 27.9 / 18.3 / 44.5</td>
+</tr>
+<tr>
+<td>2022</td>
+<td style="text-align: right;">204.8 / 172.8 / 179.3 / 176.2 / 176.2</td>
+<td style="text-align: right;">155.6 / 16.6 / 41.8 / 28.1 / 59.9</td>
+</tr>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">94.1 / 101.8 / 97.0 / 100.1 / 99.9</td>
+<td style="text-align: right;">70.0 / 6.6 / 40.6 / 26.7 / 53.6</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">72.5 / 79.7 / 74.1 / 78.2 / 77.8</td>
+<td style="text-align: right;">59.9 / 5.3 / 37.4 / 23.4 / 52.5</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">80.7 / 83.8 / 79.9 / 83.3 / 83.0</td>
+<td style="text-align: right;">67.5 / 6.0 / 39.1 / 23.8 / 51.0</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Imports: actual / full / links / UC</th>
+<th style="text-align: right;">Exports: actual / full / links / UC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2019</td>
+<td style="text-align: right;">25.0 / 28.5 / 17.8 / 17.5</td>
+<td style="text-align: right;">3.7 / 15.9 / 7.2 / 7.1</td>
+</tr>
+<tr>
+<td>2020</td>
+<td style="text-align: right;">22.8 / 26.3 / 16.4 / 15.7</td>
+<td style="text-align: right;">4.5 / 19.2 / 8.2 / 8.3</td>
+</tr>
+<tr>
+<td>2021</td>
+<td style="text-align: right;">29.2 / 37.9 / 24.1 / 24.1</td>
+<td style="text-align: right;">4.4 / 19.8 / 8.9 / 8.7</td>
+</tr>
+<tr>
+<td>2022</td>
+<td style="text-align: right;">16.2 / 26.3 / 16.6 / 16.0</td>
+<td style="text-align: right;">20.4 / 46.8 / 19.9 / 20.1</td>
+</tr>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">33.5 / 54.9 / 36.7 / 37.0</td>
+<td style="text-align: right;">10.1 / 20.7 / 9.1 / 8.6</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">43.9 / 69.4 / 46.3 / 46.5</td>
+<td style="text-align: right;">10.6 / 19.3 / 8.3 / 7.9</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">44.0 / 65.5 / 43.2 / 42.9</td>
+<td style="text-align: right;">14.8 / 27.2 / 13.2 / 13.2</td>
+</tr>
+</tbody>
+</table>
+<p>At full capacity links trade far more than happened: imports up to 64% too high (2023)
+and exports up to 4.5 times too high (2021). A price taker sees every hour's price gap as
+profit; real flows are limited by outages, losses, ramping, capacity sold ahead, trading
+on later markets and the neighbours' own supply. Each link's availability (below) brings
+imports to within 5% of actual in 2022, 2024 and 2025; they are 10% high in 2023 and
+17–29% low in 2019–2021. Exports are within 2% in 2022 and 10–22% low in 2023–2025, but
+about twice actual in 2019–2021: with the daily gas price the modelled GB price in those
+years is lower than actual, so the links export more and import less than they did.</p>
+<p>Matching flows takes spread away: links at full capacity were importing the neighbours'
+daily shape, which partly hid the model's own flat price (2025: 39.1 at full capacity,
+23.8 at fitted availability). Unit commitment restores the shape on GB's own plant: the
+spread is 63% to 88% of actual in 2019–2020 and 2023–2025 (30% and 38% in the 2021–2022
+gas crisis, even with the daily gas price). The mean is £4.5–4.9 below actual in
+2019–2020, £2–6 above it in 2023–2025 and £19–29 below it in 2021–2022 (see the
+<a href="../system-model/#after-2020-gas-crisis-and-coal-exit">system model</a>).</p>
+<h4 id="link-availability">Link availability<a class="headerlink" href="#link-availability" title="Permanent link">&para;</a></h4>
+<p><code>scripts/fit_interconnector_availability.py</code> sets each link's import and export
+availability to the energy it actually moved over what a price taker at full capacity
+would have moved on actual GB and neighbour prices, 2019–2025, capped at 1 (see
+<a href="../../data/">Data</a>). Fitted only on flows, never on prices. Fitted on 2019–2022 instead,
+it gives 36.9 TWh of imports in 2024 against 43.9 actual (66.0 at full capacity), and
+11.8 TWh of exports against 10.6. It is one number per link and direction, so it does not
+respond to the size of the price gap.</p>
+<h4 id="availability-by-price-gap-v50">Availability by price gap (v5.0)<a class="headerlink" href="#availability-by-price-gap-v50" title="Permanent link">&para;</a></h4>
+<p>Real links trade more of a bigger gap. From hourly flows (Elexon, 2019–2025) and actual
+prices, <code>availability: gap</code> takes each link's share of capacity in hours whose gap was
+£0–5, £5–10, £10–20, £20–40, £40–80 and over £80/MWh, made non-decreasing so each
+link can be offered as six steps, the k-th at the neighbour's price plus the bin's lower
+edge. Nemo Link, for example, imports 49% of its capacity at gaps under £5 and 90% above
+£80; IFA2 exports 12% and 78%. The Irish links barely respond. The shares are in
+<code>data/system/interconnector_gap_availability.csv</code>.</p>
+<p>Tested the same way as the flat share (both fitted on 2019–2022 flows and actual prices,
+links in service before 2023), it follows the hour-to-hour flows a little better and the
+yearly energy a little worse:</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Imports: actual / gap / flat</th>
+<th style="text-align: right;">Exports: actual / gap / flat</th>
+<th style="text-align: right;">Hourly correlation with actual flow: gap / flat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">33.5 / 24.4 / 26.7</td>
+<td style="text-align: right;">10.1 / 8.0 / 10.0</td>
+<td style="text-align: right;">0.47 / 0.43</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">38.9 / 29.1 / 30.2</td>
+<td style="text-align: right;">9.2 / 6.0 / 7.1</td>
+<td style="text-align: right;">0.41 / 0.37</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">38.9 / 28.6 / 29.3</td>
+<td style="text-align: right;">9.5 / 6.2 / 7.4</td>
+<td style="text-align: right;">0.46 / 0.43</td>
+</tr>
+</tbody>
+</table>
+<p>In the model (links and unit commitment, 2023–2025) it moves the mean by under £1/MWh,
+lowers the daily spread by 2.1 to 3.4 (2025: 47.9 against 51.0), cuts exports by about a
+quarter, and changes the battery's perfect-foresight value by −10% to −7% (planning on
+last week's prices it earns 6% to 23% more).
+Because it does not beat the flat share out of sample, <code>flows</code> stays the default and
+<code>gap</code> is an option. It matters most for the FES pathways below, where links are short at
+scarcity.</p>
+<h4 id="marginal-or-start-price">Marginal or start price<a class="headerlink" href="#marginal-or-start-price" title="Permanent link">&para;</a></h4>
+<p>With links and commitment, the marginal price is closer to history than the start price
+in 2023, 2024 and 2025 on the mean, the daily spread and battery value; the start price holds the night up at a running unit's cost plus its start cost.
+The scenarios below use the marginal price. This is a choice between two un-fitted
+definitions made on history. A 1 MW / 2 MWh battery (95% each way, £5/MWh wear), GBP per
+MW-year, last week's prices / perfect foresight (actual: the whole year; model: 358 or 359
+days, from the second week):</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Actual</th>
+<th style="text-align: right;">Links</th>
+<th style="text-align: right;">Links + UC, marginal</th>
+<th style="text-align: right;">Links + UC, start</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">36,362 / 46,440</td>
+<td style="text-align: right;">1,604 / 9,275</td>
+<td style="text-align: right;">10,982 / 25,701</td>
+<td style="text-align: right;">4,228 / 15,228</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">29,048 / 39,304</td>
+<td style="text-align: right;">1,643 / 9,234</td>
+<td style="text-align: right;">9,282 / 25,553</td>
+<td style="text-align: right;">4,425 / 15,308</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">36,208 / 44,974</td>
+<td style="text-align: right;">648 / 9,728</td>
+<td style="text-align: right;">11,293 / 26,038</td>
+<td style="text-align: right;">4,384 / 15,723</td>
+</tr>
+</tbody>
+</table>
+<p>With perfect foresight the model gives 55% to 65% of the actual value; planning on
+last week's prices, 30% to 32%.</p>
+<p>A hurdle (<code>hurdle_gbp_per_mwh</code>) is still available but left at 0.</p>
+<h2 id="fes-pathways">FES pathways<a class="headerlink" href="#fes-pathways" title="Permanent link">&para;</a></h2>
+<p><code>system.fes</code> scales the weather year's system by the ratio of the FES year to the weather
+year in the same pathway, so every half-hour keeps its weather and demand shape:</p>
+<table>
+<thead>
+<tr>
+<th>Weather-year input</th>
+<th>Scaled by FES (target year / weather year)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wind (transmission and embedded)</td>
+<td>Offshore Wind + Onshore Wind capacity</td>
+</tr>
+<tr>
+<td>Solar</td>
+<td>Solar PV capacity</td>
+</tr>
+<tr>
+<td>Nuclear, hydro</td>
+<td>Nuclear; Hydro capacity</td>
+</tr>
+<tr>
+<td>Biomass</td>
+<td>Biomass + CCS Biomass capacity</td>
+</tr>
+<tr>
+<td>CCGT and peaking capacity (DUKES)</td>
+<td>Gas + CCS Gas + Hydrogen capacity</td>
+</tr>
+<tr>
+<td>Coal</td>
+<td>none (set to 0)</td>
+</tr>
+<tr>
+<td>Demand</td>
+<td>ED1 annual system demand</td>
+</tr>
+<tr>
+<td>Interconnector capacity</td>
+<td>Interconnectors capacity</td>
+</tr>
+<tr>
+<td>Batteries</td>
+<td>added in full: FES GW, hours = GWh / GW</td>
+</tr>
+<tr>
+<td>Long-duration storage</td>
+<td>added: FES increase over the weather year (GW, GWh)</td>
+</tr>
+</tbody>
+</table>
+<p>Pumped storage keeps its historic output. Hydrogen and CCS gas plant are costed as gas,
+because there is no open cost data for them. The weather year has to be a year the FES
+edition covers: from 2024 for FES 2025, from 2025 for the Ten Year Outlook. Any <code>scale</code> or
+<code>capacity_mw</code> you set overrides the FES value.</p>
+<h3 id="results-on-2025s-weather">Results on 2025's weather<a class="headerlink" href="#results-on-2025s-weather" title="Permanent link">&para;</a></h3>
+<p><code>scripts/build_scenario_prices.py</code> runs every pathway in 2030 and 2035 with default
+settings (prices in £/MWh, energy in TWh, <code>fes</code> columns are NESO's own figures for the
+same year; firm capacity is what the secure top-up added, below):</p>
+<table>
+<thead>
+<tr>
+<th>Pathway</th>
+<th>Year</th>
+<th style="text-align: right;">Mean</th>
+<th style="text-align: right;">Spread</th>
+<th style="text-align: right;">Imports</th>
+<th style="text-align: right;">FES</th>
+<th style="text-align: right;">Exports</th>
+<th style="text-align: right;">FES</th>
+<th style="text-align: right;">Curtailed</th>
+<th style="text-align: right;">FES</th>
+<th style="text-align: right;">Firm added (GW)</th>
+<th style="text-align: right;">Unserved GWh</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Holistic Transition</td>
+<td>2030</td>
+<td style="text-align: right;">76.6</td>
+<td style="text-align: right;">53.2</td>
+<td style="text-align: right;">35.1</td>
+<td style="text-align: right;">35.7</td>
+<td style="text-align: right;">26.1</td>
+<td style="text-align: right;">38.9</td>
+<td style="text-align: right;">8.7</td>
+<td style="text-align: right;">12.4</td>
+<td style="text-align: right;">2.5</td>
+<td style="text-align: right;">12.2</td>
+</tr>
+<tr>
+<td>Holistic Transition</td>
+<td>2035</td>
+<td style="text-align: right;">75.5</td>
+<td style="text-align: right;">67.6</td>
+<td style="text-align: right;">46.1</td>
+<td style="text-align: right;">27.6</td>
+<td style="text-align: right;">52.8</td>
+<td style="text-align: right;">108.8</td>
+<td style="text-align: right;">34.9</td>
+<td style="text-align: right;">41.0</td>
+<td style="text-align: right;">9.25</td>
+<td style="text-align: right;">6.8</td>
+</tr>
+<tr>
+<td>Electric Engagement</td>
+<td>2030</td>
+<td style="text-align: right;">69.8</td>
+<td style="text-align: right;">56.6</td>
+<td style="text-align: right;">34.6</td>
+<td style="text-align: right;">37.0</td>
+<td style="text-align: right;">29.8</td>
+<td style="text-align: right;">40.1</td>
+<td style="text-align: right;">11.6</td>
+<td style="text-align: right;">12.2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9.7</td>
+</tr>
+<tr>
+<td>Electric Engagement</td>
+<td>2035</td>
+<td style="text-align: right;">73.6</td>
+<td style="text-align: right;">54.7</td>
+<td style="text-align: right;">57.7</td>
+<td style="text-align: right;">41.3</td>
+<td style="text-align: right;">48.9</td>
+<td style="text-align: right;">89.1</td>
+<td style="text-align: right;">15.0</td>
+<td style="text-align: right;">27.4</td>
+<td style="text-align: right;">8.25</td>
+<td style="text-align: right;">13.1</td>
+</tr>
+<tr>
+<td>Hydrogen Evolution</td>
+<td>2030</td>
+<td style="text-align: right;">64.0</td>
+<td style="text-align: right;">42.4</td>
+<td style="text-align: right;">35.1</td>
+<td style="text-align: right;">40.1</td>
+<td style="text-align: right;">26.0</td>
+<td style="text-align: right;">36.2</td>
+<td style="text-align: right;">7.6</td>
+<td style="text-align: right;">9.2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Hydrogen Evolution</td>
+<td>2035</td>
+<td style="text-align: right;">72.6</td>
+<td style="text-align: right;">55.8</td>
+<td style="text-align: right;">49.7</td>
+<td style="text-align: right;">31.3</td>
+<td style="text-align: right;">42.8</td>
+<td style="text-align: right;">93.5</td>
+<td style="text-align: right;">19.6</td>
+<td style="text-align: right;">34.2</td>
+<td style="text-align: right;">6.25</td>
+<td style="text-align: right;">12.1</td>
+</tr>
+<tr>
+<td>Falling Behind</td>
+<td>2030</td>
+<td style="text-align: right;">70.4</td>
+<td style="text-align: right;">33.4</td>
+<td style="text-align: right;">39.2</td>
+<td style="text-align: right;">29.5</td>
+<td style="text-align: right;">22.8</td>
+<td style="text-align: right;">35.4</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">2.3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Falling Behind</td>
+<td>2035</td>
+<td style="text-align: right;">54.7</td>
+<td style="text-align: right;">42.0</td>
+<td style="text-align: right;">31.7</td>
+<td style="text-align: right;">21.2</td>
+<td style="text-align: right;">34.3</td>
+<td style="text-align: right;">61.8</td>
+<td style="text-align: right;">18.7</td>
+<td style="text-align: right;">18.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Ten Year Forecast</td>
+<td>2030</td>
+<td style="text-align: right;">64.5</td>
+<td style="text-align: right;">37.0</td>
+<td style="text-align: right;">35.4</td>
+<td style="text-align: right;">22.9</td>
+<td style="text-align: right;">25.7</td>
+<td style="text-align: right;">46.8</td>
+<td style="text-align: right;">6.2</td>
+<td style="text-align: right;">7.4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Ten Year Forecast</td>
+<td>2035</td>
+<td style="text-align: right;">56.0</td>
+<td style="text-align: right;">35.2</td>
+<td style="text-align: right;">42.9</td>
+<td style="text-align: right;">21.2</td>
+<td style="text-align: right;">43.7</td>
+<td style="text-align: right;">93.1</td>
+<td style="text-align: right;">18.3</td>
+<td style="text-align: right;">23.7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Ten Year Outlook</td>
+<td>2030</td>
+<td style="text-align: right;">71.7</td>
+<td style="text-align: right;">30.5</td>
+<td style="text-align: right;">41.1</td>
+<td style="text-align: right;">42.1</td>
+<td style="text-align: right;">21.4</td>
+<td style="text-align: right;">34.0</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">7.4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>Ten Year Outlook</td>
+<td>2035</td>
+<td style="text-align: right;">85.0</td>
+<td style="text-align: right;">52.1</td>
+<td style="text-align: right;">43.9</td>
+<td style="text-align: right;">35.3</td>
+<td style="text-align: right;">40.6</td>
+<td style="text-align: right;">69.3</td>
+<td style="text-align: right;">15.3</td>
+<td style="text-align: right;">49.8</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">7.9</td>
+</tr>
+</tbody>
+</table>
+<p>Settings since v6.0: links at each link's availability fitted from its flows, unit
+commitment (marginal price), the daily gas price of the weather year, and a secure system.
+For comparison, the model's own 2025 with the same settings has a mean of £83.0/MWh and a
+spread of £51.0/MWh (actual £80.7 and £67.5).</p>
+<p>Imports in 2030 are within 7% of FES's in three pathways, 12% below in Hydrogen
+Evolution, and 33% and 55% above in Falling Behind and the Ten Year Forecast; in 2035 they
+are 1.2 to 2.0 times FES's. Exports are 46% to 74% of FES's in every case: FES expects GB
+to export much more in windy hours than links that behave as they did in 2019–2025 do.
+Curtailment is 22% to 104% of FES's.</p>
+<h3 id="a-secure-system-first">A secure system first<a class="headerlink" href="#a-secure-system-first" title="Permanent link">&para;</a></h3>
+<p>As FES's fleets stand, several pathways cannot meet demand through 2025's cold, still
+spell in January. GB buys capacity through the Capacity Market to a reliability standard
+of 3 hours' loss of load expectation a year (DESNZ), so since v6.0 a FES system is made
+secure first (<code>fes.adequacy: secure</code>, the default): the least firm peaking capacity, in
+250 MW steps and costed as gas peaking plant, is added until hours with unserved energy
+are within <code>fes.lole_hours</code> (3). That is the "Firm added" column: 2.5 GW in Holistic
+Transition 2030; 6.25 to 9.25 GW in Holistic Transition, Electric Engagement and Hydrogen
+Evolution 2035; 0.25 GW in the Ten Year Outlook 2035; none elsewhere. A single weather year
+is one draw, not an expectation; the saturation study below averages two.</p>
+<p><code>fes.adequacy: as_modelled</code> keeps the fleet as FES gives it, as before v6.0. Then six
+cases leave demand unserved, and the price sits at the £6,000/MWh value of lost load for
+much of it. Mean £/MWh and unserved GWh (hours with unserved energy), as modelled:</p>
+<table>
+<thead>
+<tr>
+<th>Pathway and year</th>
+<th style="text-align: right;">Links as fitted (default)</th>
+<th style="text-align: right;"><code>availability: gap</code></th>
+<th style="text-align: right;">Every link at full capacity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Holistic Transition 2030</td>
+<td style="text-align: right;">85.0, 68.0 (16)</td>
+<td style="text-align: right;">80.2, 47.0 (14)</td>
+<td style="text-align: right;">66.2, 0</td>
+</tr>
+<tr>
+<td>Holistic Transition 2035</td>
+<td style="text-align: right;">210.5, 715.2 (81)</td>
+<td style="text-align: right;">161.6, 508.0 (60)</td>
+<td style="text-align: right;">84.9, 50.5 (8)</td>
+</tr>
+<tr>
+<td>Electric Engagement 2030</td>
+<td style="text-align: right;">69.8, 9.7 (2)</td>
+<td style="text-align: right;">60.1, 0</td>
+<td style="text-align: right;">63.4, 0</td>
+</tr>
+<tr>
+<td>Electric Engagement 2035</td>
+<td style="text-align: right;">186.9, 683.2 (81)</td>
+<td style="text-align: right;">150.5, 480.4 (60)</td>
+<td style="text-align: right;">77.6, 10.9 (3)</td>
+</tr>
+<tr>
+<td>Hydrogen Evolution 2035</td>
+<td style="text-align: right;">119.9, 214.8 (30)</td>
+<td style="text-align: right;">93.9, 150.1 (22)</td>
+<td style="text-align: right;">64.1, 0</td>
+</tr>
+<tr>
+<td>Ten Year Outlook 2035</td>
+<td style="text-align: right;">85.6, 17.1 (5)</td>
+<td style="text-align: right;">58.5, 0</td>
+<td style="text-align: right;">62.0, 0</td>
+</tr>
+</tbody>
+</table>
+<p>The cause is link availability. The fitted availability holds on GB's tightest days in
+the record: on the 1% of days with the highest GB price in 2019–2025, links imported 3%
+(ElecLink) to 42% (Nemo Link, BritNed) of their capacity, below their fitted shares for
+every link but East West (39% against 38%), because neighbours were often short at the
+same time. So derating links at stress is supported by the flows. What the model leaves
+out is what FES counts on in those hours: demand response, new flexibility and neighbours'
+own 2030s fleets. The secure top-up stands in for all of that with the cheapest firm
+capacity, so read it as "this much firm capacity, or its equivalent", not as a forecast of
+new gas plant.</p>
+<h3 id="a-battery-on-pathway-prices">A battery on pathway prices<a class="headerlink" href="#a-battery-on-pathway-prices" title="Permanent link">&para;</a></h3>
+<p>The same 1 MW / 2 MWh battery (95% each way, £5/MWh wear) on 358 days of each modelled
+year (the first week has no last week to plan on), from the app's precomputed results
+(<code>data/app/</code>), GBP per MW-year:</p>
+<table>
+<thead>
+<tr>
+<th>Prices</th>
+<th style="text-align: right;">Last week's prices</th>
+<th style="text-align: right;">Perfect foresight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Actual 2025</td>
+<td style="text-align: right;">36,208</td>
+<td style="text-align: right;">44,974</td>
+</tr>
+<tr>
+<td>Model 2025, links + commitment</td>
+<td style="text-align: right;">11,293</td>
+<td style="text-align: right;">26,038</td>
+</tr>
+<tr>
+<td>Holistic Transition 2030 / 2035</td>
+<td style="text-align: right;">3,448 / 8,440</td>
+<td style="text-align: right;">19,657 / 25,450</td>
+</tr>
+<tr>
+<td>Electric Engagement 2030 / 2035</td>
+<td style="text-align: right;">4,025 / 11,010</td>
+<td style="text-align: right;">26,685 / 20,663</td>
+</tr>
+<tr>
+<td>Hydrogen Evolution 2030 / 2035</td>
+<td style="text-align: right;">5,860 / 5,145</td>
+<td style="text-align: right;">17,514 / 22,031</td>
+</tr>
+<tr>
+<td>Falling Behind 2030 / 2035</td>
+<td style="text-align: right;">3,646 / 4,098</td>
+<td style="text-align: right;">11,514 / 15,822</td>
+</tr>
+<tr>
+<td>Ten Year Forecast 2030 / 2035</td>
+<td style="text-align: right;">3,157 / 3,078</td>
+<td style="text-align: right;">12,940 / 12,421</td>
+</tr>
+<tr>
+<td>Ten Year Outlook 2030 / 2035</td>
+<td style="text-align: right;">2,166 / 3,937</td>
+<td style="text-align: right;">9,288 / 19,400</td>
+</tr>
+</tbody>
+</table>
+<p>Compare pathways with the model's own 2025, not with actual 2025: on modelled 2025 prices
+the battery's perfect-foresight value is 58% of its actual value, and the model's daily
+spread is 76% of the real one. Against that baseline, every pathway's perfect-foresight
+value is about the same or lower: 2% lower in Holistic Transition 2035 and 2% higher in
+Electric Engagement 2030, 15% to 33% lower in Holistic Transition 2030, Electric
+Engagement and Hydrogen Evolution 2035, Hydrogen Evolution 2030 and the Ten Year Outlook
+2035, and 39% to 64% lower in Falling Behind, the Ten Year Forecast and the Ten Year
+Outlook 2030. With secure systems the 2035 pathways no longer rise far above the baseline
+on days of lost load (before v6.0 they reached 1.8 to 2.7 times it), but scarcity still
+matters: with perfect foresight over the full year, the one or two days with an hour at
+£1,000/MWh or more earn 29% to 49% of the value in the six cases that have them (49% of
+Holistic Transition 2035's). Planning on last week's prices keeps 15% to 53% of the
+perfect-foresight value, against 81% on actual 2025 prices and 43% on the model's own
+2025.</p>
+<h2 id="how-much-storage-can-gb-use">How much storage can GB use?<a class="headerlink" href="#how-much-storage-can-gb-use" title="Permanent link">&para;</a></h2>
+<p>The batteries above join a fleet that FES has already sized: 23 to 33 GW of batteries in
+2035 in FES 2025's pathways, storing 1.3 to 1.5 hours on average. What happens to the
+value of one more battery as that fleet grows, once the system is secure? <code>openenergy system saturation</code> scales each pathway's
+2035 battery fleet from none to three times FES's figure (same duration), and for each fleet
+adds the least firm capacity that keeps loss of load, averaged over the 2024 and 2025
+weather years, within the 3-hour standard. A 1 MW / 2 MWh battery (95% each way, £5/MWh
+wear) is then valued with perfect foresight on each year's modelled prices
+(<code>data/scenarios/saturation.csv</code>; try it in the <a href="https://open-energy-eight.vercel.app/2035">web app</a>).
+FES 2025 publishes figures from 2024, so these two weather years are all a FES system can
+be scaled from today; the Ten Year Outlook, which has no 2024 wind, is left out.</p>
+<p>The pathways with no shortfall first. GBP per MW-year, mean of the two weather years:</p>
+<table>
+<thead>
+<tr>
+<th>Battery fleet (× FES 2035)</th>
+<th style="text-align: right;">0</th>
+<th style="text-align: right;">0.5</th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Falling Behind: fleet GW</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11.3</td>
+<td style="text-align: right;">22.7</td>
+<td style="text-align: right;">45.3</td>
+<td style="text-align: right;">68.0</td>
+</tr>
+<tr>
+<td>Falling Behind: one more battery earns</td>
+<td style="text-align: right;">43,609</td>
+<td style="text-align: right;">21,840</td>
+<td style="text-align: right;">15,551</td>
+<td style="text-align: right;">10,362</td>
+<td style="text-align: right;">8,017</td>
+</tr>
+<tr>
+<td>Falling Behind: daily spread (£/MWh)</td>
+<td style="text-align: right;">72.2</td>
+<td style="text-align: right;">47.9</td>
+<td style="text-align: right;">40.6</td>
+<td style="text-align: right;">32.6</td>
+<td style="text-align: right;">28.2</td>
+</tr>
+<tr>
+<td>Ten Year Forecast: fleet GW</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15.0</td>
+<td style="text-align: right;">29.9</td>
+<td style="text-align: right;">59.9</td>
+<td style="text-align: right;">89.8</td>
+</tr>
+<tr>
+<td>Ten Year Forecast: one more battery earns</td>
+<td style="text-align: right;">40,897</td>
+<td style="text-align: right;">17,196</td>
+<td style="text-align: right;">12,057</td>
+<td style="text-align: right;">8,130</td>
+<td style="text-align: right;">6,296</td>
+</tr>
+<tr>
+<td>Ten Year Forecast: daily spread (£/MWh)</td>
+<td style="text-align: right;">71.9</td>
+<td style="text-align: right;">41.0</td>
+<td style="text-align: right;">34.3</td>
+<td style="text-align: right;">28.1</td>
+<td style="text-align: right;">24.3</td>
+</tr>
+</tbody>
+</table>
+<p>The first half of the FES fleet takes half or more of a battery's value away; the next two
+and a half fleets take nearly two thirds of what is left. Batteries earn by flattening the
+daily spread, so each one leaves less spread for the next. The two weather years agree: in
+Falling Behind a battery joining the FES fleet earns £14,927 on 2024's weather and
+£16,176 on 2025's.</p>
+<p>The other three pathways are short of firm capacity in a cold, still spell, and the
+batteries do little about it:</p>
+<table>
+<thead>
+<tr>
+<th>Pathway</th>
+<th style="text-align: right;">Firm capacity added (GW) for a fleet of × 0 / 0.5 / 1 / 2 / 3</th>
+<th style="text-align: right;">Firm capacity each MW of the FES fleet replaces (MW)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Holistic Transition</td>
+<td style="text-align: right;">11.25 / 9.25 / 8.25 / 8.0 / 8.25</td>
+<td style="text-align: right;">0.10</td>
+</tr>
+<tr>
+<td>Electric Engagement</td>
+<td style="text-align: right;">11.25 / 8.75 / 8.25 / 7.25 / 7.25</td>
+<td style="text-align: right;">0.09</td>
+</tr>
+<tr>
+<td>Hydrogen Evolution</td>
+<td style="text-align: right;">8.75 / 6.75 / 4.75 / 4.0 / 3.0</td>
+<td style="text-align: right;">0.16</td>
+</tr>
+</tbody>
+</table>
+<p>The FES fleets store under an hour and a half on average, and the shortfalls they would
+cover last longer: the first half of the fleet saves 2.0 to 2.5 GW of firm capacity, and
+the next two and a half fleets 1.0 to 3.75 GW more. In 250 MW steps the search is not
+perfectly monotonic (Holistic Transition needs 8.0 GW at twice the fleet and 8.25 GW at
+three times). In these pathways a battery's value also rests on a handful of scarcity
+days: a 1 MW battery with the FES fleet earns £16,591 in Holistic Transition, £17,441 in
+Electric Engagement and £26,961 in Hydrogen Evolution, of which 23%, 17% and 45% comes on
+the days with an hour priced at £1,000/MWh or more (one to three across the two weather
+years). Holistic Transition's and Electric Engagement's are all in 2025's weather; a value
+resting on them is a statement about one cold week, not about the pathway.</p>
+<p>What this says, with its limits: in a GB system that has enough firm capacity, battery
+value halves or more as the first 11 to 15 GW of FES's fleet arrives, and falls to 15–18% of the
+first battery's value at three times the fleet. It is the perfect-foresight value of a
+2-hour battery on a model whose daily spread is 76% of the real one in 2025, so the levels
+are lower bounds on what the spread allows and upper bounds on what a forecast captures;
+the shape of the curve is the result.</p>
+<h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
+<ul>
+<li>One GB bus: no constraint between Scotland and England, which is where much FES
+  curtailment happens.</li>
+<li>Links take the neighbours' actual prices for the weather year, so neighbours do not
+  respond to GB, and their 2030s fleets are not modelled. New links are not added as new
+  neighbours; FES interconnector growth scales the existing ten.</li>
+<li>Capacities from the register are today's; earlier limits on Moyle, IFA and BritNed are
+  not modelled separately, only through each link's fitted availability (see
+  <a href="../../data/">Data</a>).</li>
+<li>Each link's availability is one number per direction for every hour and year (with
+  <code>availability: gap</code>, one per price-gap bin); new FES capacity gets the existing links'
+  shares.</li>
+<li>Ember gives one price for Norway and one for Denmark; GB's links land in southern Norway
+  and western Denmark.</li>
+<li>The weather year's fuel and carbon prices are kept; storage efficiencies for FES
+  batteries and long-duration storage are stated assumptions.</li>
+<li>With unit commitment (the published scenarios), storage is planned one day at a time
+  seeing 24 hours ahead; without it, with perfect foresight over the year.</li>
+</ul>
+<h2 id="data-sources">Data sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
+<p>FES tables: NESO, <em>FES: Pathways to Net Zero 2025</em> and <em>2026 Ten Year Outlook</em>,
+<a href="https://www.neso.energy/data-portal/future-energy-scenario-electricity-supply-data-table-es1">ES1</a>
+and <a href="https://www.neso.energy/data-portal/fes-electricity-demand-summary-data-table-ed1">ED1</a>;
+interconnectors: NESO,
+<a href="https://www.neso.energy/data-portal/interconnector-register">Interconnector Register</a>;
+both under the <a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a>,
+supported by National Energy SO Open Data. Flows: Elexon BMRS FUELHH, under the
+<a href="https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/">BMRS data licence</a>;
+contains BMRS data © Elexon Limited copyright and database right 2026. Neighbouring prices:
+Ember, <a href="https://ember-energy.org/data/european-wholesale-electricity-price-data/">European Wholesale Electricity Price Data</a>,
+<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>, converted with ECB reference
+rates (source: ECB). FES and the register accessed 13 October 2026, flows and prices
+30 October 2026 (daily and hourly flows); see <a href="../../data/">Data</a> for the rest of
+the system model's sources. OpenEnergy is not affiliated with or endorsed by NESO, Elexon,
+Ember or the ECB.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../system-model/" class="md-footer__link md-footer__link--prev" aria-label="Previous: System model">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                System model
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../constraints/" class="md-footer__link md-footer__link--next" aria-label="Next: Constraints">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Constraints
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Code: MIT licence. Documentation: CC BY 4.0. Data keeps its own licence: Open Power System Data; Ember (CC BY 4.0); NESO Carbon Intensity API (CC BY 4.0); NESO historic generation mix, supported by National Energy SO Open Data; DESNZ and HMRC (Open Government Licence v3.0); World Bank Carbon Pricing Dashboard and Danish Energy Agency (CC BY 4.0); NREL; ECB.
+
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://koulakhilesh.github.io/" target="_blank" rel="noopener" title="Akhilesh Koul" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M277.8 8.6c-12.3-11.4-31.3-11.4-43.5 0l-224 208c-9.6 9-12.8 22.9-8 35.1S18.8 272 32 272h16v176c0 35.3 28.7 64 64 64h288c35.3 0 64-28.7 64-64V272h16c13.2 0 25-8.1 29.8-20.3s1.6-26.2-8-35.1zM240 320h32c26.5 0 48 21.5 48 48v96H192v-96c0-26.5 21.5-48 48-48"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://github.com/koulakhilesh/OpenEnergy" target="_blank" rel="noopener" title="OpenEnergy on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://linkedin.com/in/akhilesh-koul" target="_blank" rel="noopener" title="LinkedIn" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.footer", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/katex.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+      
+    
+  </body>
+</html>
