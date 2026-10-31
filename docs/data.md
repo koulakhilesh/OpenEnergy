@@ -110,7 +110,7 @@ direction and rough scale, not causal impact.
 |---|---|---|
 | `generation_mix.csv` | Half-hourly GB generation by fuel, MW, 2015-01-01 to 2025-12-31 (192,864 rows, no gaps) | NESO historic generation mix |
 | `fleet.csv` | GB capacity at each year end 2014–2025 (CCGT, coal, gas turbines, oil engines, nuclear, pumped storage) and CCGT and coal efficiency | DUKES 5.8 and 5.10 |
-| `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2025 | DESNZ QEP 3.2.1 |
+| `fuel_prices.csv` | Quarterly coal, oil and gas prices paid by major power producers, 2014–2025; the model's gas price before 2018 and with `gas_price: quarterly` | DESNZ QEP 3.2.1 |
 | `carbon_prices.csv` | EU ETS (2015–2020) and UK ETS (2021–2025) price on 1 April with ECB exchange rates, and carbon price support rates | World Bank, DESNZ (2021), ECB, HMRC |
 | `unit_parameters.csv` | Unit size, minimum stable output and start-up cost for CCGT, coal and peaking plant (unit commitment) | Danish Energy Agency, NREL, ECB |
 | `interconnectors.csv` | GB's ten built interconnectors: neighbour, import and export capacity (MW) | NESO Interconnector Register, 12 October 2026 |
@@ -131,9 +131,10 @@ within the year (EU ETS 2018 rose from about €10 to €25; UK ETS 2021–2023 
 World Bank dashboard has no UK ETS price on 1 April 2021, before the first auction, so
 2021 uses DESNZ's 2021 carbon price (mean auction price, £47.96/t). DESNZ suppresses some
 coal prices from 2023 (carried forward) and gives no coal efficiency for 2025 (latest
-earlier value used). Fuel prices are what power producers paid, including contracts
-agreed earlier, so they lag market gas prices: see the
-[system model](guides/system-model.md#after-2020-gas-crisis-and-coal-exit). Emission
+earlier value used). Quarterly fuel prices are what power producers paid, including
+contracts agreed earlier, so they lag market gas prices; since v6.0 the model uses the
+daily wholesale gas price from 2018 instead (below, and the
+[system model](guides/system-model.md#after-2020-gas-crisis-and-coal-exit)). Emission
 factors (gas 0.1839, coal 0.3096 tCO2 per MWh of fuel) follow from the carbon price support
 rates, which are set at £18/tCO2.
 
@@ -152,6 +153,31 @@ prices and flows only. Fitted on 2019–2022 it gives 36.9 TWh of imports in 202
 43.9, full capacity 66.0) and 11.8 TWh of exports (actual 10.6); the published file is
 fitted on 2019–2025.
 
+## What is known the day before
+
+`data/fundamentals/`, written by `scripts/fetch_fundamentals.py` (or
+`openenergy data update --fundamentals`), holds what is published before the day-ahead
+auction, each with the time it was issued so a backtest uses only what existed at its
+decision time:
+
+| File | Contents | Source |
+|---|---|---|
+| `gas_sap_daily.csv` | Daily System Average Price of gas, p/kWh, 2018-01-01 to 2026-10-25 (3,220 days, no gaps) | ONS, from National Gas Transmission |
+| `neso_demand_day_ahead.csv` | NESO's day-ahead national demand forecast at its cardinal points, with issue times, 2018-01-02 to 2026-11-01 (58,792 points) | NESO Day Ahead Demand Forecast |
+| `elexon_wind_day_ahead.csv` | Elexon's hourly wind forecast, the latest issued by noon UTC the day before, 2018-01-02 to 2026-11-01 (76,970 hours) | Elexon BMRS WINDFOR |
+
+The system model uses the daily gas price from its first day (quarterly DESNZ prices
+before); the `fundamentals` forecast uses all three. Known issues: SAP is a wholesale price
+without the network charges power stations pay; NESO's demand forecast covers transmission
+demand and its published times fit best an hour earlier (used as published); NESO's own
+wind forecast archive keeps only the latest issue for each half-hour, often made on the
+day, so Elexon's is used. Details in `data/fundamentals/README.md`.
+
+`data/forecasts/gb_fundamentals_day_ahead.csv` is model output, not source data: the
+`fundamentals` forecast for every hour from 2019 to 28 October 2026, exactly as a backtest
+would make it, so scenarios and the web app can use it without training
+(`data/forecasts/README.md`; built by `scripts/build_fundamentals_forecast.py`).
+
 ## Future Energy Scenarios
 
 `data/fes/` holds NESO's Future Energy Scenarios tables unchanged, written by
@@ -166,9 +192,14 @@ fuel or carbon prices and no storage efficiencies.
 `data/scenarios/` is model output, not source data: hourly modelled prices for each
 pathway in 2030 and 2035 on 2025's weather (`fes_prices.csv`) and a summary next to FES's
 own figures (`fes_summary.csv`), written by `scripts/build_scenario_prices.py` for the
-[web app](guides/web-app.md). `data/app/` is model output too: per-MW battery results for
-common requests (1, 2 and 4 hours, every year, response option and pathway), written by
-`scripts/build_app_results.py` so the app answers at once.
+[web app](guides/web-app.md), and the storage saturation study (`saturation.csv`,
+`saturation_years.csv`, from `openenergy system saturation`; see
+[forward scenarios](guides/forward-scenarios.md#how-much-storage-can-gb-use)).
+`data/app/` is model output too: per-MW battery results for common requests (1, 2 and 4
+hours, every year, forecast, response option and pathway), written by
+`scripts/build_app_results.py` so the app answers at once. `web/public/data/` reshapes
+bundled data and these results into the static files the app's in-browser pages read
+(`scripts/build_app_data.py`), each carrying its attribution.
 
 ## Frequency response
 
@@ -195,6 +226,15 @@ the GB system (imbalance) price for every half-hour from 2016 to 29 October 2026
 periods, 20
 blank where Elexon's API returned nothing). GB has a single imbalance price, so the sell
 and buy prices are equal; it is used by `examples/imbalance_value.py`.
+
+## Transmission constraints
+
+`data/constraints/`, written by `scripts/fetch_constraints.py`, holds the evidence on the
+[constraints page](guides/constraints.md); no model uses it yet:
+`constraint_breakdown_daily.csv`, NESO's daily constraint costs and volumes from April
+2021 (values unchanged), and `day_ahead_boundaries_monthly.csv`, a monthly summary of
+NESO's half-hourly day-ahead limits and flows by boundary group from January 2023. Known
+issues are in `data/constraints/README.md`.
 
 ## Attribution
 
@@ -239,6 +279,13 @@ step; the bundled file itself is unchanged.
 > <https://www.gov.uk/government/statistical-data-sets/prices-of-fuels-purchased-by-major-power-producers>
 > (accessed 10 October 2026).
 
+**Daily gas price**
+
+> Office for National Statistics. System Average Price (SAP) of gas, table 1 (daily), from
+> National Gas Transmission.
+> <https://www.ons.gov.uk/economy/economicoutputandproductivity/output/datasets/systemaveragepricesapofgas>
+> (accessed 30 October 2026). Official statistics in development.
+
 **Carbon price support**
 
 > HM Revenue & Customs. Excise Notice CCL1/6: a guide to carbon price floor, section 2.3,
@@ -253,7 +300,7 @@ step; the bundled file itself is unchanged.
 > <https://www.gov.uk/government/publications/determinations-of-the-uk-ets-carbon-price>
 > (accessed 10 October 2026).
 
-The four UK government sources contain public sector information licensed under the
+The five UK government sources contain public sector information licensed under the
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
 **EU ETS and UK ETS prices**
@@ -341,6 +388,28 @@ unchanged, converts delivery times to UTC and reduces frequency to monthly avera
 > [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
 > Contains BMRS data © Elexon Limited copyright and database right 2026.
 
+**Day-ahead demand and wind forecasts**
+
+> National Energy System Operator (NESO). Day Ahead Demand Forecast, Historic Day Ahead
+> Demand Forecasts. <https://www.neso.energy/data-portal/1-day-ahead-demand-forecast>
+> (accessed 30 October 2026). Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
+> Elexon. BMRS Insights API, wind generation forecast (WINDFOR),
+> <https://bmrs.elexon.co.uk/> (accessed 30 October 2026). Reused under the
+> [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+> Contains BMRS data © Elexon Limited copyright and database right 2026.
+
+**Transmission constraints**
+
+> National Energy System Operator (NESO). Constraint Breakdown Costs and Volume,
+> <https://www.neso.energy/data-portal/constraint-breakdown>, and Day Ahead Constraint
+> Flows and Limits, <https://www.neso.energy/data-portal/day-ahead-constraint-flows-and-limits>
+> (accessed 31 October 2026). Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
 **Unit sizes and minimum loads**
 
 > Danish Energy Agency. Technology Data for Generation of Electricity and District
@@ -362,8 +431,8 @@ typical plant, not GB-specific.
 The system files keep source values unchanged apart from dropped rows and columns, GB
 totals (England and Wales plus Scotland), integer MW and the start-cost conversion;
 changes are listed in `data/system/README.md`. OpenEnergy is not affiliated with or
-endorsed by Open Power System Data, NESO, Elexon, DESNZ, HMRC, the World Bank, the ECB,
-the Danish Energy Agency, NREL or Ember.
+endorsed by Open Power System Data, NESO, Elexon, DESNZ, ONS, National Gas Transmission,
+HMRC, the World Bank, the ECB, the Danish Energy Agency, NREL or Ember.
 
 ## Software
 
@@ -372,7 +441,9 @@ The system model's storage dispatch uses PyPSA:
 > T. Brown, J. Hörsch, D. Schlachtberger. PyPSA: Python for Power System Analysis.
 > Journal of Open Research Software 6(1), 2018. <https://doi.org/10.5334/jors.188>.
 
-Optimisation problems are solved with [HiGHS](https://highs.dev) (MIT licence).
+Optimisation problems are solved with [HiGHS](https://highs.dev) (MIT licence); the web
+app's in-browser optimiser uses [highs-js](https://github.com/lovasoa/highs-js), HiGHS
+compiled to WebAssembly (MIT licence).
 
 Each data folder has a `README.md` with the full source, licence and known issues, and
 every `summary.json` repeats the attribution for the data a run used.

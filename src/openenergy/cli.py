@@ -14,10 +14,12 @@ import typer
 
 import openenergy
 from openenergy.data.ember import EMBER_ATTRIBUTION, gb_prices
+from openenergy.data.fes import PATHWAYS
 from openenergy.data.fleet import SystemInputs
+from openenergy.data.fundamentals import FUNDAMENTALS_ATTRIBUTION
 from openenergy.data.neso import GenerationMixSource
 from openenergy.data.opsd import OPSDCsvSource
-from openenergy.data.update import cache_dir, update_prices
+from openenergy.data.update import cache_dir, update_fundamentals, update_prices
 from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
 from openenergy.scenario import (
@@ -31,6 +33,15 @@ from openenergy.scenario import (
 from openenergy.system.commitment import Commitment
 from openenergy.system.model import PriceKind
 from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
+from openenergy.system.saturation import (
+    SATURATION_NOTE,
+    SCALES,
+    WEATHER_YEARS,
+    saturation_study,
+    saturation_summary,
+    unusable,
+)
+from openenergy.system.saturation import firm_from as firm_from_csv
 from openenergy.system.scenario import (
     SystemRun,
     is_system_scenario,
@@ -301,17 +312,29 @@ def data_update(
         Path | None,
         typer.Option("--dir", help="Where to write; default ~/.cache/openenergy/prices."),
     ] = None,
+    fundamentals: Annotated[
+        bool,
+        typer.Option(
+            help="Also download the daily gas price and day-ahead demand and wind forecasts "
+            "(to ~/.cache/openenergy/fundamentals, or the fundamentals folder beside --dir)."
+        ),
+    ] = False,
 ) -> None:
     """Download the latest GB day-ahead prices (Ember, CC BY 4.0) and ECB GBP rates."""
     target = directory or cache_dir()
     try:
         path, hours, first, last = update_prices(target)
-    except (OSError, KeyError, zipfile.BadZipFile) as exc:
+        written = update_fundamentals(target.parent / "fundamentals") if fundamentals else []
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile) as exc:
         typer.echo(f"error: download failed: {exc}", err=True)
         raise typer.Exit(1) from exc
     typer.echo(f"{hours:,} hours from {first} to {last} UTC written to {path}")
     typer.echo("Use it in a scenario with data: {source: ember, path: <that file>}.")
     typer.echo(f"Prices: {EMBER_ATTRIBUTION}")
+    for name, rows, first_row, last_row in written:
+        typer.echo(f"{name}: {rows:,} rows, {first_row} to {last_row}")
+    if written:
+        typer.echo(f"Fundamentals: {FUNDAMENTALS_ATTRIBUTION}")
 
 
 @system_app.command("run")
@@ -363,6 +386,70 @@ def _per_mw(value: float | None) -> str:
     return "n/a" if value is None else f"{value:,.0f}"
 
 
+@system_app.command("saturation")
+def system_saturation(
+    pathway: Annotated[
+        list[str] | None, typer.Option(help="FES pathway (repeat for several); default all.")
+    ] = None,
+    year: Annotated[int, typer.Option(help="FES year.")] = 2035,
+    scale: Annotated[
+        list[float] | None,
+        typer.Option(help="FES battery fleet scale (repeat); default 0, 0.5, 1, 2, 3."),
+    ] = None,
+    weather_year: Annotated[
+        list[int] | None, typer.Option(help="Weather year (repeat); default 2024-2025.")
+    ] = None,
+    data: Annotated[Path, typer.Option(help="System data directory.")] = SYSTEM_DATA,
+    workers: Annotated[int, typer.Option(min=1, help="Parallel solves.")] = 1,
+    firm_from: Annotated[
+        Path | None,
+        typer.Option(
+            help="An earlier saturation_years.csv: reuse its firm capacity, skip the search."
+        ),
+    ] = None,
+    out: Annotated[Path, typer.Option("--out", "-o", help="Output directory.")] = Path(
+        "outputs/saturation"
+    ),
+) -> None:
+    """How a battery's value falls as the FES battery fleet grows, on a secure system.
+
+    Many full-year solves with unit commitment: hours for the full study. By default every
+    pathway that can be scaled from each weather year.
+    """
+    with _reported_errors():
+        unknown = set(pathway or ()) - set(PATHWAYS)
+        if unknown:
+            raise ConfigError(f"unknown pathway {sorted(unknown)}; choose from {list(PATHWAYS)}")
+        years = weather_year or WEATHER_YEARS
+        chosen = pathway or []
+        if not pathway:
+            for name in PATHWAYS:
+                problem = unusable(data, name, year, years)
+                if problem is None:
+                    chosen.append(name)
+                else:
+                    typer.echo(f"skipped {problem}")
+        rows = saturation_study(
+            data,
+            chosen,
+            year,
+            scale or SCALES,
+            years,
+            workers=workers,
+            progress=typer.echo,
+            known_firm=None if firm_from is None else firm_from_csv(firm_from, year),
+        )
+        out.mkdir(parents=True, exist_ok=True)
+        rows.to_csv(out / "saturation_years.csv", index=False)
+        table = saturation_summary(rows)
+        table.to_csv(out / "saturation.csv", index=False)
+    columns = ["pathway", "battery_scale", "fleet_battery_mw", "firm_added_mw", "lole_hours"]
+    columns += ["revenue_per_mw_year", "scarcity_revenue", "daily_spread", "equivalent_firm"]
+    typer.echo(table[columns].round(2).to_string(index=False))
+    typer.echo(SATURATION_NOTE)
+    typer.echo(f"outputs written to {out}")
+
+
 @system_app.command("validate")
 def system_validate(
     data: Annotated[Path, typer.Option(help="Directory from scripts/fetch_system_data.py.")] = (
@@ -384,6 +471,9 @@ def system_validate(
     price: Annotated[
         str, typer.Option(help="Modelled price to compare: marginal, or start (commitment).")
     ] = "marginal",
+    gas_price: Annotated[
+        str, typer.Option(help="Gas price: daily (System Average Price, from 2018) or quarterly.")
+    ] = "daily",
     out: Annotated[Path | None, typer.Option("--out", "-o", help="Output directory.")] = None,
 ) -> None:
     """Rebuild GB prices and fuel use from costs and compare with what happened."""
@@ -391,12 +481,14 @@ def system_validate(
         first, last = _day(start, "start"), _day(end, "end")
         if price not in ("marginal", "start"):
             raise ConfigError(f"--price must be marginal or start, got {price!r}")
+        if gas_price not in ("daily", "quarterly"):
+            raise ConfigError(f"--gas-price must be daily or quarterly, got {gas_price!r}")
         kind: PriceKind = "start" if price == "start" else "marginal"
         mix = GenerationMixSource(data / "generation_mix.csv").mix(
             first, last, step=pd.Timedelta(hours=1)
         )
         actual, sources = gb_prices(prices or [OPSD_DATA, EMBER_DATA], first, last)
-        inputs = SystemInputs(data)
+        inputs = SystemInputs(data, "daily" if gas_price == "daily" else "quarterly")
         units = Commitment.from_inputs(inputs) if commitment else None
         result = backcast(mix, inputs, actual, commitment=units, price=kind)
         destination = (

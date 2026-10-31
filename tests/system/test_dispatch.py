@@ -169,7 +169,7 @@ def write_inputs(directory: Path) -> SystemInputs:
             "cps_coal_gbp_per_gj": [1.0],
         }
     ).to_csv(directory / "carbon_prices.csv", index=False)
-    return SystemInputs(directory)
+    return SystemInputs(directory, "quarterly")
 
 
 def test_thermal_tranches_cost_and_capacity(tmp_path: Path) -> None:

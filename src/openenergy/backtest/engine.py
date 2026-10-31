@@ -7,6 +7,7 @@ import math
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 from datetime import date, timedelta
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -27,6 +28,9 @@ from openenergy.forecast.baseline import Forecaster, NaiveLastWeek
 
 FloatArray = npt.NDArray[np.float64]
 CARBON_PLANNING = ("last_week", "actual")
+# GB day-ahead auction results are out by 11:00 UTC the day before delivery (EPEX and N2EX
+# publish by about 11:00 UK time, 10:00 UTC in summer); 13 hours before the day starts.
+AUCTION_PUBLISHED_BEFORE = pd.Timedelta(hours=13)
 
 INTERVAL_COLUMNS = ["price", "forecast", "charge_mw", "discharge_mw", "energy_mwh", "revenue"]
 DAILY_COLUMNS = [
@@ -72,14 +76,34 @@ RESPONSE_DAILY_COLUMNS = ["energy_revenue", "response_revenue"]
 
 @dataclass(frozen=True)
 class BacktestConfig:
-    """``lead_hours``: how long before each UTC day the plan is fixed (12 = noon the day before)."""
+    """``lead_hours``: how long before each UTC day the plan is fixed (12 = noon the day before).
+
+    ``information`` sets which prices a forecast sees. ``auction`` (default): every earlier
+    day whose day-ahead auction had published by the decision, as GB's auction publishes
+    each day's prices by 11:00 UTC the day before. ``decision``: only prices for hours that
+    have started by the decision time.
+    """
 
     lead_hours: float = 12.0
     dispatch: DispatchConfig = field(default_factory=DispatchConfig)
+    information: Literal["auction", "decision"] = "auction"
 
     def __post_init__(self) -> None:
         if not (math.isfinite(self.lead_hours) and self.lead_hours >= 0):
             raise ConfigError(f"lead_hours must be non-negative, got {self.lead_hours}")
+        if self.information not in ("auction", "decision"):
+            raise ConfigError(f"information must be auction or decision, got {self.information!r}")
+
+
+def known_until(
+    day_start: pd.Timestamp, lead_hours: float, information: Literal["auction", "decision"]
+) -> pd.Timestamp:
+    """Prices before this time are known when the plan for the day at ``day_start`` is fixed."""
+    decision = day_start - pd.Timedelta(hours=lead_hours)
+    if information == "decision":
+        return decision
+    published = (decision + AUCTION_PUBLISHED_BEFORE).ceil("D")
+    return min(day_start, published)
 
 
 @dataclass(frozen=True, eq=False)
@@ -297,7 +321,6 @@ def _days(
     if not requested:
         raise DataError("no days to simulate")
     wanted = set(requested)
-    lead = pd.Timedelta(hours=config.lead_hours)
 
     for day in _calendar(requested[0], requested[-1]):
         if day not in wanted:
@@ -307,7 +330,8 @@ def _days(
         else:
             day_prices = prices.day(day)
             start = pd.Timestamp(day, tz="UTC")
-            history = actual.iloc[: index.searchsorted(start - lead)]
+            cutoff = known_until(start, config.lead_hours, config.information)
+            history = actual.iloc[: index.searchsorted(cutoff)]
             ahead = 0
             while ahead < lookahead and day + timedelta(days=ahead + 1) in covered:
                 ahead += 1

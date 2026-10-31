@@ -8,6 +8,7 @@ from openenergy.data.fleet import (
     UNIT_ATTRIBUTION,
     SystemInputs,
 )
+from openenergy.data.fundamentals import FUNDAMENTALS_ATTRIBUTION, FundamentalsSource
 from openenergy.data.neso import MIX_ATTRIBUTION, GenerationMixSource
 from openenergy.data.opsd import OPSD_ATTRIBUTION, OPSDCsvSource
 from openenergy.data.series import PriceSeries, ProfileSeries, fill_gaps
@@ -17,11 +18,13 @@ __all__ = [
     "EMBER_ATTRIBUTION",
     "EMISSION_FACTORS",
     "FLEET_ATTRIBUTION",
+    "FUNDAMENTALS_ATTRIBUTION",
     "MIX_ATTRIBUTION",
     "OPSD_ATTRIBUTION",
     "UNIT_ATTRIBUTION",
     "CarbonIntensitySource",
     "EmberPriceSource",
+    "FundamentalsSource",
     "GenerationMixSource",
     "IntensitySeries",
     "OPSDCsvSource",

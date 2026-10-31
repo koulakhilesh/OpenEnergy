@@ -59,6 +59,13 @@ Either a method name, or a mapping with `method` and its options.
 | `perfect_foresight` | none |
 | `noisy_foresight` | `error_std` (required, currency/MWh), `seed` |
 | `gradient_boosting` | `train_start`, `train_end` (required, before `data.start`), `seed` |
+| `fundamentals` | `path` (the bundled precomputed forecast, `data/forecasts/gb_fundamentals_day_ahead.csv`; no training), or train live: `fundamentals` (folder, default the `fundamentals` folder beside the price file's folder), `stretch` (`auto`, or a fixed factor), `seed`. GB from 2019 (its inputs start in January 2018). See [Concepts](../concepts.md#forecasters) |
+
+```yaml
+forecast:
+  method: fundamentals
+  path: ../data/forecasts/gb_fundamentals_day_ahead.csv
+```
 
 ## `dispatch`
 
@@ -75,6 +82,7 @@ Either a method name, or a mapping with `method` and its options.
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `lead_hours` | `12` | Hours before each UTC day that the plan is fixed |
+| `information` | `auction` | What the forecaster knows at the decision time: `auction`, every day whose day-ahead auction had cleared (at noon on D−1, all of D−1); `decision`, only hours before the decision time (the rule before v6.0) |
 
 ## `assets` (co-located sites)
 

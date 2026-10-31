@@ -262,6 +262,10 @@
             "title": "Fes Imports Twh",
             "type": "number"
           },
+          "firm_added_mw": {
+            "title": "Firm Added Mw",
+            "type": "number"
+          },
           "imports_twh": {
             "title": "Imports Twh",
             "type": "number"
@@ -277,6 +281,10 @@
           "unserved_gwh": {
             "title": "Unserved Gwh",
             "type": "number"
+          },
+          "unserved_hours": {
+            "title": "Unserved Hours",
+            "type": "integer"
           },
           "weather_year": {
             "title": "Weather Year",
@@ -297,6 +305,8 @@
           "exports_twh",
           "curtailment_twh",
           "unserved_gwh",
+          "unserved_hours",
+          "firm_added_mw",
           "emissions_mt",
           "fes_imports_twh",
           "fes_exports_twh",
@@ -310,6 +320,7 @@
           "forecast": {
             "enum": [
               "naive_last_week",
+              "fundamentals",
               "perfect_foresight"
             ],
             "title": "Forecast",
@@ -572,7 +583,7 @@
   },
   "info": {
     "title": "OpenEnergy",
-    "version": "5.0.1"
+    "version": "6.0.0"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -618,6 +629,7 @@
               "default": "naive_last_week",
               "enum": [
                 "naive_last_week",
+                "fundamentals",
                 "perfect_foresight"
               ],
               "title": "Forecast",
@@ -710,6 +722,7 @@
               "default": "naive_last_week",
               "enum": [
                 "naive_last_week",
+                "fundamentals",
                 "perfect_foresight"
               ],
               "title": "Forecast",
@@ -871,6 +884,7 @@
               "default": "naive_last_week",
               "enum": [
                 "naive_last_week",
+                "fundamentals",
                 "perfect_foresight"
               ],
               "title": "Forecast",
@@ -1032,6 +1046,7 @@
               "default": "naive_last_week",
               "enum": [
                 "naive_last_week",
+                "fundamentals",
                 "perfect_foresight"
               ],
               "title": "Forecast",
@@ -1163,6 +1178,7 @@
               "default": "naive_last_week",
               "enum": [
                 "naive_last_week",
+                "fundamentals",
                 "perfect_foresight"
               ],
               "title": "Forecast",
@@ -1294,6 +1310,7 @@
               "default": "naive_last_week",
               "enum": [
                 "naive_last_week",
+                "fundamentals",
                 "perfect_foresight"
               ],
               "title": "Forecast",

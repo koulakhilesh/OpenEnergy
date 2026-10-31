@@ -15,20 +15,23 @@ from openenergy.app.runs import (
     Request,
 )
 from openenergy.data.ember import EMBER_ATTRIBUTION
+from openenergy.data.fundamentals import FUNDAMENTALS_ATTRIBUTION
 from openenergy.data.response import RESPONSE_ATTRIBUTION
 
 SERVICE_NAMES = {
     "dc": "Dynamic Containment",
     "dc_dm": "Dynamic Containment and Moderation",
 }
-MODEL_SPREAD_SHARE = 0.77  # modelled 2025 daily spread 52.0 / actual 67.5 (forward guide)
+MODEL_SPREAD_SHARE = 0.76  # modelled 2025 daily spread 51.0 / actual 67.5 (forward guide)
 HELP = {
     "power": "The most the battery can charge or discharge at once. Revenue scales with it.",
     "duration": "Hours to fill or empty at full power: a 10 MW, 2-hour battery stores 20 MWh.",
     "forecast": (
         "Last week's prices: each day is planned as if prices repeat the same day last "
-        "week, a simple forecast anyone could make. Perfect foresight: planned knowing "
-        "every price, the most the battery could earn."
+        "week, a simple forecast anyone could make. OpenEnergy forecast: a model trained "
+        "each month on what was known by noon the day before (recent prices, NESO's demand "
+        "forecast, Elexon's wind forecast, the daily gas price). Perfect foresight: planned "
+        "knowing every price, the most the battery could earn."
     ),
     "response": (
         "NESO pays batteries to hold power ready for when grid frequency drifts from 50 Hz: "
@@ -60,13 +63,14 @@ def answer(result: Result, power_mw: float) -> str:
         verb = "would earn"
     total = s["revenue_per_mw_year"] * power_mw
     perfect = s["perfect_per_mw_year"] * power_mw
-    if r.forecast == "naive_last_week":
+    if r.forecast == "perfect_foresight":
+        how = "with perfect foresight of prices, an upper bound"
+    else:
+        plan = "last week's prices" if r.forecast == "naive_last_week" else "OpenEnergy's forecast"
         how = (
-            f"planning each day on last week's prices: {s['capture_ratio']:.0%} of the "
+            f"planning each day on {plan}: {s['capture_ratio']:.0%} of the "
             f"{money(perfect)} perfect foresight allows"
         )
-    else:
-        how = "with perfect foresight of prices, an upper bound"
     text = (
         f"{battery} {where} {verb} about {money(total)} a year "
         f"({money(s['revenue_per_mw_year'])} per MW), {how}. "
@@ -110,6 +114,8 @@ def sources(request: Request) -> str:
     if request.source == "scenario":
         return f"Prices modelled by OpenEnergy from open data. {SCENARIO_ATTRIBUTION}"
     text = EMBER_ATTRIBUTION
+    if request.forecast == "fundamentals":
+        text += " " + FUNDAMENTALS_ATTRIBUTION
     if request.services != "none":
         text += " " + RESPONSE_ATTRIBUTION
     return text
@@ -136,7 +142,11 @@ def scenario_yaml(request: Request, power_mw: float) -> str:
                 "end": f"{request.year}-12-31",
             },
             "battery": battery,
-            "forecast": request.forecast,
+            "forecast": (
+                {"method": "fundamentals", "path": "data/forecasts/gb_fundamentals_day_ahead.csv"}
+                if request.forecast == "fundamentals"
+                else request.forecast
+            ),
             "dispatch": dispatch,
         }
         if request.services != "none":

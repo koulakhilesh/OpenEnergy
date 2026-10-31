@@ -20,7 +20,19 @@ from openenergy.report import build_report
 
 logger = logging.getLogger(__name__)
 # Front-end routes; each serves the same page and the browser reads the query string.
-PAGES = ("/", "/result", "/explore", "/compare", "/scenarios")
+PAGES = (
+    "/",
+    "/lab",
+    "/replay",
+    "/2035",
+    "/play",
+    "/run",
+    "/result",
+    "/explore",
+    "/compare",
+    "/scenarios",
+    "/embed/arbitrage",
+)
 _MISSING = (
     "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>OpenEnergy</title>"
     "</head><body><h1>OpenEnergy</h1><p>The web front end is not built. From the repository "
@@ -96,12 +108,22 @@ for _path in PAGES:
 @app.get("/assets/{name:path}", include_in_schema=False, response_model=None)
 def assets(name: str) -> FileResponse | PlainTextResponse:
     """Hashed build files, looked up by name among the files in the assets folder."""
-    folder = web_dir() / "assets"
+    return _listed(web_dir() / "assets", name, "public, max-age=31536000, immutable")
+
+
+@app.get("/data/{name:path}", include_in_schema=False, response_model=None)
+def static_data(name: str) -> FileResponse | PlainTextResponse:
+    """Prices, generation mix and study results for the in-browser pages."""
+    return _listed(web_dir() / "data", name, "public, max-age=86400")
+
+
+def _listed(folder: Path, name: str, cache: str) -> FileResponse | PlainTextResponse:
+    # Only names of files actually in the folder are served, never a path built from input.
     files = {p.name: p for p in folder.iterdir() if p.is_file()} if folder.is_dir() else {}
     path = files.get(name)
     if path is None:
         return PlainTextResponse("Not found", 404)
-    return FileResponse(path, headers={"Cache-Control": "public, max-age=31536000, immutable"})
+    return FileResponse(path, headers={"Cache-Control": cache})
 
 
 def _message(title: str, body: str) -> str:
