@@ -1157,11 +1157,11 @@
 
 
 <h1 id="web-app">Web app<a class="headerlink" href="#web-app" title="Permanent link">&para;</a></h1>
-<p>The web app shows a battery trading Britain's grid and values one on any GB day or year or
-on a NESO FES pathway's modelled prices. It answers in plain sentences and shows the
-charts, assumptions and sources behind each answer. The pages are a React and TypeScript
-front end (<code>web/</code>); the year-long results come from a FastAPI JSON API (<code>openenergy.app</code>),
-and since v6.0 the day-by-day pages run the battery optimiser in the browser. It runs at
+<p>The web app is a simulator of Britain's grid with a battery trading on it, and values a
+battery on any GB day or year or on a NESO FES pathway's modelled prices. It answers in
+plain sentences and keeps the charts, assumptions and sources one click away. The pages
+are a React and TypeScript front end (<code>web/</code>); the year-long results come from a FastAPI
+JSON API (<code>openenergy.app</code>), and the simulator, Play and 2035 run in the browser. It runs at
 <a href="https://open-energy-eight.vercel.app/">open-energy-eight.vercel.app</a>, or locally:</p>
 <div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w">                        </span><span class="c1"># the app dependency group (FastAPI, plotly, uvicorn) is a default</span>
 npm<span class="w"> </span>--prefix<span class="w"> </span>web<span class="w"> </span>ci<span class="w">            </span><span class="c1"># Node 22 or later</span>
@@ -1185,23 +1185,19 @@ passing API calls to port 8000).</p>
 <tbody>
 <tr>
 <td><code>/</code></td>
-<td>A real day plays itself: a 1 MW battery plans on OpenEnergy's forecast, the price line draws, the battery fills and empties and a counter adds up what it earns; then the ways in</td>
-</tr>
-<tr>
-<td><code>/lab</code></td>
-<td><strong>Battery Lab.</strong> Any day from 2019, any power, duration, efficiency and wear cost; plan with perfect foresight, OpenEnergy's forecast and last week's prices at once and see each plan's trades; the whole year below as a strip, solved in the background a month at a time (click a day to open it); "best day" and "the forecast's worst miss" jump to them</td>
-</tr>
-<tr>
-<td><code>/replay</code></td>
-<td><strong>Grid replay.</strong> Any week from 2019 to 2025: generation by fuel, price and carbon intensity hour by hour; play, scrub or jump to the year's dearest, windiest, stillest or cleanest week</td>
-</tr>
-<tr>
-<td><code>/2035</code></td>
-<td>The <a href="../forward-scenarios/#how-much-storage-can-gb-use">storage saturation study</a>: pick a pathway and drag the battery fleet to see what one more battery earns and how much firm capacity is still needed</td>
+<td><strong>Simulator.</strong> Britain's grid hour by hour from 2019 to October 2026: generation by fuel flowing into the GB node, the day-ahead price, demand, carbon intensity and the wind share, with a battery charging and discharging on a plan the optimiser makes in the browser. Play at 1, 4 or 24 hours a second, step with ←/→ (shift for a day, space to play), or click a day on the year strip, coloured by each day's price spread. The side panel sets power, duration, efficiency and wear cost and the forecast the battery plans with; it shows the day's revenue for perfect foresight, OpenEnergy's forecast and last week's prices, and the whole year for all three, solved in the background a month at a time, with "best day" and "the forecast's worst miss". Notes appear on negative prices and price spikes. The address holds the day, hour and battery (<code>/?day=2025-01-20&amp;hour=16&amp;mw=1&amp;h=2&amp;eff=95&amp;wear=5&amp;plan=fundamentals</code>)</td>
 </tr>
 <tr>
 <td><code>/play</code></td>
-<td><strong>Beat the battery.</strong> Plan a day yourself from OpenEnergy's forecast, then see actual prices and your result against the optimiser on the same forecast and against perfect foresight; the same day for everyone each day, and any day by link (<code>/play?d=2024-03-12</code>)</td>
+<td><strong>Play: beat the battery.</strong> Tap or drag across the hours to plan a day from OpenEnergy's forecast; the battery (1 MW / 2 MWh, lossless, £5/MWh wear) starts and must end half full, as the optimiser's does. Run the day to see actual prices draw in and your cash against the optimiser on the same forecast and against perfect foresight; show the optimiser's plan to compare. The same day for everyone each day, and any day by link (<code>/play?d=2024-03-12</code>)</td>
+</tr>
+<tr>
+<td><code>/2035</code></td>
+<td>The <a href="../forward-scenarios/#how-much-storage-can-gb-use">storage saturation study</a>: pick a pathway and slide the battery fleet to see what one more battery earns, how hard the fleet works and how much firm capacity is still needed (<code>/2035?pathway=Falling+Behind&amp;fleet=2</code>)</td>
+</tr>
+<tr>
+<td><code>/research</code></td>
+<td>The pages below, for whole years, pathways and downloads</td>
 </tr>
 <tr>
 <td><code>/embed/arbitrage</code></td>
@@ -1209,6 +1205,13 @@ passing API calls to port 8000).</p>
 </tr>
 </tbody>
 </table>
+<p><code>?embed=1</code> shows the simulator or 2035 without the header, for embedding (as on
+<a href="../../findings/">Findings</a>). The 6.0 addresses <code>/lab</code> and <code>/replay</code> open the simulator with
+their day and battery.</p>
+<p>Revenue in these pages is after wear: what the plan earns at actual prices less the wear
+cost on every MWh moved, the quantity the optimiser maximises, so no plan beats perfect
+foresight. (The year results from the API below report revenue before wear, as the Python
+backtest does.)</p>
 <p>These pages read static files (<code>web/public/data/</code>, written by
 <code>scripts/build_app_data.py</code> and served at <code>/data/&lt;file&gt;</code>): hourly prices and the fundamentals forecast for each year,
 the generation mix and carbon intensity, and the saturation study, each with its

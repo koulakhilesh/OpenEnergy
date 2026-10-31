@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#whats-new-in-60" class="md-skip">
+        <a href="#whats-new" class="md-skip">
           Skip to content
         </a>
       
@@ -502,6 +502,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#61-the-web-app-becomes-a-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1: the web app becomes a simulator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#60" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#new" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -511,8 +534,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#changed-defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -522,8 +545,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#fixed-the-end-of-day-energy-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -533,8 +556,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#the-web-app" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -544,8 +567,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#numbers-re-run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -553,6 +576,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1038,6 +1066,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#61-the-web-app-becomes-a-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1: the web app becomes a simulator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#60" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#new" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1047,8 +1098,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#changed-defaults" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1058,8 +1109,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#fixed-the-end-of-day-energy-target" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1069,8 +1120,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#the-web-app" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1080,8 +1131,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#numbers-re-run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1089,6 +1140,11 @@
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1117,12 +1173,41 @@
   
 
 
-<h1 id="whats-new-in-60">What's new in 6.0<a class="headerlink" href="#whats-new-in-60" title="Permanent link">&para;</a></h1>
+<h1 id="whats-new">What's new<a class="headerlink" href="#whats-new" title="Permanent link">&para;</a></h1>
+<h2 id="61-the-web-app-becomes-a-simulator">6.1: the web app becomes a simulator<a class="headerlink" href="#61-the-web-app-becomes-a-simulator" title="Permanent link">&para;</a></h2>
+<p>OpenEnergy 6.1 changes only the <a href="../guides/web-app/">web app</a> and its data; the library,
+the API and every model result are as in 6.0.</p>
+<ul>
+<li><strong>One simulator instead of pages.</strong> <a href="https://open-energy-eight.vercel.app/">open-energy-eight.vercel.app</a>
+  opens on Britain's grid hour by hour: each fuel flows into the GB node with a band as
+  wide as its output, the node shows the day-ahead price, and your battery charges and
+  discharges on a plan the optimiser makes in the browser. Play at 1, 4 or 24 hours a
+  second, step with the arrow keys, or click a day on the year strip (each day coloured by
+  its price spread). A side panel sets the battery, the forecast it plans with and the day,
+  and shows the day and the whole year for all three forecasts.</li>
+<li><strong>Four tabs</strong>: Simulator, Play, 2035 and Research. Play lets you paint a day's plan,
+  then run the day and watch actual prices and the scores come in; it keeps the engine's
+  rule that the battery starts and ends the day half full. 2035 counts the saturation
+  study's value up and down as you add batteries. Research holds the analyst pages
+  (<code>/run</code>, <code>/result</code>, <code>/explore</code>, <code>/compare</code>, <code>/scenarios</code>), unchanged.</li>
+<li><strong>Revenue after wear in the browser.</strong> The 6.0 Battery Lab compared revenue before wear,
+  so on days when a forecast's plan traded more it could show more than perfect foresight
+  (on 20 October 2026 a 1 MW / 2 MWh battery on OpenEnergy's forecast showed 113%). The
+  simulator now compares revenue less wear, the quantity the optimiser maximises, so
+  perfect foresight is the most any plan earns (90% that day). The Python backtest and the
+  API's year results are unchanged.</li>
+<li><strong>2026 on the grid.</strong> NESO's generation mix now runs to 29 October 2026; the rows to
+  2025 are unchanged, and the system model still uses 2015–2025.</li>
+<li><strong>Addresses.</strong> <code>/lab</code> and <code>/replay</code> open the simulator with their day and battery, so
+  6.0 links keep working; sources are one click away under each view. The app and the
+  docs use the README's logo.</li>
+</ul>
+<h2 id="60">6.0<a class="headerlink" href="#60" title="Permanent link">&para;</a></h2>
 <p>OpenEnergy 6.0 makes the model more accurate, answers a research question, and puts the
 battery optimiser in the browser. Three defaults changed, and one bug was fixed that moves
-results; this page lists each with what it does to the numbers, measured by re-running
+results; this section lists each with what it does to the numbers, measured by re-running
 every result in these docs.</p>
-<h2 id="new">New<a class="headerlink" href="#new" title="Permanent link">&para;</a></h2>
+<h3 id="new">New<a class="headerlink" href="#new" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>A day-ahead forecast built on fundamentals</strong> (<code>forecast: fundamentals</code>): NESO's
   day-ahead demand forecast, Elexon's day-ahead wind forecast, the daily gas price and
@@ -1150,7 +1235,7 @@ every result in these docs.</p>
   and Elexon's day-ahead wind forecast, each with issue times (<code>data/fundamentals/</code>,
   <code>openenergy data update --fundamentals</code>; <a href="../data/#what-is-known-the-day-before">Data</a>).</li>
 </ul>
-<h2 id="changed-defaults">Changed defaults<a class="headerlink" href="#changed-defaults" title="Permanent link">&para;</a></h2>
+<h3 id="changed-defaults">Changed defaults<a class="headerlink" href="#changed-defaults" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1195,7 +1280,7 @@ The fundamentals forecaster uses them.</p>
 to 7–13 GWh. Their mean prices fall from £120–211/MWh to £73–76/MWh, and a battery's
 perfect-foresight value on them from 1.8–2.7 times the model's own 2025 to about it or
 below (<a href="../guides/forward-scenarios/#a-secure-system-first">Forward scenarios</a>).</p>
-<h2 id="fixed-the-end-of-day-energy-target">Fixed: the end-of-day energy target<a class="headerlink" href="#fixed-the-end-of-day-energy-target" title="Permanent link">&para;</a></h2>
+<h3 id="fixed-the-end-of-day-energy-target">Fixed: the end-of-day energy target<a class="headerlink" href="#fixed-the-end-of-day-energy-target" title="Permanent link">&para;</a></h3>
 <p>The daily plan required the battery to end each day with <em>at least</em> the energy it began
 with. When the last hour was cheap, a plan could end fuller, and the next day's target was
 then that fuller level, so the battery kept ratcheting up and holding energy it could have
@@ -1212,12 +1297,12 @@ sold. The plan now ends <em>exactly</em> at the target (<span class="arithmatex"
 <li>The fundamentals forecast in its design stage: a 2024 capture ratio of 73.7% became
   85.3%.</li>
 </ul>
-<h2 id="the-web-app">The web app<a class="headerlink" href="#the-web-app" title="Permanent link">&para;</a></h2>
+<h3 id="the-web-app">The web app<a class="headerlink" href="#the-web-app" title="Permanent link">&para;</a></h3>
 <p>The year form moved from <code>/</code> to <code>/run</code>; <code>/result</code>, <code>/explore</code>, <code>/compare</code> and
 <code>/scenarios</code> keep their addresses, so shared links still work. The app offers the
 fundamentals forecast for historic years from 2019, and the FES table shows the firm
 capacity each pathway needed.</p>
-<h2 id="numbers-re-run">Numbers re-run<a class="headerlink" href="#numbers-re-run" title="Permanent link">&para;</a></h2>
+<h3 id="numbers-re-run">Numbers re-run<a class="headerlink" href="#numbers-re-run" title="Permanent link">&para;</a></h3>
 <p>Every table and number in these docs was re-run for 6.0 with the commands and scripts
 named next to it. The ones that moved by more than rounding are on the pages linked above;
 the <a href="../guides/research/">Research</a> and <a href="../guides/revenue-stacking/">Revenue stacking</a>
