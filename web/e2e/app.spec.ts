@@ -1,42 +1,56 @@
 import { expect, test } from "@playwright/test";
 
-test("home plays a real day and leads to the lab", async ({ page }) => {
+test("the simulator plays Britain's grid and plans the battery", async ({ page }) => {
   await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "Watch a battery trade a real day on Britain's grid." }),
-  ).toBeVisible();
-  await expect(page.locator(".counter")).toContainText("£");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("20 January 2025");
+  await expect(page.locator(".answer")).toContainText("of what perfect foresight allows", { timeout: 30_000 });
+  await expect(page.getByRole("img", { name: /Britain used/ })).toBeVisible();
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(page).toHaveURL(/\/\?day=2025-01-2\d&hour=\d+/);
+  await page.getByText("Sources and licences").click();
   await expect(page.getByText(/Ember, European Wholesale Electricity Price Data/)).toBeVisible();
-  await page.getByRole("link", { name: "Try your own battery" }).click();
-  await expect(page).toHaveURL(/\/lab\?year=2025&day=/);
 });
 
-test("battery lab plans a day in the browser and solves the year", async ({ page }) => {
+test("the Battery Lab's address opens the simulator on its day and solves the year", async ({ page }) => {
   await page.goto("/lab?year=2025&day=2025-01-21");
+  await expect(page).toHaveURL(/\/\?day=2025-01-21/);
   await expect(page.locator(".answer")).toContainText("Tue, 21 January 2025", { timeout: 30_000 });
-  await expect(page.locator(".answer")).toContainText("of what perfect foresight allows");
   await expect(page.getByText(/daily plans solved in/)).toBeVisible({ timeout: 60_000 });
   await page.getByRole("button", { name: "4 h" }).click();
   await expect(page).toHaveURL(/h=4/);
   await expect(page.locator(".answer")).toContainText("1 MW / 4 MWh");
 });
 
-test("beat the battery scores a plan", async ({ page }) => {
+test("keys and the year strip move the clock", async ({ page }) => {
+  await page.goto("/?day=2025-06-01&hour=10");
+  const clock = page.getByRole("heading", { level: 1 });
+  await expect(clock).toContainText("1 June 2025 · 10:00");
+  await page.keyboard.press("ArrowRight");
+  await expect(clock).toContainText("11:00");
+  await page.keyboard.press("Shift+ArrowRight");
+  await expect(clock).toContainText("2 June 2025 · 11:00");
+  const strip = page.locator(".year-strip");
+  const box = (await strip.boundingBox())!;
+  await page.mouse.click(box.x + 3, box.y + box.height / 2);
+  await expect(clock).toContainText("January 2025");
+});
+
+test("beat the battery scores a plan as the day runs", async ({ page }) => {
   await page.goto("/play?d=2024-03-12");
   const cells = page.getByRole("group", { name: "Your plan, hour by hour" }).getByRole("button");
   await expect(cells).toHaveCount(24, { timeout: 30_000 });
   await cells.nth(3).click(); // charge to full
   await cells.nth(18).click(); // full, so the first tap sells
   await expect(cells.nth(18)).toHaveAccessibleName("18:00 sell");
-  await page.getByRole("button", { name: "Lock in my plan" }).click();
+  await cells.nth(5).focus();
+  await page.keyboard.press("Enter"); // full: a tap from the keyboard sells too
+  await expect(cells.nth(5)).toHaveAccessibleName("05:00 sell");
+  await cells.nth(5).focus();
+  await page.keyboard.press("Enter");
+  await expect(cells.nth(5)).toHaveAccessibleName("05:00 rest");
+  await page.getByRole("button", { name: "Run the day ▶" }).click();
   await expect(page.locator(".scoreboard")).toContainText("Optimiser, same forecast");
-});
-
-test("grid replay finds a week", async ({ page }) => {
-  await page.goto("/replay?week=2025-01-18");
-  await expect(page.locator(".now-panel")).toContainText("Wind gives", { timeout: 30_000 });
-  await page.getByRole("button", { name: "Windiest week" }).click();
-  await expect(page).not.toHaveURL(/week=2025-01-18/);
+  await expect(page.getByRole("status").filter({ hasText: /optimiser/ })).toBeVisible({ timeout: 10_000 });
 });
 
 test("2035 answers from the saturation study", async ({ page }) => {
@@ -44,6 +58,14 @@ test("2035 answers from the saturation study", async ({ page }) => {
   await expect(page.locator(".answer")).toContainText("GW of batteries", { timeout: 30_000 });
   await page.getByRole("button", { name: "Falling Behind" }).click();
   await expect(page.locator(".answer")).toContainText("Falling Behind 2035");
+  await expect(page).toHaveURL(/pathway=Falling\+Behind/);
+});
+
+test("research leads to the analyst pages", async ({ page }) => {
+  await page.goto("/research");
+  await page.getByRole("link", { name: /Value a battery/ }).click();
+  await expect(page).toHaveURL(/\/run$/);
+  await expect(page.getByRole("link", { name: "Research" })).toHaveAttribute("aria-current", "page");
 });
 
 test("the docs widget plans dragged prices", async ({ page }) => {

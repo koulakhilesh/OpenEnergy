@@ -5,21 +5,19 @@ import { useLoad } from "./hooks";
 import { Arbitrage } from "./pages/Arbitrage";
 import { Compare } from "./pages/Compare";
 import { Explore } from "./pages/Explore";
-import { Future } from "./pages/Future";
-import { Home } from "./pages/Home";
-import { Lab } from "./pages/Lab";
-import { Play } from "./pages/Play";
-import { Replay } from "./pages/Replay";
 import { ResultPage } from "./pages/Result";
 import { Run } from "./pages/Run";
 import { Scenarios } from "./pages/Scenarios";
+import { Future } from "./sim/Future";
+import { Play } from "./sim/Play";
+import { Research } from "./sim/Research";
+import { Simulator } from "./sim/Simulator";
 
 const TITLES: Record<string, string> = {
-  "/": "OpenEnergy",
-  "/lab": "Battery Lab | OpenEnergy",
-  "/replay": "Grid replay | OpenEnergy",
-  "/2035": "2035 | OpenEnergy",
+  "/": "OpenEnergy · Britain's grid, hour by hour",
   "/play": "Beat the battery | OpenEnergy",
+  "/2035": "2035 | OpenEnergy",
+  "/research": "Research | OpenEnergy",
   "/run": "Value a battery | OpenEnergy",
   "/result": "Battery value | OpenEnergy",
   "/explore": "Explore | OpenEnergy",
@@ -28,30 +26,28 @@ const TITLES: Record<string, string> = {
   "/embed/arbitrage": "How a battery earns | OpenEnergy",
 };
 
-const NAV: [string, string][] = [
-  ["/lab", "Battery Lab"],
-  ["/replay", "Grid replay"],
+const LENSES: [string, string][] = [
+  ["/", "Simulator"],
+  ["/play", "Play"],
   ["/2035", "2035"],
-  ["/play", "Beat the battery"],
-  ["/run", "Value a battery"],
-  ["/explore", "Explore"],
+  ["/research", "Research"],
 ];
 
-// Pages that run in the browser on static data; the rest ask the API.
-const STATIC = ["/", "/lab", "/replay", "/2035", "/play"];
+// Lenses run in the browser on static data; the research pages ask the API.
+const STATIC = ["/", "/play", "/2035", "/research"];
+// v6.0 addresses, now views of the simulator; their queries still work.
+const MOVED: Record<string, string> = { "/lab": "/", "/replay": "/" };
 
-function StaticPage({ path, params }: { path: string; params: URLSearchParams }) {
+function StaticPage({ path, params, embedded }: { path: string; params: URLSearchParams; embedded: boolean }) {
   switch (path) {
-    case "/lab":
-      return <Lab params={params} />;
-    case "/replay":
-      return <Replay params={params} />;
     case "/2035":
       return <Future params={params} />;
     case "/play":
       return <Play params={params} />;
+    case "/research":
+      return <Research />;
     default:
-      return <Home />;
+      return <Simulator params={params} embedded={embedded} />;
   }
 }
 
@@ -107,35 +103,37 @@ function initialTheme(): "light" | "dark" {
 function Brand() {
   return (
     <a className="brand" href="/">
-      <span className="mark" aria-hidden="true">
-        <i className="c" />
-        <i className="t" />
-        <i className="s" />
-      </span>
+      <img src="/assets/logo.png" alt="" width={28} height={28} />
       OpenEnergy
     </a>
   );
 }
 
 /** Each page is its own URL (shareable); the query string holds the choices. */
-export function App({ path, search }: { path: string; search: string }) {
+export function App({ path: asked, search }: { path: string; search: string }) {
   const [theme, setTheme] = useState(initialTheme);
+  const path = MOVED[asked] ?? asked;
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+  useEffect(() => {
+    // The page may already have written its own address (child effects run first).
+    if (path !== asked && window.location.pathname === asked) window.history.replaceState(null, "", `${path}${search}`);
+  }, [path, asked, search]);
   document.title = TITLES[path] ?? "OpenEnergy";
   const params = new URLSearchParams(search);
   if (path === "/embed/arbitrage") return <Arbitrage />;
-  const wide = STATIC.includes(path);
-  // ``?embed=1`` shows an in-browser page without the header, for the docs.
-  if (wide && params.get("embed") === "1") {
+  const lens = STATIC.includes(path);
+  // ``?embed=1`` shows a lens without the header, for the docs.
+  if (lens && params.get("embed") === "1") {
     document.documentElement.dataset.embed = "true";
     return (
-      <main className="wide embedded">
-        <StaticPage path={path} params={params} />
+      <main className={path === "/" ? "sim-main embedded" : "wide embedded"}>
+        <StaticPage path={path} params={params} embedded />
       </main>
     );
   }
+  const current = lens ? path : "/research";
   return (
     <>
       <a className="skip" href="#content">
@@ -144,14 +142,16 @@ export function App({ path, search }: { path: string; search: string }) {
       <header className="top">
         <Brand />
         <nav aria-label="Main" className="tabs">
-          {NAV.map(([href, name]) => (
-            <a key={href} href={href} aria-current={href === path ? "page" : undefined}>
+          {LENSES.map(([href, name]) => (
+            <a key={href} href={href} aria-current={href === current ? "page" : undefined}>
               {name}
             </a>
           ))}
-          <a href="https://koulakhilesh.github.io/OpenEnergy/">Docs</a>
         </nav>
         <span className="spacer" />
+        <a className="btn ghost small" href="https://koulakhilesh.github.io/OpenEnergy/">
+          Docs ↗
+        </a>
         <button
           type="button"
           className="btn ghost small"
@@ -165,14 +165,16 @@ export function App({ path, search }: { path: string; search: string }) {
           {theme === "dark" ? "Light" : "Dark"}
         </button>
       </header>
-      <main id="content" className={wide ? "wide" : "narrow"}>
-        {wide ? <StaticPage path={path} params={params} /> : <WithOptions path={path} params={params} />}
+      <main id="content" className={path === "/" ? "sim-main" : lens ? "wide" : "narrow"}>
+        {lens ? <StaticPage path={path} params={params} embedded={false} /> : <WithOptions path={path} params={params} />}
       </main>
-      <footer className="foot">
-        Code MIT; data keep their own licences, credited on each page.{" "}
-        <a href="https://github.com/koulakhilesh/OpenEnergy">Source</a> ·{" "}
-        <a href="https://koulakhilesh.github.io/OpenEnergy/">Docs</a>
-      </footer>
+      {path !== "/" && (
+        <footer className="foot">
+          Code MIT; data keep their own licences, credited on each page.{" "}
+          <a href="https://github.com/koulakhilesh/OpenEnergy">Source</a> ·{" "}
+          <a href="https://koulakhilesh.github.io/OpenEnergy/">Docs</a>
+        </footer>
+      )}
     </>
   );
 }

@@ -129,6 +129,16 @@ export function revenue(plan: Plan, actual: ArrayLike<number>, dt = 1): number {
   return total;
 }
 
+/**
+ * Revenue less wear on every MWh moved: the quantity the plan maximises, so no plan beats
+ * perfect foresight on it (revenue before wear can).
+ */
+export function afterWear(plan: Plan, actual: ArrayLike<number>, wear: number, dt = 1): number {
+  let moved = 0;
+  for (let t = 0; t < plan.charge.length; t++) moved += (plan.charge[t] + plan.discharge[t]) * dt;
+  return revenue(plan, actual, dt) - wear * moved;
+}
+
 /** Revenue each day from planning on `forecast` and settling at `actual` (hourly, whole days). */
 export function backtestDays(
   highs: Highs,
@@ -137,6 +147,7 @@ export function backtestDays(
   battery: Battery,
   first = 0,
   last?: number,
+  net = false,
 ): (number | null)[] {
   const days = Math.floor(actual.length / 24);
   const out: (number | null)[] = [];
@@ -147,7 +158,8 @@ export function backtestDays(
       continue;
     }
     const plan = planDay(highs, f as number[], battery);
-    out.push(revenue(plan, Array.prototype.slice.call(actual, day * 24, day * 24 + 24)));
+    const settle = Array.prototype.slice.call(actual, day * 24, day * 24 + 24) as number[];
+    out.push(net ? afterWear(plan, settle, battery.wear) : revenue(plan, settle));
   }
   return out;
 }

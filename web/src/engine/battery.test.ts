@@ -37,4 +37,12 @@ describe("browser engine", async () => {
     expect(days[0]).not.toBeNull();
     expect(days[1]).toBeNull();
   });
+
+  it("never beats perfect foresight after wear", () => {
+    const best = backtestDays(highs, parity.price, parity.forecast.perfect, battery, 0, undefined, true);
+    for (const forecast of Object.values(parity.forecast)) {
+      const days = backtestDays(highs, parity.price, forecast, battery, 0, undefined, true);
+      days.forEach((v, i) => expect(v ?? 0).toBeLessThanOrEqual((best[i] ?? 0) + 1e-6));
+    }
+  });
 });

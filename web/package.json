@@ -1,7 +1,7 @@
 {
   "name": "openenergy-web",
   "private": true,
-  "version": "6.0.0",
+  "version": "6.1.0",
   "type": "module",
   "description": "React front end for the OpenEnergy web app; talks to the FastAPI JSON API.",
   "license": "MIT",

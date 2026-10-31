@@ -39,7 +39,7 @@ from pathlib import Path
 import pandas as pd
 
 OUTPUT = Path(__file__).parents[1] / "data/system"
-START, END = "2015-01-01", "2026-01-01"
+START, END = "2015-01-01", "2026-10-30"
 YEARS = range(2014, 2026)
 
 NESO_MIX = (

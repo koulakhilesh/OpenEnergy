@@ -8,14 +8,16 @@ The model's files stop at the latest complete calendar year, 2025, and were chec
 on 2026-10-13. DUKES publishes each year's fleet the following July, so 2026 has no fleet
 or efficiency yet; Quarterly Energy Prices for 2026 and the carbon price on 1 April 2026
 exist but are not added until the year is complete, so every model year has the same
-kind of inputs. The interconnector files (below) are written by `scripts/fetch_fes.py`,
+kind of inputs. The generation mix is the exception: it runs to 29 October 2026 for the web
+app (refreshed on 2026-10-31; the rows to 2025 are unchanged). The interconnector files
+(below) are written by `scripts/fetch_fes.py`,
 `scripts/fetch_interconnector_flows.py` and `scripts/fit_interconnector_availability.py`;
 the flows run to 29 October 2026 (refreshed on 2026-10-30).
 
 ## `generation_mix.csv`
 
-Half-hourly GB generation by fuel, MW, 2015-01-01 00:00 to 2025-12-31 23:30 UTC
-(192,864 rows, no gaps). Columns: `utc_timestamp` (start of the half-hour, UTC), `gas`,
+Half-hourly GB generation by fuel, MW, 2015-01-01 00:00 to 2026-10-29 23:30 UTC
+(207,360 rows, no gaps). Columns: `utc_timestamp` (start of the half-hour, UTC), `gas`,
 `coal`, `nuclear`, `wind` (transmission-connected), `wind_emb` (embedded, estimated),
 `hydro`, `imports`, `biomass`, `other`, `solar`, `storage`, and `generation` (their sum).
 

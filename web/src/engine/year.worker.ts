@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 /**
  * Backtests a whole year in the background, a month at a time, so the page stays
- * responsive: each message is one month of daily revenue for every forecast asked for.
+ * responsive: each message is one month of daily revenue after wear for every forecast asked for.
  */
 import highsLoader from "highs";
 import wasmUrl from "highs/runtime?url";
@@ -36,7 +36,7 @@ self.onmessage = async (event: MessageEvent<YearRequest>) => {
     const last = Math.min(total, first + 31);
     const revenue: Record<string, (number | null)[]> = {};
     for (const [name, forecast] of Object.entries(forecasts)) {
-      revenue[name] = backtestDays(solver, settled, forecast, battery, first, last).map((v) =>
+      revenue[name] = backtestDays(solver, settled, forecast, battery, first, last, true).map((v) =>
         v === null || Number.isNaN(v) ? null : v,
       );
     }
