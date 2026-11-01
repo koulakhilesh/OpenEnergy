@@ -1,5 +1,38 @@
 # What's new
 
+## 7.0: from the model to the real grid
+
+OpenEnergy 7.0 checks its optimiser against what GB's real batteries did and adds the data
+for Scotland and England & Wales. No model default changes; every 6.x result stands.
+
+- **Real batteries** ([guide](guides/real-batteries.md), [web app](https://open-energy-eight.vercel.app/fleet)):
+  every GB grid battery's physical notifications, metered output and Balancing Mechanism
+  volumes and cashflows from Elexon, January 2021 to October 2026 (`data/fleet/`,
+  `scripts/fetch_fleet.py`, `openenergy.data.batteries`). In 2024 and 2025 the real fleet
+  discharged about 400 full-power hours a year at the hours the optimiser uses, but its
+  metered energy was worth 17–23% of a 1-hour optimiser's day-ahead revenue on
+  OpenEnergy's forecast; with contracts priced at the day-ahead price, the BM and
+  imbalance it made an estimated £16,200–16,700 per MW-year, before frequency response.
+  A physical notification turned out not to be what a battery did (one unit notified 1,262
+  MWh out and metered 615 in a week), so physical operation comes from the meter.
+- **Scotland and England & Wales** ([constraints](guides/constraints.md#scotland-and-england-wales)):
+  zonal demand and the transfer across the B6 boundary from NESO, and grid-scale capacity
+  by zone and year from DESNZ's project register (`data/zones/`, `scripts/fetch_zones.py`).
+  Scotland sent power south in 86% of half-hours in 2025 (19.3 TWh), up from 71% in 2023.
+  Scottish batteries make about the same per MW as English and Welsh ones, by selling
+  ahead and being paid less in the BM.
+- **The web app** gains a Real batteries tab (each year's fleet against the optimiser, its
+  average day, every unit by zone) and shows the real fleet's output each hour in the
+  simulator.
+- **Numbers checked on every test run**: `tests/test_docs_numbers.py` recomputes the
+  headline tables (saturation, the Scottish transfer, real batteries) from their source
+  files. Its first run found two errors in the docs, both fixed: Ten Year Forecast was
+  called a pathway with no shortfall (it needs 0.75 GW of firm capacity without batteries),
+  and a transfer maximum was mis-rounded.
+
+Planned for 7.1: a two-zone dispatch model checked against the observed transfer, and the
+saturation study on 2019–2023 weather using the capacity by year.
+
 ## 6.1: the web app becomes a simulator
 
 OpenEnergy 6.1 changes only the [web app](guides/web-app.md) and its data; the library,

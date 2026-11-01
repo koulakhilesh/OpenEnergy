@@ -2,7 +2,9 @@
 
 What OpenEnergy's runs show so far, each with the page that has the method, the numbers
 and the limits. Every number here comes from a command or script in the repository and
-was re-run for v6.0 (v6.1 changed only the web app).
+was re-run for v6.0 (v6.1 changed only the web app; v7.0 added real batteries and zones).
+The headline tables are checked against their source files on every test run
+(`tests/test_docs_numbers.py`).
 
 ## A battery on GB day-ahead prices
 
@@ -11,6 +13,17 @@ A 1 MW / 2 MWh battery planning on last week's prices earned £13,943 per MW-yea
 foresight allows every year from 2017 ([Home](index.md)). Try any day:
 
 <iframe src="https://open-energy-eight.vercel.app/?embed=1&day=2025-01-21&hour=16" title="OpenEnergy simulator" loading="lazy" style="width:100%;height:760px;border:0"></iframe>
+
+## Real batteries trade the same shape, far less of it
+
+GB's real grid batteries, from Elexon's metered data, discharged about 400 full-power hours
+a year in 2024 and 2025, at the same hours a day-ahead optimiser uses, but the energy they
+moved was worth only 17–23% of what a 1-hour optimiser on OpenEnergy's forecast earns at
+the day-ahead price. With their contracts priced at the day-ahead price, the Balancing
+Mechanism and imbalance, they made an estimated £16,200–16,700 per MW-year, before
+frequency response. Scottish batteries end up with about the same total as English and
+Welsh ones, paid more for selling ahead and less in the BM
+([Real batteries](guides/real-batteries.md)).
 
 ## A better forecast pays, less than its error suggests
 

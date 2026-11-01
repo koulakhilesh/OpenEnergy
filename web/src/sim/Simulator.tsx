@@ -5,10 +5,12 @@ import {
   complete,
   dateOf,
   day,
+  FLEET_YEARS,
   FORECASTS,
   type ForecastName,
   iso,
   label,
+  loadFleet,
   loadMix,
   loadPrices,
   MIX_YEARS,
@@ -55,6 +57,11 @@ export function Simulator({ params, embedded }: { params: URLSearchParams; embed
   );
   const data = prices.state === "done" ? prices.value : null;
   const mixData = mixes.state === "done" ? mixes.value : null;
+  const fleets = useLoad(
+    () => (FLEET_YEARS.includes(s.year) ? loadFleet(s.year) : Promise.reject(new Error("no fleet"))),
+    `fleet-${s.year}`,
+  );
+  const fleetData = fleets.state === "done" ? fleets.value : null;
   const { highs, failed } = useHighs();
   const b = useMemo(() => battery(s.power, s.hours, s.efficiency / 100, s.wear), [s.power, s.hours, s.efficiency, s.wear]);
   const playable = data ? playableHours(data.price) : 0;
@@ -130,6 +137,7 @@ export function Simulator({ params, embedded }: { params: URLSearchParams; embed
   const price = data?.price[hour] ?? null;
   const total = mix ? demandOf(mix) : 0;
   const carbon = mixData?.carbon[hour] ?? null;
+  const realFleet = fleetData?.net[hour] ?? null;
   const action = gridMw > 1e-6 ? "charging" : gridMw < -1e-6 ? "discharging" : "idle";
 
   return (
@@ -147,6 +155,9 @@ export function Simulator({ params, embedded }: { params: URLSearchParams; embed
             <Kpi value={mix ? (total / 1000).toFixed(1) : "–"} label="GW demand" />
             <Kpi value={carbon === null ? "–" : String(Math.round(carbon))} label="gCO₂/kWh" />
             <Kpi value={mix && total ? `${Math.round((100 * (mix.wind ?? 0)) / total)}%` : "–"} label="wind share" />
+            {realFleet !== null && (
+              <Kpi value={`${realFleet > 0 ? "+" : ""}${Math.round(realFleet)}`} label="MW real batteries" />
+            )}
           </div>
           <button type="button" className="btn ghost small" aria-expanded={drawer} aria-controls="sim-drawer" onClick={() => setDrawer(!drawer)}>
             Battery ⚙
@@ -257,7 +268,7 @@ export function Simulator({ params, embedded }: { params: URLSearchParams; embed
           />
         </div>
         <YearSummary year={s.year} yearly={yearly} onPick={(d) => seek(d * 24 + h)} />
-        <Sources texts={[...(data?.attribution ?? []), ...(mixData?.attribution ?? [])]} />
+        <Sources texts={[...(data?.attribution ?? []), ...(mixData?.attribution ?? []), ...(fleetData?.attribution ?? [])]} />
       </aside>
 
       <footer className="timeline" aria-label="Timeline">

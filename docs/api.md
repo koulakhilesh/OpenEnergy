@@ -18,6 +18,8 @@
 
 ::: openenergy.data.fleet
 
+::: openenergy.data.batteries
+
 ::: openenergy.data.interconnectors
 
 ::: openenergy.data.fes

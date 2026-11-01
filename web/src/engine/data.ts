@@ -49,6 +49,36 @@ export interface Saturation {
 }
 
 export const PRICE_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+export const FLEET_YEARS = [2021, 2022, 2023, 2024, 2025, 2026];
+
+/** The real GB battery fleet each UTC hour: metered net output (MW, exporting positive). */
+export interface FleetYear {
+  year: number;
+  start: string;
+  net: (number | null)[];
+  units: (number | null)[];
+  attribution: string[];
+}
+
+export interface FleetUnitYear {
+  unit: string;
+  name: string;
+  zone: string;
+  mw: number;
+  year: number;
+  days: number;
+  dischargeHours: number;
+  dayAheadPerMwYear: number;
+  bmPerMwYear: number;
+  /** Contracts (PN) at the day-ahead price + BM cashflow + imbalance at the system price. */
+  totalPerMwYear: number;
+}
+
+export interface FleetUnits {
+  units: FleetUnitYear[];
+  years: Record<string, number>[];
+  attribution: string[];
+}
 export const MIX_YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 export type ForecastName = "perfect" | "fundamentals" | "naive";
 export const FORECASTS: Record<ForecastName, { label: string; colour: string }> = {
@@ -74,6 +104,8 @@ function load<T>(name: string): Promise<T> {
 export const loadPrices = (year: number) => load<PriceYear>(`prices-${year}.json`);
 export const loadMix = (year: number) => load<MixYear>(`mix-${year}.json`);
 export const loadSaturation = () => load<Saturation>("saturation.json");
+export const loadFleet = (year: number) => load<FleetYear>(`fleet-${year}.json`);
+export const loadFleetUnits = () => load<FleetUnits>("fleet-units.json");
 
 /** Last week's prices for every hour of the year: what the naive plan uses. */
 export function naive(data: PriceYear): (number | null)[] {

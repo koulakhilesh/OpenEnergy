@@ -68,6 +68,17 @@ test("research leads to the analyst pages", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Research" })).toHaveAttribute("aria-current", "page");
 });
 
+test("real batteries compare the fleet with the optimiser and filter by zone", async ({ page }) => {
+  await page.goto("/fleet?year=2024");
+  await expect(page.locator(".answer")).toContainText("battery units ran", { timeout: 30_000 });
+  const rows = page.locator("tbody tr");
+  const all = await rows.count();
+  expect(all).toBeGreaterThan(5);
+  await page.getByRole("button", { name: "Scotland" }).click();
+  await expect(rows.first().locator("td").last()).toHaveText("Scotland");
+  expect(await rows.count()).toBeLessThan(all);
+});
+
 test("the docs widget plans dragged prices", async ({ page }) => {
   await page.goto("/embed/arbitrage");
   await expect(page.getByText(/plan earns/)).toBeVisible({ timeout: 30_000 });

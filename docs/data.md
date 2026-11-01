@@ -236,6 +236,25 @@ and buy prices are equal; it is used by `examples/imbalance_value.py`.
 NESO's half-hourly day-ahead limits and flows by boundary group from January 2023. Known
 issues are in `data/constraints/README.md`.
 
+## Real batteries
+
+`data/fleet/`, written by `scripts/fetch_fleet.py` from Elexon's BMRS, holds what GB's
+grid batteries did ([Real batteries](guides/real-batteries.md)): `battery_units.csv`, the
+83 BM units named as batteries with capacity, region and zone; `battery_daily.csv`, each
+unit's physical notifications, metered output (B1610), Balancing Mechanism volumes and
+cashflows and imbalance, by UTC day, January 2021 to 29 October 2026 (64,203 unit-days);
+and `fleet_hourly.csv`, the fleet each hour. `scripts/real_batteries.py` adds the yearly
+comparison with the optimiser. Read them with `openenergy.data.batteries.RealBatteries`.
+Known issues are in `data/fleet/README.md`.
+
+## Zones
+
+`data/zones/`, written by `scripts/fetch_zones.py`: `demand_by_zone.csv`, GB, England and
+Wales and Scottish demand, the transfer from Scotland (from 2023) and embedded wind and
+solar each half-hour from 2019 (NESO historic demand data), and `capacity_by_year.csv`,
+grid-scale battery, solar and wind capacity by zone and year (DESNZ REPD). Used on the
+[constraints page](guides/constraints.md#scotland-and-england-wales); no model uses them yet.
+
 ## Attribution
 
 **Prices, load and renewables**
@@ -409,6 +428,27 @@ unchanged, converts delivery times to UTC and reduces frequency to monthly avera
 > (accessed 31 October 2026). Licensed under the
 > [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
 > Supported by National Energy SO Open Data.
+
+**Real batteries**
+
+> Elexon. BMRS Insights API: BM unit register (reference/bmunits), physical notifications
+> (PN), actual metered volumes per BM unit (B1610) and indicative Balancing Mechanism
+> volumes and cashflows, <https://bmrs.elexon.co.uk/> (accessed 31 October 2026). Reused
+> under the [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+> Contains BMRS data © Elexon Limited copyright and database right 2026.
+
+**Zones**
+
+> National Energy System Operator (NESO). Historic Demand Data,
+> <https://www.neso.energy/data-portal/historic-demand-data> (accessed 31 October 2026).
+> Licensed under the [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
+> Department for Energy Security and Net Zero. Renewable Energy Planning Database,
+> quarterly extract, July 2026,
+> <https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract>.
+> Contains public sector information licensed under the
+> [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
 **Unit sizes and minimum loads**
 

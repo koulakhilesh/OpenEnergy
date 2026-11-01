@@ -297,7 +297,9 @@ wear) is then valued with perfect foresight on each year's modelled prices
 FES 2025 publishes figures from 2024, so these two weather years are all a FES system can
 be scaled from today; the Ten Year Outlook, which has no 2024 wind, is left out.
 
-The pathways with no shortfall first. GBP per MW-year, mean of the two weather years:
+The pathways with no shortfall once they have batteries first (Ten Year Forecast needs
+0.75 GW of firm capacity with no batteries, none with half its fleet). GBP per MW-year,
+mean of the two weather years:
 
 | Battery fleet (× FES 2035) | 0 | 0.5 | 1 | 2 | 3 |
 |---|---:|---:|---:|---:|---:|
