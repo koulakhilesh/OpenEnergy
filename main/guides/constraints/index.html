@@ -27,7 +27,7 @@
     
     
       
-        <title>Constraints - OpenEnergy</title>
+        <title>Constraints and zones - OpenEnergy</title>
       
     
     
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Constraints
+              Constraints and zones
             
           </span>
         </div>
@@ -259,7 +259,7 @@
   
     
   
-  What's new in 6.0
+  What's new
 
       </a>
     </li>
@@ -449,7 +449,7 @@
   <span class="md-ellipsis">
     
   
-    What's new in 6.0
+    What's new
   
 
     
@@ -692,6 +692,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../real-batteries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real batteries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../system/" class="md-nav__link">
         
   
@@ -792,7 +820,7 @@
   <span class="md-ellipsis">
     
   
-    Constraints
+    Constraints and zones
   
 
     
@@ -810,7 +838,7 @@
   <span class="md-ellipsis">
     
   
-    Constraints
+    Constraints and zones
   
 
     
@@ -851,6 +879,17 @@
     <span class="md-ellipsis">
       
         How often the boundaries are full
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scotland-and-england-wales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scotland and England &amp; Wales
       
     </span>
   </a>
@@ -1047,6 +1086,17 @@
     <span class="md-ellipsis">
       
         How often the boundaries are full
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scotland-and-england-wales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scotland and England &amp; Wales
       
     </span>
   </a>
@@ -1269,23 +1319,111 @@ caution: in 2023 almost no flow is above its limit, and from 2024 a fifth to a h
 the first six groups. NESO's description does not say whether the published flow is before
 or after its actions, so part of the jump may be in what is published. Group names also
 change (<code>SSHARN</code> became <code>SSHARN3</code>).</p>
+<h2 id="scotland-and-england-wales">Scotland and England &amp; Wales<a class="headerlink" href="#scotland-and-england-wales" title="Permanent link">&para;</a></h2>
+<p>Most of GB's wind is in Scotland and most of its demand is not. NESO's historic demand data
+split national demand into England and Wales and the rest, and from 2023 publish the flow
+from Scotland to England and Wales (the transfer across the B6 boundary); DESNZ's
+Renewable Energy Planning Database gives where the grid-scale capacity is (<code>data/zones/</code>,
+<code>scripts/fetch_zones.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th style="text-align: right;">Scotland's demand (mean GW)</th>
+<th style="text-align: right;">Transfer south (mean GW)</th>
+<th style="text-align: right;">Transfer, 95th percentile / highest (GW)</th>
+<th style="text-align: right;">Half-hours exporting south</th>
+<th style="text-align: right;">Energy sent south (TWh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2023</td>
+<td style="text-align: right;">2.19</td>
+<td style="text-align: right;">1.36</td>
+<td style="text-align: right;">4.53 / 6.24</td>
+<td style="text-align: right;">71%</td>
+<td style="text-align: right;">13.3</td>
+</tr>
+<tr>
+<td>2024</td>
+<td style="text-align: right;">2.13</td>
+<td style="text-align: right;">1.96</td>
+<td style="text-align: right;">5.26 / 6.70</td>
+<td style="text-align: right;">83%</td>
+<td style="text-align: right;">18.2</td>
+</tr>
+<tr>
+<td>2025</td>
+<td style="text-align: right;">2.16</td>
+<td style="text-align: right;">2.11</td>
+<td style="text-align: right;">4.96 / 6.59</td>
+<td style="text-align: right;">86%</td>
+<td style="text-align: right;">19.3</td>
+</tr>
+<tr>
+<td>2026 (to 10 Oct)</td>
+<td style="text-align: right;">2.05</td>
+<td style="text-align: right;">2.34</td>
+<td style="text-align: right;">5.06 / 6.71</td>
+<td style="text-align: right;">91%</td>
+<td style="text-align: right;">16.2</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Grid-scale capacity at the end of 2025 (GW)</th>
+<th style="text-align: right;">Scotland</th>
+<th style="text-align: right;">England and Wales</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Onshore wind</td>
+<td style="text-align: right;">10.1</td>
+<td style="text-align: right;">4.1</td>
+</tr>
+<tr>
+<td>Offshore wind</td>
+<td style="text-align: right;">4.3</td>
+<td style="text-align: right;">11.7</td>
+</tr>
+<tr>
+<td>Batteries</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">3.6</td>
+</tr>
+<tr>
+<td>Solar (over 150 kW)</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">10.4</td>
+</tr>
+</tbody>
+</table>
+<p>Scotland uses about 2.2 GW on average and has over 14 GW of wind, so it sends power south
+most of the time, more each year, and the transfer tops out near 6.7 GW. What a battery
+north or south of the boundary actually earns is on <a href="../real-batteries/#north-and-south-of-the-border">Real batteries</a>.</p>
 <h2 id="what-this-means-for-openenergy">What this means for OpenEnergy<a class="headerlink" href="#what-this-means-for-openenergy" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Day-ahead prices are national, so constraints do not change the backcasts or the
   battery values on day-ahead prices.</li>
 <li>They do change where storage is worth most to the system: a battery on the exporting
   side of a full boundary can absorb wind that would otherwise be paid to turn down.
-  Valuing that needs the Balancing Mechanism and a two-zone dispatch, which needs
-  generation by zone; open data gives that unit by unit only. It is planned for a later
-  release.</li>
+  v7.0 measures this from what real batteries in each zone earned; a two-zone dispatch
+  model, checked against the transfer above, is planned for v7.1.</li>
 <li>FES curtailment in the <a href="../forward-scenarios/">forward scenarios</a> is curtailment on one
   bus; a real network would curtail more.</li>
 </ul>
 <h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
-<p>NESO, <em>Constraint Breakdown Costs and Volume</em> and <em>Day Ahead Constraint Flows and Limits</em>,
+<p>NESO, <em>Constraint Breakdown Costs and Volume</em>, <em>Day Ahead Constraint Flows and Limits</em> and
+<em>Historic Demand Data</em>,
 <a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a>,
-supported by National Energy SO Open Data (accessed 31 October 2026). Details and known
-issues in <code>data/constraints/README.md</code>.</p>
+supported by National Energy SO Open Data (accessed 31 October 2026). Department for
+Energy Security and Net Zero, <em>Renewable Energy Planning Database</em>, July 2026,
+<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.
+Details and known issues in <code>data/constraints/README.md</code> and <code>data/zones/README.md</code>.</p>
 
 
 

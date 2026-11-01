@@ -27,7 +27,7 @@
     
     
       
-        <title>What's new in 6.0 - OpenEnergy</title>
+        <title>What's new - OpenEnergy</title>
       
     
     
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              What's new in 6.0
+              What's new
             
           </span>
         </div>
@@ -261,7 +261,7 @@
   
     
   
-  What's new in 6.0
+  What's new
 
       </a>
     </li>
@@ -458,7 +458,7 @@
   <span class="md-ellipsis">
     
   
-    What's new in 6.0
+    What's new
   
 
     
@@ -476,7 +476,7 @@
   <span class="md-ellipsis">
     
   
-    What's new in 6.0
+    What's new
   
 
     
@@ -500,6 +500,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#70-from-the-model-to-the-real-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.0: from the model to the real grid
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#61-the-web-app-becomes-a-simulator" class="md-nav__link">
@@ -817,6 +828,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../guides/real-batteries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real batteries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guides/system/" class="md-nav__link">
         
   
@@ -908,7 +947,7 @@
   <span class="md-ellipsis">
     
   
-    Constraints
+    Constraints and zones
   
 
     
@@ -1066,6 +1105,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#70-from-the-model-to-the-real-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.0: from the model to the real grid
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#61-the-web-app-becomes-a-simulator" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1174,6 +1224,37 @@
 
 
 <h1 id="whats-new">What's new<a class="headerlink" href="#whats-new" title="Permanent link">&para;</a></h1>
+<h2 id="70-from-the-model-to-the-real-grid">7.0: from the model to the real grid<a class="headerlink" href="#70-from-the-model-to-the-real-grid" title="Permanent link">&para;</a></h2>
+<p>OpenEnergy 7.0 checks its optimiser against what GB's real batteries did and adds the data
+for Scotland and England &amp; Wales. No model default changes; every 6.x result stands.</p>
+<ul>
+<li><strong>Real batteries</strong> (<a href="../guides/real-batteries/">guide</a>, <a href="https://open-energy-eight.vercel.app/fleet">web app</a>):
+  every GB grid battery's physical notifications, metered output and Balancing Mechanism
+  volumes and cashflows from Elexon, January 2021 to October 2026 (<code>data/fleet/</code>,
+  <code>scripts/fetch_fleet.py</code>, <code>openenergy.data.batteries</code>). In 2024 and 2025 the real fleet
+  discharged about 400 full-power hours a year at the hours the optimiser uses, but its
+  metered energy was worth 17–23% of a 1-hour optimiser's day-ahead revenue on
+  OpenEnergy's forecast; with contracts priced at the day-ahead price, the BM and
+  imbalance it made an estimated £16,200–16,700 per MW-year, before frequency response.
+  A physical notification turned out not to be what a battery did (one unit notified 1,262
+  MWh out and metered 615 in a week), so physical operation comes from the meter.</li>
+<li><strong>Scotland and England &amp; Wales</strong> (<a href="../guides/constraints/#scotland-and-england-wales">constraints</a>):
+  zonal demand and the transfer across the B6 boundary from NESO, and grid-scale capacity
+  by zone and year from DESNZ's project register (<code>data/zones/</code>, <code>scripts/fetch_zones.py</code>).
+  Scotland sent power south in 86% of half-hours in 2025 (19.3 TWh), up from 71% in 2023.
+  Scottish batteries make about the same per MW as English and Welsh ones, by selling
+  ahead and being paid less in the BM.</li>
+<li><strong>The web app</strong> gains a Real batteries tab (each year's fleet against the optimiser, its
+  average day, every unit by zone) and shows the real fleet's output each hour in the
+  simulator.</li>
+<li><strong>Numbers checked on every test run</strong>: <code>tests/test_docs_numbers.py</code> recomputes the
+  headline tables (saturation, the Scottish transfer, real batteries) from their source
+  files. Its first run found two errors in the docs, both fixed: Ten Year Forecast was
+  called a pathway with no shortfall (it needs 0.75 GW of firm capacity without batteries),
+  and a transfer maximum was mis-rounded.</li>
+</ul>
+<p>Planned for 7.1: a two-zone dispatch model checked against the observed transfer, and the
+saturation study on 2019–2023 weather using the capacity by year.</p>
 <h2 id="61-the-web-app-becomes-a-simulator">6.1: the web app becomes a simulator<a class="headerlink" href="#61-the-web-app-becomes-a-simulator" title="Permanent link">&para;</a></h2>
 <p>OpenEnergy 6.1 changes only the <a href="../guides/web-app/">web app</a> and its data; the library,
 the API and every model result are as in 6.0.</p>

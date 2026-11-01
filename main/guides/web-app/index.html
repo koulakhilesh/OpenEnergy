@@ -259,7 +259,7 @@
   
     
   
-  What's new in 6.0
+  What's new
 
       </a>
     </li>
@@ -449,7 +449,7 @@
   <span class="md-ellipsis">
     
   
-    What's new in 6.0
+    What's new
   
 
     
@@ -692,6 +692,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../real-batteries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real batteries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../system/" class="md-nav__link">
         
   
@@ -783,7 +811,7 @@
   <span class="md-ellipsis">
     
   
-    Constraints
+    Constraints and zones
   
 
     
@@ -1196,6 +1224,10 @@ passing API calls to port 8000).</p>
 <td>The <a href="../forward-scenarios/#how-much-storage-can-gb-use">storage saturation study</a>: pick a pathway and slide the battery fleet to see what one more battery earns, how hard the fleet works and how much firm capacity is still needed (<code>/2035?pathway=Falling+Behind&amp;fleet=2</code>)</td>
 </tr>
 <tr>
+<td><code>/fleet</code></td>
+<td><strong>Real batteries.</strong> What GB's grid batteries did each year from 2021, from Elexon's metered data: the fleet's estimated revenue next to the optimiser's, the fleet's average day against the day-ahead price, and every unit with its estimated total, metered energy at the day-ahead price and Balancing Mechanism cashflow per MW-year, by zone (<code>/fleet?year=2025</code>; <a href="../real-batteries/">Real batteries</a>). The simulator also shows the real fleet's metered output each hour</td>
+</tr>
+<tr>
 <td><code>/research</code></td>
 <td>The pages below, for whole years, pathways and downloads</td>
 </tr>
@@ -1381,7 +1413,7 @@ app does not read.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../constraints/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Constraints">
+          <a href="../constraints/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Constraints and zones">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1391,7 +1423,7 @@ app does not read.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Constraints
+                Constraints and zones
               </div>
             </div>
           </a>

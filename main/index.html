@@ -259,7 +259,7 @@
   
     
   
-  What's new in 6.0
+  What's new
 
       </a>
     </li>
@@ -527,7 +527,7 @@
   <span class="md-ellipsis">
     
   
-    What's new in 6.0
+    What's new
   
 
     
@@ -765,6 +765,34 @@
   
   
     <li class="md-nav__item">
+      <a href="guides/real-batteries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real batteries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="guides/system/" class="md-nav__link">
         
   
@@ -856,7 +884,7 @@
   <span class="md-ellipsis">
     
   
-    Constraints
+    Constraints and zones
   
 
     
@@ -1251,6 +1279,9 @@ a correlation of 0.81 (0.40 with quarterly prices) (see <a href="guides/system-m
     browser, lets you play a day against it, and values a battery on any GB year from 2017
     or on a FES pathway; try it at
     <a href="https://open-energy-eight.vercel.app/">open-energy-eight.vercel.app</a>.</li>
+<li><strong>Checks itself against real batteries</strong>: every GB grid battery's metered output and
+    Balancing Mechanism cashflows from Elexon since 2021, next to what the optimiser does,
+    north and south of the Scottish border (see <a href="guides/real-batteries/">Real batteries</a>).</li>
 </ol>
 <p>See <a href="concepts/">Concepts</a> for the equations and <a href="guides/scenarios/">Scenarios</a> for
 every setting.</p>
@@ -1322,7 +1353,11 @@ every setting.</p>
 </tr>
 <tr>
 <td>v6.1</td>
-<td>The web app as a simulator: Britain's grid hour by hour with power flowing in by fuel and a battery trading on the in-browser optimiser, play controls, keys and a year strip; Play, 2035 and Research tabs; revenue after wear in the browser, so perfect foresight is a true ceiling; NESO's generation mix to October 2026 (<a href="whats-new/">What's new</a>; current)</td>
+<td>The web app as a simulator: Britain's grid hour by hour with power flowing in by fuel and a battery trading on the in-browser optimiser, play controls, keys and a year strip; Play, 2035 and Research tabs; revenue after wear in the browser, so perfect foresight is a true ceiling; NESO's generation mix to October 2026 (<a href="whats-new/#61-the-web-app-becomes-a-simulator">What's new</a>)</td>
+</tr>
+<tr>
+<td>v7.0</td>
+<td>Real batteries: every GB grid battery's physical notifications, metered output and Balancing Mechanism volumes and cashflows from Elexon (2021 to October 2026), compared with the optimiser and by zone; Scotland and England &amp; Wales demand, transfer and capacity by year; a Real batteries tab in the web app; the docs' headline numbers checked against their sources on every test run (<a href="whats-new/">What's new</a>; current)</td>
 </tr>
 </tbody>
 </table>
@@ -1336,8 +1371,8 @@ every setting.</p>
 </thead>
 <tbody>
 <tr>
-<td>v6.2</td>
-<td>Scotland and England as two zones with the Balancing Mechanism, to value where a battery relieves constraints; historic capacity by technology so the saturation study can use every weather year from 2019; the evening peak premium the cost-based model misses</td>
+<td>v7.1</td>
+<td>A two-zone dispatch model (Scotland and England &amp; Wales) checked against the observed transfer, to value where a battery relieves constraints; the saturation study on every weather year from 2019, using capacity by year; the evening peak premium the cost-based model misses</td>
 </tr>
 </tbody>
 </table>
@@ -1381,13 +1416,13 @@ forecastable market price appears. Ideas are welcome in
         
         
           
-          <a href="whats-new/" class="md-footer__link md-footer__link--next" aria-label="Next: What&#39;s new in 6.0">
+          <a href="whats-new/" class="md-footer__link md-footer__link--next" aria-label="Next: What&#39;s new">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                What's new in 6.0
+                What's new
               </div>
             </div>
             <div class="md-footer__button md-icon">

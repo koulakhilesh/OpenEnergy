@@ -259,7 +259,7 @@
   
     
   
-  What's new in 6.0
+  What's new
 
       </a>
     </li>
@@ -449,7 +449,7 @@
   <span class="md-ellipsis">
     
   
-    What's new in 6.0
+    What's new
   
 
     
@@ -687,6 +687,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../guides/real-batteries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Real batteries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../guides/system/" class="md-nav__link">
         
   
@@ -778,7 +806,7 @@
   <span class="md-ellipsis">
     
   
-    Constraints
+    Constraints and zones
   
 
     
@@ -1043,6 +1071,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#real-batteries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real batteries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#attribution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1240,6 +1290,28 @@
     <span class="md-ellipsis">
       
         Transmission constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-batteries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real batteries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zones
       
     </span>
   </a>
@@ -1672,6 +1744,21 @@ and buy prices are equal; it is used by <code>examples/imbalance_value.py</code>
 2021 (values unchanged), and <code>day_ahead_boundaries_monthly.csv</code>, a monthly summary of
 NESO's half-hourly day-ahead limits and flows by boundary group from January 2023. Known
 issues are in <code>data/constraints/README.md</code>.</p>
+<h2 id="real-batteries">Real batteries<a class="headerlink" href="#real-batteries" title="Permanent link">&para;</a></h2>
+<p><code>data/fleet/</code>, written by <code>scripts/fetch_fleet.py</code> from Elexon's BMRS, holds what GB's
+grid batteries did (<a href="../guides/real-batteries/">Real batteries</a>): <code>battery_units.csv</code>, the
+83 BM units named as batteries with capacity, region and zone; <code>battery_daily.csv</code>, each
+unit's physical notifications, metered output (B1610), Balancing Mechanism volumes and
+cashflows and imbalance, by UTC day, January 2021 to 29 October 2026 (64,203 unit-days);
+and <code>fleet_hourly.csv</code>, the fleet each hour. <code>scripts/real_batteries.py</code> adds the yearly
+comparison with the optimiser. Read them with <code>openenergy.data.batteries.RealBatteries</code>.
+Known issues are in <code>data/fleet/README.md</code>.</p>
+<h2 id="zones">Zones<a class="headerlink" href="#zones" title="Permanent link">&para;</a></h2>
+<p><code>data/zones/</code>, written by <code>scripts/fetch_zones.py</code>: <code>demand_by_zone.csv</code>, GB, England and
+Wales and Scottish demand, the transfer from Scotland (from 2023) and embedded wind and
+solar each half-hour from 2019 (NESO historic demand data), and <code>capacity_by_year.csv</code>,
+grid-scale battery, solar and wind capacity by zone and year (DESNZ REPD). Used on the
+<a href="../guides/constraints/#scotland-and-england-wales">constraints page</a>; no model uses them yet.</p>
 <h2 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h2>
 <p><strong>Prices, load and renewables</strong></p>
 <blockquote>
@@ -1836,6 +1923,26 @@ Flows and Limits, <a href="https://www.neso.energy/data-portal/day-ahead-constra
 (accessed 31 October 2026). Licensed under the
 <a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a>.
 Supported by National Energy SO Open Data.</p>
+</blockquote>
+<p><strong>Real batteries</strong></p>
+<blockquote>
+<p>Elexon. BMRS Insights API: BM unit register (reference/bmunits), physical notifications
+(PN), actual metered volumes per BM unit (B1610) and indicative Balancing Mechanism
+volumes and cashflows, <a href="https://bmrs.elexon.co.uk/">https://bmrs.elexon.co.uk/</a> (accessed 31 October 2026). Reused
+under the <a href="https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/">BMRS data licence</a>.
+Contains BMRS data © Elexon Limited copyright and database right 2026.</p>
+</blockquote>
+<p><strong>Zones</strong></p>
+<blockquote>
+<p>National Energy System Operator (NESO). Historic Demand Data,
+<a href="https://www.neso.energy/data-portal/historic-demand-data">https://www.neso.energy/data-portal/historic-demand-data</a> (accessed 31 October 2026).
+Licensed under the <a href="https://www.neso.energy/data-portal/neso-open-licence">NESO Open Data Licence v1.0</a>.
+Supported by National Energy SO Open Data.</p>
+<p>Department for Energy Security and Net Zero. Renewable Energy Planning Database,
+quarterly extract, July 2026,
+<a href="https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract">https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract</a>.
+Contains public sector information licensed under the
+<a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.</p>
 </blockquote>
 <p><strong>Unit sizes and minimum loads</strong></p>
 <blockquote>
