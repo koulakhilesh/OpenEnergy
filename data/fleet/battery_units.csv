@@ -1,0 +1,84 @@
+unit,national_grid_unit,name,lead_party,type,generation_capacity_mw,demand_capacity_mw,gsp_group,transmission_loss_factor,region,zone,capacity_mw,capacity_source
+E_ARBRB-1,ARBRB-1,Arbroath Battery Storage,Octopus Energy Trading Limited,E,34.511,35.964,North Scotland,-0.0304534,North Scotland,scotland,34.511,generation
+E_ARNKB-2,ARNKB-2,Hutton Battery Storage,Flexitricity Limited,E,49.0,5.686,Eastern,0.0083094,Eastern,england_wales,49.0,generation
+E_BARNB-1,BARNB-1,Hunningley Stairfoot BESS,EDF Energy Customers Limited,E,44.0,44.0,Yorkshire,-0.0042872,Yorkshire,england_wales,44.0,generation
+E_BERKB-1,BERKB-1,Berkeley BESS,EDF Energy Customers Limited,E,52.0,52.0,Midlands,0.0154944,Midlands,england_wales,52.0,generation
+E_BERKB-2,BERKB-2,Berkeley BESS,EDF Energy Customers Limited,E,52.0,52.0,Midlands,0.0163921,Midlands,england_wales,52.0,generation
+E_BHOLB-1,BHOLB-1,Holes Bay Battery,Tesla Motors Limited,E,7.12,7.426,Southern,0.0213863,Southern,england_wales,7.12,generation
+E_BRETB-1,BRETB-1,Brentwood BESS,EDF Energy Customers Limited,E,52.0,52.0,Eastern,0.0019757,Eastern,england_wales,52.0,generation
+E_BRETB-2,BRETB-2,Brentwood BESS,EDF Energy Customers Limited,E,52.0,52.0,Eastern,0.0083094,Eastern,england_wales,52.0,generation
+E_BROAB-1,BROAB-1,Broadditch Battery,Tesla Motors Limited,E,11.0,11.0,South Eastern,0.0130857,South Eastern,england_wales,11.0,generation
+E_BROFB-1,BROFB-1,Brook Farm BESS,EDF Energy Customers Limited,E,52.0,52.803,Eastern,0.0083094,Eastern,england_wales,52.0,generation
+E_BROXB-1,BROXB-1,BroxburnBattery,ENGIE Power Limited,E,50.0,50.0,South Scotland,-0.0099306,South Scotland,scotland,50.0,generation
+E_BURWB-1,BURWB-1,Burwell Weirs Drove BESS,Arenko Cleantech Limited,E,50.533,50.861,Eastern,0.0042196,Eastern,england_wales,50.533,generation
+E_CATHB-1,CATHB-1,CathkinBattery,ENGIE Power Limited,E,49.9,49.9,South Scotland,-0.0099306,South Scotland,scotland,49.9,generation
+E_CHAPB-1,CHAPB-1,Chapel Farm BESS,Tesla Motors Limited,E,50.169,50.21,Eastern,0.0083094,Eastern,england_wales,50.169,generation
+E_CLAYB-1,CLAYB-1,ClayTye Farm 1 Battery Storage,Tesla Motors Limited,E,49.5,49.5,Eastern,0.0083094,Eastern,england_wales,49.5,generation
+E_CLAYB-2,CLAYB-2,ClayTye Farm 2 Battery Storage,Tesla Motors Limited,E,49.5,49.5,Eastern,0.0083094,Eastern,england_wales,49.5,generation
+E_CONTB-1,CONTB-1,Contego Battery,Tesla Motors Limited,E,35.8,34.445,South Eastern,0.0130857,South Eastern,england_wales,35.8,generation
+E_CUPAB-1,CUPAB-1,Coupar Battery Storage,Octopus Energy Trading Limited,E,41.314,41.543,North Scotland,-0.0304534,North Scotland,scotland,41.314,generation
+E_CUXTB-1,CUXTB-1,Cuxton Energy Storage,Cuxton Energy Storage Limited,E,49.0,49.0,South Eastern,0.0130857,South Eastern,england_wales,49.0,generation
+E_DALMB-1,DALMB-1,Dalmarnock_BESS,EDF Energy Customers Limited,E,40.0,40.0,South Scotland,-0.0099306,South Scotland,scotland,40.0,generation
+E_DYCEB-1,DYCEB-1,DYCE BESS,CBS ENERGY STORAGE ASSETS LTD,E,30.0,30.0,North Scotland,-0.0304534,North Scotland,scotland,30.0,generation
+E_ERSKB-1,ERSKB-1,Erskine BESS,EDF Energy Customers Limited,E,29.9,29.9,South Scotland,-0.0099306,South Scotland,scotland,29.9,generation
+E_FARNB-1,FARNB-1,Farnham BESS,Tesla Motors Limited,E,20.0,20.0,Southern,0.0213863,Southern,england_wales,20.0,generation
+E_GRCRB-1,GRCRB-1,Gerrards Cross BESS,FIELD GERRARDS CROSS LTD,E,20.0,20.0,Southern,0.0213863,Southern,england_wales,20.0,generation
+E_HAWKB-1,HAWKB-1,HawkersHill  Battery,Tesla Motors Limited,E,20.0,20.0,Southern,0.0213863,Southern,england_wales,20.0,generation
+E_ILMEB-1,ILMEB-1,Ilmer Lane BESS,Tesla Motors Limited,E,49.5,49.5,Eastern,0.0083094,Eastern,england_wales,49.5,generation
+E_JAMBB-1,JAMBB-1,Jamesfield 1 Battery Storage,Tesla Motors Limited,E,30.0,30.0,North Scotland,-0.0304534,North Scotland,scotland,30.0,generation
+E_JAMBB-2,JAMBB-2,Jamesfield 2 Battery Storage,Tesla Motors Limited,E,19.0,19.314,North Scotland,-0.0304534,North Scotland,scotland,19.0,generation
+E_LITRB-1,LITRB-1,Little Raith BESS,Tesla Motors Limited,E,50.0,50.0,South Scotland,-0.0099306,South Scotland,scotland,50.0,generation
+E_NEWPB-1,NEWPB-1,Newport BESS,Field Newport Ltd,E,20.933,20.931,South Wales,0.0164211,South Wales,england_wales,20.933,generation
+E_NEWTB-1,NEWTB-1,Newton wood BESS,EDF Energy Customers Limited,E,52.0,52.0,East Midlands,0.0092272,East Midlands,england_wales,52.0,generation
+E_NTAWB-1,NTAWB-1,North Tawton BESS,EDF Energy Customers Limited,E,32.0,32.0,South Western,0.0228729,South Western,england_wales,32.0,generation
+E_OLDHB-1,OLDHB-1,Oldham BESS,Field Oldham Ltd,E,20.0,20.0,North Western,-0.0050170,North Western,england_wales,20.0,generation
+E_OVRHB-1,OVRHB-1,Overhill BESS,Flexitricity Limited,E,49.0,5.343,North Scotland,-0.0304534,North Scotland,scotland,49.0,generation
+E_PILLB-1,PILLB-1,Pillswood 1 Battery Storage,BP Gas Marketing Limited,E,49.9,49.9,Yorkshire,-0.0042872,Yorkshire,england_wales,49.9,generation
+E_PILLB-2,PILLB-2,Pillswood 2 Battery Storage,BP Gas Marketing Limited,E,49.9,49.9,Yorkshire,-0.0042872,Yorkshire,england_wales,49.9,generation
+E_POTES-1,POTES-1,Port of Tyne Energy Storage,Arenko Cleantech Limited,E,35.0,35.0,Northern,-0.0105171,Northern,england_wales,35.0,generation
+E_ROARB-1,ROARB-1,Roaring Hill BESS,Tesla Motors Limited,E,50.0,50.0,South Scotland,-0.0099306,South Scotland,scotland,50.0,generation
+E_ROOSB-1,ROOSB-1,Roosecote BESS,CBS ENERGY STORAGE ASSETS LTD,E,49.0,49.0,North Western,-0.0050170,North Western,england_wales,49.0,generation
+E_SHILB-1,SHILB-1,Shilton Lane BESS,Octopus Energy Trading Limited,E,40.0,40.0,South Scotland,-0.0099306,South Scotland,scotland,40.0,generation
+E_SKELB-1,SKELB-1,Skelmersdale Battery,Tesla Motors Limited,E,49.9,50.642,North Western,-0.0050170,North Western,england_wales,49.9,generation
+E_STALB-1,STALB-1,KXP Immingham BESS,KXP Immingham Ltd,E,80.844,83.066,Yorkshire,-0.0042872,Yorkshire,england_wales,80.844,generation
+E_THMRB-1,THMRB-1,Thame Road  BESS,Tesla Motors Limited,E,49.5,49.5,Eastern,0.0083094,Eastern,england_wales,49.5,generation
+E_TOLLB-1,TOLLB-1,Tollgate Energy Storage,Tollgate Energy Storage Ltd,E,49.0,50.481,Eastern,0.0083094,Eastern,england_wales,49.0,generation
+E_WHTBB-1,WHTBB-1,Whitebirk BESS,Field Whitebirk Ltd,E,25.0,25.0,North Western,-0.0050170,North Western,england_wales,25.0,generation
+E_WOLVB-1,WOLVB-1,Wolverhampton West BESS,EDF Energy Customers Limited,E,56.0,52.0,Midlands,0.0163921,Midlands,england_wales,56.0,generation
+T_BLPFB-1,BLPFB-1,Bulphan Fen Warley Green BESS,EDF Energy Customers Limited,T,56.606,52.0,,0.0083094,Eastern,england_wales,56.606,generation
+T_BLWNB-1,BLWNB-1,Thornton Battery,Statkraft Markets Gmbh,T,200.0,200.0,,-0.0042872,Yorkshire,england_wales,200.0,generation
+T_BREDB-1,BREDB-1,BREDBURY BESS,Pivoted Power LLP,T,51.99,57.0,,-0.0050170,North Western,england_wales,51.99,generation
+T_ENDRB-1,ENDRB-1,Enderby BESS,Flexitricity Limited,T,57.0,57.0,,0.0092272,East Midlands,england_wales,57.0,generation
+T_FERRB-1,FERRB-1,Ferrybridge BESS BMU-1,SSE BATTERY SALISBURY LIMITED,T,76.0,76.1,,-0.0042872,Yorkshire,england_wales,76.0,generation
+T_FERRB-2,FERRB-2,Ferrybridge BESS BMU-2,SSE BATTERY SALISBURY LIMITED,T,76.0,75.94,,-0.0042872,Yorkshire,england_wales,76.0,generation
+T_HAMHB-1,HAMHB-1,T_HAMHB-1,Welbar Energy Storage Limited,T,100.0,100.0,,0.0163921,Midlands,england_wales,100.0,generation
+T_HAMHB-2,HAMHB-2,T_HAMHB-2,Welbar Energy Storage Limited,T,100.0,100.0,,0.0163921,Midlands,england_wales,100.0,generation
+T_HAMHB-3,HAMHB-3,T_HAMHB-3,Welbar Energy Storage Limited,T,100.0,100.0,,0.0163921,Midlands,england_wales,100.0,generation
+T_HAMHB-4,HAMHB-4,T_HAMHB-4,Welbar Energy Storage Limited,T,100.0,100.0,,0.0163921,Midlands,england_wales,100.0,generation
+T_HAMHD-1,HAMH-01,T_HAMHD-1,Welbar Energy Storage Limited,T,16.03,18.65,,0.0163921,Midlands,england_wales,16.03,generation
+T_INDQB-1,INDQB-1,INDIAN QUEENS BESS,Pivoted Power LLP,T,47.5,47.5,,0.0228729,South Western,england_wales,47.5,generation
+T_LARKB-1,LARKB-1,Larks Green Battery Storage,EDF Energy Customers Limited,T,52.0,52.0,,0.0228729,South Western,england_wales,52.0,generation
+T_LIONB-1,LIONB-1,Wilton BESS,Sembcorp (Wilton BESS) Ltd,T,50.0,50.0,,-0.0105171,Northern,england_wales,50.0,generation
+T_LIONB-2,LIONB-2,Wilton BESS,Sembcorp (Wilton BESS) Ltd,T,50.0,50.0,,-0.0105171,Northern,england_wales,50.0,generation
+T_LIONB-3,LIONB-3,Wilton BESS,Sembcorp (Wilton BESS) Ltd,T,50.0,50.0,,-0.0105171,Northern,england_wales,50.0,generation
+T_LIOND-1,LionD-1,Wilton BESS,Sembcorp (Wilton BESS) Ltd,T,0.0,7.0,,-0.0105171,Northern,england_wales,7.0,demand
+T_LKSDB-1,LKSDB-1,Lakeside  BESS,Lakeside Energy Storage Ltd,T,105.0,99.9,,-0.0042872,Yorkshire,england_wales,105.0,generation
+T_MNFRB-1,MNFRB-1,Monk Fryston BESS BMU-1,SSE Battery Monk Fryston Ltd,T,80.0,80.0,,-0.0042872,Yorkshire,england_wales,80.0,generation
+T_MNFRB-2,MNFRB-2,Monk Fryston BESS BMU-2,SSE Battery Monk Fryston Ltd,T,80.0,80.0,,-0.0042872,Yorkshire,england_wales,80.0,generation
+T_MNFRB-3,MNFRB-3,Monk Fryston BESS BMU-3,SSE Battery Monk Fryston Ltd,T,80.0,80.0,,-0.0042872,Yorkshire,england_wales,80.0,generation
+T_MNFRB-4,MNFRB-4,Monk Fryston BESS BMU-4,SSE Battery Monk Fryston Ltd,T,80.0,80.0,,-0.0042872,Yorkshire,england_wales,80.0,generation
+T_NLSTB-1,NLSTB-1,Neilston Battery 1,Statkraft Markets Gmbh,T,50.0,50.0,,-0.0099306,South Scotland,scotland,50.0,generation
+T_NURSB-1,NURSB-1,Nursling Battery Storage,EDF Energy Customers Limited,T,48.976,52.0,,0.0213863,Southern,england_wales,48.976,generation
+T_PNYCB-1,PNYCB-1,Pen y Cymoedd Battery,Arenko Cleantech Limited,T,0.0,0.0,,0.0164211,South Wales,england_wales,10.1,metered peak
+T_SANDB-1,SANDB-1,Sheaf BESS,Sheaf Energy Limited,T,249.0,249.0,,0.0130857,South Eastern,england_wales,249.0,generation
+T_SUNDB-1,SUNDB-1,SUNDON BESS,Pivoted Power LLP,T,50.246,57.0,,0.0083094,Eastern,england_wales,50.246,generation
+T_TEBWB-1,TEBWB-1,Tebworth BESS Power Park,Arenko Cleantech Limited,T,39.9,39.9,,0.0083094,Eastern,england_wales,39.9,generation
+T_TYLNB-1,TYLNB-1,Tye Lane BESS,Pivoted Power LLP,T,59.152,78.962,,0.0083094,Eastern,england_wales,59.152,generation
+T_USKMB-2,USKMB-2,Uskmouth Battery Unit 2,E.ON UK Battery Storage,T,57.5,57.5,,0.0164211,South Wales,england_wales,57.5,generation
+T_USKMB-3,USKMB-3,Uskmouth Battery Unit 3,E.ON UK Battery Storage,T,57.5,57.0,,0.0164211,South Wales,england_wales,57.5,generation
+T_USKMB-4,USKMB-4,Uskmouth Battery Unit 4,UES Asset 1 Limited,T,57.5,57.5,,0.0164211,South Wales,england_wales,57.5,generation
+T_USKMB-5,USKMB-5,Uskmouth Battery Unit 5,UES Asset 1 Limited,T,57.5,57.5,,0.0164211,South Wales,england_wales,57.5,generation
+T_WBURB-41,WBURB-41,West Burton B Battery,West Burton B Limited,T,31.0,30.0,,0.0092272,East Midlands,england_wales,31.0,generation
+T_WBURB-43,WBURB-43,West Burton B Battery,West Burton B Limited,T,31.0,30.338,,0.0092272,East Midlands,england_wales,31.0,generation
+T_WHLWB-1,WHLWB-1,Whitelee 1 Battery,SP Renewables (UK) Limited,T,50.2,50.2,,-0.0099306,South Scotland,scotland,50.2,generation
+T_WISHB-1,WISHB-1,Wishaw BESS,Zenobe Wishaw Limited,T,51.0,51.0,,-0.0099306,South Scotland,scotland,51.0,generation

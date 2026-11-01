@@ -1,0 +1,6 @@
+year,units,mw_years,repd_battery_mw,discharge_hours,round_trip,real_metered_day_ahead_per_mw_year,real_pn_day_ahead_per_mw_year,real_bm_net_per_mw_year,real_imbalance_per_mw_year,real_estimated_total_per_mw_year,model_1h_perfect_per_mw_year,model_1h_fundamentals_per_mw_year,model_1h_naive_per_mw_year,model_2h_perfect_per_mw_year,model_2h_fundamentals_per_mw_year,model_2h_naive_per_mw_year
+2021,11,231.8,1345.0,87.0,0.674,-172.0,5806.0,-123.0,-4402.0,1281.0,53836.0,40471.0,43644.0,90264.0,71665.0,75065.0
+2022,18,451.6,1924.0,102.0,0.689,-3410.0,9847.0,810.0,-11939.0,-1283.0,57655.0,43094.0,41764.0,103705.0,81135.0,77954.0
+2023,32,968.6,2837.0,306.0,0.815,4138.0,10233.0,3160.0,-3861.0,9532.0,25394.0,21092.0,19776.0,46440.0,39840.0,36362.0
+2024,43,1437.5,3504.0,400.0,0.843,4056.0,18750.0,8381.0,-10894.0,16237.0,21459.0,17897.0,15619.0,39412.0,33894.0,29128.0
+2025,55,2066.3,4220.0,402.0,0.849,3587.0,17673.0,10536.0,-11511.0,16699.0,24192.0,21112.0,19080.0,44974.0,39745.0,36208.0

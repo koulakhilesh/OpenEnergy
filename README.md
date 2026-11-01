@@ -55,9 +55,15 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   availability fitted from its flows, and unit commitment (`system.fes`,
   `system.interconnectors: links`, `system.commitment`); `openenergy system saturation`
   measures how a battery's value falls as the storage fleet grows.
+- **Real batteries**: what every GB grid battery did since 2021, from Elexon's physical
+  notifications, metered output and Balancing Mechanism data, set against the optimiser
+  and split between Scotland and England & Wales (`openenergy.data.batteries`): the real
+  fleet trades the same daily shape at a fraction of the size and makes most of its money
+  outside the day-ahead market.
 - **Web app**: a simulator of Britain's grid hour by hour from 2019, with power flowing in
   by fuel and a battery trading on a plan the optimiser makes in your browser; play a day
-  against the optimiser, explore the 2035 saturation study, or value a battery on any GB
+  against the optimiser, explore the 2035 saturation study, see what the real batteries
+  did, or value a battery on any GB
   year from 2017 or a FES pathway, at [open-energy-eight.vercel.app](https://open-energy-eight.vercel.app/)
   (`web/`, a React and TypeScript front end with HiGHS in WebAssembly, on the
   `openenergy.app` FastAPI JSON API, on Vercel).
@@ -71,7 +77,9 @@ what the battery earned, how hard it worked, and how close it came to perfect fo
   its interconnector register, daily interconnector flows from Elexon and hourly
   day-ahead prices in the six neighbouring markets from Ember; the daily gas price (ONS),
   NESO's day-ahead demand forecast and Elexon's day-ahead wind forecast from 2018 with
-  their issue times; and NESO's constraint costs and day-ahead boundary flows.
+  their issue times; NESO's constraint costs and day-ahead boundary flows; Elexon's
+  physical notifications, metered output and Balancing Mechanism data for every GB grid
+  battery since 2021; and NESO's demand by zone with DESNZ's renewable project register.
   `openenergy data update` downloads the latest prices (`--fundamentals` the forecasts and
   gas price).
 - **Reports**: `openenergy report` turns saved runs, system scenarios, backcasts and sweeps
@@ -163,12 +171,13 @@ cd web && npm ci && npm run build && npm test && npx playwright install chromium
 | v5.0 | A React and TypeScript front end on an extended JSON API (options, explore, compare, FES table), typed from the OpenAPI schema and tested end to end; interconnector availability by price gap from hourly flows, tested out of sample (an option: it does not beat the flat share); data refreshed to October 2026; versioned docs and a Zenodo DOI |
 | v6.0 | The daily gas price in the system model; a day-ahead forecast from NESO's demand and Elexon's wind forecasts, the gas price and auction prices (`forecast: fundamentals`); FES systems made secure to the reliability standard and a storage saturation study (`openenergy system saturation`); the battery optimiser in the browser (Battery Lab, Grid replay, 2035, Beat the battery); a Gymnasium environment; constraint evidence; an end-of-day energy target that is now exact ([What's new](https://koulakhilesh.github.io/OpenEnergy/whats-new/)) |
 | v6.1 | The web app as a simulator: Britain's grid hour by hour with power flowing in by fuel and a battery trading on the in-browser optimiser, play controls, keys and a year strip; Play, 2035 and Research tabs; revenue after wear in the browser, so perfect foresight is a true ceiling; NESO's generation mix to October 2026 |
+| v7.0 | Real batteries: every GB grid battery's physical notifications, metered output and Balancing Mechanism volumes and cashflows from Elexon (2021 to October 2026), compared with the optimiser and by zone; Scotland and England & Wales demand, transfer and capacity by year; a Real batteries tab in the web app; the docs' headline numbers checked against their sources on every test run ([What's new](https://koulakhilesh.github.io/OpenEnergy/whats-new/)) |
 
 **Planned**
 
 | Release | Scope |
 |---------|-------|
-| v6.2 | Scotland and England as two zones with the Balancing Mechanism, to value where a battery relieves constraints; historic capacity by technology so the saturation study can use every weather year from 2019; the evening peak premium the cost-based model misses |
+| v7.1 | A two-zone dispatch model (Scotland and England & Wales) checked against the observed transfer, to value where a battery relieves constraints; the saturation study on every weather year from 2019, using capacity by year; the evening peak premium the cost-based model misses |
 
 Alongside releases: refresh and re-check the bundled data
 every release; keep CI and its actions current; revisit stochastic planning if an open,
@@ -253,8 +262,10 @@ See [data/time_series](data/time_series/README.md),
 [data/fes](data/fes/README.md),
 [data/scenarios](data/scenarios/README.md),
 [data/app](data/app/README.md),
-[data/response](data/response/README.md) and
-[data/balancing](data/balancing/README.md) for sources, changes and known issues. OpenEnergy is
+[data/response](data/response/README.md),
+[data/balancing](data/balancing/README.md),
+[data/fleet](data/fleet/README.md) and
+[data/zones](data/zones/README.md) for sources, changes and known issues. OpenEnergy is
 not affiliated with or endorsed by any data provider.
 
 ## License
@@ -279,6 +290,8 @@ either and keeps its own licence:
 | `data/app` | Precomputed web app results built from the sources above | Attribution of every source used; see its README |
 | `data/response` | NESO response auction results and system frequency (derived monthly averages) | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence) |
 | `data/balancing` | Elexon BMRS system prices | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
+| `data/fleet` | Elexon BMRS battery unit register, physical notifications, metered output and Balancing Mechanism volumes and cashflows (daily and hourly totals), with OpenEnergy comparisons | [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/) |
+| `data/zones` | NESO historic demand data by zone; DESNZ Renewable Energy Planning Database capacity by zone and year | [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence); [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) |
 
 Reuse of any of these requires the attribution given in the folder's `README.md`.
 

@@ -56,6 +56,36 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: /21 January 2025/ })).toBeTruthy();
   });
 
+  it("compares the real battery fleet with the optimiser", async () => {
+    const year = {
+      year: 2025,
+      units: 40,
+      mw_years: 1500,
+      discharge_hours: 400,
+      round_trip: 0.85,
+      real_metered_day_ahead_per_mw_year: 4000,
+      real_pn_day_ahead_per_mw_year: 18000,
+      real_imbalance_per_mw_year: -7000,
+      real_estimated_total_per_mw_year: 20000,
+      repd_battery_mw: 3000,
+      real_bm_net_per_mw_year: 9000,
+      model_1h_naive_per_mw_year: 30000,
+      model_1h_fundamentals_per_mw_year: 33000,
+      model_1h_perfect_per_mw_year: 38000,
+      model_2h_perfect_per_mw_year: 60000,
+    };
+    const unit = { unit: "E_AB-1", name: "A Battery", zone: "scotland", mw: 50, year: 2025, days: 300, dischargeHours: 420, dayAheadPerMwYear: 21000, bmPerMwYear: 8000, totalPerMwYear: 19000 };
+    serve({
+      "/data/fleet-units.json": { status: 200, body: { units: [unit], years: [year], attribution: ["Elexon BMRS."] } },
+      "/data/fleet-2025.json": { status: 200, body: { year: 2025, start: "", net: new Array(48).fill(10), units: new Array(48).fill(3), attribution: [] } },
+      "/data/prices-2025.json": { status: 200, body: PRICES },
+    });
+    render(<App path="/fleet" search="" />);
+    expect((await screen.findByText(/battery units ran/)).textContent).toContain("£20,000");
+    expect(screen.getByRole("cell", { name: "A Battery" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Real batteries" }).getAttribute("aria-current")).toBe("page");
+  });
+
   it("marks Research for the analyst pages", async () => {
     serve({ "/api/options": { status: 200, body: OPTIONS } });
     render(<App path="/run" search="" />);

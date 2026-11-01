@@ -47,7 +47,7 @@ theme:
 
 nav:
   - Home: index.md
-  - What's new in 6.0: whats-new.md
+  - What's new: whats-new.md
   - Findings: findings.md
   - Concepts: concepts.md
   - Guides:
@@ -55,10 +55,11 @@ nav:
       - Revenue stacking: guides/revenue-stacking.md
       - Command line: guides/cli.md
       - Research with the Python API: guides/research.md
+      - Real batteries: guides/real-batteries.md
       - System analysis: guides/system.md
       - System model: guides/system-model.md
       - Forward scenarios: guides/forward-scenarios.md
-      - Constraints: guides/constraints.md
+      - Constraints and zones: guides/constraints.md
       - Web app: guides/web-app.md
       - Reports: guides/reports.md
   - Data: data.md

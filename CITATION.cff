@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use OpenEnergy, please cite it as below, and credit the data sources each result lists."
 type: software
 title: "OpenEnergy: backtest battery storage and renewables against real power-market data"
-version: 6.1.0
+version: 7.0.0
 date-released: 2026-10-31
 license: MIT
 authors:
@@ -15,7 +15,8 @@ abstract: >-
   day-ahead prices without lookahead, forecasts prices from what is known the day before,
   stacks frequency-response revenue, rebuilds GB prices from plant, fuel and carbon data,
   and applies NESO Future Energy Scenarios, made secure to the reliability standard, with
-  price-taking interconnectors, to measure how battery value saturates.
+  price-taking interconnectors, to measure how battery value saturates; it checks the
+  optimiser against what every GB grid battery actually did, from Elexon metered data.
 keywords:
   - energy storage
   - battery

@@ -8,6 +8,7 @@ import { Explore } from "./pages/Explore";
 import { ResultPage } from "./pages/Result";
 import { Run } from "./pages/Run";
 import { Scenarios } from "./pages/Scenarios";
+import { Fleet } from "./sim/Fleet";
 import { Future } from "./sim/Future";
 import { Play } from "./sim/Play";
 import { Research } from "./sim/Research";
@@ -17,6 +18,7 @@ const TITLES: Record<string, string> = {
   "/": "OpenEnergy · Britain's grid, hour by hour",
   "/play": "Beat the battery | OpenEnergy",
   "/2035": "2035 | OpenEnergy",
+  "/fleet": "Real batteries | OpenEnergy",
   "/research": "Research | OpenEnergy",
   "/run": "Value a battery | OpenEnergy",
   "/result": "Battery value | OpenEnergy",
@@ -30,11 +32,12 @@ const LENSES: [string, string][] = [
   ["/", "Simulator"],
   ["/play", "Play"],
   ["/2035", "2035"],
+  ["/fleet", "Real batteries"],
   ["/research", "Research"],
 ];
 
 // Lenses run in the browser on static data; the research pages ask the API.
-const STATIC = ["/", "/play", "/2035", "/research"];
+const STATIC = ["/", "/play", "/2035", "/fleet", "/research"];
 // v6.0 addresses, now views of the simulator; their queries still work.
 const MOVED: Record<string, string> = { "/lab": "/", "/replay": "/" };
 
@@ -44,6 +47,8 @@ function StaticPage({ path, params, embedded }: { path: string; params: URLSearc
       return <Future params={params} />;
     case "/play":
       return <Play params={params} />;
+    case "/fleet":
+      return <Fleet params={params} />;
     case "/research":
       return <Research />;
     default:

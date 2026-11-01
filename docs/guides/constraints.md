@@ -51,21 +51,49 @@ the first six groups. NESO's description does not say whether the published flow
 or after its actions, so part of the jump may be in what is published. Group names also
 change (`SSHARN` became `SSHARN3`).
 
+## Scotland and England & Wales
+
+Most of GB's wind is in Scotland and most of its demand is not. NESO's historic demand data
+split national demand into England and Wales and the rest, and from 2023 publish the flow
+from Scotland to England and Wales (the transfer across the B6 boundary); DESNZ's
+Renewable Energy Planning Database gives where the grid-scale capacity is (`data/zones/`,
+`scripts/fetch_zones.py`):
+
+| Year | Scotland's demand (mean GW) | Transfer south (mean GW) | Transfer, 95th percentile / highest (GW) | Half-hours exporting south | Energy sent south (TWh) |
+|---|---:|---:|---:|---:|---:|
+| 2023 | 2.19 | 1.36 | 4.53 / 6.24 | 71% | 13.3 |
+| 2024 | 2.13 | 1.96 | 5.26 / 6.70 | 83% | 18.2 |
+| 2025 | 2.16 | 2.11 | 4.96 / 6.59 | 86% | 19.3 |
+| 2026 (to 10 Oct) | 2.05 | 2.34 | 5.06 / 6.71 | 91% | 16.2 |
+
+| Grid-scale capacity at the end of 2025 (GW) | Scotland | England and Wales |
+|---|---:|---:|
+| Onshore wind | 10.1 | 4.1 |
+| Offshore wind | 4.3 | 11.7 |
+| Batteries | 0.6 | 3.6 |
+| Solar (over 150 kW) | 0.1 | 10.4 |
+
+Scotland uses about 2.2 GW on average and has over 14 GW of wind, so it sends power south
+most of the time, more each year, and the transfer tops out near 6.7 GW. What a battery
+north or south of the boundary actually earns is on [Real batteries](real-batteries.md#north-and-south-of-the-border).
+
 ## What this means for OpenEnergy
 
 - Day-ahead prices are national, so constraints do not change the backcasts or the
   battery values on day-ahead prices.
 - They do change where storage is worth most to the system: a battery on the exporting
   side of a full boundary can absorb wind that would otherwise be paid to turn down.
-  Valuing that needs the Balancing Mechanism and a two-zone dispatch, which needs
-  generation by zone; open data gives that unit by unit only. It is planned for a later
-  release.
+  v7.0 measures this from what real batteries in each zone earned; a two-zone dispatch
+  model, checked against the transfer above, is planned for v7.1.
 - FES curtailment in the [forward scenarios](forward-scenarios.md) is curtailment on one
   bus; a real network would curtail more.
 
 ## Sources
 
-NESO, *Constraint Breakdown Costs and Volume* and *Day Ahead Constraint Flows and Limits*,
+NESO, *Constraint Breakdown Costs and Volume*, *Day Ahead Constraint Flows and Limits* and
+*Historic Demand Data*,
 [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence),
-supported by National Energy SO Open Data (accessed 31 October 2026). Details and known
-issues in `data/constraints/README.md`.
+supported by National Energy SO Open Data (accessed 31 October 2026). Department for
+Energy Security and Net Zero, *Renewable Energy Planning Database*, July 2026,
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+Details and known issues in `data/constraints/README.md` and `data/zones/README.md`.
