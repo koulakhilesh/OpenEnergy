@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from openenergy.data.series import PriceSeries, ProfileSeries, _between, _validate
+from openenergy.data.series import PriceSeries, ProfileSeries, between_days, validate_series
 from openenergy.errors import DataError
 
 OPSD_ATTRIBUTION = (
@@ -70,7 +70,7 @@ class OPSDCsvSource:
             )
         values = self._load(column)
         if start is not None or end is not None:
-            values = _between(values, start, end, zone)
+            values = between_days(values, start, end, zone)
         # Reported capacity can lag new build, pushing generation / capacity above 1.
         clipped = int(((values > 1) | (values < 0)).sum())
         return ProfileSeries(values.clip(0.0, 1.0), technology, zone, clipped=clipped)
@@ -84,8 +84,8 @@ class OPSDCsvSource:
             similar = [c for c in self._columns() if c.split("_", 2)[:2] == prefix]
             hint = f"; similar: {', '.join(similar)}" if similar else ""
             raise DataError(f"no column {column!r} in {self.path.name}{hint}")
-        values, _ = _validate(self._load(column))
-        return values if start is None and end is None else _between(values, start, end, column)
+        values, _ = validate_series(self._load(column))
+        return values if start is None and end is None else between_days(values, start, end, column)
 
     def load(
         self, zone: str, start: date | None = None, end: date | None = None

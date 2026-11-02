@@ -29,7 +29,9 @@ test("keys and the year strip move the clock", async ({ page }) => {
   await expect(clock).toContainText("11:00");
   await page.keyboard.press("Shift+ArrowRight");
   await expect(clock).toContainText("2 June 2025 · 11:00");
-  const strip = page.locator(".year-strip");
+  // The strip is a placeholder until the year's prices load; click the drawn one.
+  const strip = page.locator("canvas.year-strip");
+  await expect(strip).toBeVisible({ timeout: 30_000 });
   const box = (await strip.boundingBox())!;
   await page.mouse.click(box.x + 3, box.y + box.height / 2);
   await expect(clock).toContainText("January 2025");
@@ -71,12 +73,41 @@ test("research leads to the analyst pages", async ({ page }) => {
 test("real batteries compare the fleet with the optimiser and filter by zone", async ({ page }) => {
   await page.goto("/fleet?year=2024");
   await expect(page.locator(".answer")).toContainText("battery units ran", { timeout: 30_000 });
+  await expect(page.locator(".answer")).toContainText("with frequency response");
+  await expect(page.getByRole("button", { name: /Response, £\/MW-yr/ })).toBeVisible();
   const rows = page.locator("tbody tr");
   const all = await rows.count();
   expect(all).toBeGreaterThan(5);
   await page.getByRole("button", { name: "Scotland" }).click();
   await expect(rows.first().locator("td").last()).toHaveText("Scotland");
   expect(await rows.count()).toBeLessThan(all);
+});
+
+test("tomorrow's forecast shows the plan and the track record", async ({ page }) => {
+  const forecast = Array.from({ length: 24 }, (_, h) => 70 + 40 * Math.sin(((h - 11) / 24) * 2 * Math.PI));
+  await page.route("https://raw.githubusercontent.com/koulakhilesh/OpenEnergy/live/live.json", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        day: "2026-11-03",
+        issued: "2026-11-02T09:40:00Z",
+        pricesKnownUntil: "2026-10-31T00:00:00Z",
+        start: "2026-11-03T00:00:00Z",
+        forecast,
+        planMw: forecast.map((v) => (v > 100 ? 1 : v < 40 ? -1 : 0)),
+        stretch: 1.5,
+        track: [{ day: "2026-10-30", mae: 12.3, earned: 80, perfect: 100 }],
+        summary: { days: 1, mae: 12.3, capture: 0.8 },
+        note: "Fundamentals forecast.",
+        attribution: ["Ember, CC BY 4.0."],
+      }),
+    }),
+  );
+  await page.goto("/live");
+  await expect(page.locator(".answer")).toContainText("Tue 3 November", { timeout: 30_000 });
+  await expect(page.getByRole("img", { name: /forecast price and the battery's plan/ })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "12.3" })).toBeVisible();
 });
 
 test("the docs widget plans dragged prices", async ({ page }) => {

@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
+import { LIVE_URL } from "./sim/Live";
 
 const OPTIONS = {
   version: "5.0.0",
@@ -84,6 +85,34 @@ describe("App", () => {
     expect((await screen.findByText(/battery units ran/)).textContent).toContain("£20,000");
     expect(screen.getByRole("cell", { name: "A Battery" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Real batteries" }).getAttribute("aria-current")).toBe("page");
+  });
+
+  it("shows tomorrow's forecast and its track record", async () => {
+    const forecast = Array.from({ length: 24 }, (_, h) => 60 + (h === 18 ? 60 : h === 3 ? -30 : 0));
+    serve({
+      [LIVE_URL]: {
+        status: 200,
+        body: {
+          day: "2026-11-03",
+          issued: "2026-11-02T09:40:00Z",
+          pricesKnownUntil: "2026-10-31T00:00:00Z",
+          start: "2026-11-03T00:00:00Z",
+          forecast,
+          planMw: forecast.map((v) => (v > 100 ? 1 : v < 40 ? -1 : 0)),
+          stretch: 1.5,
+          track: [{ day: "2026-10-30", mae: 12.3, earned: 80, perfect: 100 }],
+          summary: { days: 1, mae: 12.3, capture: 0.8 },
+          note: "Fundamentals forecast.",
+          attribution: ["Ember, CC BY 4.0."],
+        },
+      },
+    });
+    render(<App path="/live" search="" />);
+    const answer = await screen.findByText(/forecasts GB day-ahead prices/);
+    expect(answer.textContent).toContain("Tue 3 November");
+    expect(answer.textContent).toContain("£120");
+    expect(screen.getByText(/perfect foresight\.$/).textContent).toContain("80%");
+    expect(screen.getByRole("link", { name: "Tomorrow" }).getAttribute("aria-current")).toBe("page");
   });
 
   it("marks Research for the analyst pages", async () => {

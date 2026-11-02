@@ -290,54 +290,61 @@ The batteries above join a fleet that FES has already sized: 23 to 33 GW of batt
 2035 in FES 2025's pathways, storing 1.3 to 1.5 hours on average. What happens to the
 value of one more battery as that fleet grows, once the system is secure? `openenergy system saturation` scales each pathway's
 2035 battery fleet from none to three times FES's figure (same duration), and for each fleet
-adds the least firm capacity that keeps loss of load, averaged over the 2024 and 2025
-weather years, within the 3-hour standard. A 1 MW / 2 MWh battery (95% each way, £5/MWh
+adds the least firm capacity that keeps loss of load, averaged over the seven weather years
+2019 to 2025, within the 3-hour standard. A 1 MW / 2 MWh battery (95% each way, £5/MWh
 wear) is then valued with perfect foresight on each year's modelled prices
 (`data/scenarios/saturation.csv`; try it in the [web app](https://open-energy-eight.vercel.app/2035)).
-FES 2025 publishes figures from 2024, so these two weather years are all a FES system can
-be scaled from today; the Ten Year Outlook, which has no 2024 wind, is left out.
+FES 2025 publishes figures from 2024; earlier weather years are scaled from FES's 2024
+figures in proportion to that year's own wind, solar, nuclear, gas and interconnector
+capacity and its total generation (wind from the Renewable Energy Planning Database, solar
+from NESO, nuclear and gas from DUKES), so each weather year brings its weather, demand
+shape and fuel prices to the same 2035 system. The Ten Year Outlook, which has no 2024
+wind, is left out.
 
 The pathways with no shortfall once they have batteries first (Ten Year Forecast needs
-0.75 GW of firm capacity with no batteries, none with half its fleet). GBP per MW-year,
-mean of the two weather years:
+4.25 GW of firm capacity with no batteries, 0.5 GW with half its fleet and none with all of
+it). GBP per MW-year, mean of the seven weather years:
 
 | Battery fleet (× FES 2035) | 0 | 0.5 | 1 | 2 | 3 |
 |---|---:|---:|---:|---:|---:|
 | Falling Behind: fleet GW | 0 | 11.3 | 22.7 | 45.3 | 68.0 |
-| Falling Behind: one more battery earns | 43,609 | 21,840 | 15,551 | 10,362 | 8,017 |
-| Falling Behind: daily spread (£/MWh) | 72.2 | 47.9 | 40.6 | 32.6 | 28.2 |
+| Falling Behind: one more battery earns | 39,421 | 18,251 | 13,595 | 9,688 | 7,812 |
+| Falling Behind: daily spread (£/MWh) | 68.1 | 43.7 | 37.8 | 31.5 | 27.9 |
 | Ten Year Forecast: fleet GW | 0 | 15.0 | 29.9 | 59.9 | 89.8 |
-| Ten Year Forecast: one more battery earns | 40,897 | 17,196 | 12,057 | 8,130 | 6,296 |
-| Ten Year Forecast: daily spread (£/MWh) | 71.9 | 41.0 | 34.3 | 28.1 | 24.3 |
+| Ten Year Forecast: one more battery earns | 33,718 | 18,833 | 14,293 | 9,984 | 7,577 |
+| Ten Year Forecast: daily spread (£/MWh) | 64.4 | 46.0 | 40.8 | 32.9 | 27.8 |
 
-The first half of the FES fleet takes half or more of a battery's value away; the next two
-and a half fleets take nearly two thirds of what is left. Batteries earn by flattening the
-daily spread, so each one leaves less spread for the next. The two weather years agree: in
-Falling Behind a battery joining the FES fleet earns £14,927 on 2024's weather and
-£16,176 on 2025's.
+The first half of the FES fleet takes about half of a battery's value away; the next two
+and a half fleets take nearly three fifths of what is left. Batteries earn by flattening
+the daily spread, so each one leaves less spread for the next. The weather year matters
+as much as the fleet, because it brings its fuel prices: in Falling Behind a battery
+joining the FES fleet earns £5,310 on 2020's weather and fuel prices, when gas was cheap,
+£22,193 on 2022's, in the gas crisis, and £14,920–16,176 on 2023 to 2025.
 
 The other three pathways are short of firm capacity in a cold, still spell, and the
 batteries do little about it:
 
 | Pathway | Firm capacity added (GW) for a fleet of × 0 / 0.5 / 1 / 2 / 3 | Firm capacity each MW of the FES fleet replaces (MW) |
 |---|---:|---:|
-| Holistic Transition | 11.25 / 9.25 / 8.25 / 8.0 / 8.25 | 0.10 |
-| Electric Engagement | 11.25 / 8.75 / 8.25 / 7.25 / 7.25 | 0.09 |
-| Hydrogen Evolution | 8.75 / 6.75 / 4.75 / 4.0 / 3.0 | 0.16 |
+| Holistic Transition | 13.25 / 10.5 / 9.25 / 8.75 / 8.25 | 0.13 |
+| Electric Engagement | 15.0 / 11.5 / 10.25 / 8.75 / 7.75 | 0.15 |
+| Hydrogen Evolution | 12.25 / 8.75 / 7.25 / 5.75 / 4.25 | 0.20 |
 
 The FES fleets store under an hour and a half on average, and the shortfalls they would
-cover last longer: the first half of the fleet saves 2.0 to 2.5 GW of firm capacity, and
-the next two and a half fleets 1.0 to 3.75 GW more. In 250 MW steps the search is not
-perfectly monotonic (Holistic Transition needs 8.0 GW at twice the fleet and 8.25 GW at
-three times). In these pathways a battery's value also rests on a handful of scarcity
-days: a 1 MW battery with the FES fleet earns £16,591 in Holistic Transition, £17,441 in
-Electric Engagement and £26,961 in Hydrogen Evolution, of which 23%, 17% and 45% comes on
-the days with an hour priced at £1,000/MWh or more (one to three across the two weather
-years). Holistic Transition's and Electric Engagement's are all in 2025's weather; a value
-resting on them is a statement about one cold week, not about the pathway.
+cover last longer: the first half of the fleet saves 2.75 to 3.5 GW of firm capacity, and
+the next two and a half fleets 2.25 to 4.5 GW more. More weather years need more firm
+capacity than 2024 and 2025 alone did (Holistic Transition 13.25 GW with no batteries
+against 11.25 GW): with the FES fleet, almost all the hours of shortfall come in 2019's
+weather. In these pathways a
+battery's value also rests on a handful of scarcity days: a 1 MW battery with the FES
+fleet earns £18,159 in Holistic Transition, £17,131 in Electric Engagement and £17,536 in
+Hydrogen Evolution, of which 30%, 22% and 19% comes on the days with an hour priced at
+£1,000/MWh or more, three or four of them in 2019's weather and two more in Holistic
+Transition's 2025. A value resting on them is a statement about one or two cold weeks,
+not about the pathway.
 
 What this says, with its limits: in a GB system that has enough firm capacity, battery
-value halves or more as the first 11 to 15 GW of FES's fleet arrives, and falls to 15–18% of the
+value roughly halves as the first 11 to 15 GW of FES's fleet arrives, and falls to 20–22% of the
 first battery's value at three times the fleet. It is the perfect-foresight value of a
 2-hour battery on a model whose daily spread is 76% of the real one in 2025, so the levels
 are lower bounds on what the spread allows and upper bounds on what a forecast captures;
@@ -346,7 +353,8 @@ the shape of the curve is the result.
 ## Limits
 
 - One GB bus: no constraint between Scotland and England, which is where much FES
-  curtailment happens.
+  curtailment happens. The [two-zone model](constraints.md#a-two-zone-model) splits the
+  historic system; the FES scenarios are not split yet.
 - Links take the neighbours' actual prices for the weather year, so neighbours do not
   respond to GB, and their 2030s fleets are not modelled. New links are not added as new
   neighbours; FES interconnector growth scales the existing ten.

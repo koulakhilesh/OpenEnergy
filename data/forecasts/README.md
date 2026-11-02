@@ -34,3 +34,11 @@ How well it does: `examples/fundamentals_forecast.py` backtests a 1 MW / 2 MWh b
 it and on last week's prices. It captures more of the perfect-foresight revenue than last
 week's prices in every year except 2021, when gas prices rose faster than any model trained
 on the calmer years before could follow; see the research guide.
+
+## `live_lag_2025.csv`
+
+Written by `scripts/live_lag.py`: for each day of 2025, the mean absolute error (GBP/MWh)
+of the same forecast made with prices known up to the auction (`mae_auction`, as above),
+with the last two, three or four days of prices missing (`mae_lag_2d`, `_3d`, `_4d`, as
+for a live forecast when Ember's prices lag), and of last week's prices (`mae_last_week`).
+Same inputs and licences as above.

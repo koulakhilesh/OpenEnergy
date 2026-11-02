@@ -243,17 +243,38 @@ grid batteries did ([Real batteries](guides/real-batteries.md)): `battery_units.
 83 BM units named as batteries with capacity, region and zone; `battery_daily.csv`, each
 unit's physical notifications, metered output (B1610), Balancing Mechanism volumes and
 cashflows and imbalance, by UTC day, January 2021 to 29 October 2026 (64,203 unit-days);
-and `fleet_hourly.csv`, the fleet each hour. `scripts/real_batteries.py` adds the yearly
-comparison with the optimiser. Read them with `openenergy.data.batteries.RealBatteries`.
-Known issues are in `data/fleet/README.md`.
+and `fleet_hourly.csv`, the fleet each hour. `scripts/fetch_fleet_response.py` adds
+`battery_response_daily.csv`, what NESO paid each unit for frequency response (auction
+results by unit, September 2021 to November 2026, NESO Open Data Licence), and
+`scripts/real_batteries.py` the yearly comparison with the optimiser. Read them with
+`openenergy.data.batteries.RealBatteries`. Known issues are in `data/fleet/README.md`.
+
+## Supply tightness
+
+`data/scarcity/`, written by `scripts/fetch_scarcity.py` from Elexon's BMRS: `lolp.csv`,
+NESO's loss-of-load probability and de-rated margin for each half-hour from July 2018, the
+last value published before it. `scripts/evening_premium.py` sets them against the
+backcast ([System model](guides/system-model.md#the-evening-premium-and-supply-tightness));
+no model uses them.
+
+## Investment inputs
+
+`data/invest/`, written by `scripts/fetch_invest.py`: every Capacity Market auction's
+clearing price and the de-rating factors for storage by duration (NESO's Capacity Market
+Register), and utility-scale battery capital and fixed O&M costs by duration and year
+(NREL's 2024 Annual Technology Baseline, US costs in 2022 dollars, with the ECB rate used
+to convert them). Used by `openenergy invest` ([Investment case](guides/investment.md)).
 
 ## Zones
 
 `data/zones/`, written by `scripts/fetch_zones.py`: `demand_by_zone.csv`, GB, England and
 Wales and Scottish demand, the transfer from Scotland (from 2023) and embedded wind and
 solar each half-hour from 2019 (NESO historic demand data), and `capacity_by_year.csv`,
-grid-scale battery, solar and wind capacity by zone and year (DESNZ REPD). Used on the
-[constraints page](guides/constraints.md#scotland-and-england-wales); no model uses them yet.
+grid-scale battery, solar and wind capacity by zone and year (DESNZ REPD), and
+`plant_by_zone.csv`, thermal, nuclear, hydro and biomass capacity by zone and year (DUKES).
+Used on the [constraints page](guides/constraints.md#scotland-and-england-wales) and by the
+[two-zone model](guides/constraints.md#a-two-zone-model) (`two_zones_by_year.csv`), and to
+scale FES systems on weather years before 2024.
 
 ## Attribution
 
@@ -437,6 +458,33 @@ unchanged, converts delivery times to UTC and reduces frequency to monthly avera
 > under the [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
 > Contains BMRS data © Elexon Limited copyright and database right 2026.
 
+> National Energy System Operator (NESO). DC, DR & DM Results By Unit Master Data
+> 2021-2023 (<https://www.neso.energy/data-portal/dynamic-containment-data>) and
+> Response-Reserve Results By Unit (<https://www.neso.energy/data-portal/eac-auction-results>),
+> accessed 1 November 2026. Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
+**Supply tightness**
+
+> Elexon. BMRS Insights API, loss of load probability and de-rated margin (LOLPDRM),
+> <https://bmrs.elexon.co.uk/> (accessed 1 November 2026). Reused under the
+> [BMRS data licence](https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/).
+> Contains BMRS data © Elexon Limited copyright and database right 2026.
+
+**Investment case**
+
+> National Energy System Operator (NESO). Capacity Market Register: auction static data
+> and de-rating factors, <https://www.neso.energy/data-portal/capacity-market-register>
+> (accessed 2 November 2026). Licensed under the
+> [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+> Supported by National Energy SO Open Data.
+
+> National Renewable Energy Laboratory (NREL). 2024 Annual Technology Baseline,
+> <https://atb.nrel.gov/> (ATBe file from the Open Energy Data Initiative, accessed
+> 2 November 2026). Licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+> Converted from 2022 US dollars to pounds with the ECB's 2022 average reference rates.
+
 **Zones**
 
 > National Energy System Operator (NESO). Historic Demand Data,
@@ -447,6 +495,12 @@ unchanged, converts delivery times to UTC and reduces frequency to monthly avera
 > Department for Energy Security and Net Zero. Renewable Energy Planning Database,
 > quarterly extract, July 2026,
 > <https://www.gov.uk/government/publications/renewable-energy-planning-database-monthly-extract>.
+> Contains public sector information licensed under the
+> [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+
+> Department for Energy Security and Net Zero. Digest of UK Energy Statistics (DUKES)
+> 2026, table 5.8, plant capacity by region,
+> <https://www.gov.uk/government/statistics/electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes>.
 > Contains public sector information licensed under the
 > [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 

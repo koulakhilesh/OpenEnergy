@@ -78,6 +78,35 @@ the same results without training (a test checks a week of it against a live run
 the forecast may know is tested too: a later wind forecast or a price after the decision
 time changes nothing.
 
+## Live forecast
+
+The same forecast runs every morning for the next day. A scheduled workflow
+(`.github/workflows/live.yml`, 09:30 UTC, after NESO publishes tomorrow's demand forecast)
+downloads the latest data with `openenergy data update --fundamentals`, runs
+`openenergy forecast live` and commits `forecasts.csv` and `live.json` to the repository's
+`live` branch. The [web app](https://open-energy-eight.vercel.app/live) shows tomorrow's
+forecast, a 1 MW / 2 MWh battery's plan on it and the track record. Each forecast is
+scored once Ember publishes that day's prices: its mean absolute error, and what the
+battery earns at the real prices planning on it against planning with perfect foresight.
+
+Live, the forecast knows less than in the backtest. Ember publishes day-ahead prices about
+two days late, so the latest prices a morning forecast has end two to four days before the
+day it forecasts, not the day before; ONS publishes the daily gas price weekly, so the
+last published price is carried forward (at most two weeks). `scripts/live_lag.py`
+measures what the missing prices cost on 2025
+(`data/forecasts/live_lag_2025.csv`):
+
+| Prices known up to | Mean absolute error, £/MWh |
+|---|---:|
+| The auction (backtest) | 10.65 |
+| 2 days before | 13.97 |
+| 3 days before | 14.15 |
+| 4 days before | 14.28 |
+| Last week's prices | 21.81 |
+
+So a live forecast is about a third worse than the backtest's, and still well ahead of
+last week's prices. The track record on the page is the honest measure.
+
 ## Can reinforcement learning do better?
 
 A reinforcement-learning agent can learn to trade directly, without a forecast and an

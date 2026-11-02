@@ -72,6 +72,9 @@ export interface FleetUnitYear {
   bmPerMwYear: number;
   /** Contracts (PN) at the day-ahead price + BM cashflow + imbalance at the system price. */
   totalPerMwYear: number;
+  /** NESO response auctions: megawatts won x hours x clearing price. */
+  responsePerMwYear: number;
+  totalWithResponsePerMwYear: number;
 }
 
 export interface FleetUnits {

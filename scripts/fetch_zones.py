@@ -13,20 +13,38 @@
   Open Government Licence v3.0. Projects over 150 kW (1 MW before 2021) with status
   "Operational" and an operational date; Northern Ireland excluded. Rooftop and other small
   solar is not in REPD (NESO's embedded solar capacity, above, covers it nationally).
+- plant_by_zone.csv: major power producers' capacity at the end of each year by technology
+  and zone, MW, from DESNZ's Digest of UK Energy Statistics (DUKES) 2026 table 5.8 (tables
+  5.8.A and 5.8.C), Open Government Licence v3.0,
+  https://www.gov.uk/government/statistics/electricity-chapter-5-digest-of-united-kingdom-energy-statistics-dukes.
+  Changes: rows renamed; Northern Ireland dropped.
 
-Run: uv run python scripts/fetch_zones.py
+Run: uv run --with openpyxl python scripts/fetch_zones.py [demand capacity plant]
 """
 
 import io
 import json
+import sys
 import urllib.request
 from pathlib import Path
 
 import pandas as pd
+from fetch_system_data import DUKES_5_8, dukes_table
 
 OUT = Path(__file__).parents[1] / "data/zones"
 NESO = "https://api.neso.energy/api/3/action/package_show?id=historic-demand-data"
 REPD = "https://assets.publishing.service.gov.uk/media/6a6cbdc00c36759b5ccaa305/REPD_Publication_Q2_2026.csv"
+REGIONS = {"England and Wales": "england_wales", "Scotland": "scotland"}
+PLANT = {
+    ("Table 5.8.C", "CCGT stations"): "ccgt",
+    ("Table 5.8.C", "Gas turbines"): "gas_turbine",
+    ("Table 5.8.C", "Oil engines"): "oil_engine",
+    ("Table 5.8.A", "Coal fired"): "coal",
+    ("Table 5.8.A", "Nuclear stations"): "nuclear",
+    ("Table 5.8.A", "Hydro (natural flow)"): "hydro",
+    ("Table 5.8.A", "Pumped storage hydro"): "pumped_storage",
+    ("Table 5.8.A", "Bioenergy and waste"): "bioenergy",
+}
 FIRST_YEAR = 2019
 KEEP = {
     "ND": "national_demand_mw",
@@ -117,15 +135,41 @@ def capacity() -> pd.DataFrame:
     return out[out["year"] >= 2010].sort_values(["technology", "zone", "year"])
 
 
+def plant() -> pd.DataFrame:
+    sheet = pd.read_excel(io.BytesIO(get(DUKES_5_8)), sheet_name="5.8", header=None)
+    tables = {title: dukes_table(sheet, title, labels=2) for title in {t for t, _ in PLANT}}
+    rows = []
+    for (title, row), technology in PLANT.items():
+        for region, zone in REGIONS.items():
+            for year, mw in tables[title].loc[(region, row)].items():
+                if year >= 2010:
+                    rows.append(
+                        {
+                            "year": year,
+                            "technology": technology,
+                            "zone": zone,
+                            "mw": round(float(mw), 1),
+                        }
+                    )
+    return pd.DataFrame(rows).sort_values(["technology", "zone", "year"])
+
+
 def main() -> None:
+    parts = sys.argv[1:] or ["demand", "capacity", "plant"]
     OUT.mkdir(parents=True, exist_ok=True)
-    table = demand()
-    table.to_csv(OUT / "demand_by_zone.csv", index=False)
-    first, last = table["utc_timestamp"].iloc[0], table["utc_timestamp"].iloc[-1]
-    print(f"demand_by_zone.csv: {len(table)} half-hours, {first} to {last}")
-    caps = capacity()
-    caps.to_csv(OUT / "capacity_by_year.csv", index=False)
-    print(f"capacity_by_year.csv: {len(caps)} rows")
+    if "demand" in parts:
+        table = demand()
+        table.to_csv(OUT / "demand_by_zone.csv", index=False)
+        first, last = table["utc_timestamp"].iloc[0], table["utc_timestamp"].iloc[-1]
+        print(f"demand_by_zone.csv: {len(table)} half-hours, {first} to {last}")
+    if "capacity" in parts:
+        caps = capacity()
+        caps.to_csv(OUT / "capacity_by_year.csv", index=False)
+        print(f"capacity_by_year.csv: {len(caps)} rows")
+    if "plant" in parts:
+        plants = plant()
+        plants.to_csv(OUT / "plant_by_zone.csv", index=False)
+        print(f"plant_by_zone.csv: {len(plants)} rows")
 
 
 if __name__ == "__main__":

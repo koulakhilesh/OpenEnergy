@@ -1,0 +1,55 @@
+name: Live forecast
+
+# Each morning, after NESO publishes tomorrow's demand forecast (by about 09:00 UTC) and
+# before the noon decision the backtest assumes, forecast tomorrow and score past days.
+# Results go to the `live` branch, which the web app reads.
+on:
+  schedule:
+    - cron: "30 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    if: github.repository == 'koulakhilesh/OpenEnergy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.14"
+          enable-cache: false
+      - run: uv sync --locked --extra forecast
+      - run: uv run openenergy data update --fundamentals
+      - name: Check out the live branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git init -q "$RUNNER_TEMP/live"
+          cd "$RUNNER_TEMP/live"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth=1 origin live; then
+            git checkout -q -b live FETCH_HEAD
+          else
+            git checkout -q --orphan live
+          fi
+      - run: uv run openenergy forecast live --out "$RUNNER_TEMP/live"
+      - name: Publish
+        working-directory: ${{ runner.temp }}/live
+        run: |
+          git add forecasts.csv live.json
+          git commit -q -m "Live forecast for $(jq -r .day live.json)"
+          git push -q origin live

@@ -10,15 +10,18 @@ import { Run } from "./pages/Run";
 import { Scenarios } from "./pages/Scenarios";
 import { Fleet } from "./sim/Fleet";
 import { Future } from "./sim/Future";
+import { LiveForecast } from "./sim/Live";
 import { Play } from "./sim/Play";
 import { Research } from "./sim/Research";
 import { Simulator } from "./sim/Simulator";
+import { NEW_TAB } from "./components/links";
 
 const TITLES: Record<string, string> = {
   "/": "OpenEnergy · Britain's grid, hour by hour",
   "/play": "Beat the battery | OpenEnergy",
   "/2035": "2035 | OpenEnergy",
   "/fleet": "Real batteries | OpenEnergy",
+  "/live": "Tomorrow | OpenEnergy",
   "/research": "Research | OpenEnergy",
   "/run": "Value a battery | OpenEnergy",
   "/result": "Battery value | OpenEnergy",
@@ -33,11 +36,12 @@ const LENSES: [string, string][] = [
   ["/play", "Play"],
   ["/2035", "2035"],
   ["/fleet", "Real batteries"],
+  ["/live", "Tomorrow"],
   ["/research", "Research"],
 ];
 
 // Lenses run in the browser on static data; the research pages ask the API.
-const STATIC = ["/", "/play", "/2035", "/fleet", "/research"];
+const STATIC = ["/", "/play", "/2035", "/fleet", "/live", "/research"];
 // v6.0 addresses, now views of the simulator; their queries still work.
 const MOVED: Record<string, string> = { "/lab": "/", "/replay": "/" };
 
@@ -49,6 +53,8 @@ function StaticPage({ path, params, embedded }: { path: string; params: URLSearc
       return <Play params={params} />;
     case "/fleet":
       return <Fleet params={params} />;
+    case "/live":
+      return <LiveForecast />;
     case "/research":
       return <Research />;
     default:
@@ -154,7 +160,7 @@ export function App({ path: asked, search }: { path: string; search: string }) {
           ))}
         </nav>
         <span className="spacer" />
-        <a className="btn ghost small" href="https://koulakhilesh.github.io/OpenEnergy/">
+        <a className="btn ghost small" href="https://koulakhilesh.github.io/OpenEnergy/" {...NEW_TAB}>
           Docs ↗
         </a>
         <button
@@ -177,7 +183,7 @@ export function App({ path: asked, search }: { path: string; search: string }) {
         <footer className="foot">
           Code MIT; data keep their own licences, credited on each page.{" "}
           <a href="https://github.com/koulakhilesh/OpenEnergy">Source</a> ·{" "}
-          <a href="https://koulakhilesh.github.io/OpenEnergy/">Docs</a>
+          <a href="https://koulakhilesh.github.io/OpenEnergy/" {...NEW_TAB}>Docs</a>
         </footer>
       )}
     </>

@@ -22,6 +22,8 @@ from openenergy.errors import ConfigError, DataError
 from openenergy.system.model import Link, Storage
 
 FES_YEARS = (2025, 2035)
+# FES 2025 publishes capacities from 2024; earlier weather years are scaled back from it.
+FES_FROM = 2024
 # Irish day-ahead prices start in October 2018, so links need a weather year from 2019.
 LINKS_FROM = 2019
 # FES technology types behind each scalable historic profile.
@@ -35,6 +37,21 @@ PROFILE_TYPES = {
 # Hydrogen and CCS gas have no open cost data; they are counted as gas plant.
 GAS_TYPES = ("Gas", "CCS Gas", "Hydrogen")
 LDES = "Long Duration Energy Storage"
+# What each historic ratio scales in FES's figures for FES_FROM.
+HISTORY_TYPES = {
+    "wind": PROFILE_TYPES["wind"],
+    "solar": PROFILE_TYPES["solar"],
+    "nuclear": PROFILE_TYPES["nuclear"],
+    "gas": GAS_TYPES,
+    "interconnectors": ("Interconnectors",),
+}
+HISTORY_NOTE = (
+    "Weather years before 2024 are scaled from FES's 2024 figures in proportion to that "
+    "year's own capacity against 2024's: wind from the Renewable Energy Planning Database, "
+    "solar from NESO's embedded solar capacity, nuclear and gas from DUKES, interconnectors "
+    "from the links in service; demand by the year's total generation. Biomass, hydro and "
+    "long-duration storage keep FES's 2024 figures."
+)
 FES_NOTE = (
     "FES scenario: capacities and annual demand scaled from NESO's Future Energy Scenarios "
     "relative to the weather year, which keeps its weather, demand shape and fuel and "
@@ -67,26 +84,43 @@ def fes_changes(
     thermal_mw: Mapping[str, float],
     battery_efficiency: float,
     ldes_efficiency: float,
+    history: Mapping[str, float] | None = None,
 ) -> FesChanges:
     """Ratios of FES ``year`` to FES ``base_year`` applied to the weather year's system.
 
     ``thermal_mw`` is the weather year's installed CCGT and peaking capacity (DUKES); both
     scale with FES gas. Coal is zero (FES has none). FES batteries are added in full, and
     long-duration storage beyond the base year's (pumped storage keeps its historic output).
+    A ``base_year`` before ``FES_FROM`` needs ``history`` (see ``history_ratios``).
     """
     if not FES_YEARS[0] <= year <= FES_YEARS[1]:
         raise ConfigError(f"FES year must be {FES_YEARS[0]} to {FES_YEARS[1]}, got {year}")
     if year < base_year:
         raise ConfigError(f"FES year {year} is before the weather year {base_year}")
     target = source.capacity_mw(pathway, year)
-    base = source.capacity_mw(pathway, base_year)
+    if base_year < FES_FROM:
+        if history is None:
+            raise ConfigError(
+                f"weather year {base_year} is before FES's first year {FES_FROM}; "
+                "it needs historic capacities"
+            )
+        base = source.capacity_mw(pathway, FES_FROM).copy()
+        for key, types in HISTORY_TYPES.items():
+            mask = base.index.isin(types)
+            base[mask] = base[mask] * history[key]
+        base_demand = source.demand_gwh(pathway, FES_FROM) * history["demand"]
+        base_energy = source.storage_gwh(pathway, FES_FROM)
+    else:
+        base = source.capacity_mw(pathway, base_year)
+        base_demand = source.demand_gwh(pathway, base_year)
+        base_energy = source.storage_gwh(pathway, base_year)
     scale = {name: _ratio(target, base, types) for name, types in PROFILE_TYPES.items()}
-    scale["demand"] = source.demand_gwh(pathway, year) / source.demand_gwh(pathway, base_year)
+    scale["demand"] = source.demand_gwh(pathway, year) / base_demand
     gas = _ratio(target, base, GAS_TYPES)
     capacity = {group: mw * gas for group, mw in thermal_mw.items()}
     capacity["coal"] = 0.0
 
-    energy, base_energy = source.storage_gwh(pathway, year), source.storage_gwh(pathway, base_year)
+    energy = source.storage_gwh(pathway, year)
     storage = []
     battery_mw = float(target.get("Battery", 0.0))
     if battery_mw > 0:
@@ -174,6 +208,57 @@ def links(
 def price_column(pathway: str, year: int) -> str:
     """Column name for a pathway and year in ``data/scenarios/fes_prices.csv``."""
     return f"{pathway.lower().replace(' ', '_')}_{year}"
+
+
+def history_ratios(
+    system_dir: str | Path, year: int, reference: int = FES_FROM
+) -> dict[str, float]:
+    """Each ``HISTORY_TYPES`` group's capacity, and total generation (``demand``), in
+    ``year`` relative to ``reference``, from the bundled system and zones data."""
+    system = Path(system_dir)
+    zones = system.parent / "zones"
+    repd = _read(zones / "capacity_by_year.csv")
+    wind = repd[repd["technology"].isin(["onshore_wind", "offshore_wind"])]
+    wind_mw = wind.groupby("year")["mw"].sum()
+    demand = _read(zones / "demand_by_zone.csv", ["utc_timestamp", "embedded_solar_capacity_mw"])
+    demand_year = demand["utc_timestamp"].str[:4].astype(int)
+    fleet = _read(system / "fleet.csv").set_index("year")
+    gas = fleet["ccgt_mw"] + fleet["gas_turbine_mw"] + fleet["oil_engine_mw"]
+    mix = _read(system / "generation_mix.csv", ["utc_timestamp", "generation"])
+    mix_year = mix["utc_timestamp"].str[:4].astype(int)
+    units = interconnectors(system)
+    values = {}
+    for when in (year, reference):
+        middle = pd.Timestamp(when, 7, 1, tz="UTC")
+        links = sum(u.import_mw for u in units if u.in_service is None or u.in_service <= middle)
+        values[when] = {
+            "wind": _mid_year(wind_mw, when),
+            "solar": float(demand.loc[demand_year == when, "embedded_solar_capacity_mw"].mean()),
+            "nuclear": _mid_year(fleet["nuclear_mw"], when),
+            "gas": _mid_year(gas, when),
+            "interconnectors": float(links),
+            "demand": float(mix.loc[mix_year == when, "generation"].sum()),
+        }
+    ratios = {}
+    for key, value in values[year].items():
+        base = values[reference][key]
+        if not (base > 0 and value == value):
+            raise DataError(f"no historic {key} for {year} or {reference}")
+        ratios[key] = value / base
+    return ratios
+
+
+def _mid_year(end_of_year: pd.Series[float], year: int) -> float:
+    """Mean of the capacity at the end of the year before and of the year itself."""
+    if year not in end_of_year.index or year - 1 not in end_of_year.index:
+        raise DataError(f"no capacity at the end of {year - 1} and {year}")
+    return float((end_of_year[year - 1] + end_of_year[year]) / 2)
+
+
+def _read(path: Path, columns: list[str] | None = None) -> pd.DataFrame:
+    if not path.is_file():
+        raise DataError(f"historic capacity file not found: {path}")
+    return pd.read_csv(path, usecols=columns)
 
 
 def _ratio(target: pd.Series[float], base: pd.Series[float], types: tuple[str, ...]) -> float:

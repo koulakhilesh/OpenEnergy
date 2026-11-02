@@ -29,9 +29,10 @@ jobs:
       - run: uv sync --locked --all-extras --group docs
       - run: uv run mkdocs build --strict
 
-  # Versioned docs on the gh-pages branch: main as "main", each release as X.Y and "latest".
+  # One version of the docs on the gh-pages branch, for the latest release; each deploy
+  # replaces the branch, so no older versions are kept.
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -46,22 +47,12 @@ jobs:
           python-version: "3.14"
           enable-cache: false
       - run: uv sync --locked --all-extras --group docs
-      - name: Push access for mike
+      - name: Push access
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git fetch origin gh-pages --depth=1 || true
-      - name: Deploy main
-        if: github.event_name != 'release'
-        run: uv run mike deploy --push main
-      - name: Deploy the release as latest
-        if: github.event_name == 'release'
-        env:
-          TAG: ${{ github.event.release.tag_name }}
-        run: |
-          version="${TAG#v}"
-          uv run mike deploy --push --update-aliases "${version%.*}" latest
-          uv run mike set-default --push latest
+      - name: Deploy
+        run: uv run mkdocs gh-deploy --force --no-history --strict

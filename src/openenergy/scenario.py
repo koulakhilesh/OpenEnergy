@@ -64,11 +64,11 @@ MAX_SWEEP = 100
 _KEY = re.compile(r"[A-Za-z_]\w*(\.[A-Za-z_]\w*)*")
 
 
-class _Strict(BaseModel):
+class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-def _resolve(value: Path, info: ValidationInfo) -> Path:
+def resolve_path(value: Path, info: ValidationInfo) -> Path:
     """Resolve a path relative to the scenario file's directory."""
     base = (info.context or {}).get("base")
     if base is not None and not value.is_absolute():
@@ -76,7 +76,7 @@ def _resolve(value: Path, info: ValidationInfo) -> Path:
     return value.resolve()
 
 
-class DataSection(_Strict):
+class DataSection(StrictModel):
     source: Literal["opsd", "ember"] = "opsd"
     path: Path
     zone: str = "GB_GBN"
@@ -87,10 +87,10 @@ class DataSection(_Strict):
     @pydantic.field_validator("path")
     @classmethod
     def _resolve_path(cls, value: Path, info: ValidationInfo) -> Path:
-        return _resolve(value, info)
+        return resolve_path(value, info)
 
 
-class ForecastSection(_Strict):
+class ForecastSection(StrictModel):
     method: ForecastMethod = "naive_last_week"
     error_std: float | None = Field(default=None, ge=0)
     seed: int = 0
@@ -105,7 +105,7 @@ class ForecastSection(_Strict):
     @pydantic.field_validator("fundamentals", "path")
     @classmethod
     def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
-        return None if value is None else _resolve(value, info)
+        return None if value is None else resolve_path(value, info)
 
     @pydantic.model_validator(mode="after")
     def _method_requirements(self) -> ForecastSection:
@@ -122,13 +122,13 @@ class ForecastSection(_Strict):
         return self
 
 
-class PlantSection(_Strict):
+class PlantSection(StrictModel):
     capacity_mw: float = Field(gt=0)
     degradation_per_year: float = Field(default=0.0, ge=0, lt=1)
     technology: str | None = None
 
 
-class AssetsSection(_Strict):
+class AssetsSection(StrictModel):
     """Renewable plants sharing the battery's grid connection."""
 
     pv: PlantSection | None = None
@@ -151,7 +151,7 @@ class AssetsSection(_Strict):
         ]
 
 
-class GridSection(_Strict):
+class GridSection(StrictModel):
     """Shared connection; export defaults to total plant capacity, import to export."""
 
     export_limit_mw: float | None = Field(default=None, ge=0)
@@ -159,7 +159,7 @@ class GridSection(_Strict):
     premium_per_mwh: float = 0.0
 
 
-class CarbonSection(_Strict):
+class CarbonSection(StrictModel):
     """Carbon intensity file, an optional carbon price, and what dispatch plans on."""
 
     path: Path
@@ -169,10 +169,10 @@ class CarbonSection(_Strict):
     @pydantic.field_validator("path")
     @classmethod
     def _resolve_path(cls, value: Path, info: ValidationInfo) -> Path:
-        return _resolve(value, info)
+        return resolve_path(value, info)
 
 
-class ResponseSection(_Strict):
+class ResponseSection(StrictModel):
     """Frequency-response services sold alongside trading (GB dynamic response)."""
 
     path: Path
@@ -184,7 +184,7 @@ class ResponseSection(_Strict):
     @pydantic.field_validator("path", "utilisation_path")
     @classmethod
     def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
-        return None if value is None else _resolve(value, info)
+        return None if value is None else resolve_path(value, info)
 
     @pydantic.field_validator("services")
     @classmethod
@@ -194,7 +194,7 @@ class ResponseSection(_Strict):
         return value
 
 
-class Scenario(_Strict):
+class Scenario(StrictModel):
     # Restricted so the name is safe to use as an output directory.
     name: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
     data: DataSection
@@ -279,7 +279,7 @@ class ScenarioRun:
 def load_scenario(path: str | Path) -> Scenario:
     """Read and validate a scenario; relative data paths resolve against the file."""
     path = Path(path)
-    return _validate_scenario(_read(path), path)
+    return _validate_scenario(read_yaml(path), path)
 
 
 def parse_assignment(text: str) -> tuple[str, list[Any]]:
@@ -312,7 +312,7 @@ def sweep(path: str | Path, grid: dict[str, list[Any]]) -> pd.DataFrame:
     combinations = math.prod(len(values) for values in grid.values())
     if combinations > MAX_SWEEP:
         raise ConfigError(f"{combinations} combinations exceed the limit of {MAX_SWEEP}")
-    raw = _read(path)
+    raw = read_yaml(path)
     rows = []
     for values in itertools.product(*grid.values()):
         overrides = dict(zip(grid, values, strict=True))
@@ -331,7 +331,7 @@ def sweep(path: str | Path, grid: dict[str, list[Any]]) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("total", ascending=False, ignore_index=True)
 
 
-def _read(path: Path) -> dict[str, Any]:
+def read_yaml(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ConfigError(f"scenario file not found: {path}")
     try:

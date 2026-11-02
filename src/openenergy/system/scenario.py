@@ -29,15 +29,18 @@ from openenergy.dispatch.arbitrage import DispatchConfig
 from openenergy.errors import ConfigError
 from openenergy.forecast.baseline import Forecaster, NaiveLastWeek, PerfectForesight
 from openenergy.metrics.summary import Summary, summarise
-from openenergy.scenario import MAX_SWEEP, _read, _resolve, _Strict, apply_overrides
+from openenergy.scenario import MAX_SWEEP, StrictModel, apply_overrides, read_yaml, resolve_path
 from openenergy.system.commitment import Commitment
 from openenergy.system.fleet import Adjustments, FleetAssumptions, build_system
 from openenergy.system.forward import (
+    FES_FROM,
     FES_NOTE,
     FES_YEARS,
+    HISTORY_NOTE,
     LINKS_FROM,
     LINKS_NOTE,
     fes_changes,
+    history_ratios,
     links,
 )
 from openenergy.system.model import Link, PriceKind, Storage, SystemResult, SystemSpec, solve
@@ -45,7 +48,7 @@ from openenergy.system.validate import (
     BACKCAST_START,
     COMMITMENT_NOTE,
     DATA_END,
-    _daily_spread,
+    mean_daily_spread,
 )
 
 SYSTEM_NOTE = (
@@ -69,7 +72,7 @@ ADEQUACY_NOTE = (
 )
 
 
-class StorageSection(_Strict):
+class StorageSection(StrictModel):
     """Storage added to the system; ``power_mw: 0`` leaves it out (handy in sweeps)."""
 
     power_mw: float = Field(ge=0)
@@ -77,7 +80,7 @@ class StorageSection(_Strict):
     efficiency: float = Field(default=0.85, gt=0, le=1)
 
 
-class AssumptionsSection(_Strict):
+class AssumptionsSection(StrictModel):
     tranches: int = Field(default=5, ge=1)
     availability: float = Field(default=0.9, gt=0, le=1)
     ccgt_spread: float = Field(default=0.04, ge=0, lt=0.2)
@@ -86,7 +89,7 @@ class AssumptionsSection(_Strict):
     variable_cost: float = Field(default=0.0, ge=0)
 
 
-class InterconnectorSection(_Strict):
+class InterconnectorSection(StrictModel):
     """``fixed`` keeps historic imports; ``links`` trades at neighbours' actual prices.
 
     ``prices`` defaults to ``prices/europe_day_ahead_ember.csv`` next to the system data.
@@ -108,10 +111,10 @@ class InterconnectorSection(_Strict):
     @pydantic.field_validator("prices")
     @classmethod
     def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
-        return None if value is None else _resolve(value, info)
+        return None if value is None else resolve_path(value, info)
 
 
-class FesSection(_Strict):
+class FesSection(StrictModel):
     """A NESO FES pathway and year applied to the weather year (``system.year``).
 
     Storage efficiencies are stated assumptions; FES does not publish them.
@@ -143,10 +146,10 @@ class FesSection(_Strict):
     @pydantic.field_validator("data")
     @classmethod
     def _resolve_path(cls, value: Path | None, info: ValidationInfo) -> Path | None:
-        return None if value is None else _resolve(value, info)
+        return None if value is None else resolve_path(value, info)
 
 
-class SystemSection(_Strict):
+class SystemSection(StrictModel):
     data: Path
     prices: list[Path] | None = None
     year: int = Field(ge=BACKCAST_START.year, le=DATA_END.year)
@@ -199,12 +202,12 @@ class SystemSection(_Strict):
     @pydantic.field_validator("data")
     @classmethod
     def _resolve_path(cls, value: Path, info: ValidationInfo) -> Path:
-        return _resolve(value, info)
+        return resolve_path(value, info)
 
     @pydantic.field_validator("prices")
     @classmethod
     def _resolve_paths(cls, value: list[Path] | None, info: ValidationInfo) -> list[Path] | None:
-        return None if value is None else [_resolve(path, info) for path in value]
+        return None if value is None else [resolve_path(path, info) for path in value]
 
     def window(self) -> tuple[date, date]:
         """Days modelled: the year, narrowed by ``start``/``end`` and the data window."""
@@ -219,7 +222,7 @@ class SystemSection(_Strict):
         return (self.fes.data if self.fes else None) or self.data.parent / "fes"
 
 
-class SystemScenario(_Strict):
+class SystemScenario(StrictModel):
     name: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
     system: SystemSection
     battery: BatterySpec | None = None
@@ -268,12 +271,12 @@ class SystemRun:
 
 
 def is_system_scenario(path: str | Path) -> bool:
-    return "system" in _read(Path(path))
+    return "system" in read_yaml(Path(path))
 
 
 def load_system_scenario(path: str | Path) -> SystemScenario:
     path = Path(path)
-    return _validate(_read(path), path)
+    return _validate(read_yaml(path), path)
 
 
 def run_system_scenario(scenario: SystemScenario) -> SystemRun:
@@ -307,6 +310,7 @@ def run_system_scenario(scenario: SystemScenario) -> SystemRun:
             },
             section.fes.battery_efficiency,
             section.fes.ldes_efficiency,
+            history_ratios(section.data, section.year) if section.year < FES_FROM else None,
         )
         scale.update(changes.scale)
         capacity.update(changes.capacity_mw)
@@ -463,6 +467,8 @@ def write_system_outputs(run: SystemRun, directory: str | Path) -> Path:
         note += " " + LINKS_NOTE
     if section.fes is not None:
         note += " " + FES_NOTE
+        if section.year < FES_FROM:
+            note += " " + HISTORY_NOTE
         if section.fes.firm_mw is not None:
             note += f" {section.fes.firm_mw:,.0f} MW of firm peaking capacity is added."
         elif section.fes.adequacy == "secure":
@@ -488,7 +494,7 @@ def system_sweep(path: str | Path, grid: dict[str, list[Any]]) -> pd.DataFrame:
     combinations = math.prod(len(values) for values in grid.values())
     if combinations > MAX_SWEEP:
         raise ConfigError(f"{combinations} combinations exceed the limit of {MAX_SWEEP}")
-    raw = _read(path)
+    raw = read_yaml(path)
     rows = []
     for values in itertools.product(*grid.values()):
         overrides = dict(zip(grid, values, strict=True))
@@ -558,7 +564,7 @@ def _summarise(
         price_std=float(price.std()),
         price_p05=float(price.quantile(0.05)),
         price_p95=float(price.quantile(0.95)),
-        daily_spread=_daily_spread(price),
+        daily_spread=mean_daily_spread(price),
         generation_twh=generation,
         curtailment_twh=float(result.curtailment.sum() * hours / 1e6),
         unserved_mwh=float(result.unserved.sum() * hours),

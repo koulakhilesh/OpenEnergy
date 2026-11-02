@@ -21,10 +21,10 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
 from threadpoolctl import threadpool_limits
 
-from openenergy.assets.battery import BatterySpec
 from openenergy.backtest.engine import known_until
+from openenergy.backtest.reference import REFERENCE_BATTERY, REFERENCE_DISPATCH
 from openenergy.data.fundamentals import FUNDAMENTALS_FROM, FundamentalsSource
-from openenergy.dispatch.arbitrage import DispatchConfig, optimise_dispatch
+from openenergy.dispatch.arbitrage import optimise_dispatch
 from openenergy.errors import ConfigError, DataError
 
 FloatArray = npt.NDArray[np.float64]
@@ -35,8 +35,6 @@ MIN_TRAINING_DAYS = 90
 STRETCH_DAYS = 90
 STRETCHES = (1.0, 1.25, 1.5, 1.75, 2.0)
 LAG_DAYS = (1, 2, 7)
-REFERENCE_BATTERY = BatterySpec(power_mw=1.0, energy_mwh=2.0)
-REFERENCE_DISPATCH = DispatchConfig(degradation_cost=5.0)
 _HOUR = pd.Timedelta(hours=1)
 _DAY = pd.Timedelta(days=1)
 
@@ -82,9 +80,19 @@ class FundamentalsForecaster:
         self.months: dict[pd.Timestamp, MonthModel] = {}
         self._cache: pd.DataFrame | None = None
 
-    def forecast(self, history: pd.Series[float], index: pd.DatetimeIndex) -> FloatArray:
+    def forecast(
+        self,
+        history: pd.Series[float],
+        index: pd.DatetimeIndex,
+        known: pd.Timestamp | None = None,
+    ) -> FloatArray:
+        """Forecast whole days at ``index``.
+
+        ``known`` is when the known prices end, by default the auction's information for
+        the day; a live forecast passes an earlier time when its price feed lags.
+        """
         day = index[0].normalize()
-        cutoff = known_until(day, self.lead_hours, self.information)
+        cutoff = known_until(day, self.lead_hours, self.information) if known is None else known
         if not history.empty and history.index.max() >= cutoff:
             raise DataError(f"history extends to or after what is known for {day.date()}")
         if len(index) % 24 or (len(index) > 1 and index[1] - index[0] != _HOUR):
@@ -212,7 +220,7 @@ class FundamentalsForecaster:
         forecast = self._predict(model, frame)
         prices = np.asarray(actual.reindex(rows), dtype=np.float64)
         earned = {
-            k: _reference_revenue(_stretch(forecast, rows, k), prices, rows) for k in STRETCHES
+            k: reference_revenue(_stretch(forecast, rows, k), prices, rows) for k in STRETCHES
         }
         return max(STRETCHES, key=lambda k: (earned[k], -k))
 
@@ -227,7 +235,7 @@ def _stretch(forecast: FloatArray, index: pd.DatetimeIndex, factor: float) -> Fl
     return stretched
 
 
-def _reference_revenue(forecast: FloatArray, prices: FloatArray, index: pd.DatetimeIndex) -> float:
+def reference_revenue(forecast: FloatArray, prices: FloatArray, index: pd.DatetimeIndex) -> float:
     """Revenue of the reference battery planned day by day on ``forecast``, at ``prices``."""
     spec, config = REFERENCE_BATTERY, REFERENCE_DISPATCH
     state = spec.initial_state()

@@ -3,8 +3,16 @@ import { Axes, Chart, frame, Legend, nice, path } from "../components/Svg";
 import { loadSaturation, money, remember, type SaturationRow } from "../engine/data";
 import { useLoad } from "../hooks";
 import { Sources } from "./Sources";
+import { NEW_TAB } from "../components/links";
 
 const COLOURS = ["var(--blue)", "var(--red)", "var(--yellow)", "var(--ink)", "var(--green)"];
+
+/** "2019–2025" (or "2024 and 2025") for the weather years in the study. */
+function weatherYears(rows: { weather_year: number }[]): string {
+  const years = [...new Set(rows.map((r) => r.weather_year))].sort((a, b) => a - b);
+  if (years.length <= 2) return years.join(" and ");
+  return `${years[0]}–${years[years.length - 1]}`;
+}
 const CELL_GW = 2;
 
 /** A number that counts to its new value instead of jumping. */
@@ -42,6 +50,7 @@ export function Future({ params }: { params: URLSearchParams }) {
   });
   const data = loaded.state === "done" ? loaded.value : null;
   const pathways = useMemo(() => (data ? [...new Set(data.summary.map((r) => r.pathway))] : []), [data]);
+  const weather = useMemo(() => weatherYears(data?.years ?? []), [data]);
   const chosen = pathways.includes(pathway) ? pathway : pathways[0];
   const rows = useMemo(
     () => (data ? data.summary.filter((r) => r.pathway === chosen).sort((a, b) => a.battery_scale - b.battery_scale) : []),
@@ -71,7 +80,7 @@ export function Future({ params }: { params: URLSearchParams }) {
 
   return (
     <section className="lens">
-      <p className="kicker">2035 · NESO Future Energy Scenarios, made secure, on 2024 and 2025 weather</p>
+      <p className="kicker">2035 · NESO Future Energy Scenarios, made secure, on {weather} weather</p>
       <h1>How much storage can Britain use before batteries stop paying?</h1>
       <div className="chips" role="group" aria-label="Pathway">
         {pathways.map((p) => (
@@ -184,10 +193,10 @@ export function Future({ params }: { params: URLSearchParams }) {
       </div>
       <p className="help">
         Modelled with OpenEnergy's GB dispatch (unit commitment, interconnectors trading at neighbours' actual
-        prices) on 2024 and 2025 weather, fuel and carbon prices. Values are perfect-foresight upper bounds; a real
+        prices) on {weather} weather, fuel and carbon prices. Values are perfect-foresight upper bounds; a real
         battery planning on a forecast earns less. Firm capacity is added as gas peaking plant until loss of load,
-        averaged over the two weather years, is within 3 hours a year.{" "}
-        <a href="https://koulakhilesh.github.io/OpenEnergy/guides/forward-scenarios/">Method</a>
+        averaged over the weather years, is within 3 hours a year.{" "}
+        <a href="https://koulakhilesh.github.io/OpenEnergy/guides/forward-scenarios/" {...NEW_TAB}>Method</a>
       </p>
       <Sources texts={[`Storage saturation study: OpenEnergy model output, ${data.source}, built on NESO Future Energy Scenarios 2025 (NESO Open Data Licence v1.0) and the data credited in data/scenarios/README.md.`]} />
     </section>

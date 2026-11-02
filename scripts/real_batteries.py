@@ -94,6 +94,12 @@ def main() -> None:
                 "real_bm_net_per_mw_year": round(row["bm_net_per_mw_year"], 0),
                 "real_imbalance_per_mw_year": round(row["imbalance_per_mw_year"], 0),
                 "real_estimated_total_per_mw_year": round(row["estimated_total_per_mw_year"], 0),
+                "real_response_per_mw_year": round(
+                    row.get("response_per_mw_year", float("nan")), 0
+                ),
+                "real_total_with_response_per_mw_year": round(
+                    row.get("estimated_total_with_response_per_mw_year", float("nan")), 0
+                ),
                 **{k: round(v, 0) for k, v in model.items()},
             }
         )

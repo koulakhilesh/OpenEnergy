@@ -48,7 +48,7 @@ class EmberPriceSource:
         """Hourly GBP/MWh over whole UTC days, ``start`` and ``end`` inclusive."""
         if zone not in ZONES:
             raise DataError(f"Ember source covers GB only (GB or GB_GBN), got {zone!r}")
-        eur = _read(self.path, "utc_timestamp", _PRICE)
+        eur = read_series(self.path, "utc_timestamp", _PRICE)
         eur.index = pd.DatetimeIndex(pd.to_datetime(eur.index, utc=True, format="ISO8601"))
         series = PriceSeries(eur * self._rate(eur.index), currency="GBP", zone="GB_GBN")
         if start is None and end is None:
@@ -56,7 +56,7 @@ class EmberPriceSource:
         return series.between(start, end)
 
     def _rate(self, index: pd.DatetimeIndex) -> pd.Series[float]:
-        table = _read(self.rates, "date", _RATE)
+        table = read_series(self.rates, "date", _RATE)
         days = pd.DatetimeIndex(pd.to_datetime(table.index)).as_unit("ns")
         wanted = index.tz_convert(None).normalize().as_unit("ns")
         position = np.searchsorted(days.to_numpy(), wanted.to_numpy(), side="right") - 1
@@ -66,7 +66,7 @@ class EmberPriceSource:
         return pd.Series(table.to_numpy(dtype=float)[position], index=index)
 
 
-def _read(path: Path, index: str, column: str) -> pd.Series[float]:
+def read_series(path: Path, index: str, column: str) -> pd.Series[float]:
     if not path.is_file():
         raise DataError(f"file not found: {path}")
     frame = pd.read_csv(path)

@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from openenergy.data.update import _download
+from openenergy.data.update import download
 
 API = (
     "https://data.elexon.co.uk/bmrs/api/v1/datasets/FUELHH/stream"
@@ -42,7 +42,7 @@ def main() -> None:
     for first in pd.date_range(args.start, args.end, freq="MS"):
         last = min(first + pd.offsets.MonthEnd(0), pd.Timestamp(args.end))
         url = API.format(start=first.date(), end=last.date())
-        rows += [r for r in json.loads(_download(url)) if r["fuelType"].startswith("INT")]
+        rows += [r for r in json.loads(download(url)) if r["fuelType"].startswith("INT")]
         print(first.strftime("%Y-%m"), len(rows), flush=True)
     frame = pd.DataFrame(rows)
     frame["start"] = pd.to_datetime(frame["startTime"], utc=True)

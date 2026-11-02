@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 
 from openenergy.data.response import PRICES_FILE, SERVICES, UTILISATION_FILE, utilisation
-from openenergy.data.update import _download
+from openenergy.data.update import download
 
 OUTPUT = Path(__file__).parents[1] / "data/response"
 API = "https://api.neso.energy/api/3/action/datapackage_show?id={}"
@@ -41,7 +41,7 @@ MONTHS = {calendar.month_name[number].lower(): number for number in range(1, 13)
 
 
 def resources(dataset: str) -> Iterator[tuple[str, str]]:
-    for resource in json.loads(_download(API.format(dataset)))["result"]["resources"]:
+    for resource in json.loads(download(API.format(dataset)))["result"]["resources"]:
         yield str(resource.get("name", "")), str(resource["path"])
 
 
@@ -51,7 +51,7 @@ def master_2021_2023() -> pd.DataFrame:
         for name, url in resources("dynamic-containment-data")
         if "results_summary" in name and "2021-2023" in name
     )
-    frame = pd.read_csv(io.BytesIO(_download(path)))
+    frame = pd.read_csv(io.BytesIO(download(path)))
     london = "Europe/London"
     return pd.DataFrame(
         {
@@ -74,7 +74,7 @@ def eac() -> pd.DataFrame:
         summary = "results_summary" in name and "daily" not in name
         if not summary:
             continue
-        frame = pd.read_csv(io.BytesIO(_download(url)))
+        frame = pd.read_csv(io.BytesIO(download(url)))
         frame = frame[frame["serviceType"] == "Response"]
         frames.append(
             pd.DataFrame(
@@ -130,7 +130,7 @@ def write_utilisation(first: pd.Period) -> None:
         if key in done:
             continue
         compression = "zip" if url.endswith(".zip") else None
-        frame = pd.read_csv(io.BytesIO(_download(url)), compression=compression)
+        frame = pd.read_csv(io.BytesIO(download(url)), compression=compression)
         values = pd.to_numeric(frame.iloc[:, 1], errors="coerce").to_numpy(dtype=np.float64)
         frequency = values.copy()
         # Outside 49-51 Hz would be a GB blackout-scale event; treat as bad samples.

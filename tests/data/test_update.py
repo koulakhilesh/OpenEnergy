@@ -46,7 +46,7 @@ def fake_download(url: str) -> bytes:
 def test_update_writes_files_the_ember_source_reads(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(update_module, "_download", fake_download)
+    monkeypatch.setattr(update_module, "download", fake_download)
     path, hours, first, last = update_prices(tmp_path / "prices")
     assert (hours, first, last) == (2, "2026-01-01 00:00:00", "2026-01-01 01:00:00")
     assert (tmp_path / "prices" / "ecb_gbp_per_eur.csv").read_text().splitlines()[1] == (
@@ -73,13 +73,13 @@ def test_missing_neighbour_is_an_error(tmp_path: Path, monkeypatch: pytest.Monke
                     archive.writestr(name, source.read(name))
         return buffer.getvalue()
 
-    monkeypatch.setattr(update_module, "_download", no_norway)
+    monkeypatch.setattr(update_module, "download", no_norway)
     with pytest.raises(OSError, match="Norway"):
         update_prices(tmp_path)
 
 
 def test_cli_data_update(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(update_module, "_download", fake_download)
+    monkeypatch.setattr(update_module, "download", fake_download)
     result = runner.invoke(app, ["data", "update", "--dir", str(tmp_path)])
     assert result.exit_code == 0, result.output
     assert "2 hours" in result.output and "CC BY 4.0" in result.output
@@ -87,7 +87,7 @@ def test_cli_data_update(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
     def offline(url: str) -> bytes:
         raise OSError("no network")
 
-    monkeypatch.setattr(update_module, "_download", offline)
+    monkeypatch.setattr(update_module, "download", offline)
     result = runner.invoke(app, ["data", "update", "--dir", str(tmp_path)])
     assert result.exit_code == 1
     assert "download failed" in result.output
@@ -100,7 +100,7 @@ def test_missing_uk_file_is_an_error(tmp_path: Path, monkeypatch: pytest.MonkeyP
             archive.writestr("hourly/Germany.csv", "x\n")
         return buffer.getvalue()
 
-    monkeypatch.setattr(update_module, "_download", no_uk)
+    monkeypatch.setattr(update_module, "download", no_uk)
     with pytest.raises(OSError, match="not found"):
         update_prices(tmp_path)
 
@@ -112,7 +112,7 @@ def test_empty_uk_file_is_an_error(tmp_path: Path, monkeypatch: pytest.MonkeyPat
             archive.writestr("United Kingdom.csv", EMBER_CSV.splitlines()[0] + "\n")
         return buffer.getvalue()
 
-    monkeypatch.setattr(update_module, "_download", empty)
+    monkeypatch.setattr(update_module, "download", empty)
     with pytest.raises(OSError, match="empty"):
         update_prices(tmp_path)
 
@@ -135,7 +135,7 @@ def test_download_retries_then_gives_up(monkeypatch: pytest.MonkeyPatch) -> None
 
     monkeypatch.setattr(update_module.time, "sleep", lambda seconds: None)
     monkeypatch.setattr(update_module.urllib.request, "urlopen", flaky)
-    assert update_module._download("https://example.org") == b"ok"
+    assert update_module.download("https://example.org") == b"ok"
     assert len(calls) == 3
 
     def down(request: object, timeout: float) -> Response:
@@ -143,7 +143,7 @@ def test_download_retries_then_gives_up(monkeypatch: pytest.MonkeyPatch) -> None
 
     monkeypatch.setattr(update_module.urllib.request, "urlopen", down)
     with pytest.raises(OSError, match="down"):
-        update_module._download("https://example.org")
+        update_module.download("https://example.org")
 
 
 def test_cache_dir_follows_xdg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

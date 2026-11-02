@@ -7,8 +7,9 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
+import numpy as np
 import pandas as pd
 import typer
 
@@ -16,10 +17,14 @@ import openenergy
 from openenergy.data.ember import EMBER_ATTRIBUTION, gb_prices
 from openenergy.data.fes import PATHWAYS
 from openenergy.data.fleet import SystemInputs
-from openenergy.data.fundamentals import FUNDAMENTALS_ATTRIBUTION
+from openenergy.data.fundamentals import (
+    FUNDAMENTALS_ATTRIBUTION,
+    FUNDAMENTALS_FROM,
+    FundamentalsSource,
+)
 from openenergy.data.neso import GenerationMixSource
 from openenergy.data.opsd import OPSDCsvSource
-from openenergy.data.update import cache_dir, update_fundamentals, update_prices
+from openenergy.data.update import PRICE_FILE, cache_dir, update_fundamentals, update_prices
 from openenergy.errors import ConfigError, OpenEnergyError
 from openenergy.metrics.capture import capture_by_year
 from openenergy.scenario import (
@@ -31,6 +36,7 @@ from openenergy.scenario import (
     write_outputs,
 )
 from openenergy.system.commitment import Commitment
+from openenergy.system.fleet import build_system
 from openenergy.system.model import PriceKind
 from openenergy.system.netload import load_system, net_load, netload_by_year, surplus
 from openenergy.system.saturation import (
@@ -64,6 +70,8 @@ data_app = typer.Typer(no_args_is_help=True, help="Inspect and update market dat
 app.add_typer(data_app, name="data")
 system_app = typer.Typer(no_args_is_help=True, help="Model the GB power system.")
 app.add_typer(system_app, name="system")
+forecast_app = typer.Typer(no_args_is_help=True, help="Forecast GB day-ahead prices.")
+app.add_typer(forecast_app, name="forecast")
 
 SYSTEM_DATA = Path("data/system")
 OPSD_DATA = Path("data/time_series/time_series_60min_singleindex_filtered.csv")
@@ -290,6 +298,67 @@ def sweep_command(
     typer.echo(shown.to_string(index=False, float_format=lambda v: f"{v:,.2f}"))
 
 
+@app.command()
+def invest(
+    data: Annotated[Path, typer.Option(help="The repository's data folder.")] = Path("data"),
+    cost_year: Annotated[int, typer.Option(help="Year the battery is built (ATB cost).")] = 2025,
+    cost_scale: Annotated[
+        float, typer.Option(help="Multiply ATB's US capital and O&M costs by this.")
+    ] = 1.0,
+    life: Annotated[int, typer.Option(help="Years of operation.")] = 15,
+    rate: Annotated[float, typer.Option(help="Real discount rate, e.g. 0.07.")] = 0.07,
+    cm_price: Annotated[
+        float | None,
+        typer.Option(help="Capacity Market price, GBP/kW-year; default the latest T-4 auction."),
+    ] = None,
+    out: Annotated[
+        Path | None, typer.Option("--out", "-o", help="Write every case to CSV.")
+    ] = None,
+) -> None:
+    """Value a 1 MW / 2 MWh battery over its life on each year seen or modelled."""
+    from openenergy.invest import (
+        appraise,
+        battery_costs,
+        capacity_market,
+        revenue_cases,
+        summary,
+    )
+
+    with _reported_errors():
+        if cost_scale <= 0:
+            raise ConfigError(f"--cost-scale must be positive, got {cost_scale}")
+        costs = battery_costs(data / "invest", cost_year, cost_scale)
+        market = capacity_market(data / "invest", cm_price)
+        table = appraise(revenue_cases(data), costs, market, life, rate)
+        if out is not None:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            table.to_csv(out, index=False)
+    typer.echo(
+        f"1 MW / 2 MWh battery built {costs.year}: capital £{costs.capex_gbp:,.0f}, fixed O&M "
+        f"£{costs.fixed_om_gbp_per_year:,.0f}/year, {life} years at {rate:.0%} real; Capacity "
+        f"Market £{market.gbp_per_mw_year:,.0f}/MW-year ({market.clearing_gbp_per_kw_year:g} "
+        f"£/kW x {market.derating_factor:.2%} de-rating, {market.auction})"
+    )
+    typer.echo(f"{'case':<36}{'revenue':>10}{'net':>10}{'break-even':>12}{'NPV':>12}{'IRR':>7}")
+    for family, rows in table.groupby("family", sort=False):
+        typer.echo(str(family))
+        for record in rows.to_dict("records"):
+            irr_value = float(record["irr"])
+            rate_of_return = "-" if np.isnan(irr_value) else f"{irr_value:.1%}"
+            typer.echo(
+                f"  {record['case']!s:<34}{record['revenue']:>10,.0f}{record['net']:>10,.0f}"
+                f"{record['breakeven_capex']:>12,.0f}{record['npv']:>12,.0f}{rate_of_return:>7}"
+            )
+    for name, s in summary(table).to_dict("index").items():
+        typer.echo(
+            f"{name}: break-even build cost {s['breakeven_min']:,.0f} to "
+            f"{s['breakeven_max']:,.0f} GBP/MW (median {s['breakeven_median']:,.0f}); of "
+            f"{int(s['cases'])} cases, {int(s['pays_back'])} earn their cost back and "
+            f"{int(s['worth_building'])} have a positive NPV at {rate:.0%}"
+        )
+    typer.echo("GBP per MW-year unless stated; break-even = build cost per MW at which NPV is zero")
+
+
 @data_app.command("info")
 def data_info(path: Annotated[Path, typer.Argument(help="OPSD time-series CSV.")]) -> None:
     """List price zones with currency, date range and data completeness."""
@@ -335,6 +404,53 @@ def data_update(
         typer.echo(f"{name}: {rows:,} rows, {first_row} to {last_row}")
     if written:
         typer.echo(f"Fundamentals: {FUNDAMENTALS_ATTRIBUTION}")
+
+
+@forecast_app.command("live")
+def forecast_live(
+    out: Annotated[
+        Path, typer.Option("--out", "-o", help="Directory for forecasts.csv and live.json.")
+    ] = Path("live"),
+    prices: Annotated[
+        Path | None,
+        typer.Option(help="Ember price file from `data update`; default in the cache."),
+    ] = None,
+    fundamentals: Annotated[
+        Path | None,
+        typer.Option(help="Folder from `data update --fundamentals`; default in the cache."),
+    ] = None,
+    day: Annotated[
+        str | None, typer.Option(help="Day to forecast, YYYY-MM-DD; default tomorrow (UTC).")
+    ] = None,
+) -> None:
+    """Forecast tomorrow's prices from the latest data and score earlier live forecasts."""
+    with _reported_errors():
+        try:
+            from openenergy.forecast.live import update
+        except ImportError as exc:
+            raise ConfigError(
+                "live forecasts need the forecast extra: pip install 'openenergy[forecast]'"
+            ) from exc
+        now = pd.Timestamp.now(tz="UTC").floor("min")
+        target = _day(day, "day") if day else (now + pd.Timedelta(days=1)).date()
+        price_file = prices or cache_dir() / PRICE_FILE
+        series, sources = gb_prices([price_file], FUNDAMENTALS_FROM.date(), target)
+        source = FundamentalsSource(fundamentals or cache_dir().parent / "fundamentals")
+        live, summary = update(
+            out, series.prices, source, target, now, [*sources, FUNDAMENTALS_ATTRIBUTION]
+        )
+    typer.echo(
+        f"{target} forecast, prices known to {live.prices_known_until:%Y-%m-%d %H:%M} UTC: "
+        f"mean {live.prices.mean():.1f}, low {live.prices.min():.1f}, "
+        f"high {live.prices.max():.1f} GBP/MWh"
+    )
+    scored = summary["summary"]
+    if scored["days"]:
+        line = f"track record, last {scored['days']} days: MAE {scored['mae']:.1f} GBP/MWh"
+        if scored["capture"] is not None:
+            line += f", battery captured {scored['capture']:.0%} of perfect foresight"
+        typer.echo(line)
+    typer.echo(f"written to {out}")
 
 
 @system_app.command("run")
@@ -386,6 +502,80 @@ def _per_mw(value: float | None) -> str:
     return "n/a" if value is None else f"{value:,.0f}"
 
 
+@system_app.command("zones")
+def system_zones(
+    start: Annotated[str, typer.Option(help="First day, YYYY-MM-DD.")] = "2023-01-01",
+    end: Annotated[str, typer.Option(help="Last day, YYYY-MM-DD.")] = "2025-12-31",
+    limit: Annotated[
+        str,
+        typer.Option(help="B6 limit: scotex (NESO's monthly day-ahead limit), recorded, or MW."),
+    ] = "scotex",
+    data: Annotated[Path, typer.Option(help="System data directory.")] = SYSTEM_DATA,
+    out: Annotated[Path | None, typer.Option("--out", "-o", help="Output directory.")] = None,
+) -> None:
+    """Split GB into Scotland and England & Wales and check the flow between them."""
+    from openenergy.system.zones import (
+        ZONES_NOTE,
+        battery_values,
+        compare,
+        solve_two_zones,
+    )
+
+    with _reported_errors():
+        first, last = _day(start, "start"), _day(end, "end")
+        boundary: float | Literal["scotex", "recorded"]
+        if limit == "scotex":
+            boundary = "scotex"
+        elif limit == "recorded":
+            boundary = "recorded"
+        else:
+            try:
+                boundary = float(limit)
+            except ValueError as exc:
+                raise ConfigError(f"--limit must be scotex, recorded or MW, got {limit!r}") from exc
+        mix = GenerationMixSource(data / "generation_mix.csv").mix(
+            first, last, step=pd.Timedelta(hours=1)
+        )
+        inputs = SystemInputs(data)
+        index = pd.DatetimeIndex(mix.index)
+        rows, frames = [], []
+        for year in sorted(set(index.year)):
+            spec = build_system(mix[index.year == year], inputs)
+            result = solve_two_zones(spec, data.parent / "zones", boundary)
+            values = battery_values(result)
+            rows.append(
+                {"year": year, **compare(result)}
+                | {f"battery_{zone}": value for zone, value in values.items()}
+            )
+            frames.append(result.frame)
+        table = pd.DataFrame(rows)
+        if out is not None:
+            out.mkdir(parents=True, exist_ok=True)
+            table.to_csv(out / "two_zones_by_year.csv", index=False)
+            pd.concat(frames).to_csv(out / "two_zones_hourly.csv", index_label="utc_timestamp")
+    typer.echo(
+        f"{'year':<6}{'limit':>7}{'flow m/a':>11}{'corr':>6}{'at limit m/a':>14}"
+        f"{'split':>7}{'gap':>6}{'battery S/EW':>15}"
+    )
+    for r in table.to_dict("records"):
+        flow = f"{r['transfer_mean_model'] / 1000:.2f}/{r['transfer_mean_actual'] / 1000:.2f}"
+        at_limit = f"{r['model_at_limit_share']:.0%}/{r['actual_near_limit_share']:.0%}"
+        battery = f"{r['battery_scotland']:,.0f}/{r['battery_england_wales']:,.0f}"
+        typer.echo(
+            f"{r['year']:<6}{r['limit_mw'] / 1000:>7.2f}{flow:>11}{r['correlation']:>6.2f}"
+            f"{at_limit:>14}{r['price_split_share']:>7.0%}{r['price_gap_mean']:>6.1f}{battery:>15}"
+        )
+    typer.echo(
+        "GW; flow = mean transfer from Scotland, modelled/recorded; at limit = share of hours "
+        "at the B6 limit (recorded: within 10%); split = hours the zones' prices differ by over "
+        "GBP 1; gap = mean England and Wales minus Scotland price; battery = 1 MW / 2 MWh "
+        "perfect-foresight revenue per MW-year on each zone's price"
+    )
+    typer.echo(ZONES_NOTE)
+    if out is not None:
+        typer.echo(f"outputs written to {out}")
+
+
 @system_app.command("saturation")
 def system_saturation(
     pathway: Annotated[
@@ -397,7 +587,7 @@ def system_saturation(
         typer.Option(help="FES battery fleet scale (repeat); default 0, 0.5, 1, 2, 3."),
     ] = None,
     weather_year: Annotated[
-        list[int] | None, typer.Option(help="Weather year (repeat); default 2024-2025.")
+        list[int] | None, typer.Option(help="Weather year (repeat); default 2019-2025.")
     ] = None,
     data: Annotated[Path, typer.Option(help="System data directory.")] = SYSTEM_DATA,
     workers: Annotated[int, typer.Option(min=1, help="Parallel solves.")] = 1,

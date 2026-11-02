@@ -39,6 +39,24 @@ One row per unit and UTC day with any PN or metered output, 2021-01-01 to 2026-1
 Changes: PN points averaged over each half-hour (time-weighted); settlement periods
 turned into UTC times; values summed by UTC day; battery units only.
 
+## `battery_response_daily.csv`
+
+Written by `scripts/fetch_fleet_response.py`. One row per UTC day, unit (Elexon id) and
+response product, 2021-09-15 to 2026-11-01: `mw_hours` (megawatts won times hours held)
+and `gbp` (that at the clearing price).
+
+Source: NESO Data Portal (<https://www.neso.energy/data-portal>): "DC, DR & DM Results By
+Unit Master Data 2021-2023" (dataset `dynamic-containment-data`) and the "Response-Reserve
+Results By Unit" files of the Enduring Auction Capability (dataset `eac-auction-results`,
+November 2023 on). Licence: [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence).
+Supported by National Energy SO Open Data. OpenEnergy is not affiliated with or endorsed
+by NESO.
+
+Changes: UK local delivery times turned into UTC; the earlier file used only before the
+first auction-capability delivery; duplicate rows across the yearly archives dropped;
+auction units matched to battery units by National Grid id (units that are not BM units
+are left out); cancelled results dropped.
+
 ## `fleet_hourly.csv`
 
 Each UTC hour: the fleet's metered net output (`metered_net_mw`, export positive), its net
@@ -49,7 +67,8 @@ number of units running.
 
 OpenEnergy model output from the files above and the bundled prices: by year, the fleet's
 metered energy at the day-ahead price and BM cashflow per MW-year of registered capacity
-(over the days each unit ran), with the optimiser's day-ahead revenue for a 1-hour and a
+(over the days each unit ran or held response), with response per MW-year and the total
+with response, and the optimiser's day-ahead revenue for a 1-hour and a
 2-hour battery (95% each way, £5/MWh wear) on three forecasts; and by year and UTC hour,
 the fleet's mean net output per MW running and the 2-hour perfect-foresight plan.
 
@@ -60,5 +79,6 @@ the fleet's mean net output per MW running and the 2-hour perfect-foresight plan
 - A PN is a position, not what happened: one unit in January 2025 notified 1,262 MWh of
   exports and 443 of imports in a week and metered 615 and 723. Physical operation comes
   from metered output.
-- Frequency response and intraday trading are not in these files; the BM cashflows are
-  Elexon's indicative values, not final settlement.
+- Intraday trading is not in these files; the BM cashflows are Elexon's indicative values,
+  not final settlement. Response is valued at the clearing price for the megawatts won,
+  without any deductions for poor delivery.

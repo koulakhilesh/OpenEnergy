@@ -76,6 +76,8 @@ def test_real_batteries_tables() -> None:
             f"{r['discharge_hours']:.0f}",
             gbp(r["real_metered_day_ahead_per_mw_year"]),
             gbp(r["real_estimated_total_per_mw_year"]),
+            gbp(r["real_response_per_mw_year"]),
+            gbp(r["real_total_with_response_per_mw_year"]),
             " / ".join(
                 gbp(r[f"model_1h_{n}_per_mw_year"]) for n in ("naive", "fundamentals", "perfect")
             ),
@@ -87,6 +89,8 @@ def test_real_batteries_tables() -> None:
     for (year, zone), r in zones.loc[[2024, 2025]].iterrows():
         values = [
             "estimated_total",
+            "response",
+            "estimated_total_with_response",
             "pn_value_day_ahead",
             "bm_net",
             "imbalance",
@@ -94,3 +98,75 @@ def test_real_batteries_tables() -> None:
         ]
         cells = [str(int(r["units"])), *(gbp(r[f"{v}_per_mw_year"]) for v in values)]
         assert f"| {year} | {names[zone]} | {' | '.join(cells)} |" in text, (year, zone)
+
+
+def test_investment_table() -> None:
+    from openenergy.invest import summary
+
+    text = page("guides/investment.md")
+    table = summary(pd.read_csv(ROOT / "data/invest/cases.csv"))
+    for family, r in table.iterrows():
+        breakeven = " / ".join(
+            f"{v:,.0f}" if v >= 0 else f"−{-v:,.0f}"  # noqa: RUF001 (minus sign)
+            for v in (r["breakeven_min"], r["breakeven_median"], r["breakeven_max"])
+        )
+        cells = [
+            str(int(r["cases"])),
+            f"{r['revenue_median']:,.0f}",
+            breakeven,
+            str(int(r["worth_building"])),
+        ]
+        assert f"| {family} | {' | '.join(cells)} |" in text, family
+
+
+def test_two_zones_table() -> None:
+    text = page("guides/constraints.md")
+    years = pd.read_csv(ROOT / "data/zones/two_zones_by_year.csv")
+    for r in years.itertuples():
+        cells = [
+            f"{r.limit_mw / 1000:.2f}",
+            f"{r.transfer_mean_model / 1000:.2f} / {r.transfer_mean_actual / 1000:.2f}",
+            f"{r.correlation:.2f}",
+            f"{r.model_at_limit_share:.0%}",
+            f"{r.price_split_share:.0%}",
+            f"{r.price_gap_mean:.1f}",
+            f"{r.battery_scotland:,.0f}",
+        ]
+        assert f"| {r.year} | {' | '.join(cells)} |" in text, r.year
+
+
+def test_live_lag_table() -> None:
+    text = page("guides/research.md")
+    mean = pd.read_csv(ROOT / "data/forecasts/live_lag_2025.csv").drop(columns="date").mean()
+    rows = {
+        "The auction (backtest)": "mae_auction",
+        "2 days before": "mae_lag_2d",
+        "3 days before": "mae_lag_3d",
+        "4 days before": "mae_lag_4d",
+        "Last week's prices": "mae_last_week",
+    }
+    for name, column in rows.items():
+        assert f"| {name} | {mean[column]:.2f} |" in text, name
+
+
+def test_evening_premium_tables() -> None:
+    text = page("guides/system-model.md")
+
+    def num(value: float) -> str:
+        return f"{value:.1f}" if value >= 0 else f"−{-value:.1f}"  # noqa: RUF001 (minus sign)
+
+    margins = pd.read_csv(ROOT / "data/scarcity/evening_premium_by_margin.csv")
+    for r in margins.itertuples():
+        band = str(r.derated_margin_gw).replace("-", "–")  # noqa: RUF001 (the docs' en dash)
+        cells = [f"{r.hours:,}", num(r.gap), num(r.gap_vs_day), num(r.scarcity)]
+        assert f"| {band} | {' | '.join(cells)} |" in text, band
+    years = pd.read_csv(ROOT / "data/scarcity/evening_premium_by_year.csv")
+    for r in years[years["year"] >= 2019].itertuples():
+        cells = [
+            num(r.evening_gap_vs_day),
+            num(r.evening_scarcity),
+            f"{r.margin_correlation:.2f}",
+            f"{r.mae_model:.1f} / {r.mae_with_scarcity:.1f}",
+            f"{r.correlation_model:.2f} / {r.correlation_with_scarcity:.2f}",
+        ]
+        assert f"| {r.year} | {' | '.join(cells)} |" in text, r.year

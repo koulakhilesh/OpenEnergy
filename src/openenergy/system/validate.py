@@ -175,8 +175,8 @@ def _compare(
         p95_actual=float(actual.quantile(0.95)),
         std_model=float(model.std()),
         std_actual=float(actual.std()),
-        daily_spread_model=_daily_spread(model),
-        daily_spread_actual=_daily_spread(actual),
+        daily_spread_model=mean_daily_spread(model),
+        daily_spread_actual=mean_daily_spread(actual),
         gas_twh_model=twh("gas_model_mw"),
         gas_twh_actual=twh("gas_actual_mw"),
         coal_twh_model=twh("coal_model_mw"),
@@ -187,7 +187,7 @@ def _compare(
     )
 
 
-def _daily_spread(prices: pd.Series[float]) -> float:
+def mean_daily_spread(prices: pd.Series[float]) -> float:
     """Mean over UTC days of the highest minus the lowest price."""
     days = pd.DatetimeIndex(prices.index).normalize()
     grouped = prices.groupby(days)

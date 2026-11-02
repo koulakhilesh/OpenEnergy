@@ -11,10 +11,9 @@ The firm capacity no longer needed as the fleet grows, per MW of batteries added
 fleet's equivalent firm capacity. Every system solve is a full year with unit commitment,
 so a study is long; ``workers`` solves weather years in parallel processes.
 
-Weather years start in 2024: a FES system is scaled from FES's own figures for the weather
-year, which FES 2025 publishes from 2024. Two years make a thin expectation; earlier
-weather years would need each technology's historic GB capacity, which is not yet in the
-bundled data.
+Weather years start in 2019, the first with every interconnector neighbour's prices. FES
+2025 publishes capacities from 2024, so earlier weather years are scaled from FES's 2024
+figures in proportion to their own historic capacity (``history_ratios``).
 """
 
 from __future__ import annotations
@@ -27,15 +26,11 @@ from typing import Any
 
 import pandas as pd
 
-from openenergy.assets.battery import BatterySpec
-from openenergy.backtest.engine import BacktestConfig, run_backtest
+from openenergy.backtest.reference import perfect_foresight_run
 from openenergy.data.fes import FesSource
-from openenergy.data.series import PriceSeries
-from openenergy.dispatch.arbitrage import DispatchConfig
 from openenergy.errors import ConfigError, DataError
-from openenergy.forecast.baseline import PerfectForesight
 from openenergy.metrics.summary import summarise
-from openenergy.system.forward import fes_changes
+from openenergy.system.forward import FES_FROM, LINKS_FROM, fes_changes, history_ratios
 from openenergy.system.scenario import (
     RELIABILITY_STANDARD_HOURS,
     SystemScenario,
@@ -45,12 +40,8 @@ from openenergy.system.scenario import (
 from openenergy.system.validate import DATA_END
 
 SCALES = (0.0, 0.5, 1.0, 2.0, 3.0)
-# FES is scaled from its own value for the weather year, and FES 2025 starts at 2024.
-FES_FROM = 2024
-WEATHER_YEARS = tuple(range(FES_FROM, DATA_END.year + 1))
+WEATHER_YEARS = tuple(range(LINKS_FROM, DATA_END.year + 1))
 SCARCITY_GBP_PER_MWH = 1000.0
-REFERENCE = BatterySpec(power_mw=1, energy_mwh=2, eta_charge=0.95, eta_discharge=0.95)
-WEAR_GBP_PER_MWH = 5.0
 SATURATION_NOTE = (
     "Each FES pathway's system on each weather year with interconnector links and unit "
     "commitment; firm peaking capacity is added until the loss of load expectation over "
@@ -104,9 +95,7 @@ def solve_point(point: Point, value: bool = False) -> dict[str, Any]:
     if not value:
         return row
     price = run.result.price_of(run.scenario.system.price)
-    prices = PriceSeries(price, currency="GBP", zone="GB_GBN")
-    config = BacktestConfig(dispatch=DispatchConfig(degradation_cost=WEAR_GBP_PER_MWH))
-    battery = run_backtest(REFERENCE, prices, PerfectForesight(prices), config)
+    battery = perfect_foresight_run(price)
     summary = summarise(battery)
     # Each day ends as full as it began, so daily revenue adds up: split it by whether the
     # day had a scarcity hour.
@@ -166,7 +155,10 @@ def unusable(data: str | Path, pathway: str, year: int, weather_years: Sequence[
     source = FesSource(Path(data).parent / "fes")
     for weather in weather_years:
         try:
-            fes_changes(source, pathway, year, weather, {"ccgt": 0.0, "peaking": 0.0}, 0.85, 0.75)
+            history = history_ratios(data, weather) if weather < FES_FROM else None
+            fes_changes(
+                source, pathway, year, weather, {"ccgt": 0.0, "peaking": 0.0}, 0.85, 0.75, history
+            )
         except (ConfigError, DataError) as exc:
             return f"{pathway} on {weather} weather: {exc}"
     return None

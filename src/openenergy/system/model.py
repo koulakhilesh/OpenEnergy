@@ -11,7 +11,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from openenergy.data.series import _validate
+from openenergy.data.series import validate_series
 from openenergy.errors import ConfigError, DataError
 
 if TYPE_CHECKING:
@@ -85,7 +85,7 @@ class SystemSpec:
     step: pd.Timedelta = field(init=False)
 
     def __post_init__(self) -> None:
-        demand, step = _validate(self.demand)
+        demand, step = validate_series(self.demand)
         if demand.isna().any():
             raise DataError("demand has missing values")
         if (demand < 0).any():
