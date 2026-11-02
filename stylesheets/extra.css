@@ -1,0 +1,121 @@
+/* Palette and shapes shared with koulakhilesh.github.io (Swiss x Bauhaus x Riso tokens). */
+:root {
+  --oe-red: #f24333;
+  --oe-yellow: #ffc21a;
+}
+
+[data-md-color-scheme="default"] {
+  --oe-bg: #f4f1e9;
+  --oe-bg2: #ece8dd;
+  --oe-card: #fbfaf5;
+  --oe-ink: #171410;
+  --oe-muted: #686157;
+  --oe-line: rgba(23, 20, 16, 0.16);
+  --oe-blue: #1961e0;
+  --oe-red-ink: #bf2d1e;
+}
+
+[data-md-color-scheme="slate"] {
+  --oe-bg: #14120e;
+  --oe-bg2: #1b1712;
+  --oe-card: #1d1914;
+  --oe-ink: #f1eee7;
+  --oe-muted: #9c948a;
+  --oe-line: rgba(244, 241, 233, 0.15);
+  --oe-blue: #5b90f5;
+  --oe-red-ink: #f24333;
+}
+
+[data-md-color-scheme="default"],
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: var(--oe-bg);
+  --md-default-fg-color: var(--oe-ink);
+  --md-default-fg-color--light: var(--oe-muted);
+  --md-default-fg-color--lighter: var(--oe-line);
+  --md-default-fg-color--lightest: var(--oe-line);
+  --md-primary-fg-color: var(--oe-bg);
+  --md-primary-fg-color--light: var(--oe-bg2);
+  --md-primary-fg-color--dark: var(--oe-bg);
+  --md-primary-bg-color: var(--oe-ink);
+  --md-primary-bg-color--light: var(--oe-muted);
+  --md-accent-fg-color: var(--oe-red-ink);
+  --md-accent-fg-color--transparent: color-mix(in srgb, var(--oe-red-ink) 10%, transparent);
+  --md-typeset-color: var(--oe-ink);
+  --md-typeset-a-color: var(--oe-blue);
+  --md-code-bg-color: var(--oe-bg2);
+  --md-code-fg-color: var(--oe-ink);
+  --md-footer-bg-color: var(--oe-bg2);
+  --md-footer-bg-color--dark: var(--oe-bg);
+  --md-footer-fg-color: var(--oe-ink);
+  --md-footer-fg-color--light: var(--oe-muted);
+  --md-footer-fg-color--lighter: var(--oe-muted);
+  --md-admonition-bg-color: var(--oe-card);
+}
+
+/* Header and tabs sit on the page colour, divided by a hairline, like the site nav. */
+.md-header,
+.md-tabs {
+  border-bottom: 1px solid var(--oe-line);
+  box-shadow: none;
+}
+
+.md-header__title,
+.md-tabs__link {
+  font-weight: 600;
+}
+
+.md-tabs__link--active {
+  color: var(--oe-red-ink);
+}
+
+.md-nav {
+  --md-typeset-a-color: var(--oe-red-ink);
+}
+
+/* Square cards, 4px controls. */
+.md-typeset .admonition,
+.md-typeset details,
+.md-typeset table:not([class]) {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.md-typeset code,
+.md-typeset pre > code,
+.md-search__form,
+.md-clipboard {
+  border-radius: 4px;
+}
+
+.md-typeset table:not([class]) {
+  border: 1px solid var(--oe-line);
+  font-size: 0.72rem;
+}
+
+.md-typeset table:not([class]) td:first-child code {
+  white-space: nowrap;
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--oe-bg2);
+  font-family: var(--md-code-font-family);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.md-typeset h1,
+.md-typeset h2 {
+  color: var(--oe-ink);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Mono labels, as on the website. */
+.md-nav__title,
+.md-footer__direction {
+  font-family: var(--md-code-font-family);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
