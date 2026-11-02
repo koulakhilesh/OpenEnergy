@@ -22,7 +22,7 @@ import io
 import json
 from pathlib import Path
 
-from openenergy.data.update import _download
+from openenergy.data.update import download
 
 ROOT = Path(__file__).parents[1]
 API = "https://api.neso.energy/api/3/action/datapackage_show?id={}"
@@ -52,7 +52,7 @@ LINKS = {
 
 
 def resources(dataset: str) -> dict[str, str]:
-    payload = json.loads(_download(API.format(dataset)))["result"]["resources"]
+    payload = json.loads(download(API.format(dataset)))["result"]["resources"]
     return {str(r.get("name", "")): str(r["path"]) for r in payload}
 
 
@@ -62,13 +62,13 @@ def fes_tables() -> None:
     for dataset, files in TABLES.items():
         found = resources(dataset)
         for name, filename in files.items():
-            (out / filename).write_bytes(_download(found[name]))
+            (out / filename).write_bytes(download(found[name]))
             print(f"{filename}: {found[name]}")
 
 
 def interconnectors() -> None:
     url = next(iter(resources("interconnector-register").values()))
-    rows = list(csv.DictReader(io.StringIO(_download(url).decode("utf-8-sig"))))
+    rows = list(csv.DictReader(io.StringIO(download(url).decode("utf-8-sig"))))
     built = [row for row in rows if row["Project Status"] == "Built"]
     # Moyle is listed in two stages; its total is the later stage's.
     latest: dict[str, dict[str, str]] = {}

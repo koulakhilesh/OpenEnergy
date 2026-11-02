@@ -127,7 +127,7 @@ def generation_mix() -> None:
     print(f"generation_mix.csv: {len(out)} half-hours")
 
 
-def _table(sheet: pd.DataFrame, title: str, labels: int) -> pd.DataFrame:
+def dukes_table(sheet: pd.DataFrame, title: str, labels: int) -> pd.DataFrame:
     """The table titled ``title``: ``labels`` label columns, then one column per year."""
     header = sheet.index[sheet[0].astype(str).str.startswith(title)][0] + 1
     end = header + 1
@@ -143,12 +143,12 @@ def _table(sheet: pd.DataFrame, title: str, labels: int) -> pd.DataFrame:
 
 def fleet() -> None:
     capacity = pd.read_excel(io.BytesIO(download(DUKES_5_8)), sheet_name="5.8", header=None)
-    by_fuel = _table(capacity, "Table 5.8.A", labels=2)
-    by_tech = _table(capacity, "Table 5.8.C", labels=2)
+    by_fuel = dukes_table(capacity, "Table 5.8.A", labels=2)
+    by_tech = dukes_table(capacity, "Table 5.8.C", labels=2)
     efficiency = pd.read_excel(
         io.BytesIO(download(DUKES_5_10)), sheet_name="5.10.B and 5.10.C", header=None
     )
-    eff = _table(efficiency, "Table 5.10.C", labels=1)
+    eff = dukes_table(efficiency, "Table 5.10.C", labels=1)
 
     def gb(table: pd.DataFrame, item: str) -> pd.Series:
         return sum(table.loc[(region, item)] for region in GB_REGIONS)

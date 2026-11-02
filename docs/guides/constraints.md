@@ -77,14 +77,55 @@ Scotland uses about 2.2 GW on average and has over 14 GW of wind, so it sends po
 most of the time, more each year, and the transfer tops out near 6.7 GW. What a battery
 north or south of the boundary actually earns is on [Real batteries](real-batteries.md#north-and-south-of-the-border).
 
+## A two-zone model
+
+`openenergy system zones` splits the [system model](system-model.md) in two, Scotland and
+England and Wales, joined by the boundary. Each hour's demand is split by NESO's zonal
+demand, and each generator by its technology's share of capacity in Scotland that year:
+wind and solar from the Renewable Energy Planning Database; thermal, nuclear, hydro, pumped
+storage and biomass from DUKES (`data/zones/plant_by_zone.csv`; in 2024 Scotland had 44% of
+the wind, 91% of the hydro, 20% of the nuclear and 4% of the CCGTs). The boundary carries up
+to NESO's monthly mean day-ahead limit on the Scottish export boundary group (SCOTEX), in
+either direction. Nothing is fitted to the recorded flow; it only checks the result
+(`data/zones/two_zones_by_year.csv`):
+
+| Year | SCOTEX limit (mean GW) | Transfer south, model / recorded (mean GW) | Correlation | Hours at the limit, model | Hours the zones' prices differ | England and Wales minus Scotland price (mean £/MWh) | 1 MW / 2 MWh battery in Scotland (£/MW-year) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 2023 | 5.05 | 2.58 / 1.36 | 0.63 | 21% | 20% | 19.5 | 17,099 |
+| 2024 | 4.15 | 2.67 / 1.96 | 0.79 | 34% | 33% | 25.6 | 16,545 |
+| 2025 | 4.17 | 2.68 / 2.11 | 0.73 | 36% | 34% | 26.6 | 18,877 |
+
+What the table shows:
+
+- **The timing is right, the size too big.** Hour by hour the modelled transfer follows
+  the recorded one (correlation 0.63–0.79), but it is 0.6–1.2 GW higher on average. Both
+  zones share GB's wind shape, Scotland's wind is placed by capacity, not output, and the
+  recorded flow is after NESO has already turned Scottish wind down.
+- **The boundary is full as often as NESO says.** The model is at the limit in 34% and 36%
+  of hours in 2024 and 2025; NESO's own day-ahead data have SCOTEX at 95% of its limit or
+  more in 25.4% and 34.0% of half-hours (above). 2023 does not match (21% against 0.4%),
+  the year NESO's published flows look different.
+- **Zonal prices would split a third of the time.** When the boundary is full, Scotland's
+  price falls to what its wind costs, nothing, while England and Wales stay on gas. A
+  battery in Scotland earns £16,500–18,900 per MW-year with perfect foresight from that
+  alone. On the cost-based model's flat English price a battery there earns almost nothing
+  (£0–103), which says more about the model, which misses the
+  [evening premium](system-model.md#the-evening-premium-and-supply-tightness), than about
+  England.
+
+GB's day-ahead price stays national, so this is what location would be worth under zonal
+prices, not what a Scottish battery earns today; real Scottish batteries are paid for it
+through the Balancing Mechanism instead
+([Real batteries](real-batteries.md#north-and-south-of-the-border)).
+
 ## What this means for OpenEnergy
 
 - Day-ahead prices are national, so constraints do not change the backcasts or the
   battery values on day-ahead prices.
 - They do change where storage is worth most to the system: a battery on the exporting
   side of a full boundary can absorb wind that would otherwise be paid to turn down.
-  v7.0 measures this from what real batteries in each zone earned; a two-zone dispatch
-  model, checked against the transfer above, is planned for v7.1.
+  [Real batteries](real-batteries.md) measures this from what real batteries in each zone
+  earned, and the two-zone model above from modelled zonal prices.
 - FES curtailment in the [forward scenarios](forward-scenarios.md) is curtailment on one
   bus; a real network would curtail more.
 
@@ -94,6 +135,7 @@ NESO, *Constraint Breakdown Costs and Volume*, *Day Ahead Constraint Flows and L
 *Historic Demand Data*,
 [NESO Open Data Licence v1.0](https://www.neso.energy/data-portal/neso-open-licence),
 supported by National Energy SO Open Data (accessed 31 October 2026). Department for
-Energy Security and Net Zero, *Renewable Energy Planning Database*, July 2026,
+Energy Security and Net Zero, *Renewable Energy Planning Database*, July 2026, and *Digest
+of UK Energy Statistics* 2026, table 5.8,
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 Details and known issues in `data/constraints/README.md` and `data/zones/README.md`.

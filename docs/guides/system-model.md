@@ -243,6 +243,57 @@ The cost-based model now explains the level and timing of prices through the gas
 from fuel prices alone, but not the size of their daily swings. Read results for 2021–2022
 as a lower bound on spreads.
 
+## The evening premium and supply tightness
+
+Real prices sit above the model's in the evening and below it at night. Over July 2018 to
+2025 the gap (actual minus merit-order model) averages £45.6/MWh at 17:00 UTC and
+−£13.6 at 03:00. Is that the market pricing how tight supply is? NESO publishes, for every
+half-hour, the **de-rated margin** (spare capacity after allowing for plants that may fail)
+and the **loss-of-load probability** (LoLP) it implies; `scripts/fetch_scarcity.py` keeps
+the last value published before each half-hour (`data/scarcity/`), and
+`scripts/evening_premium.py` sets them against the backcast. Nothing is fitted to prices.
+
+| De-rated margin, GW | Hours | Gap, £/MWh | Gap above the day's average gap | LoLP × £6,000 |
+|---|---:|---:|---:|---:|
+| under 2 | 117 | 271.1 | 201.1 | 382.4 |
+| 2–4 | 1,372 | 108.5 | 59.0 | 8.0 |
+| 4–6 | 3,812 | 42.5 | 16.5 | 0.1 |
+| 6–8 | 6,191 | 20.0 | 4.3 | 0.0 |
+| 8–10 | 7,185 | 11.4 | 0.9 | 0.0 |
+| 10–15 | 19,767 | 5.2 | −0.9 | 0.0 |
+| over 15 | 27,105 | −8.9 | −6.8 | 0.0 |
+
+| Year | Evening gap above the day's (16:00–19:00 UTC) | LoLP × £6,000 then | Correlation with tightness | MAE model / with LoLP × £6,000 | Correlation model / with |
+|---|---:|---:|---:|---:|---:|
+| 2019 | 10.2 | 0.7 | 0.56 | 7.3 / 7.3 | 0.69 / 0.56 |
+| 2020 | 13.1 | 6.3 | 0.46 | 9.2 / 9.7 | 0.61 / 0.32 |
+| 2021 | 54.4 | 6.4 | 0.23 | 26.8 / 26.4 | 0.65 / 0.68 |
+| 2022 | 56.2 | 15.9 | 0.31 | 46.4 / 46.6 | 0.81 / 0.67 |
+| 2023 | 23.6 | 0.4 | 0.39 | 19.1 / 19.1 | 0.67 / 0.67 |
+| 2024 | 20.4 | 1.9 | 0.44 | 17.3 / 17.4 | 0.53 / 0.35 |
+| 2025 | 23.9 | 1.4 | 0.37 | 17.3 / 17.2 | 0.55 / 0.53 |
+
+Correlation with tightness is between each hour's gap above its day's average gap and the
+negative de-rated margin. £6,000/MWh is the value of lost load that cash-out uses with LoLP
+to set the reserve scarcity price.
+
+What the tables show:
+
+- **The premium follows tightness.** The gap rises steadily as the margin falls, from
+  −£8.9 with over 15 GW spare to £108.5 at 2–4 GW and £271.1 under 2 GW, and the evening
+  hours are the tight ones (9.1–9.2 GW at 17:00–18:00 UTC against 19.1 GW at 03:00).
+  Within each day the gap correlates 0.23–0.56 with tightness.
+- **The market's own scarcity rule is a small part of it.** LoLP is almost zero above
+  4 GW of margin, where most of the premium is. In the evening it adds £0.4–15.9/MWh
+  against a gap of £10.2–56.2, and added to every hour it moves the MAE by £0.5 or less
+  and lowers the correlation in five years of seven (it rises only in 2021), because it
+  puts a few large spikes in hours where prices did not spike.
+
+So supply tightness explains the shape of the premium, but not through LoLP × VoLL: the
+market prices a thin margin well before a shortage is likely. Turning the margin into
+pounds would mean fitting a curve to prices, which this model does not do, so no scarcity
+price is added to it. 2018 (from July) is in `data/scarcity/evening_premium_by_year.csv`.
+
 ## What if: more wind
 
 The same 2019 weather and demand with wind output scaled (`system.scale.wind`):

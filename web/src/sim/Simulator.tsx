@@ -28,6 +28,7 @@ import { demandOf, Flow, FUELS } from "./Flow";
 import { battery, planRuns, revenueTo, type Run } from "./plans";
 import { Sources } from "./Sources";
 import { YearStrip } from "./YearStrip";
+import { NEW_TAB } from "../components/links";
 
 const NAMES: ForecastName[] = ["perfect", "fundamentals", "naive"];
 const PHRASES: Record<ForecastName, string> = {
@@ -245,7 +246,7 @@ export function Simulator({ params, embedded }: { params: URLSearchParams; embed
         </div>
         <p className="help">
           Each plan is made at noon the day before and paid the prices that cleared.{" "}
-          <a href="https://koulakhilesh.github.io/OpenEnergy/concepts/">How it works</a>
+          <a href="https://koulakhilesh.github.io/OpenEnergy/concepts/" {...NEW_TAB}>How it works</a>
         </p>
         <TodayTable runs={runs} />
         <h3>Day</h3>

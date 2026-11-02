@@ -25,6 +25,7 @@ PAGES = (
     "/play",
     "/2035",
     "/fleet",
+    "/live",
     "/research",
     # v6.0 addresses: the front end shows the simulator and keeps their query.
     "/lab",

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from openenergy.data.series import _between, _validate
+from openenergy.data.series import between_days, validate_series
 from openenergy.errors import DataError
 
 MIX_ATTRIBUTION = (
@@ -53,14 +53,14 @@ class GenerationMixSource:
         index = pd.DatetimeIndex(pd.to_datetime(frame["utc_timestamp"], utc=True, format="ISO8601"))
         mix = pd.DataFrame(frame[[*FUELS, TOTAL]].to_numpy(dtype=float), index=index)
         mix.columns = pd.Index([*FUELS, TOTAL])
-        _validate(mix[TOTAL])
+        validate_series(mix[TOTAL])
         if (mix < 0).any().any():
             raise DataError(f"{self.path.name} has negative generation")
         mismatch = (mix[list(FUELS)].sum(axis=1) - mix[TOTAL]).abs().max()
         if mismatch > _SUM_TOLERANCE_MW:
             raise DataError(f"fuels do not add up to {TOTAL} (off by up to {mismatch:.0f} MW)")
         if start is not None or end is not None:
-            kept = _between(mix[TOTAL], start, end, "GB").index
+            kept = between_days(mix[TOTAL], start, end, "GB").index
             mix = mix.loc[kept]
         if step is None:
             return mix

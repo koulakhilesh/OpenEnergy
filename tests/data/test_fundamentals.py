@@ -110,7 +110,7 @@ def fake_download(url: str) -> bytes:
 def test_update_fundamentals_writes_what_the_source_reads(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(update_module, "_download", fake_download)
+    monkeypatch.setattr(update_module, "download", fake_download)
     monkeypatch.setattr(update_module, "WINDFOR_FROM", date(2024, 6, 1))
     written = update_fundamentals(tmp_path, date(2024, 7, 31))
     assert [w[:2] for w in written] == [

@@ -1,5 +1,55 @@
 # What's new
 
+## 8.0: response, the evening premium, zones and the investment case
+
+OpenEnergy 8.0 completes the comparison with real batteries, tests what the cost-based
+model misses, and asks whether a battery pays. No default of the battery backtest or the
+system model changes; the saturation study is re-run on more weather years (below).
+
+- **Frequency response for real batteries** ([guide](guides/real-batteries.md)): what NESO
+  paid each battery unit in the response auctions, from September 2021
+  (`data/fleet/battery_response_daily.csv`, `scripts/fetch_fleet_response.py`). It added
+  £20,093 per MW-year in 2023, £7,751 in 2024 when response prices collapsed, and £20,176
+  in 2025. With it, real batteries made £23,973–36,864 per MW-year from 2023 to 2025, more
+  than a 1-hour optimiser with perfect foresight earns on the day-ahead market alone.
+- **The evening premium and supply tightness** ([system model](guides/system-model.md#the-evening-premium-and-supply-tightness)):
+  NESO's loss-of-load probability and de-rated margin for every half-hour from July 2018
+  (`data/scarcity/`). The gap between real and modelled prices rises steadily as the
+  margin falls, from −£8.9/MWh with over 15 GW spare to £108.5 at 2–4 GW, and the evening
+  is when the margin is thinnest. The market's own scarcity price (loss-of-load
+  probability times £6,000) is a small part of it and makes the backcast worse, so no
+  scarcity price is added to the model.
+- **A live forecast** ([research](guides/research.md#live-forecast), [web app](https://open-energy-eight.vercel.app/live)):
+  `openenergy forecast live` forecasts tomorrow's prices from the morning's data, and a
+  scheduled workflow runs it every day and keeps the record on the `live` branch, scored
+  as prices are published. Prices arrive two to four days late, which on 2025 raises the
+  forecast's error from £10.65 to £13.97–14.28/MWh, still well under last week's prices
+  (£21.81).
+- **Two zones** ([constraints](guides/constraints.md#a-two-zone-model)): `openenergy system
+  zones` splits the system into Scotland and England and Wales, joined at NESO's day-ahead
+  SCOTEX limit, with plant by zone from DUKES (`data/zones/plant_by_zone.csv`). The
+  modelled transfer follows the recorded one (correlation 0.63–0.79) and the boundary is
+  full in 34–36% of hours in 2024 and 2025, as NESO's own data say; under zonal prices a
+  battery in Scotland would earn £16,500–18,900 per MW-year from the boundary alone.
+- **The saturation study on seven weather years** ([forward scenarios](guides/forward-scenarios.md#how-much-storage-can-gb-use)):
+  weather years before 2024 are scaled from FES's 2024 figures by each year's own capacity
+  and generation, so the study now averages 2019 to 2025 instead of 2024 and 2025. A
+  battery joining Falling Behind's 2035 fleet earns £13,595 per MW-year against £39,421 for
+  the first battery, and each MW of the FES fleet replaces 0.13–0.20 MW of firm capacity in
+  the pathways that need it. More weather years need more firm capacity (Holistic
+  Transition 13.25 GW with no batteries, from 11.25 GW); with the FES fleet, almost all the
+  hours of shortfall come in 2019's weather.
+- **An investment case** ([guide](guides/investment.md)): `openenergy invest` values a 1 MW /
+  2 MWh battery over 15 years on each year seen or modelled, with the Capacity Market's
+  latest four-year-ahead price and de-rating (NESO register) and NREL's US battery costs
+  (`data/invest/`). It reports the build cost at which each case breaks even: £101,000 to
+  £218,000 per MW for real batteries' 2023–2025 revenue at 7%, far below NREL's £866,000.
+- **The web app** gains a Tomorrow tab (the live forecast, its plan and track record), and
+  the Real batteries tab shows response per unit and the total with it.
+- **Docs**: links to the docs from the web app open in a new tab, and the docs site now
+  shows the latest release only (older versioned addresses such as `/7.0/` no longer
+  exist).
+
 ## 7.0: from the model to the real grid
 
 OpenEnergy 7.0 checks its optimiser against what GB's real batteries did and adds the data
@@ -29,9 +79,6 @@ for Scotland and England & Wales. No model default changes; every 6.x result sta
   files. Its first run found two errors in the docs, both fixed: Ten Year Forecast was
   called a pathway with no shortfall (it needs 0.75 GW of firm capacity without batteries),
   and a transfer maximum was mis-rounded.
-
-Planned for 7.1: a two-zone dispatch model checked against the observed transfer, and the
-saturation study on 2019–2023 weather using the capacity by year.
 
 ## 6.1: the web app becomes a simulator
 

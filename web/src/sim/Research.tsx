@@ -1,3 +1,5 @@
+import { NEW_TAB } from "../components/links";
+
 const PAGES: [href: string, title: string, text: string][] = [
   ["/run", "Value a battery", "A whole year of trading, with frequency response, on any GB year from 2017 or a FES pathway."],
   ["/explore", "Explore", "Every year and pathway at a glance, for 1, 2 and 4-hour batteries."],
@@ -22,7 +24,7 @@ export function Research() {
       </p>
       <div className="tiles">
         {PAGES.map(([href, title, text]) => (
-          <a key={href} className="tile" href={href}>
+          <a key={href} className="tile" href={href} {...(href.startsWith("http") ? NEW_TAB : {})}>
             <b>{title}</b>
             <span>{text}</span>
           </a>

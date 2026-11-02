@@ -6,7 +6,7 @@ import pytest
 from openenergy import ConfigError, DataError
 from openenergy.data.fes import FesSource
 from openenergy.data.interconnectors import GAP_EDGES, gap_shares
-from openenergy.system.forward import fes_changes, links
+from openenergy.system.forward import fes_changes, history_ratios, links
 
 ROOT = Path(__file__).parents[2]
 FES = FesSource(ROOT / "data/fes")
@@ -67,6 +67,23 @@ def test_fes_year_bounds() -> None:
         changes(year=2040)
     with pytest.raises(ConfigError, match="before the weather year"):
         changes(year=2025, base=2026)
+    with pytest.raises(ConfigError, match="needs historic capacities"):
+        changes(base=2019)
+
+
+def test_earlier_weather_years_scale_back_from_2024_with_history() -> None:
+    history = history_ratios(ROOT / "data/system", 2019)
+    assert history_ratios(ROOT / "data/system", 2024) == pytest.approx(dict.fromkeys(history, 1.0))
+    # 2019 had less wind, solar and interconnection than 2024, and more nuclear.
+    assert history["wind"] < 1 and history["solar"] < 1 and history["interconnectors"] < 1
+    assert history["nuclear"] > 1
+    early = fes_changes(FES, "Holistic Transition", 2030, 2019, THERMAL, 0.85, 0.75, history)
+    late = changes(base=2024)
+    assert early.scale["wind"] == pytest.approx(late.scale["wind"] / history["wind"])
+    assert early.scale["nuclear"] == pytest.approx(late.scale["nuclear"] / history["nuclear"])
+    assert early.scale["demand"] == pytest.approx(late.scale["demand"] / history["demand"])
+    assert early.scale["biomass"] == pytest.approx(late.scale["biomass"])
+    assert early.link_scale == pytest.approx(late.link_scale / history["interconnectors"])
 
 
 def test_links_follow_in_service_dates() -> None:

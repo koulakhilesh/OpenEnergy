@@ -19,7 +19,7 @@ import json
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-from openenergy.data.update import _download
+from openenergy.data.update import download
 
 API = "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{day}?format=json"
 OUTPUT = Path(__file__).parents[1] / "data/balancing/gb_system_prices.csv"
@@ -27,7 +27,7 @@ OUTPUT = Path(__file__).parents[1] / "data/balancing/gb_system_prices.csv"
 
 def fetch(day: date) -> list[tuple[str, float]]:
     rows = []
-    for record in json.loads(_download(API.format(day=day.isoformat())))["data"]:
+    for record in json.loads(download(API.format(day=day.isoformat())))["data"]:
         if record["systemSellPrice"] != record["systemBuyPrice"]:
             raise ValueError(f"sell and buy prices differ: {record}")
         rows.append((str(record["startTime"]), float(record["systemSellPrice"])))

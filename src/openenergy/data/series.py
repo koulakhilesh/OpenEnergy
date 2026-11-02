@@ -30,7 +30,7 @@ class PriceSeries:
     step: pd.Timedelta = field(init=False)
 
     def __post_init__(self) -> None:
-        prices, step = _validate(self.prices)
+        prices, step = validate_series(self.prices)
         if not _CURRENCY.fullmatch(self.currency):
             raise DataError(f"currency must be an ISO 4217 code, got {self.currency!r}")
         object.__setattr__(self, "prices", prices)
@@ -46,7 +46,7 @@ class PriceSeries:
 
     def between(self, start: date | None = None, end: date | None = None) -> PriceSeries:
         """Return the whole UTC days from ``start`` to ``end``, both inclusive."""
-        selected = _between(self.prices, start, end, self.zone)
+        selected = between_days(self.prices, start, end, self.zone)
         return PriceSeries(selected, currency=self.currency, zone=self.zone)
 
     def day(self, day: date) -> pd.Series[float]:
@@ -69,7 +69,7 @@ class ProfileSeries:
     step: pd.Timedelta = field(init=False)
 
     def __post_init__(self) -> None:
-        values, step = _validate(self.values)
+        values, step = validate_series(self.values)
         if ((values < 0) | (values > 1)).any():
             raise DataError(f"{self.technology} capacity factors must lie in [0, 1]")
         object.__setattr__(self, "values", values)
@@ -85,7 +85,7 @@ class ProfileSeries:
 
     def between(self, start: date | None = None, end: date | None = None) -> ProfileSeries:
         """Return the whole UTC days from ``start`` to ``end``, both inclusive."""
-        selected = _between(self.values, start, end, self.zone)
+        selected = between_days(self.values, start, end, self.zone)
         return dataclasses.replace(self, values=selected)
 
     def day(self, day: date) -> pd.Series[float]:
@@ -130,7 +130,7 @@ def fill_gaps(
     return dataclasses.replace(series, values=filled), count
 
 
-def _between(
+def between_days(
     values: pd.Series[float], start: date | None, end: date | None, zone: str
 ) -> pd.Series[float]:
     index = values.index
@@ -159,7 +159,7 @@ def _complete_days(values: pd.Series[float], periods: int) -> list[date]:
     return [ts.date() for ts in counts.index[counts == periods]]
 
 
-def _validate(values: pd.Series[float]) -> tuple[pd.Series[float], pd.Timedelta]:
+def validate_series(values: pd.Series[float]) -> tuple[pd.Series[float], pd.Timedelta]:
     index = values.index
     if not isinstance(index, pd.DatetimeIndex):
         raise DataError("series must have a DatetimeIndex")

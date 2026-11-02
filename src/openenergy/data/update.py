@@ -65,7 +65,7 @@ def update_prices(directory: str | Path) -> tuple[Path, int, str, str]:
     """
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
-    archive = zipfile.ZipFile(io.BytesIO(_download(EMBER_HOURLY)))
+    archive = zipfile.ZipFile(io.BytesIO(download(EMBER_HOURLY)))
     name = next((n for n in archive.namelist() if n.endswith(EMBER_MEMBER)), None)
     if name is None:
         raise OSError(f"{EMBER_MEMBER} not found in the Ember archive")
@@ -81,7 +81,7 @@ def update_prices(directory: str | Path) -> tuple[Path, int, str, str]:
             writer.writerow(
                 [row["Datetime (UTC)"].replace(" ", "T") + "Z", row["Price (EUR/MWhe)"]]
             )
-    records = list(csv.DictReader(io.StringIO(_download(ECB_DAILY).decode())))
+    records = list(csv.DictReader(io.StringIO(download(ECB_DAILY).decode())))
     with (out / RATE_FILE).open("w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(["date", "gbp_per_eur"])
@@ -127,7 +127,7 @@ def update_fundamentals(
     gas = _sap_daily()
     gas.to_csv(out / GAS_FILE, index=False)
     written.append((GAS_FILE, len(gas), gas["date"].iloc[0], gas["date"].iloc[-1]))
-    demand = _neso_demand(pd.read_csv(io.BytesIO(_download(_neso_resource(*NESO_DEMAND)))))
+    demand = _neso_demand(pd.read_csv(io.BytesIO(download(_neso_resource(*NESO_DEMAND)))))
     demand.to_csv(out / DEMAND_FILE, index=False)
     written.append((DEMAND_FILE, len(demand), demand.iloc[0, 0], demand.iloc[-1, 0]))
     wind = _windfor(WINDFOR_FROM, end or date.today())
@@ -138,7 +138,7 @@ def update_fundamentals(
 
 def _sap_daily() -> pd.DataFrame:
     """ONS's daily System Average Price of gas, p/kWh, from its latest workbook."""
-    page = _download(ONS_SAP).decode("utf-8", "replace")
+    page = download(ONS_SAP).decode("utf-8", "replace")
     links = re.findall(
         r'/file\?uri=(/economy/[^"]*?systemaveragepricesapofgas/(\d{4})/[^"]+?\.xlsx)', page
     )
@@ -146,7 +146,7 @@ def _sap_daily() -> pd.DataFrame:
         raise OSError("no SAP workbook link found on the ONS dataset page")
     # The page also links a "current" alias, which is not downloadable; take the newest edition.
     latest = max(links, key=lambda link: link[1])[0]
-    rows = _xlsx_rows(_download("https://www.ons.gov.uk/file?uri=" + latest), SAP_SHEET)
+    rows = _xlsx_rows(download("https://www.ons.gov.uk/file?uri=" + latest), SAP_SHEET)
     header = next(i for i, row in enumerate(rows) if row and row[0] == "Date")
     records = []
     for row in rows[header + 1 :]:
@@ -160,7 +160,7 @@ def _sap_daily() -> pd.DataFrame:
 
 
 def _neso_resource(dataset: str, resource: str) -> str:
-    package = json.loads(_download(NESO_PACKAGE.format(id=dataset)))
+    package = json.loads(download(NESO_PACKAGE.format(id=dataset)))
     for item in package["result"]["resources"]:
         if item["name"] == resource:
             return str(item["path"])
@@ -199,7 +199,7 @@ def _windfor(start: date, end: date) -> pd.DataFrame:
     for first in pd.date_range(start, end, freq="MS"):
         last = first + pd.offsets.MonthBegin(1)
         url = WINDFOR.format(start=first.date(), end=last.date())
-        rows += json.loads(_download(url))
+        rows += json.loads(download(url))
     frame = pd.DataFrame(rows)
     if frame.empty:
         raise OSError("Elexon returned no wind forecasts")
@@ -259,7 +259,7 @@ def _xlsx_rows(content: bytes, sheet: str) -> list[list[str]]:
     return rows
 
 
-def _download(url: str) -> bytes:
+def download(url: str) -> bytes:
     # ONS answers 429 to requests without an Accept header.
     request = urllib.request.Request(url, headers={"User-Agent": "openenergy", "Accept": "*/*"})
     for attempt in range(3):

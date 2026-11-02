@@ -14,11 +14,15 @@ REAL_BATTERIES_ATTRIBUTION = (
     "physical notifications (PN), metered output per BM unit (B1610) and indicative Balancing "
     "Mechanism volumes and cashflows, BMRS data licence; contains BMRS data © Elexon Limited "
     "copyright and database right 2026. Changes: battery units chosen by name, values summed "
-    "by unit and UTC day. OpenEnergy is not affiliated with or endorsed by Elexon."
+    "by unit and UTC day. Frequency response and reserve contracts: NESO, Dynamic Containment "
+    "data and EAC auction results by unit (https://www.neso.energy/data-portal), NESO Open Data "
+    "Licence v1.0, supported by National Energy SO Open Data. OpenEnergy is not affiliated "
+    "with or endorsed by Elexon or NESO."
 )
 UNITS_FILE = "battery_units.csv"
 DAILY_FILE = "battery_daily.csv"
 HOURLY_FILE = "fleet_hourly.csv"
+RESPONSE_FILE = "battery_response_daily.csv"
 DAILY_COLUMNS = (
     "pn_mwh_out",
     "pn_mwh_in",
@@ -57,10 +61,27 @@ class RealBatteries:
         return frame.set_index("unit")
 
     def daily(self) -> pd.DataFrame:
-        """Daily totals per unit (MWh and GBP), indexed by UTC date and unit; missing as NaN."""
+        """Daily totals per unit (MWh and GBP), indexed by UTC date and unit; missing as NaN.
+
+        ``response_gbp`` is the unit's response and reserve contracts that day, where
+        ``scripts/fetch_fleet_response.py`` has been run (days after the metered data end
+        are left out).
+        """
         frame = self._read(DAILY_FILE, ("date", "unit", *DAILY_COLUMNS))
         frame["date"] = pd.to_datetime(frame["date"])
-        return frame.set_index(["date", "unit"]).sort_index()
+        frame = frame.set_index(["date", "unit"]).sort_index()
+        if (self.directory / RESPONSE_FILE).is_file():
+            response = self.response().groupby(["date", "unit"])["gbp"].sum().rename("response_gbp")
+            last = frame.index.get_level_values("date").max()
+            response = response[response.index.get_level_values("date") <= last]
+            frame = frame.join(response, how="outer").sort_index()
+        return frame
+
+    def response(self) -> pd.DataFrame:
+        """Response and reserve contracts by unit, UTC day and product: MW-hours and GBP."""
+        frame = self._read(RESPONSE_FILE, ("date", "unit", "product", "mw_hours", "gbp"))
+        frame["date"] = pd.to_datetime(frame["date"])
+        return frame
 
     def hourly(self) -> pd.DataFrame:
         """The whole battery fleet each UTC hour: net, export and import MW and units running."""
@@ -108,6 +129,12 @@ class RealBatteries:
             "imbalance_gbp",
             "estimated_total_gbp",
         ]
+        if "response_gbp" in frame:
+            frame["response_gbp"] = frame["response_gbp"].fillna(0)
+            frame["estimated_total_with_response_gbp"] = (
+                frame["estimated_total_gbp"] + frame["response_gbp"]
+            )
+            values += ["response_gbp", "estimated_total_with_response_gbp"]
         grouped = frame.groupby(keys)
         sums = grouped[["metered_mwh_out", "metered_mwh_in", *values]].sum()
         sums["units"] = grouped["unit"].nunique()

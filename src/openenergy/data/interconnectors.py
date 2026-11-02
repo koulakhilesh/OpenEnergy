@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from openenergy.data.ember import EmberPriceSource, _read
+from openenergy.data.ember import EmberPriceSource, read_series
 from openenergy.data.series import PriceSeries
 from openenergy.errors import DataError
 
@@ -271,7 +271,7 @@ class NeighbourPriceSource:
         self, neighbour: str, index: pd.DatetimeIndex, max_gap_hours: int = 3
     ) -> PriceSeries:
         """GBP/MWh on ``index``; gaps up to ``max_gap_hours`` are interpolated."""
-        eur = _read(self.path, "utc_timestamp", neighbour)
+        eur = read_series(self.path, "utc_timestamp", neighbour)
         eur.index = pd.DatetimeIndex(pd.to_datetime(eur.index, utc=True, format="ISO8601"))
         hourly = eur[~eur.index.duplicated()].sort_index().asfreq("h")
         hourly = hourly.interpolate(limit=max_gap_hours, limit_area="inside")

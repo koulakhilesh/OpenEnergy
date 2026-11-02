@@ -156,6 +156,8 @@ def fleet_files() -> None:
         + frame["bm_net_gbp"]
         + frame["imbalance_gbp"].fillna(0)
     )
+    if "response_gbp" not in frame:
+        frame["response_gbp"] = 0.0
     sums = frame.groupby(["unit", "year"]).agg(
         days=("date", "nunique"),
         mwh_out=("metered_mwh_out", "sum"),
@@ -163,6 +165,7 @@ def fleet_files() -> None:
         day_ahead=("metered_value_day_ahead_gbp", "sum"),
         bm=("bm_net_gbp", "sum"),
         total=("total_gbp", "sum"),
+        response=("response_gbp", "sum"),
     )
     rows = []
     for (unit, year), r in sums.iterrows():
@@ -183,6 +186,8 @@ def fleet_files() -> None:
                 "dayAheadPerMwYear": round(r["day_ahead"] / mw_years),
                 "bmPerMwYear": round(r["bm"] / mw_years),
                 "totalPerMwYear": round(r["total"] / mw_years),
+                "responsePerMwYear": round(r["response"] / mw_years),
+                "totalWithResponsePerMwYear": round((r["total"] + r["response"]) / mw_years),
             }
         )
     compared = DATA / "fleet/real_vs_model.csv"

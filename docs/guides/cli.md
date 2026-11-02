@@ -142,6 +142,32 @@ technology, curtailment, emissions, system cost and, if the scenario has a batte
 revenue on the modelled prices. Writes `dispatch.csv` and `summary.json`. Scenarios with
 storage need the `system` extra (`uv sync --extra system`).
 
+## `openenergy system zones`
+
+```bash
+uv run --extra system openenergy system zones [--start 2023-01-01] [--end 2025-12-31] [--limit scotex] [--out zones/]
+```
+
+Splits each year's system into Scotland and England and Wales
+([two-zone model](constraints.md#a-two-zone-model)) and compares the modelled transfer
+across the boundary with NESO's recorded one: mean, correlation and hours at the limit, how
+often the zones' prices split, and a 1 MW / 2 MWh battery's perfect-foresight revenue on
+each zone's price. `--limit` is `scotex` (NESO's monthly day-ahead limit, from 2023),
+`recorded` (the year's largest recorded transfer) or a number of MW. `--out` writes
+`two_zones_by_year.csv` and `two_zones_hourly.csv`.
+
+## `openenergy invest`
+
+```bash
+uv run openenergy invest [--cost-year 2025] [--cost-scale 1] [--life 15] [--rate 0.07] [--cm-price GBP/kW] [--out cases.csv]
+```
+
+Values a 1 MW / 2 MWh battery over its life on each revenue case
+([Investment case](investment.md)): yearly net cash flow, break-even build cost, net
+present value and internal rate of return. Costs are NREL's ATB (US, converted to pounds;
+`--cost-scale` scales them) and the Capacity Market pays the latest four-year-ahead price
+unless `--cm-price` is given.
+
 ## `openenergy data info`
 
 ```bash
@@ -160,7 +186,23 @@ Downloads the latest GB hourly day-ahead prices from Ember (CC BY 4.0, in EUR as
 published) and the ECB's daily GBP rates into `DIR` (default
 `~/.cache/openenergy/prices`, or `$XDG_CACHE_HOME/openenergy/prices`). Point a scenario at
 the result with `data: {source: ember, path: DIR/gb_day_ahead_ember.csv}`. The bundled copy
-in `data/prices/` is refreshed by `scripts/fetch_prices.py`.
+in `data/prices/` is refreshed by `scripts/fetch_prices.py`. `--fundamentals` also
+downloads the daily gas price and NESO's and Elexon's day-ahead demand and wind forecasts
+(to `fundamentals/` beside `DIR`).
+
+## `openenergy forecast live`
+
+```bash
+uv run openenergy data update --fundamentals
+uv run --extra forecast openenergy forecast live [--out live/] [--day YYYY-MM-DD]
+```
+
+Forecasts tomorrow's GB day-ahead prices (or `--day`'s, which must not have started) from
+the cached data, with the [fundamentals forecast](research.md#live-forecast), and the plan
+of a 1 MW / 2 MWh battery on it. Adds the forecast to `forecasts.csv` in `--out` (a rerun
+for the same day replaces it), scores every earlier forecast whose day has published
+prices, and writes `live.json` for the web app. It stops with an error if tomorrow's
+demand or wind forecast is not out yet (NESO's usually is by 09:00 UTC).
 
 ## Errors
 

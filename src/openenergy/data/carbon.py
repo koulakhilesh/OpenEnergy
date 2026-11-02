@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from openenergy.data.series import _between, _validate
+from openenergy.data.series import between_days, validate_series
 from openenergy.errors import DataError
 
 CARBON_ATTRIBUTION = (
@@ -38,7 +38,7 @@ class IntensitySeries:
     step: pd.Timedelta = field(init=False)
 
     def __post_init__(self) -> None:
-        values, step = _validate(self.values)
+        values, step = validate_series(self.values)
         object.__setattr__(self, "values", values)
         object.__setattr__(self, "step", step)
 
@@ -72,7 +72,7 @@ class CarbonIntensitySource:
         index = pd.DatetimeIndex(pd.to_datetime(frame["utc_timestamp"], utc=True, format="ISO8601"))
         raw = pd.Series(frame[kind].to_numpy(dtype=float), index=index)
         if start is not None or end is not None:
-            raw = _between(raw, start, end, "GB")
+            raw = between_days(raw, start, end, "GB")
         impossible = (raw < 0) | (raw > MAX_INTENSITY)
         values = raw.mask(impossible)
         series = IntensitySeries(values, kind, rejected=int(impossible.sum()))
