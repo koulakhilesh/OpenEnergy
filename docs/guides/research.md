@@ -81,7 +81,8 @@ time changes nothing.
 ## Live forecast
 
 The same forecast runs every morning for the next day. A scheduled workflow
-(`.github/workflows/live.yml`, 09:30 UTC, after NESO publishes tomorrow's demand forecast)
+(`.github/workflows/live.yml`, scheduled for 09:17 UTC, after NESO publishes tomorrow's
+demand forecast; GitHub can start scheduled runs hours late when it is busy)
 downloads the latest data with `openenergy data update --fundamentals`, runs
 `openenergy forecast live` and commits `forecasts.csv` and `live.json` to the repository's
 `live` branch. The [web app](https://open-energy-eight.vercel.app/live) shows tomorrow's

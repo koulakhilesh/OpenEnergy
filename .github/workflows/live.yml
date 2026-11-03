@@ -3,9 +3,10 @@ name: Live forecast
 # Each morning, after NESO publishes tomorrow's demand forecast (by about 09:00 UTC) and
 # before the noon decision the backtest assumes, forecast tomorrow and score past days.
 # Results go to the `live` branch, which the web app reads.
+# GitHub delays scheduled runs at busy times, most at the top and half of the hour.
 on:
   schedule:
-    - cron: "30 9 * * *"
+    - cron: "17 9 * * *"
   workflow_dispatch:
 
 permissions:
@@ -50,6 +51,8 @@ jobs:
       - name: Publish
         working-directory: ${{ runner.temp }}/live
         run: |
-          git add forecasts.csv live.json
+          # The branch holds data only; keep Vercel from trying to build it.
+          echo '{"git": {"deploymentEnabled": false}}' > vercel.json
+          git add forecasts.csv live.json vercel.json
           git commit -q -m "Live forecast for $(jq -r .day live.json)"
           git push -q origin live
