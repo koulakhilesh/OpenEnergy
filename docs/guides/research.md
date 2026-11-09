@@ -80,18 +80,27 @@ time changes nothing.
 
 ## Live forecast
 
-The same forecast runs every morning for the next day. A scheduled workflow
+The same forecast runs once a day for the next day. A scheduled workflow
 (`.github/workflows/live.yml`, scheduled for 09:17 UTC, after NESO publishes tomorrow's
-demand forecast; GitHub can start scheduled runs hours late when it is busy)
-downloads the latest data with `openenergy data update --fundamentals`, runs
+demand forecast; GitHub often starts scheduled runs hours late, so the forecast comes some
+time that day) downloads the latest data with `openenergy data update --fundamentals`
+(three tries, two minutes apart, as the sources are sometimes briefly down), runs
 `openenergy forecast live` and commits `forecasts.csv` and `live.json` to the repository's
 `live` branch. The [web app](https://open-energy-eight.vercel.app/live) shows tomorrow's
 forecast, a 1 MW / 2 MWh battery's plan on it and the track record. Each forecast is
 scored once Ember publishes that day's prices: its mean absolute error, and what the
 battery earns at the real prices planning on it against planning with perfect foresight.
+The page gives both over the last 30 scored days and since the first forecast, and lists
+the last 14 days.
+
+If a run is missed or fails, the next one catches up: it also forecasts each day of the
+last week that has no forecast, using only what was known by noon the day before (the
+demand and wind forecasts published by then) and prices to three days before, as a run
+that day would have had. These days are marked as caught up and left out of the summaries,
+which count only forecasts made before their day.
 
 Live, the forecast knows less than in the backtest. Ember publishes day-ahead prices about
-two days late, so the latest prices a morning forecast has end two to four days before the
+two days late, so the latest prices a daily forecast has end two to four days before the
 day it forecasts, not the day before; ONS publishes the daily gas price weekly, so the
 last published price is carried forward (at most two weeks). `scripts/live_lag.py`
 measures what the missing prices cost on 2025

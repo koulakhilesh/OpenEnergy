@@ -32,7 +32,15 @@ jobs:
           python-version: "3.14"
           enable-cache: false
       - run: uv sync --locked --extra forecast
-      - run: uv run openenergy data update --fundamentals
+      - name: Download the latest data
+        # Sources are sometimes briefly down (HTTP 503); wait and try again.
+        run: |
+          for attempt in 1 2 3; do
+            uv run openenergy data update --fundamentals && exit 0
+            echo "download failed (attempt $attempt); retrying in 2 minutes"
+            sleep 120
+          done
+          exit 1
       - name: Check out the live branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -97,8 +97,12 @@ test("tomorrow's forecast shows the plan and the track record", async ({ page })
         forecast,
         planMw: forecast.map((v) => (v > 100 ? 1 : v < 40 ? -1 : 0)),
         stretch: 1.5,
-        track: [{ day: "2026-10-30", mae: 12.3, earned: 80, perfect: 100 }],
+        track: [
+          { day: "2026-10-30", mae: 12.3, earned: 80, perfect: 100, catchUp: false },
+          { day: "2026-10-31", mae: 20.1, earned: 50, perfect: 100, catchUp: true },
+        ],
         summary: { days: 1, mae: 12.3, capture: 0.8 },
+        sinceStart: { days: 3, mae: 15, capture: 0.75, from: "2026-10-28" },
         note: "Fundamentals forecast.",
         attribution: ["Ember, CC BY 4.0."],
       }),
@@ -108,6 +112,8 @@ test("tomorrow's forecast shows the plan and the track record", async ({ page })
   await expect(page.locator(".answer")).toContainText("Tue 3 November", { timeout: 30_000 });
   await expect(page.getByRole("img", { name: /forecast price and the battery's plan/ })).toBeVisible();
   await expect(page.getByRole("cell", { name: "12.3" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: /\(caught up\)/ })).toBeVisible();
+  await expect(page.getByText(/Since it started/)).toBeVisible();
 });
 
 test("the docs widget plans dragged prices", async ({ page }) => {

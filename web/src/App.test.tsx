@@ -100,8 +100,12 @@ describe("App", () => {
           forecast,
           planMw: forecast.map((v) => (v > 100 ? 1 : v < 40 ? -1 : 0)),
           stretch: 1.5,
-          track: [{ day: "2026-10-30", mae: 12.3, earned: 80, perfect: 100 }],
+          track: [
+            { day: "2026-10-30", mae: 12.3, earned: 80, perfect: 100, catchUp: false },
+            { day: "2026-10-31", mae: 20.1, earned: 50, perfect: 100, catchUp: true },
+          ],
           summary: { days: 1, mae: 12.3, capture: 0.8 },
+          sinceStart: { days: 3, mae: 15, capture: 0.75, from: "2026-10-28" },
           note: "Fundamentals forecast.",
           attribution: ["Ember, CC BY 4.0."],
         },
@@ -111,7 +115,12 @@ describe("App", () => {
     const answer = await screen.findByText(/forecasts GB day-ahead prices/);
     expect(answer.textContent).toContain("Tue 3 November");
     expect(answer.textContent).toContain("£120");
-    expect(screen.getByText(/perfect foresight\.$/).textContent).toContain("80%");
+    const record = screen.getByText(/perfect foresight\./).textContent;
+    expect(record).toContain("Over the last day with");
+    expect(record).toContain("80%");
+    expect(record).toContain("Since it started on Wed 28 October (3 days)");
+    expect(record).toContain("75%");
+    expect(screen.getByRole("cell", { name: /31 October \(caught up\)/ })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Tomorrow" }).getAttribute("aria-current")).toBe("page");
   });
 

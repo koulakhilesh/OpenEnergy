@@ -200,8 +200,11 @@ uv run --extra forecast openenergy forecast live [--out live/] [--day YYYY-MM-DD
 Forecasts tomorrow's GB day-ahead prices (or `--day`'s, which must not have started) from
 the cached data, with the [fundamentals forecast](research.md#live-forecast), and the plan
 of a 1 MW / 2 MWh battery on it. Adds the forecast to `forecasts.csv` in `--out` (a rerun
-for the same day replaces it), scores every earlier forecast whose day has published
-prices, and writes `live.json` for the web app. It stops with an error if tomorrow's
+for the same day replaces it), catches up any day of the last week since the record began
+that has no forecast (with what was known by noon the day before; marked `catch_up`),
+scores every forecast whose day has published prices, and writes `live.json` for the web
+app: the last 14 scored days, and summaries over the last 30 and since the start that
+leave caught-up days out. It stops with an error if tomorrow's
 demand or wind forecast is not out yet (NESO's usually is by 09:00 UTC).
 
 ## Errors
