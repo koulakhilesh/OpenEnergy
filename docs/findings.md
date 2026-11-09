@@ -95,7 +95,7 @@ come closest (£621,519 for 2022). GB build costs are not in open data, so the b
 
 ## A live forecast knows less than a backtest
 
-Run each morning on the latest open data, OpenEnergy's forecast has prices that end two to
+Run daily on the latest open data, OpenEnergy's forecast has prices that end two to
 four days before the day it forecasts, because they are published late. On 2025 that
 raises its error from £10.65 to £13.97–14.28/MWh, still well under last week's prices
 (£21.81). Its live track record is kept on the

@@ -423,7 +423,8 @@ def forecast_live(
         str | None, typer.Option(help="Day to forecast, YYYY-MM-DD; default tomorrow (UTC).")
     ] = None,
 ) -> None:
-    """Forecast tomorrow's prices from the latest data and score earlier live forecasts."""
+    """Forecast tomorrow's prices from the latest data, catch up missed days and score the
+    record."""
     with _reported_errors():
         try:
             from openenergy.forecast.live import update
@@ -436,7 +437,7 @@ def forecast_live(
         price_file = prices or cache_dir() / PRICE_FILE
         series, sources = gb_prices([price_file], FUNDAMENTALS_FROM.date(), target)
         source = FundamentalsSource(fundamentals or cache_dir().parent / "fundamentals")
-        live, summary = update(
+        live, summary, caught_up = update(
             out, series.prices, source, target, now, [*sources, FUNDAMENTALS_ATTRIBUTION]
         )
     typer.echo(
@@ -444,9 +445,15 @@ def forecast_live(
         f"mean {live.prices.mean():.1f}, low {live.prices.min():.1f}, "
         f"high {live.prices.max():.1f} GBP/MWh"
     )
-    scored = summary["summary"]
-    if scored["days"]:
-        line = f"track record, last {scored['days']} days: MAE {scored['mae']:.1f} GBP/MWh"
+    if caught_up:
+        typer.echo(f"caught up missed days: {', '.join(d.isoformat() for d in caught_up)}")
+    for label, scored in (
+        ("last 30 days", summary["summary"]),
+        ("since start", summary["sinceStart"]),
+    ):
+        if not scored["days"]:
+            continue
+        line = f"track record, {label} ({scored['days']} days): MAE {scored['mae']:.1f} GBP/MWh"
         if scored["capture"] is not None:
             line += f", battery captured {scored['capture']:.0%} of perfect foresight"
         typer.echo(line)

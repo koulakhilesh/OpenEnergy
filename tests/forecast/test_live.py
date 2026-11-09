@@ -12,12 +12,17 @@ from openenergy.cli import app
 from openenergy.data import FundamentalsSource
 from openenergy.forecast.live import (
     APP_FILE,
+    CATCH_UP_DAYS,
     COLUMNS,
     RECORD_FILE,
+    SUMMARY_DAYS,
+    TABLE_DAYS,
     LatestGas,
     add_forecast,
     forecast_day,
     live_json,
+    missing_days,
+    read_record,
     track_record,
     update,
 )
@@ -114,3 +119,97 @@ def test_cli_writes_the_record_and_the_app_file(tmp_path: Path) -> None:
     assert result.exit_code == 1
     assert "not published yet" in result.output
     assert not out.exists()
+
+
+def test_a_missed_day_is_caught_up_with_only_what_was_known_the_day_before(
+    tmp_path: Path,
+) -> None:
+    prices = synthetic(tmp_path)
+    source = FundamentalsSource(tmp_path)
+    day, late = date(2018, 6, 10), pd.Timestamp("2018-06-12T16:00Z")
+    caught = forecast_day(prices, source, day, late, catch_up=True)
+    assert caught.catch_up and caught.issued == late
+    assert caught.prices_known_until == pd.Timestamp("2018-06-07", tz="UTC")
+    # Prices published since change nothing.
+    early = prices[prices.index < pd.Timestamp("2018-06-07", tz="UTC")]
+    again = forecast_day(early, source, day, late, catch_up=True)
+    assert again.prices.to_numpy() == pytest.approx(caught.prices.to_numpy())
+    with pytest.raises(ConfigError, match="has started"):
+        forecast_day(prices, source, day, late)
+
+
+def test_update_catches_up_missed_days_but_does_not_count_them(tmp_path: Path) -> None:
+    prices = synthetic(tmp_path)
+    out = tmp_path / "live"
+    source = FundamentalsSource(tmp_path)
+    first = pd.Timestamp("2018-06-09T16:00Z")
+    update(out, prices[prices.index < first], source, date(2018, 6, 10), first, ["x"])
+    # Runs for 11 and 12 June were missed; the next one comes on the 12th.
+    later = pd.Timestamp("2018-06-12T16:00Z")
+    _, summary, caught_up = update(
+        out, prices[prices.index < later], source, date(2018, 6, 13), later, ["x"]
+    )
+    assert caught_up == [date(2018, 6, 11), date(2018, 6, 12)]
+    record = read_record(out / RECORD_FILE)
+    assert len(record) == 4 * 24
+    assert record.groupby(record["utc_timestamp"].str[:10])["catch_up"].first().to_dict() == {
+        "2018-06-10": False,
+        "2018-06-11": True,
+        "2018-06-12": True,
+        "2018-06-13": False,
+    }
+    assert [(r["day"], r["catchUp"]) for r in summary["track"]] == [
+        ("2018-06-10", False),
+        ("2018-06-11", True),
+    ]
+    assert summary["summary"]["days"] == summary["sinceStart"]["days"] == 1
+    assert summary["sinceStart"]["from"] == "2018-06-10"
+
+
+def test_missing_days_start_with_the_record_and_look_back_a_week() -> None:
+    def record_of(*days: str) -> pd.DataFrame:
+        stamps = [f"{d}T{h:02d}:00:00Z" for d in days for h in range(24)]
+        return pd.DataFrame({"utc_timestamp": stamps})
+
+    assert missing_days(pd.DataFrame(columns=COLUMNS), date(2018, 6, 13)) == []
+    assert missing_days(record_of("2018-06-10", "2018-06-12"), date(2018, 6, 13)) == [
+        date(2018, 6, 11)
+    ]
+    long_ago = missing_days(record_of("2018-05-01"), date(2018, 6, 13))
+    assert long_ago[0] == date(2018, 6, 13) - pd.Timedelta(days=CATCH_UP_DAYS)
+    assert long_ago[-1] == date(2018, 6, 12)
+
+
+def test_summaries_cover_the_last_30_days_and_since_the_start(tmp_path: Path) -> None:
+    prices = synthetic(tmp_path)
+    live = forecast_day(
+        prices, FundamentalsSource(tmp_path), date(2018, 9, 20), NOW.replace(month=9, day=19)
+    )
+    days = pd.date_range("2018-07-01", periods=40, freq="D")
+    track = pd.DataFrame(
+        {
+            "day": days.strftime("%Y-%m-%d"),
+            "mae": np.arange(40, dtype=float),
+            "earned": 1.0,
+            "perfect": 2.0,
+            "catch_up": [i == 39 for i in range(40)],
+        }
+    )
+    summary = live_json(live, track, [])
+    assert summary["summary"]["days"] == SUMMARY_DAYS
+    assert summary["summary"]["mae"] == pytest.approx(np.arange(9, 39).mean())
+    assert summary["sinceStart"] == {"days": 39, "mae": 19.0, "capture": 0.5, "from": "2018-07-01"}
+    assert len(summary["track"]) == TABLE_DAYS and summary["track"][-1]["catchUp"]
+
+
+def test_old_records_without_catch_up_read_as_on_time(tmp_path: Path) -> None:
+    path = tmp_path / RECORD_FILE
+    pd.DataFrame(
+        {
+            "utc_timestamp": ["2018-06-10T00:00:00Z"],
+            "forecast_gbp_per_mwh": [50.0],
+            "issued_utc": ["x"],
+        }
+    ).to_csv(path, index=False)
+    record = read_record(path)
+    assert list(record.columns) == COLUMNS and not record["catch_up"].any()
