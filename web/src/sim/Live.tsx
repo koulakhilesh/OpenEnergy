@@ -33,6 +33,9 @@ export interface Live {
   track: LiveDay[];
   summary: Score;
   sinceStart?: Score & { from: string | null };
+  /** Earlier forecast days whose prices are not all published yet. */
+  waiting?: string[];
+  pricesPublishedUntil?: string | null;
   note: string;
   attribution: string[];
 }
@@ -47,6 +50,21 @@ const hour = (i: number) => `${String(i).padStart(2, "0")}:00`;
 const when = (stamp: string) => `${label(new Date(stamp))}, ${stamp.slice(11, 16)} UTC`;
 const days = (n: number) => (n === 1 ? "day" : `${n} days`);
 const share = (capture: number | null) => (capture === null ? "–" : `${Math.round(100 * capture)}%`);
+const dayLabel = (day: string) => label(new Date(`${day}T00:00:00Z`));
+
+function Waiting({ days: waiting, until }: { days: string[]; until?: string | null }) {
+  if (waiting.length === 0) return null;
+  const which =
+    waiting.length === 1
+      ? `The forecast for ${dayLabel(waiting[0])} is`
+      : `${waiting.length} forecasts, ${dayLabel(waiting[0])} to ${dayLabel(waiting[waiting.length - 1])}, are`;
+  const runs = until ? `, which run to ${label(new Date(Date.parse(until) - 3_600_000))}` : "";
+  return (
+    <p className="help">
+      {which} waiting to be scored: Ember has not published their prices yet{runs}.
+    </p>
+  );
+}
 
 /** Tomorrow's GB day-ahead prices, forecast daily, and how earlier forecasts did. */
 export function LiveForecast() {
@@ -109,6 +127,7 @@ export function LiveForecast() {
             ) : (
               <p className="help">No forecast has been scored yet: prices are published about two days late.</p>
             )}
+            <Waiting days={data.waiting ?? []} until={data.pricesPublishedUntil} />
             {recent.length > 0 && (
               <table>
                 <thead>

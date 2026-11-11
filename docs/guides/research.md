@@ -99,6 +99,9 @@ demand and wind forecasts published by then) and prices to three days before, as
 that day would have had. These days are marked as caught up and left out of the summaries,
 which count only forecasts made before their day.
 
+The workflow can also be run by hand (Actions, Live forecast, Run workflow). A second run on
+the same day keeps tomorrow's first forecast, catches up and rescores, and commits only if
+something changed; its `replace` option forecasts tomorrow again with the latest data.
 Live, the forecast knows less than in the backtest. Ember publishes day-ahead prices about
 two days late, so the latest prices a daily forecast has end two to four days before the
 day it forecasts, not the day before; ONS publishes the daily gas price weekly, so the

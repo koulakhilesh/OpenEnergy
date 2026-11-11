@@ -164,6 +164,8 @@ def test_update_catches_up_missed_days_but_does_not_count_them(tmp_path: Path) -
     ]
     assert summary["summary"]["days"] == summary["sinceStart"]["days"] == 1
     assert summary["sinceStart"]["from"] == "2018-06-10"
+    assert summary["waiting"] == ["2018-06-12"]
+    assert summary["pricesPublishedUntil"] == "2018-06-12T16:00:00Z"
 
 
 def test_missing_days_start_with_the_record_and_look_back_a_week() -> None:
@@ -213,3 +215,31 @@ def test_old_records_without_catch_up_read_as_on_time(tmp_path: Path) -> None:
     ).to_csv(path, index=False)
     record = read_record(path)
     assert list(record.columns) == COLUMNS and not record["catch_up"].any()
+
+
+def test_a_rerun_keeps_the_first_forecast_unless_asked_to_replace_it(tmp_path: Path) -> None:
+    prices = synthetic(tmp_path)
+    out = tmp_path / "live"
+    source = FundamentalsSource(tmp_path)
+    day = date(2018, 6, 10)
+    first, later = pd.Timestamp("2018-06-09T09:30Z"), pd.Timestamp("2018-06-09T20:00Z")
+    made, _, _ = update(out, prices[prices.index < first], source, day, first, ["x"])
+    record = (out / RECORD_FILE).read_text()
+    app_file = json.loads((out / APP_FILE).read_text())
+
+    kept, _, _ = update(out, prices[prices.index < later], source, day, later, ["x"])
+    assert kept.issued == first
+    assert kept.prices.to_numpy() == pytest.approx(made.prices.round(2).to_numpy())
+    assert kept.plan_mw.to_numpy() == pytest.approx(made.plan_mw.to_numpy(), abs=1e-3)
+    assert (out / RECORD_FILE).read_text() == record
+    again = json.loads((out / APP_FILE).read_text())
+    for key in ("issued", "pricesKnownUntil", "forecast", "planMw"):
+        assert again[key] == app_file[key]
+
+    redone, _, _ = update(
+        out, prices[prices.index < later], source, day, later, ["x"], replace=True
+    )
+    assert redone.issued == later
+    assert read_record(out / RECORD_FILE)["issued_utc"].unique().tolist() == [
+        "2018-06-09T20:00:00Z"
+    ]

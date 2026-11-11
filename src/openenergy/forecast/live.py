@@ -194,10 +194,17 @@ def track_record(record: pd.DataFrame, actual: pd.Series[float]) -> pd.DataFrame
     return pd.DataFrame(rows, columns=columns)
 
 
-def live_json(live: LiveForecast, track: pd.DataFrame, attribution: list[str]) -> dict[str, Any]:
+def live_json(
+    live: LiveForecast,
+    track: pd.DataFrame,
+    attribution: list[str],
+    waiting: list[str] | None = None,
+    published_until: pd.Timestamp | None = None,
+) -> dict[str, Any]:
     """What the web app shows: tomorrow's forecast and plan, and the track record.
 
     The summaries count only forecasts made before their day; caught-up days are listed.
+    ``waiting`` are earlier forecast days whose prices are not all published yet.
     """
     on_time = track[~track["catch_up"].astype(bool)]
     return {
@@ -221,6 +228,10 @@ def live_json(live: LiveForecast, track: pd.DataFrame, attribution: list[str]) -
         "summary": _score(on_time.tail(SUMMARY_DAYS)),
         "sinceStart": _score(on_time)
         | {"from": str(on_time["day"].iloc[0]) if len(on_time) else None},
+        "waiting": waiting or [],
+        "pricesPublishedUntil": (
+            published_until.strftime("%Y-%m-%dT%H:%M:%SZ") if published_until is not None else None
+        ),
         "note": LIVE_NOTE,
         "attribution": attribution,
     }
@@ -235,6 +246,24 @@ def _score(rows: pd.DataFrame) -> dict[str, Any]:
     }
 
 
+def read_app(path: Path, day: date) -> LiveForecast | None:
+    """The forecast of ``day`` in an app file written earlier, if it holds that day."""
+    if not path.is_file():
+        return None
+    app = json.loads(path.read_text())
+    if app.get("day") != day.isoformat():
+        return None
+    index = pd.date_range(pd.Timestamp(app["start"]), periods=24, freq="h")
+    return LiveForecast(
+        day=day,
+        issued=pd.Timestamp(app["issued"]),
+        prices_known_until=pd.Timestamp(app["pricesKnownUntil"]),
+        prices=pd.Series(app["forecast"], index, dtype=np.float64),
+        plan_mw=pd.Series(app["planMw"], index, dtype=np.float64),
+        stretch=float(app["stretch"]),
+    )
+
+
 def update(
     out: Path,
     prices: pd.Series[float],
@@ -242,13 +271,21 @@ def update(
     day: date,
     now: pd.Timestamp,
     attribution: list[str],
+    replace: bool = False,
 ) -> tuple[LiveForecast, dict[str, Any], list[date]]:
     """Forecast ``day``, catch up days the record missed, score it and write the app file.
 
-    Returns the forecast, the app file's content and the days caught up.
+    A rerun keeps the first forecast of ``day``, so the record shows what was known then,
+    unless ``replace``. Returns the forecast, the app file's content and the days caught up.
     """
-    live = forecast_day(prices, source, day, now)
-    record = add_forecast(read_record(out / RECORD_FILE), live)
+    record = read_record(out / RECORD_FILE)
+    earlier = None if replace else read_app(out / APP_FILE, day)
+    have = record["utc_timestamp"].str.startswith(day.isoformat()).sum() == 24
+    if earlier is not None and have:
+        live = earlier
+    else:
+        live = forecast_day(prices, source, day, now)
+        record = add_forecast(record, live)
     caught_up = []
     for missed in missing_days(record, day):
         try:
@@ -256,7 +293,12 @@ def update(
         except DataError:
             continue
         caught_up.append(missed)
-    summary = live_json(live, track_record(record, prices), attribution)
+    track = track_record(record, prices)
+    days = pd.to_datetime(record["utc_timestamp"], utc=True).dt.strftime("%Y-%m-%d").unique()
+    waiting = [d for d in days if d < day.isoformat() and d not in set(track["day"])]
+    published = prices.dropna()
+    published_until = published.index.max() + _HOUR if len(published) else None
+    summary = live_json(live, track, attribution, waiting, published_until)
     out.mkdir(parents=True, exist_ok=True)
     record.to_csv(out / RECORD_FILE, index=False)
     (out / APP_FILE).write_text(json.dumps(summary, indent=1) + "\n")
