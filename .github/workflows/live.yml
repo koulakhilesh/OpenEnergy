@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: "17 9 * * *"
   workflow_dispatch:
+    inputs:
+      replace:
+        description: Forecast tomorrow again, replacing today's earlier forecast
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -55,12 +60,26 @@ jobs:
           else
             git checkout -q --orphan live
           fi
-      - run: uv run openenergy forecast live --out "$RUNNER_TEMP/live"
+      - name: Forecast
+        env:
+          REPLACE: ${{ inputs.replace && '--replace' || '' }}
+        # A rerun keeps tomorrow's first forecast unless asked to replace it.
+        run: uv run openenergy forecast live --out "$RUNNER_TEMP/live" $REPLACE
       - name: Publish
         working-directory: ${{ runner.temp }}/live
         run: |
           # The branch holds data only; keep Vercel from trying to build it.
           echo '{"git": {"deploymentEnabled": false}}' > vercel.json
           git add forecasts.csv live.json vercel.json
+          if git diff --cached --quiet; then
+            echo "nothing new to publish"
+            exit 0
+          fi
           git commit -q -m "Live forecast for $(jq -r .day live.json)"
-          git push -q origin live
+          # GitHub sometimes rejects a push with a server error ("fatal error in commit_refs").
+          for attempt in 1 2 3; do
+            git push -q origin live && exit 0
+            echo "push failed (attempt $attempt); retrying in 30 seconds"
+            sleep 30
+          done
+          exit 1

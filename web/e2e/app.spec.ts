@@ -103,6 +103,8 @@ test("tomorrow's forecast shows the plan and the track record", async ({ page })
         ],
         summary: { days: 1, mae: 12.3, capture: 0.8 },
         sinceStart: { days: 3, mae: 15, capture: 0.75, from: "2026-10-28" },
+        waiting: ["2026-11-01", "2026-11-02"],
+        pricesPublishedUntil: "2026-11-01T00:00:00Z",
         note: "Fundamentals forecast.",
         attribution: ["Ember, CC BY 4.0."],
       }),
@@ -114,6 +116,7 @@ test("tomorrow's forecast shows the plan and the track record", async ({ page })
   await expect(page.getByRole("cell", { name: "12.3" })).toBeVisible();
   await expect(page.getByRole("cell", { name: /\(caught up\)/ })).toBeVisible();
   await expect(page.getByText(/Since it started/)).toBeVisible();
+  await expect(page.getByText(/2 forecasts, .* are waiting to be scored/)).toBeVisible();
 });
 
 test("the docs widget plans dragged prices", async ({ page }) => {

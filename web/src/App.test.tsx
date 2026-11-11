@@ -106,6 +106,8 @@ describe("App", () => {
           ],
           summary: { days: 1, mae: 12.3, capture: 0.8 },
           sinceStart: { days: 3, mae: 15, capture: 0.75, from: "2026-10-28" },
+          waiting: ["2026-11-01", "2026-11-02"],
+          pricesPublishedUntil: "2026-11-01T00:00:00Z",
           note: "Fundamentals forecast.",
           attribution: ["Ember, CC BY 4.0."],
         },
@@ -121,6 +123,10 @@ describe("App", () => {
     expect(record).toContain("Since it started on Wed 28 October (3 days)");
     expect(record).toContain("75%");
     expect(screen.getByRole("cell", { name: /31 October \(caught up\)/ })).toBeTruthy();
+    expect(screen.getByText(/waiting to be scored/).textContent).toBe(
+      "2 forecasts, Sun 1 November to Mon 2 November, are waiting to be scored: Ember has not published " +
+        "their prices yet, which run to Sat 31 October.",
+    );
     expect(screen.getByRole("link", { name: "Tomorrow" }).getAttribute("aria-current")).toBe("page");
   });
 

@@ -422,6 +422,9 @@ def forecast_live(
     day: Annotated[
         str | None, typer.Option(help="Day to forecast, YYYY-MM-DD; default tomorrow (UTC).")
     ] = None,
+    replace: Annotated[
+        bool, typer.Option(help="Forecast the day again, replacing an earlier forecast of it.")
+    ] = False,
 ) -> None:
     """Forecast tomorrow's prices from the latest data, catch up missed days and score the
     record."""
@@ -438,8 +441,16 @@ def forecast_live(
         series, sources = gb_prices([price_file], FUNDAMENTALS_FROM.date(), target)
         source = FundamentalsSource(fundamentals or cache_dir().parent / "fundamentals")
         live, summary, caught_up = update(
-            out, series.prices, source, target, now, [*sources, FUNDAMENTALS_ATTRIBUTION]
+            out,
+            series.prices,
+            source,
+            target,
+            now,
+            [*sources, FUNDAMENTALS_ATTRIBUTION],
+            replace=replace,
         )
+    if live.issued < now:
+        typer.echo(f"kept the forecast made {live.issued:%Y-%m-%d %H:%M} UTC (--replace to redo)")
     typer.echo(
         f"{target} forecast, prices known to {live.prices_known_until:%Y-%m-%d %H:%M} UTC: "
         f"mean {live.prices.mean():.1f}, low {live.prices.min():.1f}, "
